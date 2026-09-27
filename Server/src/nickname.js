@@ -37,3 +37,9 @@ export function validateNickname(raw) {
 }
 
 export const GENDERS = ['male', 'female'];
+
+/** Avatar kodi: erkaklar M1–M5, ayollar F1–F5. Avatar o'yinchi jinsiga mos bo'lishi shart. */
+export function isValidAvatar(avatarId, gender) {
+  if (typeof avatarId !== 'string' || !/^[MF][1-5]$/.test(avatarId)) return false;
+  return (gender === 'male' && avatarId[0] === 'M') || (gender === 'female' && avatarId[0] === 'F');
+}

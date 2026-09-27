@@ -6,9 +6,10 @@ using UnityEngine.UI;
 namespace CraDev.CharacterCreation
 {
     /// <summary>
-    /// Avatar yaratish ekrani (Loading'dan keyin, faqat birinchi kirishda).
+    /// Avatar yaratish ekrani (faqat birinchi kirishda).
     ///
-    /// Chap tomonda nickname va jins tanlanadi, o'ngda 3D avatar ko'rinadi.
+    /// Jins pasport bosqichidan keladi va o'zgartirilmaydi. Chap tomonda nickname yoziladi va shu jinsdagi
+    /// 5 ta avatardan biri tanlanadi, o'ngda tanlangan avatar katta ko'rinadi (old, yon, orqa).
     /// Nickname yozilayotganda server'da band yoki bo'shligi tekshiriladi (kichik kechikish bilan).
     /// "Create character" bosilganda server nickname'ni band qiladi; bir vaqtda boshqa o'yinchi
     /// olib qo'ygan bo'lsa, server rad etadi va o'yinchi boshqa nom tanlaydi.
@@ -33,9 +34,18 @@ namespace CraDev.CharacterCreation
         [SerializeField] Image helpIcon;
         [SerializeField] Text helpText;
 
-        [Header("Jins")]
-        [SerializeField] GenderCard maleCard;
-        [SerializeField] GenderCard femaleCard;
+        [Header("Jins (pasportdan)")]
+        [Tooltip("Faqat sinov uchun: pasport bosqichi hali o'tilmagan bo'lsa shu jins olinadi (\"male\" yoki \"female\").")]
+        [SerializeField] string testGender = "male";
+        [SerializeField] RectTransform genderChip;
+        [SerializeField] Image genderIcon;
+        [SerializeField] Text genderText;
+
+        [Header("Avatar")]
+        [SerializeField] AvatarOption[] avatars;
+        [SerializeField] AvatarCard[] avatarCards;
+        [SerializeField] Text avatarInfo;
+        [SerializeField] AvatarViewer viewer;
 
         [Header("Tugma va xatolar")]
         [SerializeField] Button createButton;
@@ -45,13 +55,10 @@ namespace CraDev.CharacterCreation
         [SerializeField] Image errorIcon;
         [SerializeField] Text errorText;
 
-        [Header("Avatar")]
-        [SerializeField] AvatarPreview avatar;
+        [Header("Nom yorlig'i")]
         [SerializeField] RectTransform nameplate;
         [SerializeField] Image nameplateIcon;
         [SerializeField] Text nameplateText;
-        [SerializeField] Image hintIcon;
-        [SerializeField] Text hintText;
         [SerializeField] Image fader;
 
         [Header("Ikonkalar")]
@@ -77,7 +84,9 @@ namespace CraDev.CharacterCreation
         GameApi api;
         NickState state;
         string checkedNickname;
-        bool female;
+        string gender;
+        AvatarOption[] choices = new AvatarOption[0];
+        AvatarOption selected;
         bool submitting;
         bool done;
         int checkSeq;
@@ -92,16 +101,13 @@ namespace CraDev.CharacterCreation
             nicknameInput.characterLimit = NicknameRules.MaxLength;
             nicknameInput.onValidateInput += (text, index, c) => NicknameRules.IsAllowedChar(c) ? c : '\0';
             nicknameInput.onValueChanged.AddListener(OnNicknameChanged);
-            maleCard.GetComponent<Button>().onClick.AddListener(() => SelectGender(false));
-            femaleCard.GetComponent<Button>().onClick.AddListener(() => SelectGender(true));
             createButton.onClick.AddListener(Submit);
 
-            SelectGender(false, instant: true);
+            SetupGenderAndAvatars();
             SetNickState(NickState.Empty);
             SetError(null);
             SetButton("Create character", arrowSprite, Accent);
             UpdateNameplate();
-            LayoutIconLabel(hintIcon.rectTransform, hintText, 10f);
             nicknameInput.ActivateInputField();
         }
 
@@ -235,13 +241,54 @@ namespace CraDev.CharacterCreation
 
         // ------------------------------------------------------------ Jins va avatar
 
-        void SelectGender(bool isFemale, bool instant = false)
+        void SetupGenderAndAvatars()
         {
-            female = isFemale;
-            maleCard.SetSelected(!isFemale);
-            femaleCard.SetSelected(isFemale);
-            avatar.SetFemale(isFemale, instant);
-            nameplateIcon.sprite = isFemale ? femaleSprite : maleSprite;
+            // Jins pasportdan keladi; o'yinchi uni tanlamaydi
+            gender = RegistrationSession.HasGender ? RegistrationSession.Gender : testGender;
+            if (!RegistrationSession.HasGender)
+                Debug.Log($"[CraDev] Pasport bosqichi hali yo'q: sinov uchun jins \"{gender}\" olindi (CharacterCreationDirector → Test Gender).");
+            bool isFemale = gender == "female";
+
+            genderIcon.sprite = isFemale ? femaleSprite : maleSprite;
+            genderText.text = isFemale ? "Female · from passport" : "Male · from passport";
+            float chipWidth = 14f + 16f + 8f + genderText.preferredWidth + 16f;
+            genderChip.sizeDelta = new Vector2(chipWidth, genderChip.sizeDelta.y);
+            genderIcon.rectTransform.anchoredPosition = new Vector2(14f + 8f, 0f);
+            genderText.rectTransform.anchoredPosition = new Vector2(14f + 16f + 8f + genderText.preferredWidth / 2f, 0f);
+            nameplateIcon.sprite = genderIcon.sprite;
+
+            var list = new System.Collections.Generic.List<AvatarOption>();
+            foreach (var a in avatars)
+                if (a != null && a.gender == gender && a.front != null)
+                    list.Add(a);
+            choices = list.ToArray();
+
+            for (int i = 0; i < avatarCards.Length; i++)
+            {
+                var card = avatarCards[i];
+                if (i >= choices.Length)
+                {
+                    card.gameObject.SetActive(false);
+                    continue;
+                }
+                card.Show(choices[i]);
+                var option = choices[i];
+                card.Button.onClick.AddListener(() => SelectAvatar(option));
+            }
+            if (choices.Length > 0)
+                SelectAvatar(choices[0]);
+            else
+                Debug.LogWarning("[CraDev] Bu jins uchun avatar rasmlari topilmadi: Assets/CraDev/Avatars/Photos");
+        }
+
+        void SelectAvatar(AvatarOption option)
+        {
+            selected = option;
+            for (int i = 0; i < choices.Length && i < avatarCards.Length; i++)
+                avatarCards[i].SetSelected(choices[i] == option);
+            avatarInfo.text = $"{option.title} · {option.heightCm} cm";
+            viewer.SetAvatar(option);
+            UpdateCreateButton();
         }
 
         void UpdateNameplate()
@@ -260,7 +307,7 @@ namespace CraDev.CharacterCreation
 
         // ------------------------------------------------------------ Yaratish
 
-        bool CanSubmit => state == NickState.Available && !submitting && !done && checkedNickname != null;
+        bool CanSubmit => state == NickState.Available && !submitting && !done && checkedNickname != null && selected != null;
 
         void UpdateCreateButton()
         {
@@ -280,7 +327,7 @@ namespace CraDev.CharacterCreation
             SetError(null);
             createButton.interactable = false;
             SetButton("Creating…", spinnerSprite, Accent);
-            StartCoroutine(api.CreatePlayer(checkedNickname, female ? "female" : "male", OnCreated));
+            StartCoroutine(api.CreatePlayer(checkedNickname, gender, selected.id, OnCreated));
         }
 
         void OnCreated(ApiResult<PlayerResponse> result)
@@ -293,8 +340,8 @@ namespace CraDev.CharacterCreation
                 done = true;
                 PlayerProfile.Save(result.Data);
                 nicknameInput.interactable = false;
-                maleCard.GetComponent<Button>().interactable = false;
-                femaleCard.GetComponent<Button>().interactable = false;
+                foreach (var card in avatarCards)
+                    card.Button.interactable = false;
                 createButton.interactable = false;
                 SetButton($"Welcome, {result.Data.nickname}", checkSprite, Ok);
                 StartCoroutine(GoNext());
@@ -306,6 +353,8 @@ namespace CraDev.CharacterCreation
                 SetError("Can't reach the server. Check your connection and try again.");
             else if (result.Status == 409)
                 SetNickState(NickState.Taken, "Someone just took this nickname. Try another one.");
+            else if (result.Status == 400 && result.Data != null && result.Data.error == "invalid_avatar")
+                SetError("This avatar doesn't match your passport data. Choose another one.");
             else if (result.Status == 400)
                 SetNickState(NickState.Invalid, result.Data?.message ?? "This nickname can't be used.");
             else if (result.Status == 429)

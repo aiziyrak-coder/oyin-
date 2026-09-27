@@ -1,5 +1,5 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { GENDERS, nicknameKey, validateNickname } from './nickname.js';
+import { GENDERS, isValidAvatar, nicknameKey, validateNickname } from './nickname.js';
 
 const MAX_BODY_BYTES = 4 * 1024;
 
@@ -8,7 +8,7 @@ const MAX_BODY_BYTES = 4 * 1024;
  *
  * GET  /health                                  -> { ok: true }
  * GET  /api/nicknames/availability?name=<nick>  -> { name, available, reason?, message? }
- * POST /api/players { nickname, gender }        -> 201 { id, nickname, gender, token, createdAt }
+ * POST /api/players { nickname, gender, avatarId } -> 201 { id, nickname, gender, avatarId, token, createdAt }
  *                                                  409 { error: 'nickname_taken' }
  */
 export function createApp(db, { rateLimits = { check: 60, create: 10 }, windowMs = 60_000 } = {}) {
@@ -45,6 +45,7 @@ export function createApp(db, { rateLimits = { check: 60, create: 10 }, windowMs
         const check = validateNickname(body.nickname);
         if (!check.ok) return send(res, 400, { error: 'invalid_nickname', reason: check.reason, message: check.message });
         if (!GENDERS.includes(body.gender)) return send(res, 400, { error: 'invalid_gender' });
+        if (!isValidAvatar(body.avatarId, body.gender)) return send(res, 400, { error: 'invalid_avatar' });
 
         // Token keyinchalik o'yinchini tanish uchun; bazada faqat uning xeshi saqlanadi
         const token = randomBytes(32).toString('hex');
@@ -53,6 +54,7 @@ export function createApp(db, { rateLimits = { check: 60, create: 10 }, windowMs
           nickname: check.nickname,
           nicknameKey: nicknameKey(check.nickname),
           gender: body.gender,
+          avatarId: body.avatarId,
           tokenHash: createHash('sha256').update(token).digest('hex'),
           createdAt: new Date().toISOString(),
         };
@@ -60,7 +62,7 @@ export function createApp(db, { rateLimits = { check: 60, create: 10 }, windowMs
           return send(res, 409, { error: 'nickname_taken', message: 'This nickname is already taken.' });
         }
         return send(res, 201, {
-          id: player.id, nickname: player.nickname, gender: player.gender, token, createdAt: player.createdAt,
+          id: player.id, nickname: player.nickname, gender: player.gender, avatarId: player.avatarId, token, createdAt: player.createdAt,
         });
       }
 

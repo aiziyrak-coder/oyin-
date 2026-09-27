@@ -10,7 +10,6 @@ using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Rendering;
 using UnityEngine.UI;
 using static CraDev.EditorTools.UiBuild;
 
@@ -36,7 +35,6 @@ namespace CraDev.EditorTools
         const string Fonts = "Assets/CraDev/Common/Fonts/";
         const string FontLight = Fonts + "Manrope-ExtraLight.ttf";
         const string FontSemiBold = Fonts + "Manrope-SemiBold.ttf";
-        const string MaterialsFolder = "Assets/CraDev/CharacterCreation/Materials/";
 
         // Barcha sahnalar uchun bitta tekis fon
         static readonly Color Background = new Color32(11, 11, 12, 255);
@@ -280,12 +278,31 @@ namespace CraDev.EditorTools
 
         // ---------------------------------------------------------------- Avatar yaratish
 
+        const string AvatarPhotos = "Assets/CraDev/Avatars/Photos/";
+
+        struct AvatarInfo
+        {
+            public string Id, Gender, Title;
+            public int Height;
+            public AvatarInfo(string id, string gender, string title, int height) { Id = id; Gender = gender; Title = title; Height = height; }
+        }
+
+        // Design/Characters/avatars.json dagi avatarlar. Rasmi bo'lmaganlari (masalan, hali yaratilmagan) o'tkazib yuboriladi.
+        static readonly AvatarInfo[] AvatarList =
+        {
+            new AvatarInfo("M1", "male", "Athletic", 183), new AvatarInfo("M2", "male", "Slim", 177),
+            new AvatarInfo("M3", "male", "Strong", 180), new AvatarInfo("M4", "male", "Tall", 190),
+            new AvatarInfo("M5", "male", "Classic", 176),
+            new AvatarInfo("F1", "female", "Sporty", 170), new AvatarInfo("F2", "female", "Petite", 164),
+            new AvatarInfo("F3", "female", "Curvy", 168), new AvatarInfo("F4", "female", "Tall", 178),
+            new AvatarInfo("F5", "female", "Elegant", 167),
+        };
+
         static void BuildCharacterCreation()
         {
             var accent = (Color)new Color32(61, 90, 254, 255);
             var field = (Color)new Color32(22, 23, 26, 255);
             var line = (Color)new Color32(38, 39, 44, 255);
-            var circle = (Color)new Color32(32, 33, 38, 255);
             var faint = (Color)new Color32(90, 94, 102, 255);
             var bad = (Color)new Color32(240, 82, 82, 255);
 
@@ -302,37 +319,6 @@ namespace CraDev.EditorTools
 
             var root = NewUiScene(out var scene);
             root.gameObject.AddComponent<GraphicRaycaster>();
-
-            // ---------- 3D: kamera faqat o'ng yarmini chizadi ----------
-            var camera = GameObject.FindWithTag("MainCamera").GetComponent<Camera>();
-            camera.rect = new Rect(0.5f, 0f, 0.5f, 1f);
-            camera.backgroundColor = new Color32(19, 20, 23, 255);
-            camera.cullingMask = ~0;
-            camera.fieldOfView = 30f;
-            camera.nearClipPlane = 0.1f;
-            camera.farClipPlane = 50f;
-            camera.transform.position = new Vector3(0f, 1.0f, -5.4f);
-            camera.transform.LookAt(new Vector3(0f, 0.9f, 0f));
-
-            RenderSettings.skybox = null;
-            RenderSettings.ambientMode = AmbientMode.Flat;
-            RenderSettings.ambientLight = new Color(0.36f, 0.37f, 0.40f);
-            CreateLight("Key Light", new Vector3(2.2f, 3.2f, -3.2f), new Color(1f, 0.965f, 0.925f), 1.15f, LightShadows.Soft);
-            CreateLight("Rim Light", new Vector3(-1.5f, 2.6f, 3f), new Color(0.78f, 0.83f, 1f), 0.9f, LightShadows.None);
-            CreateLight("Fill Light", new Vector3(-3f, 1.2f, -2f), Color.white, 0.3f, LightShadows.None);
-
-            var skin = CreateLitMaterial("Mannequin", new Color32(201, 205, 211, 255), 0.35f);
-            var hair = CreateLitMaterial("Hair", new Color32(43, 45, 51, 255), 0.2f);
-            var floorMat = CreateLitMaterial("Floor", new Color32(27, 28, 32, 255), 0.05f);
-            var rimMat = CreateLitMaterial("FloorRim", new Color32(42, 43, 49, 255), 0.05f);
-            CreateDisc("Floor", 1.0f, 0.02f, -0.01f, floorMat);
-            CreateDisc("FloorRim", 1.012f, 0.012f, -0.014f, rimMat);
-
-            var avatarGo = new GameObject("Avatar");
-            var avatar = avatarGo.AddComponent<AvatarPreview>();
-            Set(avatar, "skinMaterial", skin);
-            Set(avatar, "hairMaterial", hair);
-
             CreateEventSystem();
 
             // ---------- Chap panel ----------
@@ -342,7 +328,6 @@ namespace CraDev.EditorTools
             left.rectTransform.offsetMin = left.rectTransform.offsetMax = Vector2.zero;
             var leftT = left.transform;
 
-            // Brend: kichik belgi va "CraDev"
             var brandTile = CreateSliced("BrandTile", leftT, roundFill, 8f, 24f, accent);
             PlaceTopLeft(brandTile.rectTransform, 120f, 72f, 32f, 32f);
             var glyphSprite = LoadSprite(IntroArt + "CraDev_Glyph.png");
@@ -352,30 +337,39 @@ namespace CraDev.EditorTools
             brandText.supportRichText = true;
             PlaceTopLeft(brandText.rectTransform, 166f, 72f, 200f, 32f);
 
-            // Forma: 480 kenglikda, panel bo'yicha vertikal markazda
             var form = CreateRect("Form", leftT);
-            Place(form, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(480f, 700f));
+            Place(form, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(480f, 790f));
 
-            var eyebrow = CreateLabel("Eyebrow", form, bold, "NEW PLAYER", 13, accent, TextAnchor.UpperLeft);
-            PlaceTopLeft(eyebrow.rectTransform, 0f, 0f, 480f, 20f);
+            PlaceTopLeft(CreateLabel("Eyebrow", form, bold, "NEW PLAYER", 13, accent, TextAnchor.UpperLeft).rectTransform, 0f, 0f, 480f, 20f);
             var title = CreateLabel("Title", form, display, "Create your\ncharacter", 44, Color.white, TextAnchor.UpperLeft);
             title.lineSpacing = 0.92f;
             PlaceTopLeft(title.rectTransform, 0f, 34f, 480f, 110f);
             var sub = CreateLabel("Subtitle", form, medium,
-                "Pick a nickname and gender. Your nickname is unique across the server, and other players will see it in game.",
+                "Pick a nickname and one of the avatars. Next, you will scan your face and it will be placed on your avatar.",
                 17, UiMuted, TextAnchor.UpperLeft);
             sub.horizontalOverflow = HorizontalWrapMode.Wrap;
             sub.lineSpacing = 1.1f;
             PlaceTopLeft(sub.rectTransform, 0f, 152f, 440f, 84f);
 
-            PlaceTopLeft(CreateLabel("NicknameLabel", form, bold, "NICKNAME", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 276f, 480f, 18f);
+            // Pasportdan olingan jins: faqat ko'rsatiladi, o'zgartirilmaydi
+            var chip = CreateSliced("GenderChip", form, pillFill, 16f, 32f, new Color(1f, 1f, 1f, 0.06f));
+            PlaceTopLeft(chip.rectTransform, 0f, 252f, 200f, 32f);
+            chip.rectTransform.pivot = new Vector2(0f, 0.5f);
+            chip.rectTransform.anchoredPosition = new Vector2(0f, -268f);
+            var chipBorder = CreateSliced("Border", chip.transform, pillStroke, 16f, 32f, new Color(1f, 1f, 1f, 0.10f));
+            Stretch(chipBorder.rectTransform);
+            var chipIcon = CreateImage("Icon", chip.transform, Icon("Male"), new Vector2(16f, 16f), Vector2.zero, accent);
+            Place(chipIcon.rectTransform, new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(22f, 0f), new Vector2(16f, 16f));
+            var chipText = CreateLabel("Text", chip.transform, semiBold, "Male · from passport", 13, Color.white, TextAnchor.MiddleCenter);
+            Place(chipText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(100f, 0f), new Vector2(300f, 24f));
 
-            // Nickname maydoni
+            PlaceTopLeft(CreateLabel("NicknameLabel", form, bold, "NICKNAME", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 306f, 480f, 18f);
+
             var glow = CreateSliced("FieldGlow", form, roundFill, 16f, 24f, new Color(accent.r, accent.g, accent.b, 0.16f));
-            PlaceTopLeft(glow.rectTransform, -4f, 301f, 488f, 68f);
+            PlaceTopLeft(glow.rectTransform, -4f, 331f, 488f, 68f);
             glow.enabled = false;
             var fieldBg = CreateSliced("NicknameField", form, roundFill, 12f, 24f, field);
-            PlaceTopLeft(fieldBg.rectTransform, 0f, 305f, 480f, 60f);
+            PlaceTopLeft(fieldBg.rectTransform, 0f, 335f, 480f, 60f);
             fieldBg.raycastTarget = true; // maydon bosilganda yozish boshlanadi
             var fieldBorder = CreateSliced("Border", fieldBg.transform, roundStroke, 12f, 24f, line);
             Stretch(fieldBorder.rectTransform);
@@ -400,19 +394,21 @@ namespace CraDev.EditorTools
             input.caretWidth = 2;
             input.selectionColor = new Color(accent.r, accent.g, accent.b, 0.35f);
 
-            // Maydon ostidagi yordam matni
             var helpIcon = CreateImage("HelpIcon", form, Icon("Check"), new Vector2(16f, 16f), Vector2.zero, UiMuted);
-            Place(helpIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -386f), new Vector2(16f, 16f));
+            Place(helpIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -416f), new Vector2(16f, 16f));
             var helpText = CreateLabel("HelpText", form, medium, "", 14, UiMuted, TextAnchor.MiddleLeft);
-            Place(helpText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -386f), new Vector2(470f, 22f));
+            Place(helpText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -416f), new Vector2(470f, 22f));
 
-            PlaceTopLeft(CreateLabel("GenderLabel", form, bold, "GENDER", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 419f, 480f, 18f);
-            var maleCard = CreateGenderCard("MaleCard", form, 0f, "Male", Icon("Male"), roundFill, roundStroke, pillFill, Icon("Check"), bold, accent, field, line, circle);
-            var femaleCard = CreateGenderCard("FemaleCard", form, 247f, "Female", Icon("Female"), roundFill, roundStroke, pillFill, Icon("Check"), bold, accent, field, line, circle);
+            // Avatar kartalari: shu jinsdagi 5 ta avatar
+            PlaceTopLeft(CreateLabel("AvatarLabel", form, bold, "AVATAR", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 449f, 480f, 18f);
+            var cards = new AvatarCard[5];
+            for (int i = 0; i < cards.Length; i++)
+                cards[i] = CreateAvatarCard("AvatarCard" + (i + 1), form, i * 98f, 478f, roundFill, roundStroke, pillFill, Icon("Check"), accent, field, line);
+            var avatarInfo = CreateLabel("AvatarInfo", form, medium, "Athletic · 183 cm", 15, UiMuted, TextAnchor.MiddleLeft);
+            Place(avatarInfo.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -648f), new Vector2(480f, 22f));
 
-            // Asosiy tugma
             var ctaFill = CreateSliced("CreateButton", form, roundFill, 12f, 24f, accent);
-            PlaceTopLeft(ctaFill.rectTransform, 0f, 604f, 480f, 60f);
+            PlaceTopLeft(ctaFill.rectTransform, 0f, 676f, 480f, 60f);
             ctaFill.raycastTarget = true;
             var cta = ctaFill.gameObject.AddComponent<Button>();
             cta.targetGraphic = ctaFill;
@@ -429,33 +425,60 @@ namespace CraDev.EditorTools
             var ctaIcon = CreateImage("Icon", ctaFill.transform, Icon("Arrow"), new Vector2(22f, 22f), Vector2.zero, Color.white);
 
             var errorIcon = CreateImage("ErrorIcon", form, Icon("Alert"), new Vector2(16f, 16f), Vector2.zero, bad);
-            Place(errorIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -689f), new Vector2(16f, 16f));
+            Place(errorIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -760f), new Vector2(16f, 16f));
             var errorText = CreateLabel("ErrorText", form, medium, "", 14, bad, TextAnchor.MiddleLeft);
-            Place(errorText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(24f, -689f), new Vector2(456f, 22f));
+            Place(errorText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(24f, -760f), new Vector2(456f, 22f));
 
-            // ---------- O'ng panel (3D ustida) ----------
-            var right = CreateRect("RightPanel", root);
-            right.anchorMin = new Vector2(0.5f, 0f);
-            right.anchorMax = Vector2.one;
-            right.offsetMin = right.offsetMax = Vector2.zero;
-            var drag = CreateImage("DragArea", right, null, Vector2.zero, Vector2.zero, new Color(0f, 0f, 0f, 0f));
-            Stretch(drag.rectTransform);
-            drag.raycastTarget = true;
-            Set(drag.gameObject.AddComponent<AvatarDragArea>(), "avatar", avatar);
+            // ---------- O'ng panel: tanlangan avatar ----------
+            var stage = CreateImage("RightPanel", root, null, Vector2.zero, Vector2.zero, new Color32(19, 20, 23, 255));
+            stage.rectTransform.anchorMin = new Vector2(0.5f, 0f);
+            stage.rectTransform.anchorMax = Vector2.one;
+            stage.rectTransform.offsetMin = stage.rectTransform.offsetMax = Vector2.zero;
+            stage.raycastTarget = true; // sichqoncha bilan tortib aylantirish uchun
+            var stageT = stage.transform;
 
-            var plate = CreateSliced("Nameplate", right, pillFill, 22f, 32f, new Color(1f, 1f, 1f, 0.06f));
-            Place(plate.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -172f), new Vector2(200f, 44f));
+            var shadow = CreateSliced("FloorShadow", stageT, pillFill, 15f, 32f, new Color(0f, 0f, 0f, 0.45f));
+            Place(shadow.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 180f), new Vector2(320f, 30f));
+            var previous = CreateImage("AvatarPrevious", stageT, null, new Vector2(390f, 780f), Vector2.zero, Color.white);
+            Place(previous.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 172f), new Vector2(390f, 780f));
+            var current = CreateImage("Avatar", stageT, null, new Vector2(390f, 780f), Vector2.zero, Color.white);
+            Place(current.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 172f), new Vector2(390f, 780f));
+
+            var plate = CreateSliced("Nameplate", stageT, pillFill, 22f, 32f, new Color(1f, 1f, 1f, 0.06f));
+            Place(plate.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), new Vector2(200f, 44f));
             var plateBorder = CreateSliced("Border", plate.transform, pillStroke, 22f, 32f, new Color(1f, 1f, 1f, 0.10f));
             Stretch(plateBorder.rectTransform);
             var plateIcon = CreateImage("Icon", plate.transform, Icon("Male"), new Vector2(18f, 18f), Vector2.zero, accent);
             var plateText = CreateLabel("Text", plate.transform, bold, "Your nickname", 17, faint, TextAnchor.MiddleCenter);
             Place(plateText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(400f, 30f));
 
-            var hint = CreateRect("Hint", right);
-            Place(hint, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 73f), new Vector2(300f, 24f));
-            var hintIcon = CreateImage("Icon", hint, Icon("Rotate"), new Vector2(18f, 18f), Vector2.zero, UiMuted);
-            var hintText = CreateLabel("Text", hint, semiBold, "Drag to rotate", 14, UiMuted, TextAnchor.MiddleCenter);
-            Place(hintText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(240f, 24f));
+            // Old / Yon / Orqa tugmalari
+            var switcher = CreateSliced("ViewSwitch", stageT, pillFill, 22f, 32f, new Color32(28, 29, 33, 255));
+            Place(switcher.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 84f), new Vector2(284f, 44f));
+            string[] viewNames = { "Front", "Side", "Back" };
+            var viewButtons = new Button[3];
+            var viewFills = new Image[3];
+            var viewLabels = new Text[3];
+            for (int i = 0; i < 3; i++)
+            {
+                var fill = CreateSliced(viewNames[i] + "Button", switcher.transform, pillFill, 18f, 32f, new Color(0f, 0f, 0f, 0f));
+                Place(fill.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2((i - 1) * 92f, 0f), new Vector2(88f, 36f));
+                fill.raycastTarget = true;
+                var button = fill.gameObject.AddComponent<Button>();
+                button.transition = Selectable.Transition.None;
+                var label = CreateLabel("Label", fill.transform, semiBold, viewNames[i], 14, UiMuted, TextAnchor.MiddleCenter);
+                Place(label.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(88f, 24f));
+                viewButtons[i] = button;
+                viewFills[i] = fill;
+                viewLabels[i] = label;
+            }
+
+            var viewer = stage.gameObject.AddComponent<AvatarViewer>();
+            Set(viewer, "current", current);
+            Set(viewer, "previous", previous);
+            SetArray(viewer, "viewButtons", viewButtons);
+            SetArray(viewer, "viewFills", viewFills);
+            SetArray(viewer, "viewLabels", viewLabels);
 
             var fader = CreateFullscreen("Fader", root, new Color(0f, 0f, 0f, 0f));
 
@@ -469,20 +492,22 @@ namespace CraDev.EditorTools
             Set(screen, "statusIcon", status);
             Set(screen, "helpIcon", helpIcon);
             Set(screen, "helpText", helpText);
-            Set(screen, "maleCard", maleCard);
-            Set(screen, "femaleCard", femaleCard);
+            Set(screen, "genderChip", chip.rectTransform);
+            Set(screen, "genderIcon", chipIcon);
+            Set(screen, "genderText", chipText);
+            SetAvatars(screen);
+            SetArray(screen, "avatarCards", cards);
+            Set(screen, "avatarInfo", avatarInfo);
+            Set(screen, "viewer", viewer);
             Set(screen, "createButton", cta);
             Set(screen, "createFill", ctaFill);
             Set(screen, "createLabel", ctaLabel);
             Set(screen, "createIcon", ctaIcon);
             Set(screen, "errorIcon", errorIcon);
             Set(screen, "errorText", errorText);
-            Set(screen, "avatar", avatar);
             Set(screen, "nameplate", plate.rectTransform);
             Set(screen, "nameplateIcon", plateIcon);
             Set(screen, "nameplateText", plateText);
-            Set(screen, "hintIcon", hintIcon);
-            Set(screen, "hintText", hintText);
             Set(screen, "fader", fader);
             Set(screen, "checkSprite", Icon("Check"));
             Set(screen, "closeSprite", Icon("Close"));
@@ -497,27 +522,65 @@ namespace CraDev.EditorTools
 
         static readonly Color UiMuted = new Color32(142, 147, 154, 255);
 
-        static GenderCard CreateGenderCard(string name, Transform parent, float x, string label, Sprite icon,
-            Sprite roundFill, Sprite roundStroke, Sprite pill, Sprite check, Font font,
-            Color accent, Color field, Color line, Color circle)
+        /// <summary>Rasmlari bor avatarlarni ekranning "avatars" ro'yxatiga yozadi.</summary>
+        static void SetAvatars(CharacterCreationScreen screen)
         {
-            var fill = CreateSliced(name, parent, roundFill, 14f, 24f, field);
-            PlaceTopLeft(fill.rectTransform, x, 448f, 233f, 116f);
+            var so = new SerializedObject(screen);
+            var list = so.FindProperty("avatars");
+            list.arraySize = 0;
+            foreach (var info in AvatarList)
+            {
+                var front = LoadPhoto(AvatarPhotos + info.Id + "_Front.png");
+                if (front == null)
+                {
+                    Debug.Log($"[CraDev] {info.Id} avatarining rasmi hali yo'q, ro'yxatga qo'shilmadi.");
+                    continue;
+                }
+                int index = list.arraySize;
+                list.arraySize++;
+                var item = list.GetArrayElementAtIndex(index);
+                item.FindPropertyRelative("id").stringValue = info.Id;
+                item.FindPropertyRelative("gender").stringValue = info.Gender;
+                item.FindPropertyRelative("title").stringValue = info.Title;
+                item.FindPropertyRelative("heightCm").intValue = info.Height;
+                item.FindPropertyRelative("front").objectReferenceValue = front;
+                item.FindPropertyRelative("side").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_Side.png");
+                item.FindPropertyRelative("back").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_Back.png");
+            }
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        static Sprite LoadPhoto(string path)
+        {
+            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
+                return null;
+            if (importer.textureType != TextureImporterType.Sprite)
+            {
+                CraDevArtImporter.ApplyPhoto(importer);
+                importer.SaveAndReimport();
+            }
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+        }
+
+        static AvatarCard CreateAvatarCard(string name, Transform parent, float x, float y, Sprite roundFill, Sprite roundStroke,
+            Sprite pill, Sprite check, Color accent, Color field, Color line)
+        {
+            var fill = CreateSliced(name, parent, roundFill, 12f, 24f, field);
+            PlaceTopLeft(fill.rectTransform, x, y, 88f, 150f);
             fill.raycastTarget = true;
-            var border = CreateSliced("Border", fill.transform, roundStroke, 14f, 24f, line);
+            var picture = CreateImage("Picture", fill.transform, null, Vector2.zero, Vector2.zero, Color.white);
+            picture.rectTransform.anchorMin = Vector2.zero;
+            picture.rectTransform.anchorMax = Vector2.one;
+            picture.rectTransform.offsetMin = new Vector2(6f, 6f);
+            picture.rectTransform.offsetMax = new Vector2(-6f, -6f);
+            picture.preserveAspect = true;
+            var border = CreateSliced("Border", fill.transform, roundStroke, 12f, 24f, line);
             Stretch(border.rectTransform);
 
-            var iconCircle = CreateImage("IconCircle", fill.transform, pill, new Vector2(48f, 48f), Vector2.zero, circle);
-            Place(iconCircle.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -40.5f), new Vector2(48f, 48f));
-            var iconImage = CreateImage("Icon", iconCircle.transform, icon, new Vector2(24f, 24f), Vector2.zero, UiMuted);
-            var text = CreateLabel("Label", fill.transform, font, label, 17, Color.white, TextAnchor.MiddleCenter);
-            Place(text.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -88f), new Vector2(220f, 26f));
+            var tick = CreateImage("Tick", fill.transform, pill, new Vector2(18f, 18f), Vector2.zero, accent);
+            Place(tick.rectTransform, new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-14f, -14f), new Vector2(18f, 18f));
+            CreateImage("Check", tick.transform, check, new Vector2(12f, 12f), Vector2.zero, Color.white);
 
-            var tick = CreateImage("Tick", fill.transform, pill, new Vector2(22f, 22f), Vector2.zero, accent);
-            Place(tick.rectTransform, new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-23f, -23f), new Vector2(22f, 22f));
-            CreateImage("Check", tick.transform, check, new Vector2(14f, 14f), Vector2.zero, Color.white);
-
-            // Sichqoncha ustiga kelganda ramka biroz yorishadi
             var button = fill.gameObject.AddComponent<Button>();
             button.targetGraphic = border;
             var colors = button.colors;
@@ -528,11 +591,10 @@ namespace CraDev.EditorTools
             colors.fadeDuration = 0.1f;
             button.colors = colors;
 
-            var card = fill.gameObject.AddComponent<GenderCard>();
+            var card = fill.gameObject.AddComponent<AvatarCard>();
             Set(card, "fill", fill);
             Set(card, "border", border);
-            Set(card, "iconCircle", iconCircle);
-            Set(card, "icon", iconImage);
+            Set(card, "picture", picture);
             Set(card, "tick", tick.gameObject);
             return card;
         }
@@ -551,70 +613,6 @@ namespace CraDev.EditorTools
             if (font == null)
                 throw new FileNotFoundException("Shrift topilmadi: " + Fonts + file);
             return font;
-        }
-
-        static void CreateLight(string name, Vector3 from, Color color, float intensity, LightShadows shadows)
-        {
-            var go = new GameObject(name);
-            var light = go.AddComponent<Light>();
-            light.type = LightType.Directional;
-            light.color = color;
-            light.intensity = intensity;
-            light.shadows = shadows;
-            light.shadowStrength = 0.6f;
-            go.transform.rotation = Quaternion.LookRotation(-from.normalized);
-        }
-
-        static void CreateDisc(string name, float diameter, float height, float y, Material material)
-        {
-            var go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            go.name = name;
-            Object.DestroyImmediate(go.GetComponent<Collider>());
-            go.transform.position = new Vector3(0f, y, 0f);
-            go.transform.localScale = new Vector3(diameter, height / 2f, diameter);
-            go.GetComponent<Renderer>().sharedMaterial = material;
-        }
-
-        /// <summary>Joriy render pipeline'ga mos yoritiladigan material (Built-in: Standard, URP/HDRP: Lit).</summary>
-        static Material CreateLitMaterial(string name, Color color, float smoothness)
-        {
-            var pipeline = GraphicsSettings.currentRenderPipeline;
-            var shader = pipeline != null ? pipeline.defaultShader : Shader.Find("Standard");
-
-            // Mavjud material bo'lsa yangilanadi (havolalar buzilmasligi uchun), bo'lmasa yaratiladi
-            string path = MaterialsFolder + name + ".mat";
-            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
-            bool isNew = material == null;
-            if (isNew)
-                material = new Material(shader) { name = name };
-            else
-                material.shader = shader;
-
-            material.color = color;
-            if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
-            if (material.HasProperty("_Glossiness")) material.SetFloat("_Glossiness", smoothness);
-            if (material.HasProperty("_Smoothness")) material.SetFloat("_Smoothness", smoothness);
-            if (material.HasProperty("_Metallic")) material.SetFloat("_Metallic", 0f);
-
-            if (isNew)
-            {
-                EnsureFolder(MaterialsFolder.TrimEnd('/'));
-                AssetDatabase.CreateAsset(material, path);
-            }
-            else
-            {
-                EditorUtility.SetDirty(material);
-            }
-            return material;
-        }
-
-        static void EnsureFolder(string folder)
-        {
-            if (AssetDatabase.IsValidFolder(folder))
-                return;
-            string parent = Path.GetDirectoryName(folder).Replace('\\', '/');
-            EnsureFolder(parent);
-            AssetDatabase.CreateFolder(parent, Path.GetFileName(folder));
         }
 
         /// <summary>UI bosishlari uchun EventSystem: yangi Input System yoqilgan bo'lsa o'shaning moduli bilan.</summary>

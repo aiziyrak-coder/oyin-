@@ -174,6 +174,19 @@ namespace CraDev.EditorTools
         public static void Set(Object target, string field, Color value) => Edit(target, field, p => p.colorValue = value);
         public static void Set(Object target, string field, Vector2 value) => Edit(target, field, p => p.vector2Value = value);
 
+        /// <summary>Komponentning massiv maydoniga (masalan, Button[]) havolalar yozadi.</summary>
+        public static void SetArray(Object target, string field, Object[] values)
+        {
+            var so = new SerializedObject(target);
+            var property = so.FindProperty(field);
+            if (property == null || !property.isArray)
+                throw new System.ArgumentException($"{target.GetType().Name} da \"{field}\" massiv maydoni topilmadi.");
+            property.arraySize = values.Length;
+            for (int i = 0; i < values.Length; i++)
+                property.GetArrayElementAtIndex(i).objectReferenceValue = values[i];
+            so.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         static void Edit(Object target, string field, System.Action<SerializedProperty> assign)
         {
             var so = new SerializedObject(target);

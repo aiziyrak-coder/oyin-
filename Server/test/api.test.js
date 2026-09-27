@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import { after, before, describe, test } from 'node:test';
 import { createApp } from '../src/app.js';
 import { openDatabase } from '../src/db.js';
-import { validateNickname } from '../src/nickname.js';
+import { isValidAvatar, validateNickname } from '../src/nickname.js';
 
 describe('nickname qoidalari', () => {
   test('to\'g\'ri nickname\'lar', () => {
@@ -20,6 +20,14 @@ describe('nickname qoidalari', () => {
 
   test('band qilingan nomlar', () => {
     assert.deepEqual(validateNickname('Admin').reason, 'reserved');
+  });
+
+  test('avatar jinsga mos bo\'lishi kerak', () => {
+    assert.equal(isValidAvatar('M3', 'male'), true);
+    assert.equal(isValidAvatar('F5', 'female'), true);
+    assert.equal(isValidAvatar('F1', 'male'), false);
+    assert.equal(isValidAvatar('M6', 'male'), false);
+    assert.equal(isValidAvatar(undefined, 'male'), false);
   });
 });
 
@@ -48,32 +56,36 @@ describe('API', () => {
   });
 
   test('o\'yinchi yaratiladi va nickname band bo\'ladi (katta-kichik harfdan qat\'i nazar)', async () => {
-    const res = await create({ nickname: 'Shadow', gender: 'male' });
+    const res = await create({ nickname: 'Shadow', gender: 'male', avatarId: 'M3' });
     assert.equal(res.status, 201);
     const player = await res.json();
     assert.equal(player.nickname, 'Shadow');
     assert.equal(player.gender, 'male');
+    assert.equal(player.avatarId, 'M3');
     assert.match(player.token, /^[0-9a-f]{64}$/);
 
     const again = await check('shadow');
     assert.equal(again.available, false);
     assert.equal(again.reason, 'taken');
 
-    const dup = await create({ nickname: 'SHADOW', gender: 'female' });
+    const dup = await create({ nickname: 'SHADOW', gender: 'female', avatarId: 'F2' });
     assert.equal(dup.status, 409);
     assert.equal((await dup.json()).error, 'nickname_taken');
   });
 
   test('bir vaqtda kelgan so\'rovlardan faqat bittasi nickname\'ni oladi', async () => {
     const results = await Promise.all(Array.from({ length: 8 }, (_, i) =>
-      create({ nickname: 'Racer', gender: i % 2 ? 'male' : 'female' }).then(r => r.status)));
+      create({ nickname: 'Racer', gender: i % 2 ? 'male' : 'female', avatarId: i % 2 ? 'M1' : 'F1' }).then(r => r.status)));
     assert.equal(results.filter(s => s === 201).length, 1);
     assert.equal(results.filter(s => s === 409).length, 7);
   });
 
   test('noto\'g\'ri ma\'lumotlar rad etiladi', async () => {
-    assert.equal((await create({ nickname: 'ab', gender: 'male' })).status, 400);
-    assert.equal((await create({ nickname: 'Valid_Name', gender: 'other' })).status, 400);
+    assert.equal((await create({ nickname: 'ab', gender: 'male', avatarId: 'M1' })).status, 400);
+    assert.equal((await create({ nickname: 'Valid_Name', gender: 'other', avatarId: 'M1' })).status, 400);
+    const wrongAvatar = await create({ nickname: 'Valid_Name', gender: 'male', avatarId: 'F1' });
+    assert.equal(wrongAvatar.status, 400);
+    assert.equal((await wrongAvatar.json()).error, 'invalid_avatar');
     const bad = await fetch(`${base}/api/players`, { method: 'POST', body: '{not json' });
     assert.equal(bad.status, 400);
     assert.equal((await check('admin')).reason, 'reserved');

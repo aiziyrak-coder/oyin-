@@ -30,9 +30,9 @@ namespace CraDev.Online
         }
 
         /// <summary>O'yinchini yaratadi va nickname'ni band qiladi. 409 = nickname allaqachon olingan.</summary>
-        public IEnumerator CreatePlayer(string nickname, string gender, Action<ApiResult<PlayerResponse>> done)
+        public IEnumerator CreatePlayer(string nickname, string gender, string avatarId, Action<ApiResult<PlayerResponse>> done)
         {
-            string json = JsonUtility.ToJson(new CreatePlayerRequest { nickname = nickname, gender = gender });
+            string json = JsonUtility.ToJson(new CreatePlayerRequest { nickname = nickname, gender = gender, avatarId = avatarId });
             using (var request = new UnityWebRequest($"{baseUrl}/api/players", UnityWebRequest.kHttpVerbPOST))
             {
                 request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
@@ -85,6 +85,7 @@ namespace CraDev.Online
         public string id;
         public string nickname;
         public string gender;
+        public string avatarId;
         public string token;
         public string createdAt;
         public string error;
@@ -96,5 +97,6 @@ namespace CraDev.Online
     {
         public string nickname;
         public string gender;
+        public string avatarId;
     }
 }

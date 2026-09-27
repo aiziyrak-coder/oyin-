@@ -13,8 +13,15 @@ namespace CraDev.EditorTools
     {
         public static bool IsCraDevArt(string path) => path.StartsWith("Assets/CraDev/") && path.Contains("/Art/");
 
+        public static bool IsAvatarPhoto(string path) => path.StartsWith("Assets/CraDev/Avatars/Photos/");
+
         void OnPreprocessTexture()
         {
+            if (IsAvatarPhoto(assetPath) && assetImporter.importSettingsMissing)
+            {
+                ApplyPhoto((TextureImporter)assetImporter);
+                return;
+            }
             if (!IsCraDevArt(assetPath) || !assetImporter.importSettingsMissing)
                 return;
             var importer = (TextureImporter)assetImporter;
@@ -32,6 +39,22 @@ namespace CraDev.EditorTools
             if (file.StartsWith("UI_Round12")) return new Vector4(24, 24, 24, 24);
             if (file.StartsWith("UI_Pill")) return new Vector4(32, 32, 32, 32);
             return Vector4.zero;
+        }
+
+        /// <summary>
+        /// Avatar fotosuratlari: sprite, mipmap bilan (kichik kartalarda ham tiniq) va sifatli siqilgan
+        /// (xotirani tejash uchun).
+        /// </summary>
+        public static void ApplyPhoto(TextureImporter importer)
+        {
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.mipmapEnabled = true;
+            importer.alphaIsTransparency = true;
+            importer.textureCompression = TextureImporterCompression.CompressedHQ;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Trilinear;
+            importer.maxTextureSize = 1024;
         }
 
         public static void Apply(TextureImporter importer)
