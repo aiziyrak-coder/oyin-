@@ -1,21 +1,21 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace CraDev.Intro.EditorTools
+namespace CraDev.EditorTools
 {
     /// <summary>
-    /// Assets/CraDev/Intro/Art papkasidagi rasmlarni birinchi importda UI uchun
-    /// sifatli sprite sifatida sozlaydi (siqishsiz, mipmap'siz), shunda logo
+    /// Assets/CraDev/.../Art papkalaridagi rasmlarni birinchi importda UI uchun
+    /// sifatli sprite sifatida sozlaydi (siqishsiz, mipmap'siz), shunda logolar
     /// katta ekranlarda ham tiniq va yo'l-yo'l bo'lmasdan ko'rinadi.
     /// Keyin Inspector'da qo'lda o'zgartirilgan sozlamalarga tegmaydi.
     /// </summary>
-    class IntroArtImporter : AssetPostprocessor
+    class CraDevArtImporter : AssetPostprocessor
     {
-        public const string ArtFolder = "Assets/CraDev/Intro/Art/";
+        public static bool IsCraDevArt(string path) => path.StartsWith("Assets/CraDev/") && path.Contains("/Art/");
 
         void OnPreprocessTexture()
         {
-            if (!assetPath.StartsWith(ArtFolder) || !assetImporter.importSettingsMissing)
+            if (!IsCraDevArt(assetPath) || !assetImporter.importSettingsMissing)
                 return;
             Apply((TextureImporter)assetImporter);
         }

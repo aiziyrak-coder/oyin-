@@ -1,15 +1,15 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace CraDev.Intro
+namespace CraDev
 {
     /// <summary>
-    /// Intro fonida sekin suzib yuradigan, miltillovchi uchqunlar.
+    /// Splash va Loading ekranlari fonida sekin suzib yuradigan, miltillovchi uchqunlar.
     /// UI Image'lardan tuzilgan, shuning uchun istalgan render pipeline'da ishlaydi.
-    /// Umumiy yorqinlikni <see cref="Intensity"/> orqali IntroSequence boshqaradi.
+    /// Umumiy yorqinlikni <see cref="Intensity"/> orqali sahna skripti boshqaradi.
     /// </summary>
     [RequireComponent(typeof(RectTransform))]
-    public class IntroParticles : MonoBehaviour
+    public class UiParticles : MonoBehaviour
     {
         [SerializeField] Sprite sprite;
         [SerializeField, Range(0, 200)] int count = 70;

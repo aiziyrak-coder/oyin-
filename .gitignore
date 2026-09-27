@@ -43,4 +43,7 @@ sysinfo.txt
 Thumbs.db
 
 # Logo manbalarining vaqtinchalik chiqishi
-/Design/Logo/.out/
+/Design/*/.out/
+
+# Python
+__pycache__/
