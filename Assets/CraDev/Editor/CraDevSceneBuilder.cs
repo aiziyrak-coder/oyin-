@@ -180,8 +180,8 @@ namespace CraDev.EditorTools
                 QualitySettings.antiAliasing = 4;
                 QualitySettings.shadows = ShadowQuality.All;
                 QualitySettings.shadowResolution = ShadowResolution.VeryHigh;
-                QualitySettings.shadowDistance = 25f;
-                QualitySettings.shadowCascades = 2;
+                QualitySettings.shadowDistance = 110f;
+                QualitySettings.shadowCascades = 4;
                 QualitySettings.vSyncCount = 1;
             }
             QualitySettings.SetQualityLevel(level, false);
@@ -419,14 +419,12 @@ namespace CraDev.EditorTools
             var form = CreateRect("Form", leftT);
             Place(form, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(480f, 850f));
 
-            var eyebrow = CreateLabel("Eyebrow", form, bold, "NEW PLAYER", 13, accent, TextAnchor.UpperLeft);
+            var eyebrow = Localized(CreateLabel("Eyebrow", form, bold, "", 13, accent, TextAnchor.UpperLeft), "create.eyebrow");
             PlaceTopLeft(eyebrow.rectTransform, 0f, 0f, 480f, 20f);
-            var title = CreateLabel("Title", form, display, "Create your\ncharacter", 44, Color.white, TextAnchor.UpperLeft);
+            var title = Localized(CreateLabel("Title", form, display, "", 44, Color.white, TextAnchor.UpperLeft), "create.title");
             title.lineSpacing = 0.92f;
             PlaceTopLeft(title.rectTransform, 0f, 34f, 480f, 110f);
-            var sub = CreateLabel("Subtitle", form, medium,
-                "Pick a nickname and an avatar, then add your face from a photo.",
-                17, UiMuted, TextAnchor.UpperLeft);
+            var sub = Localized(CreateLabel("Subtitle", form, medium, "", 17, UiMuted, TextAnchor.UpperLeft), "create.subtitle");
             sub.horizontalOverflow = HorizontalWrapMode.Wrap;
             sub.lineSpacing = 1.1f;
             PlaceTopLeft(sub.rectTransform, 0f, 146f, 440f, 60f);
@@ -443,7 +441,7 @@ namespace CraDev.EditorTools
             var chipText = CreateLabel("Text", chip.transform, semiBold, "Male · from passport", 13, Color.white, TextAnchor.MiddleCenter);
             Place(chipText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(100f, 0f), new Vector2(300f, 24f));
 
-            PlaceTopLeft(CreateLabel("NicknameLabel", form, bold, "NICKNAME", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 272f, 480f, 18f);
+            PlaceTopLeft(Localized(CreateLabel("NicknameLabel", form, bold, "", 12, UiMuted, TextAnchor.UpperLeft), "create.nickname").rectTransform, 0f, 272f, 480f, 18f);
 
             var glow = CreateSliced("FieldGlow", form, roundFill, 16f, 24f, new Color(accent.r, accent.g, accent.b, 0.16f));
             PlaceTopLeft(glow.rectTransform, -4f, 297f, 488f, 68f);
@@ -460,7 +458,7 @@ namespace CraDev.EditorTools
             var inputText = CreateLabel("Text", fieldBg.transform, semiBold, "", 19, Color.white, TextAnchor.MiddleLeft);
             inputText.supportRichText = false;
             SetInsets(inputText.rectTransform, 56f, 52f);
-            var placeholder = CreateLabel("Placeholder", fieldBg.transform, medium, "Enter a nickname", 19, faint, TextAnchor.MiddleLeft);
+            var placeholder = Localized(CreateLabel("Placeholder", fieldBg.transform, medium, "", 19, faint, TextAnchor.MiddleLeft), "create.nickname_placeholder");
             SetInsets(placeholder.rectTransform, 56f, 52f);
             var input = fieldBg.gameObject.AddComponent<InputField>();
             input.textComponent = inputText;
@@ -480,7 +478,7 @@ namespace CraDev.EditorTools
             Place(helpText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -382f), new Vector2(470f, 22f));
 
             // Avatar kartalari: shu jinsdagi avatarlar (5 tagacha, ortiqcha kartalar yashiriladi)
-            PlaceTopLeft(CreateLabel("AvatarLabel", form, bold, "AVATAR", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 412f, 480f, 18f);
+            PlaceTopLeft(Localized(CreateLabel("AvatarLabel", form, bold, "", 12, UiMuted, TextAnchor.UpperLeft), "create.avatar").rectTransform, 0f, 412f, 480f, 18f);
             var cards = new AvatarCard[5];
             for (int i = 0; i < cards.Length; i++)
                 cards[i] = CreateAvatarCard("AvatarCard" + (i + 1), form, i * 98f, 438f, roundFill, roundStroke, pillFill, Icon("Check"), accent, field, line);
@@ -488,7 +486,7 @@ namespace CraDev.EditorTools
             Place(avatarInfo.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -606f), new Vector2(480f, 22f));
 
             // ---------- Yuz: kamera bilan suratga tushish yoki rasm yuklash ----------
-            PlaceTopLeft(CreateLabel("FaceLabel", form, bold, "FACE", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 632f, 480f, 18f);
+            PlaceTopLeft(Localized(CreateLabel("FaceLabel", form, bold, "", 12, UiMuted, TextAnchor.UpperLeft), "create.face").rectTransform, 0f, 632f, 480f, 18f);
             var thumbFill = CreateSliced("FaceThumb", form, roundFill, 12f, 24f, field);
             PlaceTopLeft(thumbFill.rectTransform, 0f, 656f, 52f, 52f);
             var thumbIcon = CreateImage("Icon", thumbFill.transform, Icon("User"), new Vector2(22f, 22f), Vector2.zero, faint);
@@ -511,8 +509,10 @@ namespace CraDev.EditorTools
             removeButton.targetGraphic = removeFill;
             CreateImage("Icon", removeFill.transform, Icon("Close"), new Vector2(10f, 10f), Vector2.zero, Color.white);
 
-            var takeButton = CreateSecondaryButton("TakePhoto", form, "Take photo", DrawnIcon("Camera"), 64f, 660f, 200f, roundFill, roundStroke, semiBold, field, line);
-            var uploadButton = CreateSecondaryButton("UploadPhoto", form, "Upload photo", DrawnIcon("Upload"), 276f, 660f, 204f, roundFill, roundStroke, semiBold, field, line);
+            var takeButton = CreateSecondaryButton("TakePhoto", form, Loc.T("face.take"), DrawnIcon("Camera"), 64f, 660f, 200f, roundFill, roundStroke, semiBold, field, line);
+            LocalizeButton(takeButton, "face.take");
+            var uploadButton = CreateSecondaryButton("UploadPhoto", form, Loc.T("face.upload"), DrawnIcon("Upload"), 276f, 660f, 204f, roundFill, roundStroke, semiBold, field, line);
+            LocalizeButton(uploadButton, "face.upload");
 
             var faceStatusIcon = CreateImage("FaceStatusIcon", form, Icon("Check"), new Vector2(16f, 16f), Vector2.zero, UiMuted);
             Place(faceStatusIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -728f), new Vector2(16f, 16f));
@@ -541,7 +541,8 @@ namespace CraDev.EditorTools
             var errorText = CreateLabel("ErrorText", form, medium, "", 14, bad, TextAnchor.MiddleLeft);
             Place(errorText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(24f, -836f), new Vector2(456f, 22f));
             // Tahrirlash rejimida "Save changes" yonida (skript ko'rsatadi)
-            var editCancel = CreateSecondaryButton("CancelEdit", form, "Cancel", null, 312f, 752f, 168f, roundFill, roundStroke, semiBold, field, line);
+            var editCancel = CreateSecondaryButton("CancelEdit", form, "", null, 312f, 752f, 168f, roundFill, roundStroke, semiBold, field, line);
+            LocalizeButton(editCancel, "common.cancel");
             ((RectTransform)editCancel.transform).sizeDelta = new Vector2(168f, 60f);
             editCancel.gameObject.SetActive(false);
 
@@ -560,6 +561,7 @@ namespace CraDev.EditorTools
             var switcher = CreateSliced("ViewSwitch", stageT, pillFill, 22f, 32f, new Color32(28, 29, 33, 255));
             Place(switcher.rectTransform, new Vector2(stageX, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 96f), new Vector2(284f, 44f));
             string[] viewNames = { "Front", "Side", "Back" };
+            string[] viewKeys = { "create.view_front", "create.view_side", "create.view_back" };
             var viewButtons = new Button[3];
             var viewFills = new Image[3];
             var viewLabels = new Text[3];
@@ -570,7 +572,7 @@ namespace CraDev.EditorTools
                 fill.raycastTarget = true;
                 var button = fill.gameObject.AddComponent<Button>();
                 button.transition = Selectable.Transition.None;
-                var label = CreateLabel("Label", fill.transform, semiBold, viewNames[i], 14, UiMuted, TextAnchor.MiddleCenter);
+                var label = Localized(CreateLabel("Label", fill.transform, semiBold, "", 14, UiMuted, TextAnchor.MiddleCenter), viewKeys[i]);
                 Place(label.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(88f, 24f));
                 viewButtons[i] = button;
                 viewFills[i] = fill;
@@ -581,7 +583,7 @@ namespace CraDev.EditorTools
             var hint = CreateRect("Hint", stageT);
             Place(hint, new Vector2(stageX, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 48f), new Vector2(300f, 20f));
             var hintIcon = CreateImage("Icon", hint, Icon("Rotate"), new Vector2(16f, 16f), Vector2.zero, faint);
-            var hintText = CreateLabel("Text", hint, medium, "Drag to rotate · Scroll to zoom", 13, faint, TextAnchor.MiddleLeft);
+            var hintText = Localized(CreateLabel("Text", hint, medium, "", 13, faint, TextAnchor.MiddleLeft), "create.drag_hint");
             float hintWidth = 16f + 8f + hintText.preferredWidth;
             hintIcon.rectTransform.anchoredPosition = new Vector2(-hintWidth / 2f + 8f, 0f);
             Place(hintText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 0.5f), new Vector2(-hintWidth / 2f + 24f, 0f), new Vector2(hintText.preferredWidth + 4f, 20f));
@@ -604,7 +606,7 @@ namespace CraDev.EditorTools
             Place(panel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(720f, 690f));
             var panelBorder = CreateSliced("Border", panel.transform, roundStroke, 16f, 24f, line);
             Stretch(panelBorder.rectTransform);
-            PlaceTopLeft(CreateLabel("Title", panel.transform, display, "Take a photo", 24, Color.white, TextAnchor.MiddleLeft).rectTransform, 40f, 32f, 640f, 36f);
+            PlaceTopLeft(Localized(CreateLabel("Title", panel.transform, display, "", 24, Color.white, TextAnchor.MiddleLeft), "face.modal_title").rectTransform, 40f, 32f, 640f, 36f);
 
             var frame = CreateSliced("Frame", panel.transform, roundFill, 12f, 24f, Color.black);
             PlaceTopLeft(frame.rectTransform, 40f, 92f, 640f, 480f);
@@ -623,13 +625,14 @@ namespace CraDev.EditorTools
 
             var modalStatus = CreateLabel("Status", panel.transform, medium, "", 15, UiMuted, TextAnchor.MiddleCenter);
             PlaceTopLeft(modalStatus.rectTransform, 40f, 580f, 640f, 24f);
-            var cancelButton = CreateSecondaryButton("Cancel", panel.transform, "Cancel", null, 40f, 614f, 300f, roundFill, roundStroke, semiBold, field, line);
+            var cancelButton = CreateSecondaryButton("Cancel", panel.transform, "", null, 40f, 614f, 300f, roundFill, roundStroke, semiBold, field, line);
+            LocalizeButton(cancelButton, "common.cancel");
             var captureFill = CreateSliced("Capture", panel.transform, roundFill, 12f, 24f, accent);
             PlaceTopLeft(captureFill.rectTransform, 380f, 614f, 300f, 44f);
             captureFill.raycastTarget = true;
             var captureButton = captureFill.gameObject.AddComponent<Button>();
             captureButton.targetGraphic = captureFill;
-            var captureLabel = CreateLabel("Label", captureFill.transform, bold, "Capture", 16, Color.white, TextAnchor.MiddleCenter);
+            var captureLabel = Localized(CreateLabel("Label", captureFill.transform, bold, "", 16, Color.white, TextAnchor.MiddleCenter), "face.capture");
             Place(captureLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(280f, 30f));
 
             var faceGo = new GameObject("FaceCapture");
@@ -654,6 +657,7 @@ namespace CraDev.EditorTools
             Set(faceCapture, "alertSprite", Icon("Alert"));
             Set(faceCapture, "spinnerSprite", Icon("Spinner"));
 
+            CreateLanguagePill(root, Kit(), new Vector2(-64f, -44f));
             var confirmDialog = BuildConfirmDialog(root, Kit());
             AddUiSounds();
             var fader = CreateFullscreen("Fader", root, new Color(0f, 0f, 0f, 0f));

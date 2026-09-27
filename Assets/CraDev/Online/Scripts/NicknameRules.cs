@@ -30,11 +30,11 @@ namespace CraDev.Online
             nickname = (raw ?? "").Trim();
             message = null;
             if (nickname.Length < MinLength || nickname.Length > MaxLength)
-                message = $"Use {MinLength}–{MaxLength} characters.";
+                message = Loc.T("create.length");
             else if (!Pattern.IsMatch(nickname))
-                message = "Start with a letter. Use only letters, numbers and _.";
+                message = Loc.T("create.pattern");
             else if (Reserved.Contains(nickname.ToLowerInvariant()))
-                message = "This nickname is reserved.";
+                message = Loc.T("create.reserved");
             return message == null;
         }
     }

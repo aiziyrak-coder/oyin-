@@ -120,6 +120,7 @@ namespace CraDev.Online
         public string token;
         public string createdAt;
         public string error;
+        public string reason;
         public string message;
     }
 

@@ -171,6 +171,8 @@ namespace CraDev.EditorTools
         public static void Set(Object target, string field, string value) => Edit(target, field, p => p.stringValue = value);
         public static void Set(Object target, string field, float value) => Edit(target, field, p => p.floatValue = value);
         public static void Set(Object target, string field, int value) => Edit(target, field, p => p.intValue = value);
+        public static void Set(Object target, string field, bool value) => Edit(target, field, p => p.boolValue = value);
+        public static void Set(Object target, string field, Vector3 value) => Edit(target, field, p => p.vector3Value = value);
         public static void Set(Object target, string field, Color value) => Edit(target, field, p => p.colorValue = value);
         public static void Set(Object target, string field, Vector2 value) => Edit(target, field, p => p.vector2Value = value);
 

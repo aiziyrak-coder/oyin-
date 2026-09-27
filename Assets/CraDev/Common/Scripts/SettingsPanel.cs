@@ -8,7 +8,7 @@ namespace CraDev
 {
     /// <summary>
     /// Sozlamalar oynasi. Har bir qator: nomi va "&lt; qiymat &gt;" tanlagichi. O'zgarish darhol qo'llanadi va saqlanadi.
-    /// Qatorlar tartibi: ekran rejimi, oyna o'lchami, grafika, V-Sync, ovoz.
+    /// Qatorlar tartibi: ekran rejimi, oyna o'lchami, grafika, V-Sync, ovoz, til.
     /// </summary>
     public class SettingsPanel : ModalWindow
     {
@@ -18,7 +18,7 @@ namespace CraDev
         [SerializeField] CanvasGroup[] rows;
         [SerializeField] Button closeButton;
 
-        const int Display = 0, Size = 1, Graphics = 2, Sync = 3, Sound = 4;
+        const int Display = 0, Size = 1, Graphics = 2, Sync = 3, Sound = 4, Lang = 5;
         List<Vector2Int> resolutions;
 
         protected override void Awake()
@@ -62,6 +62,9 @@ namespace CraDev
                 case Sound:
                     GameSettings.Volume = Mathf.Clamp01(Mathf.Round(GameSettings.Volume * 10f + step) / 10f);
                     break;
+                case Lang:
+                    Loc.Current = Loc.Current == Language.Uz ? Language.En : Language.Uz;
+                    break;
             }
             GameSettings.Apply();
             GameSettings.Save();
@@ -70,15 +73,36 @@ namespace CraDev
 
         void Refresh()
         {
-            values[Display].text = GameSettings.Fullscreen ? "Fullscreen" : "Windowed";
+            values[Display].text = Loc.T(GameSettings.Fullscreen ? "settings.fullscreen" : "settings.windowed");
             var size = GameSettings.Fullscreen ? new Vector2Int(Screen.currentResolution.width, Screen.currentResolution.height) : GameSettings.Resolution;
             values[Size].text = $"{size.x} × {size.y}";
             // Oyna o'lchami faqat oynali rejimda tanlanadi
             rows[Size].alpha = GameSettings.Fullscreen ? 0.4f : 1f;
             rows[Size].interactable = !GameSettings.Fullscreen;
-            values[Graphics].text = QualitySettings.names[GameSettings.Quality];
-            values[Sync].text = GameSettings.VSync ? "On" : "Off";
+            values[Graphics].text = QualityName(GameSettings.Quality);
+            values[Sync].text = Loc.T(GameSettings.VSync ? "settings.on" : "settings.off");
             values[Sound].text = Mathf.RoundToInt(GameSettings.Volume * 100f) + "%";
+            if (values.Length > Lang)
+                values[Lang].text = Loc.Current == Language.Uz ? "O'zbekcha" : "English";
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+            Loc.Changed += Refresh;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            Loc.Changed -= Refresh;
+        }
+
+        /// <summary>Unity sifat darajalari (Very Low … Ultra) joriy tilda.</summary>
+        static string QualityName(int level)
+        {
+            string key = "quality." + level;
+            return QualitySettings.names.Length == 6 ? Loc.T(key) : QualitySettings.names[level];
         }
 
         static int Mod(int a, int n) => ((a % n) + n) % n;

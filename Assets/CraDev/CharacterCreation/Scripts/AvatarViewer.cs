@@ -30,6 +30,8 @@ namespace CraDev.CharacterCreation
         [SerializeField] float zoomStep = 0.25f;
         [Tooltip("Qahramon ekran markazidan qancha o'ngda turadi (ekran kengligiga nisbatan).")]
         [SerializeField, Range(0f, 0.4f)] float screenOffset = 0.17f;
+        [Tooltip("Kamerani shu komponent boshqaradimi (avatar yaratish). Bosh menyuda kamerani MenuCamera boshqaradi.")]
+        [SerializeField] bool driveCamera = true;
 
         [Header("Ko'rinish tugmalari (Front, Side, Back)")]
         [SerializeField] Button[] viewButtons;
@@ -178,7 +180,8 @@ namespace CraDev.CharacterCreation
             turntable.localRotation = Quaternion.Euler(0f, 180f - yaw - swap * 40f, 0f);
 
             zoom = Mathf.Lerp(zoom, targetZoom, 1f - Mathf.Exp(-7f * dt));
-            PlaceCamera();
+            if (driveCamera)
+                PlaceCamera();
             UpdateButtons(Mathf.Repeat(yaw, 360f));
         }
 
@@ -245,6 +248,8 @@ namespace CraDev.CharacterCreation
 
         public void OnScroll(PointerEventData eventData)
         {
+            if (!driveCamera)
+                return;
             targetZoom = Mathf.Clamp01(targetZoom + Mathf.Sign(eventData.scrollDelta.y) * zoomStep);
         }
     }

@@ -40,7 +40,7 @@ namespace CraDev.CharacterCreation
         [SerializeField] Sprite alertSprite;
         [SerializeField] Sprite spinnerSprite;
 
-        const string HintDefault = "Look straight at the camera, good light, no glasses.";
+        static string HintDefault => Loc.T("face.hint");
 
         static readonly Color Ok = new Color32(34, 197, 94, 255);
         static readonly Color Bad = new Color32(240, 82, 82, 255);
@@ -67,7 +67,7 @@ namespace CraDev.CharacterCreation
                 SetFace(saved, focus: false, save: false);
             else
                 ShowFace(null);
-            SetStatus(saved != null ? "Your face is on the avatar." : HintDefault, saved != null ? Ok : Muted, saved != null ? checkSprite : null);
+            SetStatus(saved != null ? Loc.T("face.on_avatar") : HintDefault, saved != null ? Ok : Muted, saved != null ? checkSprite : null);
         }
 
         void Update()
@@ -78,6 +78,17 @@ namespace CraDev.CharacterCreation
             // Kamera kadri kelguncha o'lchami noma'lum: kelgach oynani unga moslaymiz
             if (webcam != null && webcam.width > 16 && previewFitter != null)
                 previewFitter.aspectRatio = (float)webcam.width / webcam.height;
+        }
+
+        void OnEnable() => Loc.Changed += OnLanguageChanged;
+
+        void OnDisable() => Loc.Changed -= OnLanguageChanged;
+
+        void OnLanguageChanged()
+        {
+            if (busy)
+                return;
+            SetStatus(face != null ? Loc.T("face.on_avatar") : HintDefault, face != null ? Ok : Muted, face != null ? checkSprite : null);
         }
 
         void OnDestroy()
@@ -105,7 +116,7 @@ namespace CraDev.CharacterCreation
                 return;
             if (WebCamTexture.devices.Length == 0)
             {
-                SetStatus(FacePhoto.CanPickFile ? "No webcam found. Upload a photo instead." : "No webcam found.", Bad, alertSprite);
+                SetStatus(Loc.T("face.no_camera"), Bad, alertSprite);
                 return;
             }
             // Old kamera bo'lsa o'sha (noutbuklarda odatda bitta)
@@ -117,7 +128,7 @@ namespace CraDev.CharacterCreation
             webcam.Play();
             preview.texture = webcam;
             preview.uvRect = new Rect(1f, 0f, -1f, 1f); // ko'zgudagidek: o'yinchi o'zini tabiiy ko'radi
-            modalStatus.text = "Fit your face inside the oval and look straight.";
+            modalStatus.text = Loc.T("face.modal_hint");
             modalStatus.color = Muted;
             captureButton.interactable = true;
             modal.SetActive(true);
@@ -127,7 +138,7 @@ namespace CraDev.CharacterCreation
         {
             if (webcam == null || !webcam.isPlaying || webcam.width <= 16)
             {
-                modalStatus.text = "The camera is starting…";
+                modalStatus.text = Loc.T("face.camera_starting");
                 return;
             }
             var photo = FacePhoto.Capture(webcam);
@@ -172,7 +183,7 @@ namespace CraDev.CharacterCreation
             }
             if (photo == null)
             {
-                SetStatus("Can't open this file. Use a JPG or PNG photo.", Bad, alertSprite);
+                SetStatus(Loc.T("face.bad_file"), Bad, alertSprite);
                 return;
             }
             StartCoroutine(Process(photo));
@@ -184,7 +195,7 @@ namespace CraDev.CharacterCreation
         {
             busy = true;
             UpdateButtons();
-            SetStatus("Finding your face…", Muted, spinnerSprite);
+            SetStatus(Loc.T("face.finding"), Muted, spinnerSprite);
             yield return null; // yozuv ekranga chiqib olsin
 
             bool found = false;
@@ -198,7 +209,7 @@ namespace CraDev.CharacterCreation
             catch (System.Exception e)
             {
                 Debug.LogError("[CraDev] Yuzni aniqlashda xato: " + e);
-                error = "Something went wrong. Try another photo.";
+                error = Loc.T("face.error");
             }
 
             busy = false;
@@ -212,7 +223,7 @@ namespace CraDev.CharacterCreation
             }
 
             SetFace(new FaceData { Photo = photo, Landmarks = landmarks }, focus: true, save: true);
-            SetStatus("Face added. Scroll to zoom in or out.", Ok, checkSprite);
+            SetStatus(Loc.T("face.added"), Ok, checkSprite);
             Debug.Log("[CraDev] Yuz topildi va avatarga qo'yildi.");
         }
 

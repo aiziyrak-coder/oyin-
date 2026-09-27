@@ -1,14 +1,19 @@
 # CraDev o'yini: Claude uchun yo'riqnoma
 
-Unity 6'da kompyuter (Windows, Steam) uchun yaratilayotgan multiplayer 3D o'yin. Kompaniya: **CraDev**,
-ikkinchi brend: **CDCGroup**. O'yin konsepsiyasi hali yo'q: foydalanuvchi bilan bosqichma-bosqich quryapmiz.
+Unity 6'da kompyuter (Windows, Steam) uchun yaratilayotgan multiplayer **virtual dunyo** (3D). Kompaniya: **CraDev**,
+ikkinchi brend: **CDCGroup**. G'oya: real hayotdagi joylarni (do'konlar, o'quv markazlari, biznes, ko'ngilochar zona,
+hamjamiyat) bosqichma-bosqich virtualga ko'chirish. Bosh menyu - shu dunyoga kirish joyi; zonalarning ichi keyin quriladi.
 
 ## Muloqot va uslub
 
 - Foydalanuvchi bilan **o'zbek tilida** gaplashing. Kod izohlari, README va commit xabarlari ham o'zbekcha.
-- O'yin ichidagi barcha matnlar (UI) **inglizcha**.
-- Dizayn: zamonaviy, tekis, minimal. Qora fon (`#0B0B0C`), Unbounded va Manrope shriftlari, qisqa silliq harakatlar.
-  "Galaktik", kosmik, uchqun va nur effektlari **kerak emas**: foydalanuvchi ularni rad etgan.
+- O'yin matnlari **ikki tilda**: o'zbekcha (standart) va inglizcha. Hamma matn `Common/Scripts/Loc.cs` jadvalida,
+  builder yozuvlarga `Localized(text, kalit)` bilan `LocalizedText` ulaydi; skriptlar `Loc.T(kalit)` ishlatadi va
+  `Loc.Changed` bo'lganda o'z matnlarini yangilaydi. Yangi matn qo'shilsa - ikkala tilni ham yozing.
+- Dizayn (foydalanuvchi bergan konsept rasm bo'yicha): quyoshli futuristik shahar ustida yarim shaffof "shisha"
+  panellar, ko'k gradientli asosiy tugma, ikonkali menyu, yonib turuvchi platforma va halqalar, qo'lyozma yozuvlar
+  (Great Vibes). Shriftlar: Unbounded (sarlavha), Manrope (matn). Qisqa silliq harakatlar. Kosmos/galaktika uslubi kerak emas.
+- Avatar yaratish ekrani hozircha to'q studiyada (eski uslub); keyin yangi uslubga moslash mumkin.
 - O'yin haqiqiy o'yindek alohida to'liq ekranli oynada ochiladi. Ortiqcha UI (debug yozuvlar, tugmalar) qo'shmang.
 
 ## Asosiy qoida: sahnalar koddan quriladi
@@ -64,14 +69,16 @@ server bilan ishga tushirib, o'yinchi kabi o'tish va OCR bilan tekshirish (`tool
 ## O'yin oqimi
 
 `Intro` (CraDev, 4.2 s) → `CDCGroup` (3.5 s) → `Loading` → yangi o'yinchi uchun `CharacterCreation`,
-qaytgan o'yinchi uchun `MainMenu` (Play - hali "Coming soon", Customize - `CharacterCreation` tahrirlash rejimida,
-Settings, Quit). Bosh menyu profilni serverda tekshiradi (`GET /api/players/me`). Profil PlayerPrefs'da
+qaytgan o'yinchi uchun `MainMenu`: 3D shahar (virtual dunyoga kirish joyi), menyu: Kirish (hali "tez orada"),
+Personajni sozlash (`CharacterCreation` tahrirlash rejimida), Sozlamalar, Yordam, Chiqish; pastda zona kartalari
+(bosilsa kamera binoga buriladi). Bosh menyu profilni serverda tekshiradi (`GET /api/players/me`). Profil PlayerPrefs'da
 (`PlayerProfile.cs`); uni o'chirish: menyu **CraDev > Test: saqlangan profilni o'chirish**.
 
 | Papka | Mazmuni |
 |---|---|
 | `Assets/CraDev/Common/` | `SplashSequence` (splash asosi), `SceneLoader`, `Anim` (easing, input, Esc), `GameSettings` (ekran, grafika, V-Sync, ovoz; o'yin ochilishi bilan qo'llanadi), `ModalWindow`/`ConfirmDialog`/`SettingsPanel` (oynalar), `UiSounds` (tugma ovozlari) |
-| `Assets/CraDev/MainMenu/` | `MainMenuScreen`: bosh menyu, 3D qahramon o'z yuzi bilan |
+| `Assets/CraDev/MainMenu/` | `MainMenuScreen`: bosh menyu (til, bildirishnoma, profil, zona kartalari, qahramon yonidagi nom) |
+| `Assets/CraDev/World/` | virtual shahar: `Flyer` (uchar transport), `Walker` (piyodalar), `Rotator` (charxpalak), `MenuCamera`, `WorldLighting`; manbalar va litsenziyalar `CREDITS.md` da. Shahar `CraDevSceneBuilder.City.cs` da koddan quriladi, bosh menyu interfeysi `CraDevSceneBuilder.Lobby.cs` da |
 | `Assets/CraDev/Intro/`, `CDCGroup/`, `Loading/` | splash va yuklash ekranlari |
 | `Assets/CraDev/CharacterCreation/` | nickname + avatar tanlash ekrani: 3D studiyada qahramon turadi; `AvatarViewer` uni sichqoncha bilan aylantiradi, g'ildirakcha bilan yuziga yaqinlashtiradi |
 | `Assets/CraDev/Face/` | o'yinchi yuzi: `FaceTracker` (MediaPipe BlazeFace + Face Mesh, 478 nuqta, `com.unity.ai.inference`), `FacePainter` (yuzni bosh teksturasiga chizadi), `FacePhoto` (fayl oynasi, EXIF, kamera kadri), `FaceStore` (yuz faqat shu kompyuterda saqlanadi) |
@@ -132,7 +139,10 @@ Hamma tayyor PNG/WAV'lar `Assets/` ga commit qilingan; qayta yaratish faqat manb
    "teri" sifatida chiziladi (bosh shakli modelniki), rangi qahramon terisiga 70% moslashadi. Yuz serverga yuborilmaydi.
    Tekshirish: `Unity.exe -batchmode -quit -projectPath . -executeMethod CraDev.EditorTools.CraDevFaceTest.Run -facePhoto <rasm>`.
    Keyingi: yuzni serverga yuklash (multiplayer'da boshqalar ko'rishi), 3D yuz shakli.
-5. O'yin janri hali tanlanmagan (foydalanuvchi keyin hal qiladi). O'yin qismida kamera **birinchi shaxs** bo'ladi.
+5. O'yin turi: virtual dunyo (metaverse). Zonalar: Magazinlar, O'quv markazlari, Biznes markazi, Ko'ngilochar zona, Hamjamiyat
+   (`CraDevSceneBuilder.Zones`). Ularning ichi keyin quriladi. Dunyo ichida kamera **birinchi shaxs** bo'ladi.
+   Post-processing: `com.unity.postprocessing` (bloom, ACES, AO, DOF, vignette), profil `World/PostFX.asset`.
+   Harakatlanuvchi obyektlarni `BatchingStatic` qilmang (`MeshObject` hammasini statik belgilaydi): aks holda joyida qotib qoladi.
 6. Foydalanuvchi keyinga qoldirgan: pasport bilan ro'yxatdan o'tish (jins shundan olinadi, hozir
    `testGender`), yuzni serverga yuklash, Play'dan keyingi o'yin dunyosi, musiqa.
 7. `tools/unity.ps1 run` o'yin serverini ham o'zi yoqadi (ishlamayotgan bo'lsa). Har bir sahnada Esc ishlaydi:

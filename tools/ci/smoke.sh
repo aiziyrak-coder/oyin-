@@ -106,7 +106,8 @@ PIDS+=("$GAME_PID")
 log "o'yin ishga tushdi (pid $GAME_PID), nickname: $NICK"
 
 # ---- 4. Avatar yaratish ekrani (intro'lar va Loading'dan keyin) ----
-wait_for 04-character-creation 'createyour|nickname' 120
+# O'yin standart tilda (o'zbekcha) ochiladi; inglizcha matnlar ham qabul qilinadi
+wait_for 04-character-creation 'yarating|createyour|nickname' 120
 check "avatar yaratish ekrani ochildi" $?
 CREATION_AT=$((SECONDS - VIDEO_START))
 
@@ -118,7 +119,7 @@ WINDOW=$(xdotool search --onlyvisible --name 'CraDev' 2>/dev/null | head -1)
 click 360 446                       # nickname maydoni
 sleep 0.3
 xdotool type --delay 90 "$NICK"
-wait_for 05-nickname-available 'nicknameisavailable' 15
+wait_for 05-nickname-available 'nicknamebo.?sh|nicknameisavailable' 15
 check "nickname server'da tekshirildi (available)" $?
 
 click 262 628                       # 2-avatar kartasi
@@ -148,15 +149,15 @@ sleep 1.5
 shot 10-front
 
 click 360 897                       # "Create character"
-wait_for 11-created 'welcome' 10
+wait_for 11-created 'xushkelibsiz|welcome' 10
 check "profil yaratildi (Welcome, ...)" $?
 
-wait_for 12-main-menu 'welcomeback|customize' 40
-check "bosh menyu ochildi (Welcome back, Play, Customize)" $?
+wait_for 12-main-menu 'kirish|personajni|welcome|customize' 60
+check "bosh menyu ochildi (Xush kelibsiz, Kirish, Personajni sozlash)" $?
 
 # Esc: chiqishni tasdiqlash oynasi chiqadi, "Cancel" bilan yopiladi
 xdotool key Escape
-wait_for 13-quit-dialog 'quitgame' 10
+wait_for 13-quit-dialog 'chiqasizmi|quitgame' 10
 check "Esc bosilganda 'Quit game?' so'raladi" $?
 xdotool key Escape
 
@@ -183,7 +184,7 @@ grep -qE 'neweraof|cradev' "$OUT/frames/ocr.txt"
 check "CraDev intro ko'rindi" $?
 grep -qE 'cdc|group' "$OUT/frames/ocr.txt"
 check "CDCGroup ko'rindi" $?
-grep -qE 'loading|[0-9]+%' "$OUT/frames/ocr.txt"
+grep -qE 'yuklanmoqda|loading|[0-9]+%' "$OUT/frames/ocr.txt"
 check "Loading ko'rindi" $?
 
 # ---- 6. Player.log: istisnolar bo'lmasligi kerak ----

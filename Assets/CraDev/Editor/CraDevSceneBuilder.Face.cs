@@ -354,7 +354,7 @@ namespace CraDev.EditorTools
                     segments.Add((new Vector2(14.5f, 20.5f), new Vector2(15.5f, 18f)));
                     circles.Add((new Vector2(12f, 11.5f), 3.6f));
                 }
-                else
+                else if (name == "Upload")
                 {
                     // Yuqoriga o'q va pastda patnis
                     segments.Add((new Vector2(12f, 7f), new Vector2(12f, 20f)));
@@ -364,6 +364,8 @@ namespace CraDev.EditorTools
                     segments.Add((new Vector2(4f, 4f), new Vector2(20f, 4f)));
                     segments.Add((new Vector2(20f, 4f), new Vector2(20f, 9f)));
                 }
+                else
+                    MoreIcons(name, segments, circles);
                 var texture = new Texture2D(px, px, TextureFormat.RGBA32, false);
                 for (int y = 0; y < px; y++)
                     for (int x = 0; x < px; x++)
@@ -383,6 +385,107 @@ namespace CraDev.EditorTools
                 AssetDatabase.ImportAsset(path);
             }
             return LoadSprite(path);
+        }
+
+        /// <summary>Bosh menyu va shahar ikonkalari (24x24 birlik, y yuqoriga).</summary>
+        static void MoreIcons(string name, List<(Vector2 a, Vector2 b)> s, List<(Vector2 c, float r)> circles)
+        {
+            Vector2 P(float x, float y) => new Vector2(x, y);
+            void Line(params Vector2[] points)
+            {
+                for (int i = 0; i < points.Length - 1; i++)
+                    s.Add((points[i], points[i + 1]));
+            }
+            void Arc(Vector2 center, float rx, float ry, float from, float to, int steps = 24)
+            {
+                for (int i = 0; i < steps; i++)
+                {
+                    float a = Mathf.Lerp(from, to, i / (float)steps) * Mathf.Deg2Rad, b = Mathf.Lerp(from, to, (i + 1) / (float)steps) * Mathf.Deg2Rad;
+                    s.Add((center + new Vector2(Mathf.Cos(a) * rx, Mathf.Sin(a) * ry), center + new Vector2(Mathf.Cos(b) * rx, Mathf.Sin(b) * ry)));
+                }
+            }
+            switch (name)
+            {
+                case "Play":
+                    Line(P(8f, 5.5f), P(8f, 18.5f), P(18.5f, 12f), P(8f, 5.5f));
+                    break;
+                case "Gear":
+                    circles.Add((P(12f, 12f), 3f));
+                    var gear = new List<Vector2>();
+                    for (int i = 0; i < 8; i++)
+                        foreach (var (da, r) in new[] { (-14f, 6.4f), (-8f, 8.6f), (8f, 8.6f), (14f, 6.4f) })
+                        {
+                            float a = (i * 45f + da) * Mathf.Deg2Rad;
+                            gear.Add(P(12f + Mathf.Cos(a) * r, 12f + Mathf.Sin(a) * r));
+                        }
+                    gear.Add(gear[0]);
+                    Line(gear.ToArray());
+                    break;
+                case "Help":
+                    circles.Add((P(12f, 12f), 9.5f));
+                    Arc(P(12f, 14.3f), 3f, 3f, 170f, -60f, 16);
+                    Line(P(12f + Mathf.Cos(-60f * Mathf.Deg2Rad) * 3f, 14.3f + Mathf.Sin(-60f * Mathf.Deg2Rad) * 3f), P(12f, 10.2f), P(12f, 9.4f));
+                    circles.Add((P(12f, 6.6f), 0.35f));
+                    break;
+                case "Exit":
+                    Line(P(13f, 4f), P(5f, 4f), P(5f, 20f), P(13f, 20f));
+                    Line(P(9.5f, 12f), P(20.5f, 12f));
+                    Line(P(16.5f, 8f), P(20.5f, 12f), P(16.5f, 16f));
+                    break;
+                case "Globe":
+                    circles.Add((P(12f, 12f), 9.5f));
+                    Arc(P(12f, 12f), 4.2f, 9.5f, 0f, 360f, 32);
+                    Line(P(2.5f, 12f), P(21.5f, 12f));
+                    Line(P(4.2f, 16.8f), P(19.8f, 16.8f));
+                    Line(P(4.2f, 7.2f), P(19.8f, 7.2f));
+                    break;
+                case "Bell":
+                    Line(P(4.5f, 7.5f), P(19.5f, 7.5f));
+                    Line(P(6.5f, 7.5f), P(6.5f, 13f));
+                    Arc(P(12f, 13f), 5.5f, 6f, 180f, 0f, 20);
+                    Line(P(17.5f, 13f), P(17.5f, 7.5f));
+                    Arc(P(12f, 5.6f), 2f, 1.6f, 180f, 360f, 10);
+                    Line(P(12f, 19f), P(12f, 20.5f));
+                    break;
+                case "Chevron":
+                    Line(P(7f, 14.5f), P(12f, 9.5f), P(17f, 14.5f));
+                    break;
+                case "ArrowRight":
+                    Line(P(5f, 12f), P(19f, 12f));
+                    Line(P(13.5f, 6.5f), P(19f, 12f), P(13.5f, 17.5f));
+                    break;
+                case "Bag":
+                    AddRoundRect(s, new Rect(4.5f, 3.5f, 15f, 13f));
+                    Arc(P(12f, 16.5f), 3.6f, 3.8f, 0f, 180f, 16);
+                    break;
+                case "Cap":
+                    Line(P(1.5f, 15f), P(12f, 20f), P(22.5f, 15f), P(12f, 10f), P(1.5f, 15f));
+                    Line(P(6f, 12.8f), P(6f, 8f));
+                    Arc(P(12f, 8f), 6f, 2.5f, 180f, 360f, 16);
+                    Line(P(18f, 8f), P(18f, 12.8f));
+                    Line(P(22.5f, 15f), P(22.5f, 9f));
+                    break;
+                case "Chart":
+                    AddRoundRect(s, new Rect(3.5f, 3.5f, 4.5f, 8f));
+                    AddRoundRect(s, new Rect(9.75f, 3.5f, 4.5f, 12.5f));
+                    AddRoundRect(s, new Rect(16f, 3.5f, 4.5f, 17f));
+                    break;
+                case "Gamepad":
+                    AddRoundRect(s, new Rect(2.5f, 6f, 19f, 12f));
+                    Line(P(6f, 12f), P(10f, 12f));
+                    Line(P(8f, 10f), P(8f, 14f));
+                    circles.Add((P(15.5f, 13f), 0.9f));
+                    circles.Add((P(18f, 10.8f), 0.9f));
+                    break;
+                case "People":
+                    circles.Add((P(9f, 15.5f), 3f));
+                    Arc(P(9f, 4.5f), 6f, 6f, 20f, 160f, 16);
+                    circles.Add((P(17f, 16f), 2.4f));
+                    Arc(P(17.5f, 5.5f), 4.6f, 5f, 25f, 140f, 12);
+                    break;
+                default:
+                    throw new System.ArgumentException("Noma'lum ikonka: " + name);
+            }
         }
 
         static void AddRoundRect(List<(Vector2, Vector2)> segments, Rect r)

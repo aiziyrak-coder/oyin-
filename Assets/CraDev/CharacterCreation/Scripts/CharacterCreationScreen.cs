@@ -82,7 +82,7 @@ namespace CraDev.CharacterCreation
         /// <summary>Bosh menyudagi Customize: ekran mavjud profilni tahrirlash uchun ochiladi.</summary>
         public static bool EditRequested;
 
-        const string HelpDefault = "3–16 characters: letters, numbers and _. Starts with a letter.";
+        static string HelpDefault => Loc.T("create.help_default");
 
         static readonly Color Accent = new Color32(61, 90, 254, 255);
         static readonly Color Ok = new Color32(34, 197, 94, 255);
@@ -118,9 +118,9 @@ namespace CraDev.CharacterCreation
             if (editing)
             {
                 // Nickname o'zgarmaydi: faqat avatar va yuz tahrirlanadi
-                eyebrowText.text = "CUSTOMIZE";
-                titleText.text = "Edit your\ncharacter";
-                subtitleText.text = "Choose another avatar or update your face.";
+                eyebrowText.GetComponent<LocalizedText>().Key = "edit.eyebrow";
+                titleText.GetComponent<LocalizedText>().Key = "edit.title";
+                subtitleText.GetComponent<LocalizedText>().Key = "edit.subtitle";
                 nicknameInput.text = PlayerProfile.Nickname;
                 nicknameInput.interactable = false;
             }
@@ -135,21 +135,54 @@ namespace CraDev.CharacterCreation
             {
                 checkedNickname = PlayerProfile.Nickname;
                 SetNickState(NickState.Available);
-                SetHelp("Your nickname can't be changed.", Muted, null);
+                SetHelp(Loc.T("create.nickname_locked"), Muted, null);
                 // Saqlash tugmasi yonida "Cancel" uchun joy
                 var rect = createButton.GetComponent<RectTransform>();
                 rect.sizeDelta = new Vector2(300f, rect.sizeDelta.y);
-                SetButton("Save changes", checkSprite, Accent);
+                SetButton(Loc.T("create.save"), checkSprite, Accent);
             }
             else
             {
                 SetNickState(NickState.Empty);
-                SetButton("Create character", arrowSprite, Accent);
+                SetButton(Loc.T("create.create"), arrowSprite, Accent);
                 nicknameInput.ActivateInputField();
             }
             UpdateNameplate();
             UpdateCreateButton();
         }
+
+        void OnEnable() => Loc.Changed += OnLanguageChanged;
+
+        void OnDisable() => Loc.Changed -= OnLanguageChanged;
+
+        /// <summary>Til almashganda skript yozgan matnlarni yangilash (qolganini LocalizedText o'zi qiladi).</summary>
+        void OnLanguageChanged()
+        {
+            if (api == null)
+                return;
+            bool isFemale = gender == "female";
+            genderText.text = Loc.T(isFemale ? "create.gender_female" : "create.gender_male");
+            if (selected != null)
+                avatarInfo.text = selected.Info;
+            UpdateNameplate();
+            if (submitting || done)
+                return;
+            if (editing)
+            {
+                SetHelp(Loc.T("create.nickname_locked"), Muted, null);
+                SetButton(Loc.T("create.save"), checkSprite, Accent);
+            }
+            else
+            {
+                OnNicknameChanged(nicknameInput.text); // xabar yangi tilda qayta chiqadi
+                SetButton(Loc.T("create.create"), arrowSprite, Accent);
+            }
+            UpdateCreateButton();
+        }
+
+        /// <summary>Server rad etgan nickname sababi (joriy tilda).</summary>
+        static string ServerReason(string reason) =>
+            Loc.T(reason == "taken" ? "create.taken" : reason == "reserved" ? "create.reserved" : "create.invalid");
 
         void BackToMenu()
         {
@@ -161,7 +194,7 @@ namespace CraDev.CharacterCreation
 
         void AskQuit()
         {
-            dialog.Show("Quit game?", "Your character is not created yet. Are you sure you want to quit?", "Quit", ConfirmDialog.QuitGame);
+            dialog.Show(Loc.T("menu.quit_title"), Loc.T("create.quit_message"), Loc.T("common.quit"), ConfirmDialog.QuitGame, Loc.T("common.cancel"));
         }
 
         void Update()
@@ -239,7 +272,7 @@ namespace CraDev.CharacterCreation
 
                 if (result.NetworkError || result.Data == null)
                 {
-                    SetNickState(NickState.Offline, "Can't reach the server. Retrying…");
+                    SetNickState(NickState.Offline, Loc.T("create.offline"));
                     yield return new WaitForSecondsRealtime(4f);
                     if (seq != checkSeq)
                         yield break;
@@ -255,7 +288,7 @@ namespace CraDev.CharacterCreation
                 else
                 {
                     SetNickState(result.Data.reason == "taken" ? NickState.Taken : NickState.Invalid,
-                        string.IsNullOrEmpty(result.Data.message) ? "This nickname can't be used." : result.Data.message);
+                        ServerReason(result.Data.reason));
                 }
                 yield break;
             }
@@ -279,8 +312,8 @@ namespace CraDev.CharacterCreation
 
             switch (newState)
             {
-                case NickState.Available: SetHelp("Nickname is available", Ok, checkSprite); break;
-                case NickState.Checking: SetHelp("Checking availability…", Muted, null); break;
+                case NickState.Available: SetHelp(Loc.T("create.available"), Ok, checkSprite); break;
+                case NickState.Checking: SetHelp(Loc.T("create.checking"), Muted, null); break;
                 case NickState.Invalid:
                 case NickState.Taken: SetHelp(message, Bad, null); break;
                 case NickState.Offline: SetHelp(message, Warn, alertSprite); break;
@@ -314,7 +347,7 @@ namespace CraDev.CharacterCreation
             bool isFemale = gender == "female";
 
             genderIcon.sprite = isFemale ? femaleSprite : maleSprite;
-            genderText.text = isFemale ? "Female · from passport" : "Male · from passport";
+            genderText.text = Loc.T(isFemale ? "create.gender_female" : "create.gender_male");
             float chipWidth = 14f + 16f + 8f + genderText.preferredWidth + 16f;
             genderChip.sizeDelta = new Vector2(chipWidth, genderChip.sizeDelta.y);
             genderIcon.rectTransform.anchoredPosition = new Vector2(14f + 8f, 0f);
@@ -354,7 +387,7 @@ namespace CraDev.CharacterCreation
             selected = option;
             for (int i = 0; i < choices.Length && i < avatarCards.Length; i++)
                 avatarCards[i].SetSelected(choices[i] == option);
-            avatarInfo.text = $"{option.title} · {option.heightCm} cm";
+            avatarInfo.text = option.Info;
             viewer.SetAvatar(option);
             UpdateCreateButton();
         }
@@ -363,7 +396,7 @@ namespace CraDev.CharacterCreation
         {
             string value = nicknameInput.text.Trim();
             bool empty = value.Length == 0;
-            nameplateText.text = empty ? "Your nickname" : value;
+            nameplateText.text = empty ? Loc.T("create.your_nickname") : value;
             nameplateText.color = empty ? Faint : Color.white;
 
             // Pill kengligi matnga moslashadi: 14 + ikonka 18 + 10 + matn + 20
@@ -399,7 +432,7 @@ namespace CraDev.CharacterCreation
             submitting = true;
             SetError(null);
             createButton.interactable = false;
-            SetButton("Creating…", spinnerSprite, Accent);
+            SetButton(Loc.T("create.creating"), spinnerSprite, Accent);
             StartCoroutine(api.CreatePlayer(checkedNickname, gender, selected.id, OnCreated));
         }
 
@@ -418,24 +451,24 @@ namespace CraDev.CharacterCreation
                 if (faceCapture != null)
                     faceCapture.SetLocked(true);
                 createButton.interactable = false;
-                SetButton($"Welcome, {result.Data.nickname}", checkSprite, Ok);
+                SetButton(Loc.F("create.welcome", result.Data.nickname), checkSprite, Ok);
                 StartCoroutine(GoNext());
                 return;
             }
 
-            SetButton("Create character", arrowSprite, Accent);
+            SetButton(Loc.T("create.create"), arrowSprite, Accent);
             if (result.NetworkError)
-                SetError("Can't reach the server. Check your connection and try again.");
+                SetError(Loc.T("create.error_network"));
             else if (result.Status == 409)
-                SetNickState(NickState.Taken, "Someone just took this nickname. Try another one.");
+                SetNickState(NickState.Taken, Loc.T("create.taken_race"));
             else if (result.Status == 400 && result.Data != null && result.Data.error == "invalid_avatar")
-                SetError("This avatar doesn't match your passport data. Choose another one.");
+                SetError(Loc.T("create.error_avatar"));
             else if (result.Status == 400)
-                SetNickState(NickState.Invalid, result.Data?.message ?? "This nickname can't be used.");
+                SetNickState(NickState.Invalid, ServerReason(result.Data?.reason));
             else if (result.Status == 429)
-                SetError("Too many attempts. Wait a minute and try again.");
+                SetError(Loc.T("create.error_limit"));
             else
-                SetError("Something went wrong on the server. Try again.");
+                SetError(Loc.T("create.error_server"));
             UpdateCreateButton();
         }
 
@@ -452,7 +485,7 @@ namespace CraDev.CharacterCreation
             submitting = true;
             SetError(null);
             createButton.interactable = false;
-            SetButton("Saving…", spinnerSprite, Accent);
+            SetButton(Loc.T("create.saving"), spinnerSprite, Accent);
             StartCoroutine(api.UpdateAvatar(PlayerProfile.Token, selected.id, OnSaved));
         }
 
@@ -464,17 +497,17 @@ namespace CraDev.CharacterCreation
             {
                 done = true;
                 PlayerProfile.SetAvatar(selected.id);
-                SetButton("Saved", checkSprite, Ok);
+                SetButton(Loc.T("create.saved"), checkSprite, Ok);
                 StartCoroutine(GoNext(0.6f));
                 return;
             }
-            SetButton("Save changes", checkSprite, Accent);
+            SetButton(Loc.T("create.save"), checkSprite, Accent);
             if (result.NetworkError)
-                SetError("Can't reach the server. Check your connection and try again.");
+                SetError(Loc.T("create.error_network"));
             else if (result.Status == 401)
-                SetError("Your profile was not found on the server.");
+                SetError(Loc.T("create.error_profile"));
             else
-                SetError("Something went wrong on the server. Try again.");
+                SetError(Loc.T("create.error_server"));
             UpdateCreateButton();
         }
 

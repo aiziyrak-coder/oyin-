@@ -43,108 +43,6 @@ namespace CraDev.EditorTools
             PillStroke = LoadSlicedSprite(UiArt + "UI_Pill_Stroke.png"),
         };
 
-        // ---------------------------------------------------------------- Bosh menyu
-
-        static void BuildMainMenu()
-        {
-            var kit = Kit();
-            var maleIdle = IdleController("m_idle_neutral_01", "Idle_Male");
-            var femaleIdle = IdleController("f_idle_neutral_01", "Idle_Female");
-
-            var root = NewUiScene(out var scene);
-            root.gameObject.AddComponent<GraphicRaycaster>();
-            CreateEventSystem();
-
-            var stageCamera = Object.FindFirstObjectByType<Camera>();
-            var turntable = BuildStage(stageCamera);
-            var stage = CreateFullscreen("StageInput", root, new Color(0f, 0f, 0f, 0f));
-            stage.raycastTarget = true;
-
-            var left = CreateImage("LeftShade", root, ShadeSprite(), Vector2.zero, Vector2.zero, new Color(Background.r, Background.g, Background.b, 0.94f));
-            left.rectTransform.anchorMin = Vector2.zero;
-            left.rectTransform.anchorMax = new Vector2(0.6f, 1f);
-            left.rectTransform.offsetMin = left.rectTransform.offsetMax = Vector2.zero;
-            CreateBrand(left.transform, kit);
-
-            // ---------- Menyu ----------
-            var menu = CreateRect("Menu", left.transform);
-            Place(menu, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(480f, 480f));
-            var menuGroup = menu.gameObject.AddComponent<CanvasGroup>();
-
-            PlaceTopLeft(CreateLabel("Eyebrow", menu, kit.Bold, "WELCOME BACK", 13, kit.Accent, TextAnchor.UpperLeft).rectTransform, 0f, 0f, 480f, 20f);
-            var nickname = CreateLabel("Nickname", menu, kit.Display, "Player", 52, Color.white, TextAnchor.MiddleLeft);
-            PlaceTopLeft(nickname.rectTransform, 0f, 26f, 480f, 72f);
-            var avatarInfo = CreateLabel("AvatarInfo", menu, kit.Medium, "", 17, UiMuted, TextAnchor.MiddleLeft);
-            PlaceTopLeft(avatarInfo.rectTransform, 0f, 100f, 480f, 26f);
-
-            var (play, _) = CreateAccentButton("Play", menu, "Play", kit.Icon("Arrow"), 0f, 166f, 360f, 64f, kit, 19);
-            var customize = CreateSecondaryButton("Customize", menu, "Customize", null, 0f, 246f, 360f, kit.RoundFill, kit.RoundStroke, kit.SemiBold, kit.Field, kit.Line);
-            var settingsButton = CreateSecondaryButton("Settings", menu, "Settings", null, 0f, 310f, 360f, kit.RoundFill, kit.RoundStroke, kit.SemiBold, kit.Field, kit.Line);
-            var quit = CreateSecondaryButton("Quit", menu, "Quit", null, 0f, 374f, 360f, kit.RoundFill, kit.RoundStroke, kit.SemiBold, kit.Field, kit.Line);
-            foreach (var b in new[] { customize, settingsButton, quit })
-                ((RectTransform)b.transform).sizeDelta = new Vector2(360f, 52f);
-            var toast = CreateLabel("Toast", menu, kit.Medium, "", 15, Color.white, TextAnchor.MiddleLeft);
-            PlaceTopLeft(toast.rectTransform, 0f, 446f, 480f, 24f);
-
-            // ---------- Pastki chap: server holati va versiya ----------
-            var status = CreateRect("Status", root);
-            Place(status, Vector2.zero, new Vector2(0f, 0.5f), new Vector2(120f, 56f), new Vector2(400f, 20f));
-            var dot = CreateImage("Dot", status, kit.PillFill, new Vector2(8f, 8f), Vector2.zero, UiMuted);
-            Place(dot.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(8f, 8f));
-            var statusText = CreateLabel("Text", status, kit.SemiBold, "Connecting…", 13, UiMuted, TextAnchor.MiddleLeft);
-            Place(statusText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(16f, 0f), new Vector2(160f, 20f));
-            var version = CreateLabel("Version", status, kit.Medium, "v0.1.0", 13, kit.Faint, TextAnchor.MiddleLeft);
-            Place(version.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(92f, 0f), new Vector2(160f, 20f));
-
-            // Qahramon ostidagi ko'rsatma
-            float stageX = 0.5f + StageOffset;
-            var hint = CreateRect("Hint", stage.transform);
-            Place(hint, new Vector2(stageX, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 48f), new Vector2(300f, 20f));
-            var hintIcon = CreateImage("Icon", hint, kit.Icon("Rotate"), new Vector2(16f, 16f), Vector2.zero, kit.Faint);
-            var hintText = CreateLabel("Text", hint, kit.Medium, "Drag to rotate · Scroll to zoom", 13, kit.Faint, TextAnchor.MiddleLeft);
-            float hintWidth = 16f + 8f + hintText.preferredWidth;
-            hintIcon.rectTransform.anchoredPosition = new Vector2(-hintWidth / 2f + 8f, 0f);
-            Place(hintText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 0.5f), new Vector2(-hintWidth / 2f + 24f, 0f), new Vector2(hintText.preferredWidth + 4f, 20f));
-
-            var viewer = stage.gameObject.AddComponent<AvatarViewer>();
-            Set(viewer, "stageCamera", stageCamera);
-            Set(viewer, "turntable", turntable);
-            Set(viewer, "maleIdle", maleIdle);
-            Set(viewer, "femaleIdle", femaleIdle);
-            Set(viewer, "screenOffset", StageOffset);
-            Set(viewer, "facePaint", FacePaintMaterial());
-            SetArray(viewer, "viewButtons", new Object[0]);
-            SetArray(viewer, "viewFills", new Object[0]);
-            SetArray(viewer, "viewLabels", new Object[0]);
-
-            var settings = BuildSettingsPanel(root, kit);
-            var dialog = BuildConfirmDialog(root, kit);
-            AddUiSounds();
-            var fader = CreateFullscreen("Fader", root, Color.black);
-
-            var director = new GameObject("MainMenuDirector");
-            var screen = director.AddComponent<MainMenuScreen>();
-            SetAvatars(screen, new Dictionary<string, Sprite>(), LoadFaceMaps());
-            Set(screen, "viewer", viewer);
-            Set(screen, "nicknameText", nickname);
-            Set(screen, "avatarInfoText", avatarInfo);
-            Set(screen, "toastText", toast);
-            Set(screen, "statusDot", dot);
-            Set(screen, "statusText", statusText);
-            Set(screen, "versionText", version);
-            Set(screen, "menu", menu);
-            Set(screen, "menuGroup", menuGroup);
-            Set(screen, "playButton", play);
-            Set(screen, "customizeButton", customize);
-            Set(screen, "settingsButton", settingsButton);
-            Set(screen, "quitButton", quit);
-            Set(screen, "dialog", dialog);
-            Set(screen, "settings", settings);
-            Set(screen, "fader", fader);
-
-            Save(scene, MenuScene);
-        }
-
         /// <summary>Chap yuqoridagi CraDev belgisi va nomi.</summary>
         static void CreateBrand(Transform parent, UiKit kit)
         {
@@ -191,28 +89,28 @@ namespace CraDev.EditorTools
         /// <summary>Ekran o'rtasidagi oyna uchun asos: qorong'i fon (orqani bosib bo'lmaydi) va panel.</summary>
         static (Image dim, CanvasGroup group, Image panel) CreateModalBase(string name, Transform root, Vector2 size, UiKit kit)
         {
-            var dim = CreateFullscreen(name, root, new Color(0f, 0f, 0f, 0.72f));
+            var dim = CreateFullscreen(name, root, new Color(0.01f, 0.02f, 0.05f, 0.7f));
             dim.raycastTarget = true;
             var group = dim.gameObject.AddComponent<CanvasGroup>();
-            var panel = CreateSliced("Panel", dim.transform, kit.RoundFill, 16f, 24f, kit.Panel);
+            var panel = CreateSliced("Panel", dim.transform, kit.RoundFill, 18f, 24f, new Color(0.07f, 0.09f, 0.14f, 0.94f));
             Place(panel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, size);
-            var border = CreateSliced("Border", panel.transform, kit.RoundStroke, 16f, 24f, kit.Line);
+            var border = CreateSliced("Border", panel.transform, kit.RoundStroke, 18f, 24f, new Color(1f, 1f, 1f, 0.16f));
             Stretch(border.rectTransform);
             return (dim, group, panel);
         }
 
         static ConfirmDialog BuildConfirmDialog(Transform root, UiKit kit)
         {
-            var (dim, group, panel) = CreateModalBase("ConfirmDialog", root, new Vector2(520f, 252f), kit);
+            var (dim, group, panel) = CreateModalBase("ConfirmDialog", root, new Vector2(540f, 272f), kit);
             var title = CreateLabel("Title", panel.transform, kit.Display, "Quit game?", 22, Color.white, TextAnchor.MiddleLeft);
             PlaceTopLeft(title.rectTransform, 36f, 32f, 448f, 32f);
             var message = CreateLabel("Message", panel.transform, kit.Medium, "", 16, UiMuted, TextAnchor.UpperLeft);
             message.horizontalOverflow = HorizontalWrapMode.Wrap;
             message.lineSpacing = 1.1f;
-            PlaceTopLeft(message.rectTransform, 36f, 80f, 448f, 70f);
-            var cancel = CreateSecondaryButton("Cancel", panel.transform, "Cancel", null, 36f, 168f, 214f, kit.RoundFill, kit.RoundStroke, kit.SemiBold, kit.Field, kit.Line);
-            ((RectTransform)cancel.transform).sizeDelta = new Vector2(214f, 48f);
-            var (confirm, confirmLabel) = CreateAccentButton("Confirm", panel.transform, "Quit", null, 270f, 168f, 214f, 48f, kit, 16);
+            PlaceTopLeft(message.rectTransform, 36f, 80f, 468f, 90f);
+            var cancel = CreateSecondaryButton("Cancel", panel.transform, "Cancel", null, 36f, 188f, 224f, kit.RoundFill, kit.RoundStroke, kit.SemiBold, kit.Field, kit.Line);
+            ((RectTransform)cancel.transform).sizeDelta = new Vector2(224f, 48f);
+            var (confirm, confirmLabel) = CreateAccentButton("Confirm", panel.transform, "Quit", null, 280f, 188f, 224f, 48f, kit, 16);
 
             var dialog = dim.gameObject.AddComponent<ConfirmDialog>();
             Set(dialog, "group", group);
@@ -228,11 +126,11 @@ namespace CraDev.EditorTools
 
         static SettingsPanel BuildSettingsPanel(Transform root, UiKit kit)
         {
-            string[] names = { "Display mode", "Window size", "Graphics quality", "V-Sync", "Volume" };
+            string[] names = { "settings.display", "settings.size", "settings.quality", "settings.vsync", "settings.volume", "settings.language" };
             const float rowHeight = 60f, rowGap = 10f, top = 96f, width = 560f;
             float doneY = top + names.Length * (rowHeight + rowGap) + 14f;
             var (dim, group, panel) = CreateModalBase("Settings", root, new Vector2(width + 72f, doneY + 52f + 36f), kit);
-            PlaceTopLeft(CreateLabel("Title", panel.transform, kit.Display, "Settings", 24, Color.white, TextAnchor.MiddleLeft).rectTransform, 36f, 34f, 400f, 36f);
+            PlaceTopLeft(Localized(CreateLabel("Title", panel.transform, kit.Display, "", 24, Color.white, TextAnchor.MiddleLeft), "settings.title").rectTransform, 36f, 34f, 400f, 36f);
 
             var previous = new Button[names.Length];
             var next = new Button[names.Length];
@@ -244,7 +142,7 @@ namespace CraDev.EditorTools
                 var row = CreateSliced("Row" + i, panel.transform, kit.RoundFill, 12f, 24f, kit.Field);
                 PlaceTopLeft(row.rectTransform, 36f, top + i * (rowHeight + rowGap), width, rowHeight);
                 rows[i] = row.gameObject.AddComponent<CanvasGroup>();
-                var label = CreateLabel("Label", row.transform, kit.SemiBold, names[i], 16, Color.white, TextAnchor.MiddleLeft);
+                var label = Localized(CreateLabel("Label", row.transform, kit.SemiBold, "", 16, Color.white, TextAnchor.MiddleLeft), names[i]);
                 Place(label.rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(20f, 0f), new Vector2(240f, 24f));
 
                 next[i] = CreateArrowButton("Next", row.transform, arrow, 0f, width - 12f - 40f, kit);
@@ -252,7 +150,8 @@ namespace CraDev.EditorTools
                 Place(values[i].rectTransform, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(width - 12f - 40f - 180f, 0f), new Vector2(180f, 24f));
                 previous[i] = CreateArrowButton("Previous", row.transform, arrow, 180f, width - 12f - 40f - 180f - 40f, kit);
             }
-            var (done, _) = CreateAccentButton("Done", panel.transform, "Done", null, 36f, doneY, width, 52f, kit, 16);
+            var (done, doneLabel) = CreateAccentButton("Done", panel.transform, "", null, 36f, doneY, width, 52f, kit, 16);
+            Localized(doneLabel, "settings.done");
 
             var settings = dim.gameObject.AddComponent<SettingsPanel>();
             Set(settings, "group", group);

@@ -52,7 +52,7 @@ namespace CraDev.Face
 
             if (!Detect(image, out Vector2 center, out float size, out float angle))
             {
-                error = "No face found. Use a clear, front-facing photo with good light.";
+                error = Loc.T("face.not_found");
                 return false;
             }
 
@@ -64,7 +64,7 @@ namespace CraDev.Face
                 {
                     if (points != null)
                         break;
-                    error = "The face is not clear enough. Look straight at the camera.";
+                    error = Loc.T("face.not_clear");
                     return false;
                 }
                 points = found;

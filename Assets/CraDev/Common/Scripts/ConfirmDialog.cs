@@ -18,6 +18,7 @@ namespace CraDev
 
         Action onConfirm;
         Action onCancel;
+        bool dismissable = true;
 
         protected override void Awake()
         {
@@ -26,9 +27,13 @@ namespace CraDev
             cancelButton.onClick.AddListener(OnBack);
         }
 
-        /// <summary>cancel = null bo'lsa, bekor qilish tugmasi yashiriladi (faqat bitta tanlov).</summary>
-        public void Show(string title, string message, string confirm, Action confirmed, string cancel = "Cancel", Action cancelled = null)
+        /// <summary>
+        /// cancel = null bo'lsa, bekor qilish tugmasi yashiriladi (faqat bitta tanlov).
+        /// dismissable = false: Esc bilan yopilmaydi (majburiy tanlov).
+        /// </summary>
+        public void Show(string title, string message, string confirm, Action confirmed, string cancel = null, Action cancelled = null, bool dismissable = true)
         {
+            this.dismissable = dismissable;
             titleText.text = title;
             messageText.text = message;
             confirmLabel.text = confirm;
@@ -42,7 +47,7 @@ namespace CraDev
 
         protected override void OnBack()
         {
-            if (!cancelButton.gameObject.activeSelf)
+            if (!dismissable)
                 return; // majburiy tanlov: Esc bilan yopilmaydi
             Close();
             onCancel?.Invoke();

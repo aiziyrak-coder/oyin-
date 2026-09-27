@@ -185,7 +185,7 @@ namespace CraDev.Face
                     filter = "Photos (*.jpg, *.jpeg, *.png)\0*.jpg;*.jpeg;*.png\0\0",
                     file = buffer,
                     maxFile = maxPath,
-                    title = "Choose a photo of your face",
+                    title = Loc.T("face.dialog_title"),
                     initialDir = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures),
                     // OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR
                     flags = 0x00080000 | 0x00001000 | 0x00000800 | 0x00000008,

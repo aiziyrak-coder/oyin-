@@ -49,6 +49,8 @@ namespace CraDev
             open.Remove(this);
         }
 
+        protected virtual void OnEnable() { }
+
         protected virtual void OnDisable() => open.Remove(this);
 
         protected virtual void Update()

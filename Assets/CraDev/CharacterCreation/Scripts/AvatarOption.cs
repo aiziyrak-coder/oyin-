@@ -21,6 +21,9 @@ namespace CraDev.CharacterCreation
         [Tooltip("faceUv nuqtalari orasidagi uchburchaklar (uchtadan indeks).")]
         public int[] faceTriangles;
 
+        /// <summary>"Atletik · 183 sm" (joriy tilda).</summary>
+        public string Info => Loc.F("avatar.info", Loc.T("avatar." + title.ToLowerInvariant()), heightCm);
+
         public bool SupportsFace => faceUv != null && faceUv.Length > 0 && faceTriangles != null && faceTriangles.Length > 0;
     }
 }

@@ -37,8 +37,6 @@ namespace CraDev.Loading
         [SerializeField] float fadeInDuration = 0.4f;
         [SerializeField] float fadeOutDuration = 0.5f;
         [SerializeField] int percentSignSize = 48;
-        [SerializeField] string loadingLabel = "L O A D I N G";
-        [SerializeField] string readyLabel = "R E A D Y";
 
         AsyncOperation operation;
         float time;
@@ -69,7 +67,7 @@ namespace CraDev.Loading
             }
 
             if (statusText != null)
-                statusText.text = loadingLabel;
+                statusText.text = Loc.Spaced(Loc.T("loading.loading"));
             Apply(0f);
         }
 
@@ -95,7 +93,7 @@ namespace CraDev.Loading
                 {
                     waitingWithoutScene = true;
                     if (statusText != null)
-                        statusText.text = readyLabel;
+                        statusText.text = Loc.Spaced(Loc.T("loading.ready"));
                 }
             }
 
