@@ -2,17 +2,16 @@ using System.Collections;
 using CraDev.CharacterCreation;
 using CraDev.Face;
 using CraDev.Online;
-using CraDev.World;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace CraDev.MainMenu
 {
     /// <summary>
-    /// Virtual dunyoga kirish joyi (profili bor o'yinchi uchun). Orqada 3D shahar, markazda o'yinchining qahramoni
-    /// (o'z yuzi bilan) yonib turuvchi platformada. Chapda menyu: Kirish, Personajni sozlash, Sozlamalar, Yordam,
-    /// Chiqish; yuqorida til, bildirishnomalar, profil; pastda shahar zonalari kartalari - bosilganda kamera
-    /// o'sha binoga buriladi (zonalarning ichi keyin quriladi).
+    /// Virtual dunyoga kirish joyi (profili bor o'yinchi uchun), foydalanuvchi konsept rasmi bo'yicha: orqada shahar
+    /// manzarasi (rasm), markazda o'yinchining 3D qahramoni (o'z yuzi bilan) rasmdagi yonib turuvchi platformada.
+    /// Chapda menyu: Kirish, Personajni sozlash, Sozlamalar, Yordam, Chiqish; yuqorida til, bildirishnomalar, profil;
+    /// pastda zona kartalari - bosilganda rasmdagi o'sha bino ustida belgi chiqadi (zonalarning ichi keyin quriladi).
     ///
     /// Ochilganda profil serverda tekshiriladi: server o'yinchini tanimasa, yangi qahramon yaratish taklif qilinadi.
     /// </summary>
@@ -22,18 +21,19 @@ namespace CraDev.MainMenu
         [SerializeField] string serverUrl = GameApi.DefaultServerUrl;
         [SerializeField] float retryInterval = 10f;
 
-        [Header("Qahramon va kamera")]
+        [Header("Qahramon")]
         [SerializeField] AvatarOption[] avatars;
         [SerializeField] AvatarViewer viewer;
-        [SerializeField] MenuCamera menuCamera;
-        [SerializeField] Transform characterAnchor;
+        [SerializeField] Camera stageCamera;
+        [Tooltip("Qahramon boshi ustidagi nom yorlig'i (pastki markazi boshdan shuncha piksel yuqorida).")]
+        [SerializeField] RectTransform nameplate;
+        [SerializeField] float nameplateGap = 30f;
 
         [Header("Matnlar")]
         [SerializeField] Text nicknameText;
         [SerializeField] Text profileNameText;
         [SerializeField] RawImage profileThumb;
         [SerializeField] Image profileIcon;
-        [SerializeField] RectTransform nameplate;
         [SerializeField] Text nameplateName;
         [SerializeField] Text nameplateStatus;
         [SerializeField] Image nameplateDot;
@@ -57,9 +57,10 @@ namespace CraDev.MainMenu
 
         [Header("Zonalar")]
         [SerializeField] string[] zoneIds;
-        [SerializeField] Vector3[] zoneTargets;
         [SerializeField] Button[] zoneCards;
         [SerializeField] Image[] zoneBorders;
+        [Tooltip("Rasmdagi har bir zona binosi ustidagi belgi (kartalar tartibida).")]
+        [SerializeField] CanvasGroup[] zoneMarkers;
         [SerializeField] Button nextZoneButton;
 
         [Header("Oynalar")]
@@ -106,7 +107,8 @@ namespace CraDev.MainMenu
             nextZoneButton.onClick.AddListener(() => SelectZone((selectedZone + 1) % zoneCards.Length));
 
             string nickname = PlayerProfile.Nickname;
-            nicknameText.text = nickname;
+            nicknameText.supportRichText = true;
+            nicknameText.text = Highlight(nickname);
             profileNameText.text = nickname;
             nameplateName.text = nickname;
             versionText.text = "v" + Application.version;
@@ -148,7 +150,15 @@ namespace CraDev.MainMenu
             if (toastUntil >= 0f)
                 toastGroup.alpha = Mathf.Clamp01((toastUntil - time) / 0.35f) * Mathf.Clamp01((time - (toastUntil - 3.2f)) / 0.2f);
 
-            FollowCharacter();
+            // Tanlangan zona belgisi silliq paydo bo'ladi va yengil "nafas oladi"
+            for (int i = 0; i < zoneMarkers.Length; i++)
+            {
+                var marker = zoneMarkers[i];
+                float target = i == selectedZone ? 1f : 0f;
+                marker.alpha = Mathf.MoveTowards(marker.alpha, target, dt / 0.2f);
+                float pulse = 1f + 0.06f * Mathf.Sin(time * 3f);
+                marker.transform.localScale = Vector3.one * Mathf.Lerp(0.85f, pulse, marker.alpha);
+            }
 
             if (!ModalWindow.AnyOpen && leavingAt < 0f && Anim.BackPressed())
             {
@@ -159,17 +169,36 @@ namespace CraDev.MainMenu
             }
         }
 
-        /// <summary>Qahramon yonidagi nom yorlig'i: ekrandagi joyi qahramonga ergashadi.</summary>
-        void FollowCharacter()
+        void LateUpdate() => PlaceNameplate();
+
+        /// <summary>Nom yorlig'i qahramon boshi ustida turadi (bo'yi har xil avatarlarda ham, ekran nisbati o'zgarsa ham).</summary>
+        void PlaceNameplate()
         {
-            if (characterAnchor == null || nameplate == null)
+            if (nameplate == null || stageCamera == null)
                 return;
-            var cam = menuCamera != null ? menuCamera.GetComponent<Camera>() : Camera.main;
-            var screen = cam.WorldToScreenPoint(characterAnchor.position + new Vector3(0.62f, 0.72f, 0f));
-            bool visible = screen.z > 0f && selectedZone < 0;
-            nameplate.gameObject.SetActive(visible);
-            if (visible)
-                nameplate.position = screen;
+            var parent = (RectTransform)nameplate.parent;
+            Vector2 screen = stageCamera.WorldToScreenPoint(viewer.TopOfHead);
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screen, null, out var local))
+                nameplate.localPosition = local + new Vector2(0f, nameplateGap);
+        }
+
+        /// <summary>Yorliq kengligi ism va holat matniga moslanadi.</summary>
+        void FitNameplate()
+        {
+            if (nameplate == null)
+                return;
+            float text = Mathf.Max(nameplateName.preferredWidth, nameplateStatus.preferredWidth);
+            float left = nameplateName.rectTransform.anchoredPosition.x;
+            nameplate.sizeDelta = new Vector2(Mathf.Ceil(left + text + 16f), nameplate.sizeDelta.y);
+        }
+
+        /// <summary>Konsept rasmdagidek: ismning o'rtadagi harfi ko'k ("Lyn<b>x</b>os").</summary>
+        static string Highlight(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name.Length < 3)
+                return name;
+            int i = name.Length / 2;
+            return name.Substring(0, i) + "<color=#5C7CFF>" + name[i] + "</color>" + name.Substring(i + 1);
         }
 
         void ShowAvatar(string avatarId, bool reload = true)
@@ -211,13 +240,10 @@ namespace CraDev.MainMenu
         {
             selectedZone = index;
             for (int i = 0; i < zoneBorders.Length; i++)
-                zoneBorders[i].color = i == index ? BorderActive : BorderIdle;
+                // Hech biri tanlanmaganda ham birinchi karta ajralib turadi (konsept rasmdagidek)
+                zoneBorders[i].color = i == index || (index < 0 && i == 0) ? BorderActive : BorderIdle;
             if (index < 0)
-            {
-                menuCamera.Home();
                 return;
-            }
-            menuCamera.Focus(zoneTargets[index]);
             Toast(Loc.F("menu.zone_soon", Loc.T("zone." + zoneIds[index])));
         }
 
@@ -243,7 +269,7 @@ namespace CraDev.MainMenu
                         () => Leave(() =>
                         {
                             PlayerProfile.Clear();
-                            SceneLoader.Load("CharacterCreation");
+                            SceneLoader.Switch("CharacterCreation");
                         }), dismissable: false);
                     yield break;
                 }
@@ -273,6 +299,7 @@ namespace CraDev.MainMenu
             statusDot.color = color;
             nameplateStatus.text = text;
             nameplateDot.color = color;
+            FitNameplate();
         }
 
         // ------------------------------------------------------------------ Amallar
@@ -280,7 +307,7 @@ namespace CraDev.MainMenu
         void Customize() => Leave(() =>
         {
             CharacterCreationScreen.EditRequested = true;
-            SceneLoader.Load("CharacterCreation");
+            SceneLoader.Switch("CharacterCreation");
         });
 
         void Toast(string text)

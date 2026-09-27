@@ -10,9 +10,11 @@ hamjamiyat) bosqichma-bosqich virtualga ko'chirish. Bosh menyu - shu dunyoga kir
 - O'yin matnlari **ikki tilda**: o'zbekcha (standart) va inglizcha. Hamma matn `Common/Scripts/Loc.cs` jadvalida,
   builder yozuvlarga `Localized(text, kalit)` bilan `LocalizedText` ulaydi; skriptlar `Loc.T(kalit)` ishlatadi va
   `Loc.Changed` bo'lganda o'z matnlarini yangilaydi. Yangi matn qo'shilsa - ikkala tilni ham yozing.
-- Dizayn (foydalanuvchi bergan konsept rasm bo'yicha): quyoshli futuristik shahar ustida yarim shaffof "shisha"
-  panellar, ko'k gradientli asosiy tugma, ikonkali menyu, yonib turuvchi platforma va halqalar, qo'lyozma yozuvlar
-  (Great Vibes). Shriftlar: Unbounded (sarlavha), Manrope (matn). Qisqa silliq harakatlar. Kosmos/galaktika uslubi kerak emas.
+- Dizayn (foydalanuvchi bergan konsept rasm bo'yicha, **aynan shunday**): quyoshli futuristik shahar ustida yarim
+  shaffof "shisha" panellar, ko'k gradientli asosiy tugma, ikonkali menyu, yonib turuvchi platforma. Shriftlar:
+  Unbounded (sarlavha), Manrope (matn). Qisqa silliq harakatlar. Kosmos/galaktika uslubi kerak emas.
+  **Qo'lyozma/qiyshiq shior yozuvlari kerak emas** (foydalanuvchi qarori: "Same You New World", "Haqiqiy hayot endi
+  virtualda", qiyshiq iqtibos olib tashlangan - "originallikni buzadi").
 - Avatar yaratish ekrani hozircha to'q studiyada (eski uslub); keyin yangi uslubga moslash mumkin.
 - O'yin haqiqiy o'yindek alohida to'liq ekranli oynada ochiladi. Ortiqcha UI (debug yozuvlar, tugmalar) qo'shmang.
 
@@ -69,16 +71,29 @@ server bilan ishga tushirib, o'yinchi kabi o'tish va OCR bilan tekshirish (`tool
 ## O'yin oqimi
 
 `Intro` (CraDev, 4.2 s) → `CDCGroup` (3.5 s) → `Loading` → yangi o'yinchi uchun `CharacterCreation`,
-qaytgan o'yinchi uchun `MainMenu`: 3D shahar (virtual dunyoga kirish joyi), menyu: Kirish (hali "tez orada"),
+qaytgan o'yinchi uchun `MainMenu` (virtual dunyoga kirish joyi): menyu: Kirish (hali "tez orada"),
 Personajni sozlash (`CharacterCreation` tahrirlash rejimida), Sozlamalar, Yordam, Chiqish; pastda zona kartalari
-(bosilsa kamera binoga buriladi). Bosh menyu profilni serverda tekshiradi (`GET /api/players/me`). Profil PlayerPrefs'da
-(`PlayerProfile.cs`); uni o'chirish: menyu **CraDev > Test: saqlangan profilni o'chirish**.
+(bosilsa rasmdagi o'sha bino ustida belgi chiqadi). Bosh menyu profilni serverda tekshiradi (`GET /api/players/me`).
+Profil PlayerPrefs'da (`PlayerProfile.cs`); uni o'chirish: menyu **CraDev > Test: saqlangan profilni o'chirish**.
+
+**Loading ekrani faqat og'ir yuklashda** (o'yin ochilishi, keyin dunyoga kirish): `SceneLoader.Load`. Menyu ↔ personaj
+sozlash kabi kichik o'tishlar ekran qorong'ilashib to'g'ridan-to'g'ri: `SceneLoader.Switch` (foydalanuvchi talabi).
+
+Bosh menyu = **foydalanuvchining konsept rasmi** (`CraDevSceneBuilder.Lobby.cs`): fon - rasmning o'zi (yozuvlari va
+qahramoni LaMa bilan o'chirilgan, Real-ESRGAN bilan 2560x1440 ga kattalashtirilgan: `MainMenu/Background/`, kartalar
+rasmi `MainMenu/Zones/`); uning ustida rasmdagi platformada o'yinchining 3D qahramoni (kamera `SolveLobbyCamera` bilan
+rasmdagi qahramon va platformaga sonli moslanadi, `LobbyCamera` ekran nisbatiga FOV'ni to'g'rilaydi). Hamma
+interfeys elementining joyi, o'lchami, rangi `LobbyLayout.cs` da (rasm o'lchovlari, 1280x720 → UI x1.5). Nom yorlig'i
+qahramon boshi ustida (`MainMenuScreen.PlaceNameplate`).
+
+Skrinshot (fokusni olmaydi, foydalanuvchi ishiga xalaqit bermaydi):
+`CraDev.exe -cradevShot <png> [-cradevScene MainMenu] [-cradevDelay 3] [-cradevPress <tugma nomi>] [-cradevQuit]`
+(`Common/Scripts/DevCapture.cs`; sahna almashishlari `Player.log` ga yoziladi).
 
 | Papka | Mazmuni |
 |---|---|
 | `Assets/CraDev/Common/` | `SplashSequence` (splash asosi), `SceneLoader`, `Anim` (easing, input, Esc), `GameSettings` (ekran, grafika, V-Sync, ovoz; o'yin ochilishi bilan qo'llanadi), `ModalWindow`/`ConfirmDialog`/`SettingsPanel` (oynalar), `UiSounds` (tugma ovozlari) |
-| `Assets/CraDev/MainMenu/` | `MainMenuScreen`: bosh menyu (til, bildirishnoma, profil, zona kartalari, qahramon yonidagi nom) |
-| `Assets/CraDev/World/` | virtual shahar: `Flyer` (uchar transport), `Walker` (piyodalar), `Rotator` (charxpalak), `MenuCamera`, `WorldLighting`; manbalar va litsenziyalar `CREDITS.md` da. Shahar `CraDevSceneBuilder.City.cs` da koddan quriladi, bosh menyu interfeysi `CraDevSceneBuilder.Lobby.cs` da |
+| `Assets/CraDev/MainMenu/` | `MainMenuScreen`: bosh menyu (til, bildirishnoma, profil, zona kartalari, bosh ustidagi nom yorlig'i), `LobbyCamera`, `ShadowCatcher` shader (qahramon soyasi fon rasmiga), `Background/` va `Zones/` rasmlari |
 | `Assets/CraDev/Intro/`, `CDCGroup/`, `Loading/` | splash va yuklash ekranlari |
 | `Assets/CraDev/CharacterCreation/` | nickname + avatar tanlash ekrani: 3D studiyada qahramon turadi; `AvatarViewer` uni sichqoncha bilan aylantiradi, g'ildirakcha bilan yuziga yaqinlashtiradi |
 | `Assets/CraDev/Face/` | o'yinchi yuzi: `FaceTracker` (MediaPipe BlazeFace + Face Mesh, 478 nuqta, `com.unity.ai.inference`), `FacePainter` (yuzni bosh teksturasiga chizadi), `FacePhoto` (fayl oynasi, EXIF, kamera kadri), `FaceStore` (yuz faqat shu kompyuterda saqlanadi) |
@@ -95,7 +110,9 @@ Personajni sozlash (`CharacterCreation` tahrirlash rejimida), Sozlamalar, Yordam
 ## Kod qoidalari
 
 - UI: uGUI, Canvas Screen Space - Overlay, CanvasScaler 1920x1080 (Expand).
-- 3D: Built-in render pipeline, Standard shader, Linear rang fazosi. Materiallar, pol, chiroqlar va taglik builder'da`n  (`BuildStage`) yaratiladi; Rocketbox materiallari `CraDevModelImporter` da material nomidan (`m024_body` →`n  `m024_body_color/normal`) quriladi. Import qoidasi o'zgarsa `GetVersion()` ni oshiring.
+- 3D: Built-in render pipeline, Standard shader, Linear rang fazosi. Materiallar, pol, chiroqlar va taglik builder'da
+  (`BuildStage`) yaratiladi; Rocketbox materiallari `CraDevModelImporter` da material nomidan (`m024_body` →
+  `m024_body_color/normal`) quriladi. Import qoidasi o'zgarsa `GetVersion()` ni oshiring.
 - Rasmlar 2x o'lchamda chizilgan (`UiBuild.ArtScale`). `CreateImage` `raycastTarget = false` qiladi:
   bosiladigan elementlarda uni `true` qiling.
 - Input: eski Input Manager ham, yangi Input System ham ishlashi shart (`#if ENABLE_INPUT_SYSTEM` /
@@ -140,9 +157,9 @@ Hamma tayyor PNG/WAV'lar `Assets/` ga commit qilingan; qayta yaratish faqat manb
    Tekshirish: `Unity.exe -batchmode -quit -projectPath . -executeMethod CraDev.EditorTools.CraDevFaceTest.Run -facePhoto <rasm>`.
    Keyingi: yuzni serverga yuklash (multiplayer'da boshqalar ko'rishi), 3D yuz shakli.
 5. O'yin turi: virtual dunyo (metaverse). Zonalar: Magazinlar, O'quv markazlari, Biznes markazi, Ko'ngilochar zona, Hamjamiyat
-   (`CraDevSceneBuilder.Zones`). Ularning ichi keyin quriladi. Dunyo ichida kamera **birinchi shaxs** bo'ladi.
-   Post-processing: `com.unity.postprocessing` (bloom, ACES, AO, DOF, vignette), profil `World/PostFX.asset`.
-   Harakatlanuvchi obyektlarni `BatchingStatic` qilmang (`MeshObject` hammasini statik belgilaydi): aks holda joyida qotib qoladi.
+   (`CraDevSceneBuilder.LobbyZonesList`). Ularning ichi keyin quriladi. Dunyo ichida kamera **birinchi shaxs** bo'ladi.
+   Avval qurilgan to'liq 3D shahar foydalanuvchiga yoqmadi ("umuman o'xshamabdi") va o'chirildi: bosh menyu konsept
+   rasmning o'zidan quriladi (yuqorida).
 6. Foydalanuvchi keyinga qoldirgan: pasport bilan ro'yxatdan o'tish (jins shundan olinadi, hozir
    `testGender`), yuzni serverga yuklash, Play'dan keyingi o'yin dunyosi, musiqa.
 7. `tools/unity.ps1 run` o'yin serverini ham o'zi yoqadi (ishlamayotgan bo'lsa). Har bir sahnada Esc ishlaydi:

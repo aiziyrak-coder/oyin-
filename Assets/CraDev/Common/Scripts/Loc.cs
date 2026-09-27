@@ -79,8 +79,6 @@ namespace CraDev
             ["menu.settings"] = ("Sozlamalar", "Settings"),
             ["menu.help"] = ("Yordam", "Help"),
             ["menu.quit"] = ("Chiqish", "Quit"),
-            ["menu.script"] = ("Haqiqiy hayot,\nendi virtualda", "Real life,\nnow virtual"),
-            ["menu.quote"] = ("“Yangi imkoniyatlar\nseni kutmoqda”", "“New opportunities\nare waiting for you”"),
             ["menu.enter_soon"] = ("Virtual dunyo qurilmoqda. Tez orada eshiklar ochiladi!", "The virtual world is being built. The doors open soon!"),
             ["menu.zone_soon"] = ("{0}: tez orada ochiladi", "{0}: opening soon"),
             ["menu.no_notifications"] = ("Yangi bildirishnomalar yo'q", "No new notifications"),

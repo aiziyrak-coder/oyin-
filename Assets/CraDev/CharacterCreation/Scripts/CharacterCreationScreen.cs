@@ -522,7 +522,7 @@ namespace CraDev.CharacterCreation
                     Anim.SetAlpha(fader, Ease.InOutSine(t / 0.5f));
                 yield return null;
             }
-            SceneLoader.Load(nextScene);
+            SceneLoader.Switch(nextScene);
         }
 
         // ------------------------------------------------------------ Yordamchilar

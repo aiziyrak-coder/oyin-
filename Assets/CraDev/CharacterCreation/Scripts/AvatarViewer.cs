@@ -71,6 +71,9 @@ namespace CraDev.CharacterCreation
             }
         }
 
+        /// <summary>Qahramon boshining tepasi (dunyo koordinatasi; animatsiyada tebranmaydi): nom yorlig'i shu yerga.</summary>
+        public Vector3 TopOfHead => turntable.position + Vector3.up * bodyHeight;
+
         public void SetAvatar(AvatarOption option)
         {
             if (current != null)
