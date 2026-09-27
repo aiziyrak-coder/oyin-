@@ -39,7 +39,7 @@ namespace CraDev.CharacterCreation
         [SerializeField] bool driveCamera = true;
 
         [Header("Ko'rinish tugmalari (Front, Side, Back)")]
-        [SerializeField] Button[] viewButtons;
+        [SerializeField] Button[] viewButtons = System.Array.Empty<Button>();
         [SerializeField] Image[] viewFills;
         [SerializeField] Text[] viewLabels;
 
@@ -122,6 +122,21 @@ namespace CraDev.CharacterCreation
 
         /// <summary>Hozirgi avatar (garderob rasmchalari uchun).</summary>
         public AvatarOption CurrentOption => currentOption;
+        public GameObject CurrentModel => current;
+        public Transform ModelRoot => turntable;
+        public bool LockRotation { get; set; }
+        public AvatarViewer Replica(Transform parent, AvatarOption option)
+        {
+            var copy = new GameObject("PartyAvatar").AddComponent<AvatarViewer>();
+            copy.transform.SetParent(parent, false);
+            copy.turntable = new GameObject("PartyModel").transform;
+            copy.turntable.SetParent(copy.transform, false);
+            copy.facePaint = facePaint; copy.outfitPaint = outfitPaint; copy.glossVariant = glossVariant;
+            copy.maleIdle = maleIdle; copy.femaleIdle = femaleIdle;
+            copy.driveCamera = false; copy.LockRotation = true;
+            copy.SetAvatar(option);
+            return copy;
+        }
 
         /// <summary>Hozirgi kiyim (nusxasi).</summary>
         public Outfit Outfit => outfit.Clone();
@@ -303,6 +318,7 @@ namespace CraDev.CharacterCreation
 
         void Update()
         {
+            if (LockRotation) return;
             float dt = Time.unscaledDeltaTime;
             if (!dragging)
             {

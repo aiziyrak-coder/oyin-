@@ -73,6 +73,9 @@ namespace CraDev.Online
 
         public IEnumerator Events(Action<ApiResult<EventList>> done) => SendList("/api/events", null, done);
 
+        public IEnumerator Party(string token, string action, PartyRequest body, Action<ApiResult<PartyState>> done) =>
+            Send("POST", "/api/party/" + action, token, JsonUtility.ToJson(body), done);
+
         /// <summary>
         /// Server ro'yxatni JSON massiv qilib qaytaradi, JsonUtility esa faqat obyektni o'qiydi: javob {"items":[...]}
         /// ga o'raladi.
@@ -129,6 +132,11 @@ namespace CraDev.Online
             return result;
         }
     }
+
+    [Serializable] public class PartyRequest { public string nickname, invitationId; public int pingMs = -1; }
+    [Serializable] public class PartyMember { public string nickname, avatarId, gender, outfit; public int seat, pingMs; public bool online; }
+    [Serializable] public class PartyInvitation { public string id, nickname; }
+    [Serializable] public class PartyState { public string roomId, error; public bool host; public PartyMember[] members; public PartyInvitation[] invitations; }
 
     [Serializable]
     public class AvailabilityResponse

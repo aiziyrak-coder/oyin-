@@ -1,5 +1,19 @@
 # NewWorld Lobby
 
+## Kattaroq personaj va aralash joylashuv
+
+- Qo'shimcha 0.68 scale bekor qilindi: avatar eski kattaroq scale=1 holatda, UI o'lchami o'zgarmadi.
+- Mezbon markazda; 4 mehmon roomId bo'yicha aralashtirilgan xavfsiz yo'laklarda, turlicha chuqurlikda. Har bir yangilanishda joyi o'zgarmaydi. O'tirish/kreslo qaytarilmadi.
+- Sinovga 200 xona uchun oraliq, deterministik joylashuv, turli chuqurlik hamda ekrandagi masofa va masshtab tekshiruvi qo'shildi.
+
+## Oxirgi qaror — tik turgan party
+
+- Foydalanuvchi o'tirishni bekor qildi: divan, ikki kreslo va SeatedIdle kodi olib tashlandi. Eski o'tirish rejalari tarixiy, qayta qo'shmang.
+- 5 kishi uchun tik turish idle, nickname, online va 3 ustunchali ping qoldirildi. Remote avatarlar ham erkak/ayol idle controller oladi.
+- Toast yuqori markazga ko'chirilgan. Party server 57/57 umumiy testdan o'tgan; alohida haqiqiy masofaviy qurilmalar bilan sinov hali o'tkazilmagan.
+- Saqlash nuqtasi fd441e3. Bazaga profil/test do'stlari qo'shilmagan; zaxira Logs/pre-party-backup.db.
+- Yakuniy tekshiruv: standing-final-build.log — Succeeded; standing-final-player.log — 9 avatar harakati, 5 personaj, kreslosiz sahna, ekran ichidagi nickname va yuqori toast: 0 xato. Logs/Party/five-standing.png test tasviri (TEST_* haqiqiy do'stlar emas). Oddiy o'yinda faqat haqiqiy party a'zolari ko'rinadi.
+
 ## Chap panel: pastgacha va yig‘iladigan
 
 - Saqlash nuqtasi 90eeed4. 65% UI masshtabi saqlandi; chap panel yuqoridan 124 UI birlik, pastdan 24 birlik masofada stretch. Ro‘yxat bo‘yi moslashadi, profil/sozlama footer pastga bog‘langan.

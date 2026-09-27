@@ -159,6 +159,8 @@ namespace CraDev.MainMenu
                     ActionButton(row.transform,w-50,removeIcon,"Remove",()=>ConfirmRemove(player),!busy.Contains(player.nickname));
                 else if(player.friendship!="friends")
                     ActionButton(row.transform,w-50,addIcon,"Add",()=>Change(player,false),!busy.Contains(player.nickname));
+                else if(player.online)
+                    ActionButton(row.transform,w-50,addIcon,"InviteParty",()=>lobby.GetComponent<LobbyParty>()?.Invite(player.nickname),true);
             }
             rows.sizeDelta=new Vector2(w,Mathf.Max(rows.parent.GetComponent<RectTransform>().rect.height,visible.Length*72));
         }

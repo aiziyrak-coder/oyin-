@@ -225,10 +225,15 @@ namespace CraDev.EditorTools
             Set(screen,"singleWindow",true);
             V2GameControls(pages.First(p=>p.Id=="home").transform,screen);
             var toast = V2Panel(root, "Toast", 560, 945, 800, 78, V2Glass);
+            toast.rectTransform.anchorMin=toast.rectTransform.anchorMax=toast.rectTransform.pivot=new Vector2(.5f,1);
+            toast.rectTransform.anchoredPosition=new Vector2(0,-36);
+            toast.raycastTarget=false;
             Set(screen, "toastGroup", toast.gameObject.AddComponent<CanvasGroup>());
             Set(screen, "toastText", V2Text(toast.transform, "", 24, 0, 752, 78, 26, false));
             Set(screen, "dialog", FlatDialog(root));
             Set(screen, "fader", CreateFullscreen("Fader", root, Color.black));
+            var party=root.gameObject.AddComponent<LobbyParty>();
+            Set(party,"lobby",screen);Set(party,"font",v2.Medium);
             AddUiSounds();
             Save(scene, MenuScene);
         }

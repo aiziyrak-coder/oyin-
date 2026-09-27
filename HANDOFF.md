@@ -1,5 +1,13 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## PERSONAJ MASSHTABI VA ARALASH GURUH
+
+Qo'shimcha 0.68 avatar masshtabi olib tashlandi, ModelRoot scale=1; UI va kamera avvalgi ixcham holatda. 5 a'zo bir qatorda emas: mezbon markazda, mehmonlar xavfsiz X yo'laklarida tasodifiy tartib va old-orqa chuqurlikda. Formation(roomId) deterministik, heartbeatda sakramaydi; perspektiva X oralig'ini toraytirmaydi. Tekshiruv: Logs/formation-build.log va formation-player.log.
+
+## ENG YANGI QAROR — 2026-09-28: FAQAT TIK TURISH
+
+Foydalanuvchi divan/kreslo va o'tirishni BEKOR QILDI. Quyidagi eski seating talablari endi amal qilmaydi. LobbyParty 5 kishini tik turgan Rocketbox idle animatsiyasi bilan ko'rsatadi; o'rindiq yaratadigan kod va SeatedIdle olib tashlandi. Nickname, online, o'lchangan server RTT ping va yuqori-markaz toast saqlanadi. Party API xotirada ishlaydi (server qayta yoqilganda guruhlar tarqaladi); profillar o'zgarmaydi. Saqlash nuqtasi fd441e3, DB zaxirasi Logs/pre-party-backup.db. Server testlari 57/57. Standing build/visual tekshiruvi Logs/standing-build.log va Logs/Party/ ichida.
+
 ## SO‘NGGI: FULL-HEIGHT COLLAPSIBLE FRIENDS
 
 Left friends panel now stretches from top offset124 to bottom24 at preserved 65% scale. Footer bottom anchored, scroll viewport expands. LobbyFriendsDrawer slide toggle (‹/›, 0.22sec, no raycasts when hidden), social actions reopen it. Backup90eeed4; logs friends-drawer-build/player, screenshots Logs/FriendsDrawer.

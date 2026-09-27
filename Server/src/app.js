@@ -1,5 +1,6 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { MAX_PENDING_REQUESTS } from './db.js';
+import { createParties } from './party.js';
 import { upcomingEvents } from './events.js';
 import { GENDERS, isValidAvatar, nicknameKey, validateNickname } from './nickname.js';
 
@@ -51,6 +52,8 @@ export const DEFAULT_RATE_LIMITS = { check: 60, create: 10, social: 120, search:
 export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => new Date() } = {}) {
   const limits = { ...DEFAULT_RATE_LIMITS, ...rateLimits };
   const limiter = createRateLimiter(windowMs);
+  const party = createParties(db);
+  limits.party = rateLimits.party ?? 120;
 
   // "METOD /yo'l" -> { limit: rateLimits kaliti, bucket?: cheklovchi kaliti (standart: limit), auth?,
   //                    perPlayer?: cheklov IP emas, o'yinchi bo'yicha (auth kerak), run }
@@ -76,6 +79,11 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
     'GET /api/leaderboard': { limit: 'check', bucket: 'public', run: leaderboard },
     'GET /api/events': { limit: 'check', bucket: 'public', run: ctx => [200, upcomingEvents(ctx.now)] },
   }));
+
+  for (const kind of ['heartbeat', 'invite', 'accept', 'decline', 'leave']) {
+    routes.set('POST /api/party/' + kind, { limit: 'party', auth: true, perPlayer: true,
+      run: async ctx => party(kind, ctx.player, await readJson(ctx.req), ctx.now) });
+  }
 
   function checkAvailability({ url }) {
     const name = url.searchParams.get('name') ?? '';
