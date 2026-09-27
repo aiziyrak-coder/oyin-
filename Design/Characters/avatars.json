@@ -46,20 +46,6 @@
       "title": "Strong"
     },
     {
-      "id": "M4",
-      "gender": "male",
-      "name": "Novcha",
-      "age": "18–24",
-      "height": 190,
-      "build": "Baland bo'yli, ozg'in",
-      "subject": "A 21-year-old man, 190 cm tall, tall and lean build",
-      "hair": "black curly hair on top with short tapered sides",
-      "hairUz": "Tepasi jingalak qora, yonlari qisqa",
-      "outfit": "oversized black hoodie, wide-leg charcoal trousers, black-and-white high-top sneakers",
-      "outfitUz": "Keng qora xudi, keng to'q kulrang shim, baland krossovka",
-      "title": "Tall"
-    },
-    {
       "id": "M5",
       "gender": "male",
       "name": "Ishbilarmon",

@@ -99,25 +99,45 @@ namespace CraDev.EditorTools
                 EditorUtility.DisplayDialog("CraDev", "O'yinni yig'ib bo'lmadi. Tafsilotlar Console oynasida.", "OK");
         }
 
+        /// <summary>Tahrirlovchi ishlayotgan tizim uchun o'yin: Windows'da StandaloneWindows64 va hokazo.</summary>
+        internal static BuildTarget EditorPlatformTarget()
+        {
+            switch (Application.platform)
+            {
+                case RuntimePlatform.OSXEditor: return BuildTarget.StandaloneOSX;
+                case RuntimePlatform.LinuxEditor: return BuildTarget.StandaloneLinux64;
+                default: return BuildTarget.StandaloneWindows64;
+            }
+        }
+
+        /// <summary>Standart joy: Builds/&lt;target&gt;/CraDev(.exe|.app|.x86_64).</summary>
+        internal static string DefaultBuildPath(BuildTarget target)
+        {
+            string file;
+            switch (target)
+            {
+                case BuildTarget.StandaloneOSX: file = "CraDev.app"; break;
+                case BuildTarget.StandaloneLinux64: file = "CraDev.x86_64"; break;
+                default: file = "CraDev.exe"; break;
+            }
+            return Path.Combine("Builds", target.ToString(), file);
+        }
+
         /// <summary>O'yinni tahrirlovchi ishlayotgan tizim uchun Builds/ papkasiga yig'adi.</summary>
         internal static BuildReport BuildGame(bool run)
         {
+            var target = EditorPlatformTarget();
+            return BuildGame(target, DefaultBuildPath(target), run);
+        }
+
+        /// <summary>Build Settings'dagi yoqilgan sahnalardan o'yinni yig'adi.</summary>
+        internal static BuildReport BuildGame(BuildTarget target, string path, bool run)
+        {
             ConfigurePlayer();
-
-            // Tahrirlovchi qaysi tizimda ishlayotgan bo'lsa, o'sha tizim uchun o'yin yig'iladi
-            BuildTarget target;
-            string file;
-            switch (Application.platform)
-            {
-                case RuntimePlatform.OSXEditor: target = BuildTarget.StandaloneOSX; file = "CraDev.app"; break;
-                case RuntimePlatform.LinuxEditor: target = BuildTarget.StandaloneLinux64; file = "CraDev.x86_64"; break;
-                default: target = BuildTarget.StandaloneWindows64; file = "CraDev.exe"; break;
-            }
-
             var options = new BuildPlayerOptions
             {
                 scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray(),
-                locationPathName = Path.Combine("Builds", target.ToString(), file),
+                locationPathName = path,
                 target = target,
                 options = run ? BuildOptions.AutoRunPlayer : BuildOptions.None,
             };
@@ -139,6 +159,8 @@ namespace CraDev.EditorTools
             PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;
             PlayerSettings.defaultIsNativeResolution = true;
             PlayerSettings.SplashScreen.show = false;
+            // Multiplayer o'yin: boshqa oynaga o'tilganda ham to'xtamaydi (server bilan aloqa uzilmaydi)
+            PlayerSettings.runInBackground = true;
             // Unity 6 da bepul litsenziyada ham ishlaydi; eski versiyalarning Personal litsenziyasida Unity logotipi baribir chiqadi
 #if UNITY_2022_1_OR_NEWER
             // Hozircha server http://localhost da ishlaydi. Haqiqiy serverga HTTPS bilan o'tganda buni o'chirish kerak.
@@ -300,12 +322,12 @@ namespace CraDev.EditorTools
             public AvatarInfo(string id, string gender, string title, int height) { Id = id; Gender = gender; Title = title; Height = height; }
         }
 
-        // Design/Characters/avatars.json dagi avatarlar. Rasmi bo'lmaganlari (masalan, hali yaratilmagan) o'tkazib yuboriladi.
+        // Design/Characters/avatars.json dagi avatarlar (erkaklar 4 ta: M4 kerak emas, kodlar o'zgarmasligi uchun M5 qoldi).
+        // Rasmi bo'lmaganlari o'tkazib yuboriladi. Ro'yxat Server/src/nickname.js dagi AVATARS bilan bir xil bo'lishi kerak.
         static readonly AvatarInfo[] AvatarList =
         {
             new AvatarInfo("M1", "male", "Athletic", 183), new AvatarInfo("M2", "male", "Slim", 177),
-            new AvatarInfo("M3", "male", "Strong", 180), new AvatarInfo("M4", "male", "Tall", 190),
-            new AvatarInfo("M5", "male", "Classic", 176),
+            new AvatarInfo("M3", "male", "Strong", 180), new AvatarInfo("M5", "male", "Classic", 176),
             new AvatarInfo("F1", "female", "Sporty", 170), new AvatarInfo("F2", "female", "Petite", 164),
             new AvatarInfo("F3", "female", "Curvy", 168), new AvatarInfo("F4", "female", "Tall", 178),
             new AvatarInfo("F5", "female", "Elegant", 167),
@@ -412,7 +434,7 @@ namespace CraDev.EditorTools
             var helpText = CreateLabel("HelpText", form, medium, "", 14, UiMuted, TextAnchor.MiddleLeft);
             Place(helpText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -416f), new Vector2(470f, 22f));
 
-            // Avatar kartalari: shu jinsdagi 5 ta avatar
+            // Avatar kartalari: shu jinsdagi avatarlar (5 tagacha, ortiqcha kartalar yashiriladi)
             PlaceTopLeft(CreateLabel("AvatarLabel", form, bold, "AVATAR", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 449f, 480f, 18f);
             var cards = new AvatarCard[5];
             for (int i = 0; i < cards.Length; i++)

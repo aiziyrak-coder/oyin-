@@ -27,6 +27,9 @@ describe('nickname qoidalari', () => {
     assert.equal(isValidAvatar('F5', 'female'), true);
     assert.equal(isValidAvatar('F1', 'male'), false);
     assert.equal(isValidAvatar('M6', 'male'), false);
+    assert.equal(isValidAvatar('M4', 'male'), false); // M4 olib tashlangan
+    assert.equal(isValidAvatar('M5', 'male'), true);
+    assert.equal(isValidAvatar('M1', 'toString'), false);
     assert.equal(isValidAvatar(undefined, 'male'), false);
   });
 });

@@ -6,7 +6,7 @@ data = json.load(open(os.path.join(here, "avatars.json"), encoding="utf-8"))
 lines = [
     "# CraDev avatarlari: rasm promptlari",
     "",
-    "10 ta asosiy avatar (5 erkak, 5 ayol), yuzsiz: o'yinchining yuzi keyin skaner qilinib qo'yiladi.",
+    "9 ta asosiy avatar (4 erkak, 5 ayol), yuzsiz: o'yinchining yuzi keyin skaner qilinib qo'yiladi.",
     "Har bir prompt 3 tomondan ko'rinishli (old, yon, orqa) reference rasm beradi: 3D modelchi shu rasm bo'yicha ishlaydi.",
     "Teri rangi o'rtacha neytral: o'yinda u o'yinchi yuzining rangiga avtomatik moslanadi.",
     "",

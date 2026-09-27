@@ -4,7 +4,7 @@ Ixtiyoriy references/<ID>_quarter.png (2 ko'rinish: 45° old va 135° orqa) bo'l
 qahramon aylanganda o'tishlar silliqroq bo'ladi.
 
 Ishlatish: python3 process_references.py            (hamma rasmlar)
-           python3 process_references.py M4          (faqat bittasi)
+           python3 process_references.py M5          (faqat bittasi)
 Talab: pip install "rembg[cpu]"  (model birinchi ishga tushishda yuklanadi)
 """
 import os, sys

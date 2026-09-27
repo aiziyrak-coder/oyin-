@@ -38,8 +38,16 @@ export function validateNickname(raw) {
 
 export const GENDERS = ['male', 'female'];
 
-/** Avatar kodi: erkaklar M1–M5, ayollar F1–F5. Avatar o'yinchi jinsiga mos bo'lishi shart. */
+/**
+ * O'yindagi avatarlar (CraDevSceneBuilder.AvatarList bilan bir xil).
+ * Erkaklar 4 ta: M4 olib tashlangan, qolganlarining kodi o'zgarmagan.
+ */
+export const AVATARS = {
+  male: ['M1', 'M2', 'M3', 'M5'],
+  female: ['F1', 'F2', 'F3', 'F4', 'F5'],
+};
+
+/** Avatar mavjud va o'yinchi jinsiga mos bo'lishi shart. */
 export function isValidAvatar(avatarId, gender) {
-  if (typeof avatarId !== 'string' || !/^[MF][1-5]$/.test(avatarId)) return false;
-  return (gender === 'male' && avatarId[0] === 'M') || (gender === 'female' && avatarId[0] === 'F');
+  return Object.hasOwn(AVATARS, gender) && AVATARS[gender].includes(avatarId);
 }

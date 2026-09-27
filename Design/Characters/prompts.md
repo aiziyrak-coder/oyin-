@@ -1,6 +1,6 @@
 # CraDev avatarlari: rasm promptlari
 
-10 ta asosiy avatar (5 erkak, 5 ayol), yuzsiz: o'yinchining yuzi keyin skaner qilinib qo'yiladi.
+9 ta asosiy avatar (4 erkak, 5 ayol), yuzsiz: o'yinchining yuzi keyin skaner qilinib qo'yiladi.
 Har bir prompt 3 tomondan ko'rinishli (old, yon, orqa) reference rasm beradi: 3D modelchi shu rasm bo'yicha ishlaydi.
 Teri rangi o'rtacha neytral: o'yinda u o'yinchi yuzining rangiga avtomatik moslanadi.
 
@@ -42,16 +42,6 @@ Photorealistic full-body character reference sheet for a realistic 3D game chara
 
 ```
 Photorealistic full-body character reference sheet for a realistic 3D game character. Three views of the same person side by side on one image: front view, left side view and back view. A 35-year-old man, 180 cm tall, stocky strong build with a broad chest, thick arms and a slightly rounded belly. The face is intentionally left blank: the front of the head is a smooth, featureless skin-toned surface with no eyes, no eyebrows, no nose and no mouth, like a mannequin face; ears, neck and hair are visible and realistic. Medium neutral skin tone. Hair: very short dark buzz cut. Outfit: olive-green bomber jacket over a plain grey t-shirt, black straight jeans, tan leather work boots. Relaxed A-pose, arms about 30 degrees away from the body, palms facing the thighs, feet shoulder-width apart, the whole body from the top of the head to the shoes visible in every view. Plain light-grey studio background, soft even front lighting, minimal shadows, sharp focus, realistic skin on the hands and neck, realistic fabric folds and stitching, true-to-life proportions, 8K, no text, no logos, no watermark.
-```
-
-### M4 · Novcha
-
-- Yosh: 18–24, bo'y: 190 sm, qomat: Baland bo'yli, ozg'in
-- Soch: Tepasi jingalak qora, yonlari qisqa
-- Kiyim: Keng qora xudi, keng to'q kulrang shim, baland krossovka
-
-```
-Photorealistic full-body character reference sheet for a realistic 3D game character. Three views of the same person side by side on one image: front view, left side view and back view. A 21-year-old man, 190 cm tall, tall and lean build. The face is intentionally left blank: the front of the head is a smooth, featureless skin-toned surface with no eyes, no eyebrows, no nose and no mouth, like a mannequin face; ears, neck and hair are visible and realistic. Medium neutral skin tone. Hair: black curly hair on top with short tapered sides. Outfit: oversized black hoodie, wide-leg charcoal trousers, black-and-white high-top sneakers. Relaxed A-pose, arms about 30 degrees away from the body, palms facing the thighs, feet shoulder-width apart, the whole body from the top of the head to the shoes visible in every view. Plain light-grey studio background, soft even front lighting, minimal shadows, sharp focus, realistic skin on the hands and neck, realistic fabric folds and stitching, true-to-life proportions, 8K, no text, no logos, no watermark.
 ```
 
 ### M5 · Ishbilarmon
