@@ -42,8 +42,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/unity.ps1 <buyruq>
 - Birinchi ochilish (`Library` yaratish) 5-15 daqiqa oladi: buyruqni uzun timeout bilan yoki fonda ishga tushiring.
 - To'liq loglar: `Logs/batch-<buyruq>.log`. Chiqish kodi: 0 OK, 1 Unity xatosi, 2 Unity topilmadi yoki loyiha ochiq.
 - Unity boshqa joyda o'rnatilgan bo'lsa: `UNITY_EXE` muhit o'zgaruvchisi yoki `-Unity <yo'l>`.
-- `ProjectSettings/ProjectVersion.txt` dagi versiya (`6000.0.23f1`) taxminiy. Kompyuterda boshqa Unity 6 versiyasi
-  bo'lsa, skript o'shani tanlaydi va Unity loyihani unga moslaydi: o'zgargan `ProjectVersion.txt`, Unity yaratgan
+- Foydalanuvchi kompyuterida **Unity 6000.3.24f1 LTS** (Unity Hub orqali) o'rnatilgan; `ProjectVersion.txt` ham shu.
+  Kompyuterda boshqa Unity 6 versiyasi bo'lsa, skript o'shani tanlaydi va Unity loyihani unga moslaydi: o'zgargan `ProjectVersion.txt`, Unity yaratgan
   `Packages/manifest.json`, `packages-lock.json` va `ProjectSettings/*.asset` fayllarini commit qiling.
   uGUI (`com.unity.ugui`) paketi kerak: u standart paketlar ichida bo'ladi.
 
