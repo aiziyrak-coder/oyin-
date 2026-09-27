@@ -2,11 +2,13 @@
 
 Unity'da kompyuter uchun (Steam) yaratilayotgan 3D o'yin. O'yinni bosqichma-bosqich quryapmiz.
 
-**Hozirgi bosqich — 2: o'yin boshidagi sahnalar.** O'yin ochilganda ketma-ket:
+**Hozirgi bosqich — 3: avatar yaratish.** O'yin ochilganda ketma-ket:
 
 1. **CraDev intro**: kompaniya logosi va "A NEW ERA OF GAMING" yozuvi.
 2. **CDCGroup**: ikkinchi brendning kumush logosi.
 3. **Loading**: keyingi sahnani fonda yuklaydigan ekran (katta foiz raqami va ingichka chiziq).
+4. **Avatar yaratish** (faqat birinchi kirishda): chapda nickname va jins, o'ngda aylanuvchi 3D avatar.
+   Nickname server'da noyob bo'lishi shart (multiplayer o'yin).
 
 Uslub zamonaviy va minimal: bir xil qora fon, tekis ranglar, aniq shriftlar (Unbounded, Manrope),
 qisqa va silliq harakatlar. Uchqun, nur yoki "kosmik" effektlar yo'q.
@@ -26,16 +28,48 @@ qisqa va silliq harakatlar. Uchqun, nur yoki "kosmik" effektlar yo'q.
 3. Agar Hub "Editor version not installed" desa, ro'yxatdan kompyuteringizdagi
    Unity 6 versiyasini tanlang va versiya almashtirishni tasdiqlang.
 4. Birinchi ochilish bir necha daqiqa davom etadi, chunki Unity `Library` papkasini yaratadi.
-5. Yuqori menyudan **CraDev → Sahnalarni yaratish (Intro, CDCGroup, Loading)** ni bosing.
-   Uchala sahna `Assets/CraDev/Scenes/` ga saqlanadi va Build Settings'da shu tartibda
-   birinchi o'rinlarga qo'yiladi. Keyin Intro sahnasi ochiladi.
-6. Tezkor tekshirish uchun **Play ▶** tugmasini bosing (Game oynasida 16:9 yoki 1920x1080 ni tanlang).
-7. Haqiqiy o'yindek alohida oynada ko'rish uchun **CraDev → O'yinni alohida oynada ishga tushirish
+5. Yuqori menyudan **CraDev → Sahnalarni yaratish** ni bosing. Barcha sahnalar
+   `Assets/CraDev/Scenes/` ga saqlanadi va Build Settings'da shu tartibda birinchi o'rinlarga
+   qo'yiladi. Keyin Intro sahnasi ochiladi.
+6. Avatar yaratish ekrani ishlashi uchun serverni ishga tushiring (quyidagi "Server" bo'limi).
+7. Tezkor tekshirish uchun **Play ▶** tugmasini bosing (Game oynasida 16:9 yoki 1920x1080 ni tanlang).
+8. Haqiqiy o'yindek alohida oynada ko'rish uchun **CraDev → O'yinni alohida oynada ishga tushirish
    (Build and Run)** ni bosing. O'yin `Builds/` papkasiga yig'iladi va to'liq ekranda ochiladi:
    ekranda faqat CraDev intro, CDCGroup va Loading chiqadi. Yopish: Alt+F4.
 
-Loyihani avval 1-bosqichda ochgan bo'lsangiz ham, yangilangandan keyin shu menyuni bir marta
-bosing: u sahnalarni yangi skriptlar bilan qayta yaratadi.
+Loyihani avval ochgan bo'lsangiz ham, yangilangandan keyin shu menyuni bir marta bosing:
+u sahnalarni yangi skriptlar bilan qayta yaratadi.
+
+## Server (nickname tekshiruvi)
+
+`Server/` papkasida kichik o'yin serveri bor: o'yinchi profillarini saqlaydi va har bir nickname
+faqat bitta o'yinchida bo'lishini ta'minlaydi. Node.js'da yozilgan, tashqi paketlari yo'q,
+ma'lumotlar SQLite bazasida (`Server/data/cradev.db`).
+
+1. [Node.js](https://nodejs.org) 22.13 yoki yangiroq versiyasini o'rnating (LTS versiyasi tavsiya etiladi).
+2. Terminalda: `cd Server` va `npm start`. Server `http://localhost:8080` da ishga tushadi.
+3. Testlar: `npm test`.
+
+Qoidalar (server va o'yinda bir xil):
+
+- 3–16 belgi: lotin harflari, raqamlar va `_`; harf bilan boshlanadi.
+- Katta-kichik harf farq qilmaydi: `Ali` band bo'lsa, `ali` ham band.
+- `admin`, `moderator`, `cradev` kabi nomlar band qilingan.
+- Ikki o'yinchi bir vaqtda bitta nomni olmoqchi bo'lsa, faqat bittasi oladi (bazadagi UNIQUE cheklov).
+
+API:
+
+| So'rov | Javob |
+|---|---|
+| `GET /api/nicknames/availability?name=Ali` | `{ "available": true }` yoki `{ "available": false, "reason": "taken" }` |
+| `POST /api/players` `{ "nickname": "Ali", "gender": "male" }` | `201` profil va maxfiy `token`; `409` nickname band |
+
+O'yin server manzilini `CharacterCreation` sahnasidagi **CharacterCreationDirector → Server Url**
+maydonidan oladi (hozir `http://localhost:8080`). Onlayn o'ynash uchun server keyinchalik VPS'ga
+joylanadi va HTTPS orqali ishlaydi.
+
+Profil yaratilgach, u shu kompyuterda saqlanadi va keyingi safar avatar yaratish ekrani chiqmaydi.
+Uni qayta ko'rish uchun: **CraDev → Test: saqlangan profilni o'chirish**.
 
 ## O'yin oynasi sozlamalari
 
@@ -74,6 +108,14 @@ Menyudagi buyruqlar Player sozlamalarini avtomatik o'rnatadi:
   to'xtaydi. Console'da shu haqda xabar chiqadi. Menyu keyingi bosqichda qo'shiladi.
 - Keyinchalik istalgan sahnani Loading orqali ochish mumkin: `SceneLoader.Load("Level01");`
 
+### 4. Avatar yaratish
+
+- **Chap tomon:** nickname maydoni, uning ostida holat (tekshirilmoqda, bo'sh, band, noto'g'ri), jins kartalari
+  (Male / Female) va **Create character** tugmasi. Tugma nickname server'da bo'sh bo'lgandagina yonadi. Enter ham ishlaydi.
+- **O'ng tomon:** 3D avatar sekin aylanadi, sichqoncha bilan buriladi. Jins almashganda qomati silliq o'zgaradi.
+  Tepasida yozilayotgan nickname ko'rinadi (o'yindagi nom yorlig'i kabi).
+- Avatar hozircha oddiy shakllardan yig'ilgan maneken. Haqiqiy 3D modellar keyingi bosqichlarda qo'shiladi.
+
 ### Umumiy
 
 - Splash ekranlarini istalgan tugma, sichqoncha yoki geympad tugmasi o'tkazib yuboradi. Loading o'tkazib yuborilmaydi.
@@ -92,10 +134,15 @@ Assets/CraDev/
   Intro/            CraDev intro: Art, Audio, Scripts/IntroSequence.cs
   CDCGroup/         CDCGroup splash: Art, Audio, Scripts/CdcGroupSplash.cs
   Loading/          Loading ekrani: Scripts/LoadingScreen.cs
+  CharacterCreation/  avatar yaratish: CharacterCreationScreen.cs, AvatarPreview.cs, GenderCard.cs
+  Online/           server bilan ishlash: GameApi.cs, NicknameRules.cs, PlayerProfile.cs
+  UI/Art/           ikonkalar va 9-slice spritelar
   Editor/           CraDevSceneBuilder.cs (sahna quruvchi menyu), UiBuild.cs, CraDevArtImporter.cs
   Scenes/           Intro, CDCGroup, Loading (menyu orqali yaratiladi)
+Server/             o'yin serveri (Node.js): nickname'lar va o'yinchi profillari
 Design/
   CraDev/, CDCGroup/             logo manbalari va qayta yaratish skriptlari (build.sh)
+  UI/                            ikonkalar (icons.html) va UI spritelar
   fonts/                         shriftlar va litsenziyalari
   tools/                         umumiy yordamchi skriptlar
 ```

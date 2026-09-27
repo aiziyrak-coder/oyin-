@@ -55,6 +55,58 @@ namespace CraDev.EditorTools
 
         public static Vector2 NativeSize(Sprite sprite) => sprite.rect.size / ArtScale;
 
+        /// <summary>9-slice sprite: chegarasi o'rnatilmagan bo'lsa o'rnatadi.</summary>
+        public static Sprite LoadSlicedSprite(string path)
+        {
+            var sprite = LoadSprite(path);
+            var border = CraDevArtImporter.SliceBorder(path);
+            if (AssetImporter.GetAtPath(path) is TextureImporter importer && importer.spriteBorder != border)
+            {
+                importer.spriteBorder = border;
+                importer.SaveAndReimport();
+                sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            }
+            return sprite;
+        }
+
+        /// <summary>
+        /// Yumaloq burchakli (9-slice) rasm. radius - ekrandagi burchak radiusi (birlik),
+        /// spriteRadiusPx - spritedagi radius (piksel).
+        /// </summary>
+        public static Image CreateSliced(string name, Transform parent, Sprite sprite, float radius, float spriteRadiusPx, Color color)
+        {
+            var image = CreateImage(name, parent, sprite, Vector2.zero, Vector2.zero, color);
+            image.type = Image.Type.Sliced;
+            image.pixelsPerUnitMultiplier = spriteRadiusPx / radius;
+            return image;
+        }
+
+        /// <summary>Ota elementning yuqori-chap burchagidan o'lchanadigan joylashuv (y pastga qarab).</summary>
+        public static RectTransform PlaceTopLeft(RectTransform rect, float x, float y, float width, float height)
+        {
+            rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = new Vector2(x, -y);
+            rect.sizeDelta = new Vector2(width, height);
+            return rect;
+        }
+
+        public static RectTransform Place(RectTransform rect, Vector2 anchor, Vector2 pivot, Vector2 position, Vector2 size)
+        {
+            rect.anchorMin = rect.anchorMax = anchor;
+            rect.pivot = pivot;
+            rect.anchoredPosition = position;
+            rect.sizeDelta = size;
+            return rect;
+        }
+
+        public static Text CreateLabel(string name, Transform parent, Font font, string text, int size, Color color, TextAnchor alignment)
+        {
+            var label = CreateText(name, parent, font, text, size, Vector2.zero, color);
+            label.alignment = alignment;
+            return label;
+        }
+
         public static RectTransform CreateRect(string name, Transform parent)
         {
             var go = new GameObject(name, typeof(RectTransform));

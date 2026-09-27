@@ -57,5 +57,18 @@ namespace CraDev
             return false;
 #endif
         }
+
+        /// <summary>Shu kadrda Enter bosildimi (forma yuborish uchun).</summary>
+        public static bool SubmitPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            return Keyboard.current != null &&
+                   (Keyboard.current.enterKey.wasPressedThisFrame || Keyboard.current.numpadEnterKey.wasPressedThisFrame);
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter);
+#else
+            return false;
+#endif
+        }
     }
 }

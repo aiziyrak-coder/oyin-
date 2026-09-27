@@ -17,7 +17,21 @@ namespace CraDev.EditorTools
         {
             if (!IsCraDevArt(assetPath) || !assetImporter.importSettingsMissing)
                 return;
-            Apply((TextureImporter)assetImporter);
+            var importer = (TextureImporter)assetImporter;
+            Apply(importer);
+            // 9-slice spritelar: burchaklari cho'zilmaydi
+            var border = SliceBorder(assetPath);
+            if (border != Vector4.zero)
+                importer.spriteBorder = border;
+        }
+
+        /// <summary>UI_Round12_* (24 px radius) va UI_Pill_* (32 px radius) spritelarining 9-slice chegarasi.</summary>
+        public static Vector4 SliceBorder(string path)
+        {
+            string file = System.IO.Path.GetFileName(path);
+            if (file.StartsWith("UI_Round12")) return new Vector4(24, 24, 24, 24);
+            if (file.StartsWith("UI_Pill")) return new Vector4(32, 32, 32, 32);
+            return Vector4.zero;
         }
 
         public static void Apply(TextureImporter importer)

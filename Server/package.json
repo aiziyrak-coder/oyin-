@@ -1,0 +1,14 @@
+{
+  "name": "cradev-server",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CraDev o'yin serveri: o'yinchi profillari va noyob nickname'lar",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.js",
+    "test": "node --disable-warning=ExperimentalWarning --test \"test/**/*.test.js\""
+  }
+}

@@ -1,3 +1,4 @@
+using CraDev.Online;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,15 +9,18 @@ namespace CraDev.Loading
     /// Loading ekrani: keyingi sahnani fonda yuklaydi va jarayonni katta foiz raqami va
     /// ingichka chiziq bilan ko'rsatadi.
     ///
-    /// Yuklanadigan sahna <see cref="SceneLoader.Load"/> orqali beriladi, berilmagan bo'lsa
-    /// "Default Scene" (MainMenu) olinadi. Yuklash juda tez tugasa ham ekran kamida
+    /// Yuklanadigan sahna <see cref="SceneLoader.Load"/> orqali beriladi. Berilmagan bo'lsa (o'yin endi
+    /// ochilganda): profili yo'q yangi o'yinchi avatar yaratish ekraniga, qaytgan o'yinchi bosh menyuga o'tadi. Yuklash juda tez tugasa ham ekran kamida
     /// "Minimum Duration" soniya ko'rinib turadi. 100% ga yetgach qorong'ilashib, sahna faollashadi.
     /// </summary>
     [DisallowMultipleComponent]
     public class LoadingScreen : MonoBehaviour
     {
         [Header("Yuklanadigan sahna")]
-        [SerializeField] string defaultScene = "MainMenu";
+        [Tooltip("Yangi o'yinchi (profili yo'q) uchun: avatar yaratish.")]
+        [SerializeField] string newPlayerScene = "CharacterCreation";
+        [Tooltip("Profili bor o'yinchi uchun.")]
+        [SerializeField] string returningPlayerScene = "MainMenu";
         [Tooltip("Yuklash juda tez bo'lsa ham ekran kamida shuncha soniya ko'rinib turadi.")]
         [SerializeField] float minimumDuration = 3f;
         [Tooltip("100% bo'lgach sahna almashguncha kutish.")]
@@ -52,7 +56,7 @@ namespace CraDev.Loading
         {
             string target = SceneLoader.TakePendingScene();
             if (string.IsNullOrEmpty(target))
-                target = defaultScene;
+                target = PlayerProfile.Exists ? returningPlayerScene : newPlayerScene;
 
             if (Application.CanStreamedLevelBeLoaded(target))
             {
