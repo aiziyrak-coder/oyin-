@@ -14,6 +14,7 @@ namespace CraDev.MainMenu
         [SerializeField] Font font;
         [SerializeField] Sprite rounded, addIcon, removeIcon, acceptIcon;
         [SerializeField] Text countLabel;
+        [SerializeField] Text footerName;
         [SerializeField] InputField search;
         [SerializeField] RectTransform rows;
         [SerializeField] Button[] tools;
@@ -24,7 +25,7 @@ namespace CraDev.MainMenu
         int revision;
         Coroutine debounce;
         readonly HashSet<string> busy=new HashSet<string>();
-        static readonly Color Fill=new Color32(28,37,49,248);
+        static readonly Color Fill=new Color32(41,40,40,248);
         static readonly Color Accent=LobbyPalette.Accent;
         public string Mode=>mode;
         public int VisibleCount=>visible.Length;
@@ -35,6 +36,7 @@ namespace CraDev.MainMenu
         public void Begin(MainMenuScreen screen)
         {
             lobby=screen;
+            if(footerName!=null)footerName.text=PlayerProfile.Nickname;
             string[] actions={"find","online","remove","requests","refresh"};
             for(int i=0;i<tools.Length;i++){string action=actions[i];tools[i].onClick.AddListener(()=>Choose(action));}
             search.onValueChanged.AddListener(_=>{
@@ -90,7 +92,7 @@ namespace CraDev.MainMenu
                 var accepted=connections.friends??Array.Empty<PlayerSummary>();
                 var incoming=connections.incoming??Array.Empty<PlayerSummary>();
                 var outgoing=connections.outgoing??Array.Empty<PlayerSummary>();
-                visible=(mode=="online"?accepted.Where(p=>p.online):mode=="requests"?incoming.Concat(outgoing):accepted.Concat(incoming).Concat(outgoing))
+                visible=(mode=="online"?accepted.Where(p=>p.online):mode=="offline"?accepted.Where(p=>!p.online):mode=="requests"?incoming.Concat(outgoing):accepted.Concat(incoming).Concat(outgoing))
                     .OrderByDescending(p=>p.online).ThenBy(p=>p.nickname).ToArray();
             }
             Loading=false;Draw();

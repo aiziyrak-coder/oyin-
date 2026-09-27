@@ -1,5 +1,13 @@
 # NewWorld Lobby
 
+## Eng yangi dizayn — reference gradient
+
+- Foydalanuvchining oxirgi rasmiga asoslangan iliq sunset penthouse, 492×896 chap panel, 650 px o'ng ustun, uchta ixcham karta, yashil–oltin kirish tugmasi. Bu qaror pastdagi ko'k/full-height dizayn qarorlarini almashtiradi.
+- Oldingi holat: e361a80. Yashirilgan sahifalar, tungi fonlar va haqiqiy profil saqlangan. Offline filtr qo'shilgan; soxta do'stlar yoki level yo'q.
+- Fon built-in image generation orqali yaratildi; prompt: Design/LobbyV2/ReferenceGradient/PROMPTS.md. Native 4K emas, manba o'lchami importerda saqlanadi.
+- Native vertex gradient: GrabPass, real-time blur yoki per-frame material yaratish yo'q. Birinchi test 57/57. Yakuniy build logi: Logs/lobby-gradient-build-final.log; runtime: Logs/lobby-gradient-player-final.log.
+
+
 ## Amaldagi yo'nalish: bitta o'yin lobbysi
 
 - [x] O'ng boshqaruvlar bitta 384 px ustunga tekislandi; profil/tadbir oralig'i 16 px, kirish pastki chetdan 64 px. Tiniq ko'k #2463EB yagona LobbyPalette orqali tarqatildi. Saqlash nuqtasi db71578.

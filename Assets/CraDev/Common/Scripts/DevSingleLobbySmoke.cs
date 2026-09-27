@@ -41,14 +41,14 @@ namespace CraDev
             var profileRect=(RectTransform)Find("LobbyProfile").transform;
             var entryRect=(RectTransform)Find("EnterNewWorld").transform;
             var eventRect=(RectTransform)lobby.Current.transform.Find("LobbyRightRail/LobbyEvent");
-            Check(profileRect.parent==entryRect.parent&&eventRect.parent==entryRect.parent&&profileRect.rect.width==entryRect.rect.width&&eventRect.rect.width==entryRect.rect.width&&profileRect.anchoredPosition.x==eventRect.anchoredPosition.x,"right cards share one aligned column");
-            Check(Mathf.Abs(entryRect.anchoredPosition.y-entryRect.rect.height-64)<1,"entry button keeps bottom safe margin");
-            Check(Find("EnterNewWorld").GetComponent<Image>().color==LobbyPalette.Accent,"entry uses shared vivid blue");
+            Check(profileRect.parent==entryRect.parent&&eventRect.parent==entryRect.parent&&entryRect.rect.width==650,"reference right column and compact profile");
+            Check(Mathf.Abs(entryRect.anchoredPosition.y+821)<1,"entry positioned below feature tiles");
+            Check(Find("EnterNewWorld").GetComponent<LobbyGradient>()!=null,"entry uses green gold vertex gradient");
             foreach(string id in new[]{"world","wardrobe","shops","education","business","friends","top","entertainment"})
             {lobby.Show(id);yield return null;Check(lobby.Current.Id=="home"&&!pages.First(p=>p.Id==id).gameObject.activeSelf,"archived route blocked "+id);}
             var friends=lobby.FriendsPanel;yield return Loaded(friends);
             var dock=(RectTransform)friends.transform;
-            Check(dock.anchorMin==new Vector2(0,0)&&dock.anchorMax==new Vector2(0,1)&&dock.anchoredPosition==Vector2.zero&&Mathf.Abs(dock.rect.height-((RectTransform)dock.parent).rect.height)<1,"friends dock flush left and full height");
+            Check(dock.anchoredPosition==new Vector2(36,-124)&&dock.rect.width==492&&dock.rect.height==896,"reference inset friends panel");
             yield return null;Canvas.ForceUpdateCanvases();
             var names=friends.GetComponentsInChildren<Text>().Where(t=>t.name=="FriendNickname").ToArray();
             Check(names.All(t=>!string.IsNullOrEmpty(t.text)&&t.cachedTextGenerator.vertexCount>0),"friend names render inside rows");

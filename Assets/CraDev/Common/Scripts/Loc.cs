@@ -58,6 +58,14 @@ namespace CraDev
         {
             // ---------------- Umumiy
             ["lobby.caption"] = ("Sizning yangi dunyongiz", "Your new world"),
+            ["lobby.online"] = ("Onlayn", "Online"),
+            ["lobby.offline"] = ("Oflayn", "Offline"),
+            ["lobby.promo"] = ("Yangi sarguzasht\nseni kutmoqda", "Your next adventure\nawaits"),
+            ["lobby.promo_hint"] = ("Do‘stlaring bilan birga\nkashf et", "Explore together\nwith your friends"),
+            ["lobby.with_friends"] = ("Do‘stlar bilan", "With friends"),
+            ["lobby.together"] = ("Birga yanada qiziqarli", "Better together"),
+            ["lobby.your_world"] = ("O‘z dunyong", "Your world"),
+            ["lobby.possibilities"] = ("Cheksiz imkoniyatlar", "Endless possibilities"),
             ["lobby.enter"] = ("NewWorldga kirish", "Enter NewWorld"),
             ["lobby.enter_hint"] = ("Sarguzasht shu yerdan boshlanadi", "Your adventure starts here"),
             ["lobby.profile_hint"] = ("Shaxsiy profil · Sozlamalar", "Your profile · Settings"),

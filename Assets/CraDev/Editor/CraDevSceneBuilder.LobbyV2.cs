@@ -219,8 +219,8 @@ namespace CraDev.EditorTools
             {
                 // Proportsiyalar manba rasmdagi bosh va oyoq nuqtalaridan hisoblangan.
                 float head = i == 0 ? 75.8f / 415 : 46.3f / 309;
-                float feet = i == 0 ? 332.6f / 415 : 296f / 309;
-                float x = i == 0 ? 357.2f / 766 : 197f / 519;
+                float feet = i == 0 ? 650f / 720 : 296f / 309;
+                float x = i == 0 ? 610f / 1280 : 197f / 519;
                 float fov = 30, height = 1.85f, viewHeight = height / (feet - head);
                 float distance = viewHeight / (2 * Mathf.Tan(fov * Mathf.Deg2Rad / 2));
                 var pose = poses.GetArrayElementAtIndex(i);
@@ -230,7 +230,7 @@ namespace CraDev.EditorTools
                 pose.FindPropertyRelative("fieldOfView").floatValue = fov;
                 pose.FindPropertyRelative("imageAspect").floatValue = 16f/9;
                 pose.FindPropertyRelative("sunRotation").vector3Value = new Vector3(28,-32,0);
-                pose.FindPropertyRelative("sunColor").colorValue = new Color(.87f,.91f,1f);
+                pose.FindPropertyRelative("sunColor").colorValue = new Color(1f,.92f,.81f);
                 pose.FindPropertyRelative("sunIntensity").floatValue = .85f;
                 pose.FindPropertyRelative("rimRotation").vector3Value = new Vector3(20,155,0);
                 pose.FindPropertyRelative("rimColor").colorValue = new Color(.65f,.8f,1);
@@ -305,7 +305,7 @@ namespace CraDev.EditorTools
             SetArray(page,"placeIcons",new Object[]{LineIcon("Music"),LineIcon("Film"),LineIcon("Gamepad"),LineIcon("Ball"),LineIcon("Home"),LineIcon("Music")});
             string bg = id == "world" ? "map" : id;
             Set(page, "background", V2Texture("clean-" + bg));
-            if (id == "home") { V2GameHome(rect,page); return page; }
+            if (id == "home") { Set(page,"background",V2Texture("sunset-home")); V2GameHome(rect,page); return page; }
             if(id=="settings")
             {
                 var dim=CreateFullscreen("SettingsBackdrop",rect,new Color(0,0,0,.62f));dim.raycastTarget=true;

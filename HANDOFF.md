@@ -1,5 +1,10 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## OXIRGI USTUVOR DIZAYN: YASHIL–OLTIN REFERENCE
+
+Foydalanuvchi oxirgi reference rasmga o'tishni so'radi: ko'k rangdan voz kechildi, iliq sunset penthouse, chap inset friends panel, o'ngda NewWorld sarlavha/promo/uch karta/gradient kirish. Quyidagi eski ko'k va full-height qarorlar tarixiy. Saqlash nuqtasi e361a80. Yangi fon Assets/CraDev/MainMenu/Pages/sunset-home.png; prompt Design/LobbyV2/ReferenceGradient/PROMPTS.md. All ten original pages remain, archived routes blocked. Gameplay remains unconnected. Tests: Logs/lobby-gradient-player-final.log; screenshots: Logs/LobbyGradientFinal/. Do not fabricate reference friends, online counts or level.
+
+
 ## ENG YANGI QAROR: BITTA O'YIN LOBBYSI
 
 Oxirgi bezak tuzatishi: o'ng bloklar bitta 384 px kenglikdagi ustunda, profil/tadbir orasida 16 px, pastki kirish tugmasi 64 px chet masofasida. Ko'k rang xira slate emas, LobbyPalette.Accent = #2463EB; tugmalar/tanlangan holatlar/switchlarda bir xil. Chapdagi full-height panel va fonlar o'zgarmagan. Saqlash nuqtasi db71578; tekshiruv Logs/lobby-blue-player.log: 57 checks, 0 failures. Skrinshotlar Logs/LobbyBlue/.
