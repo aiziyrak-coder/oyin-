@@ -54,6 +54,7 @@ namespace CraDev.CharacterCreation
         FaceData face;
         Outfit outfit = new Outfit();
         RenderTexture faceTexture, hairTexture, bodyTexture, glossTexture, hairCardTexture;
+        RenderTexture previewBody, previewGloss, previewHead, previewHair;
         readonly System.Collections.Generic.List<(Material material, Texture original)> heads =
             new System.Collections.Generic.List<(Material, Texture)>();
         Material bodyMaterial, hairCardMaterial;
@@ -135,16 +136,27 @@ namespace CraDev.CharacterCreation
         /// <summary>Kiyimni qo'yadi (garderob). Avatar almashsa kiyim yangisiga ham qo'yiladi.</summary>
         public void SetOutfit(Outfit value)
         {
-            outfit = value?.Clone() ?? new Outfit();
-            ApplyHeads();
+            var next = value?.Clone() ?? new Outfit();
+            if (outfit.SameAs(next)) return;
+            bool hairChanged = outfit.hair != next.hair || outfit.hairColor != next.hairColor;
+            outfit = next;
+            if (hairChanged) ApplyHeads();
             ApplyOutfit();
         }
 
         /// <summary>Katalog kartasi: aynan shu avatar va matodan shaffof 3D tasvir. Profilga yozmaydi.</summary>
-        public Texture2D CaptureGarment(WardrobeItem item)
+        public RenderTexture CaptureGarment(WardrobeItem item)
         {
             if (current == null) return null;
-            var previous = outfit;
+            // Preview uses small, separate GPU targets. Never repaint the player's face or
+            // read pixels back to the CPU while navigating the wardrobe.
+            var preview = new Outfit(); preview.Set(item.Slot,item.Id,item.Color);
+            var materials = new System.Collections.Generic.List<(Material material, Texture texture)>();
+            foreach(var head in heads) materials.Add((head.material,head.material.mainTexture));
+            if(bodyMaterial!=null) materials.Add((bodyMaterial,bodyMaterial.mainTexture));
+            if(hairCardMaterial!=null) materials.Add((hairCardMaterial,hairCardMaterial.mainTexture));
+            var oldGloss = bodyMaterial != null ? bodyMaterial.GetTexture("_MetallicGlossMap") : null;
+            bool oldGlossEnabled = bodyMaterial != null && bodyMaterial.IsKeywordEnabled("_METALLICGLOSSMAP");
             var rotation = turntable.rotation;
             var transforms = current.GetComponentsInChildren<Transform>();
             var layers = new int[transforms.Length];
@@ -158,28 +170,46 @@ namespace CraDev.CharacterCreation
             camera.orthographicSize = item.Slot == OutfitSlot.Top ? .49f : item.Slot == OutfitSlot.Bottom ? .52f : item.Slot == OutfitSlot.Shoes ? .23f : .27f;
             camera.transform.position = turntable.position + new Vector3(0,y,-3);
             camera.transform.rotation = Quaternion.identity;
-            var target = RenderTexture.GetTemporary(192,192,24,RenderTextureFormat.ARGB32);
+            var target = new RenderTexture(192,192,24,RenderTextureFormat.ARGB32) {name="Garment_"+currentOption.id+"_"+item.Id};
+            target.Create();
             var active = RenderTexture.active;
             try
             {
                 for(int i=0;i<transforms.Length;i++) {layers[i]=transforms[i].gameObject.layer;transforms[i].gameObject.layer=30;}
                 turntable.rotation = Quaternion.Euler(0,180,0);
-                outfit = new Outfit(); outfit.Set(item.Slot,item.Id,item.Color);
-                if(item.Slot==OutfitSlot.Hair) ApplyHeads(); else ApplyOutfit();
-                camera.targetTexture=target; camera.Render(); RenderTexture.active=target;
-                var texture=new Texture2D(192,192,TextureFormat.RGBA32,false);
-                texture.ReadPixels(new Rect(0,0,192,192),0,0); texture.Apply();
-                texture.name="Garment_"+currentOption.id+"_"+item.Id;
-                return texture;
+                if(item.Slot==OutfitSlot.Hair)
+                {
+                    foreach(var head in heads)
+                        head.material.mainTexture=OutfitPainter.PaintHair(head.original,currentOption,preview,outfitPaint,false,ref previewHead,512)?previewHead:head.original;
+                    if(hairCardMaterial!=null)
+                        hairCardMaterial.mainTexture=OutfitPainter.PaintHair(hairCardOriginal,currentOption,preview,outfitPaint,true,ref previewHair,512)?previewHair:hairCardOriginal;
+                }
+                else if(bodyMaterial!=null && OutfitPainter.PaintBody(bodyOriginal,currentOption,preview,outfitPaint,ref previewBody,ref previewGloss,512))
+                {
+                    bodyMaterial.mainTexture=previewBody;
+                    bodyMaterial.SetTexture("_MetallicGlossMap",previewGloss);
+                    bodyMaterial.EnableKeyword("_METALLICGLOSSMAP");
+                }
+                camera.targetTexture=target; camera.Render();
+                return target;
+            }
+            catch
+            {
+                target.Release(); Destroy(target); throw;
             }
             finally
             {
-                outfit=previous;
-                if(item.Slot==OutfitSlot.Hair) ApplyHeads(); else ApplyOutfit();
+                foreach(var state in materials) state.material.mainTexture=state.texture;
+                if(bodyMaterial!=null)
+                {
+                    bodyMaterial.SetTexture("_MetallicGlossMap",oldGloss);
+                    if(oldGlossEnabled) bodyMaterial.EnableKeyword("_METALLICGLOSSMAP");
+                    else bodyMaterial.DisableKeyword("_METALLICGLOSSMAP");
+                }
                 turntable.rotation=rotation;
                 for(int i=0;i<transforms.Length;i++) transforms[i].gameObject.layer=layers[i];
                 RenderTexture.active=active;camera.targetTexture=null;
-                RenderTexture.ReleaseTemporary(target);Destroy(cameraGo);
+                Destroy(cameraGo);
             }
         }
 
@@ -258,7 +288,7 @@ namespace CraDev.CharacterCreation
 
         void OnDestroy()
         {
-            foreach (var texture in new[] { faceTexture, hairTexture, bodyTexture, glossTexture, hairCardTexture })
+            foreach (var texture in new[] { faceTexture, hairTexture, bodyTexture, glossTexture, hairCardTexture, previewBody, previewGloss, previewHead, previewHair })
                 if (texture != null)
                     texture.Release();
         }

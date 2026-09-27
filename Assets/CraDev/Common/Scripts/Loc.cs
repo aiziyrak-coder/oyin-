@@ -108,7 +108,7 @@ namespace CraDev
             ["world.cat.events"] = ("Tadbirlar", "Events"),
             ["world.cat.services"] = ("Xizmatlar", "Services"),
             ["world.center"] = ("Shahar markazi", "City center"),
-            ["world.center.sub"] = ("Lynxos minorasi va maydon", "Lynxos tower and square"),
+            ["world.center.sub"] = ("NewWorld minorasi va maydon", "NewWorld tower and square"),
             ["world.online"] = ("Hozir onlayn: {0}", "Online now: {0}"),
             ["world.online_unknown"] = ("Onlayn soni aniqlanmoqda…", "Counting players online…"),
             ["world.no_results"] = ("Hech narsa topilmadi", "Nothing found"),

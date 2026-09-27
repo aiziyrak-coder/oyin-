@@ -10,7 +10,7 @@ using UnityEngine.UI;
 namespace CraDev.MainMenu
 {
     /// <summary>
-    /// Lobby (Lynxos virtual dunyosiga kirish joyi) - foydalanuvchi konsept rasmlari bo'yicha. Hamma sahifalar
+    /// Lobby (NewWorld virtual dunyosiga kirish joyi) - foydalanuvchi konsept rasmlari bo'yicha. Hamma sahifalar
     /// (Bosh sahifa, Dunyo xaritasi, Do'stlar, Top-lar, Sozlamalar, Garderob, zonalar) bitta sahnada: yuqoridagi
     /// navigatsiya ularni almashtiradi, fon rasmi silliq almashadi, 3D qahramon kerakli sahifalarda (Bosh sahifa,
     /// Garderob) o'sha rasmdagi joyida turadi.
@@ -139,6 +139,10 @@ namespace CraDev.MainMenu
                 return;
             if (page == current)
             {
+                // A fast click back to the visible page cancels a queued transition.
+                pending = null;
+                switchAt = -1f;
+                current.Group.blocksRaycasts = true;
                 SyncNav(page);
                 return;
             }

@@ -19,18 +19,17 @@ namespace CraDev.EditorTools
             if(material==null)AssetDatabase.CreateAsset(new Material(shader),path);
             else {material.shader=shader;EditorUtility.SetDirty(material);}
         }
-        static ConfirmDialog GlassDialog(Transform root)
+        static ConfirmDialog FlatDialog(Transform root)
         {
             var dim=CreateFullscreen("ConfirmDialog",root,new Color(0,0,0,.6f));dim.raycastTarget=true;
             var group=dim.gameObject.AddComponent<CanvasGroup>();
             var panel=V2Panel(dim.transform,"Sheet",0,0,680,350,new Color(.065f,.077f,.098f,.97f));
             Place(panel.rectTransform,new Vector2(.5f,.5f),new Vector2(.5f,.5f),Vector2.zero,new Vector2(680,350));
-            GlassSurface.Apply(panel,40);
-            var title=V2Text(panel.transform,"",40,32,600,55,34,false);title.font=v2.Bold;
+            var title=V2Text(panel.transform,"",40,32,600,55,30,false);title.font=v2.SemiBold;
             var message=V2Text(panel.transform,"",40,98,600,128,24,false);
             message.alignment=TextAnchor.UpperLeft;message.color=new Color(.77f,.8f,.85f);
-            var cancel=V2Button(panel.transform,"",null,32,260,296,62);
-            var confirm=V2Button(panel.transform,"",null,352,260,296,62,blue:true);
+            var cancel=V2Button(panel.transform,"",null,32,260,296,54);
+            var confirm=V2Button(panel.transform,"",null,352,260,296,54,blue:true);
             var dialog=dim.gameObject.AddComponent<ConfirmDialog>();
             Set(dialog,"group",group);Set(dialog,"panel",panel.rectTransform);
             Set(dialog,"titleText",title);Set(dialog,"messageText",message);

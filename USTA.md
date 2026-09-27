@@ -1,4 +1,18 @@
-# Lynxos Lobby V2
+# NewWorld Lobby
+
+## Silliq, ixcham NewWorld dizayni — 2026-09-28
+
+- [x] Foydalanuvchi talabi: Liquid Glass olib tashlandi; ma'qullangan tungi fonlar o'zgarmadi.
+- [x] Platforma NewWorld deb nomlandi; haqiqiy foydalanuvchi nomlari va saqlangan profil o'zgartirilmadi.
+- [x] Saqlash nuqtasi 2b9a3d8; katta Design manbalari Git'ga qo'shilmadi, push yo'q.
+- [x] Tekis panellar, 8 px radius, 52–56 px asosiy tugmalar, kichikroq Manrope yozuvlari; 10 sahifa, menyu, dialog va switchlar bir uslubda.
+- [x] Garderob previewlari GPUda alohida kichik teksturada navbat bilan chiziladi; CPU readback yo'q, asosiy avatar yuzini qayta bo'yamaydi.
+- [x] Statik sahifa UI keshi, o'zgarmagan outfitni qayta hisoblamaslik, tez navigatsiyada pending sahifani bekor qilish.
+- [x] UI 39/39; 9 avatarning 4 slotidan surat olindi, materiallar/outfit va profil saqlanishi tekshirildi.
+- [x] Dastlabki garderob uzilishi 82.99 ms -> 22.06 ms; qayta kirish 10.85 ms (shu qurilmada, 1920x1080). Runtime exception yo'q.
+- [ ] Kartalarning yakuniy kosmetik tuzatishidan so'ng NewWorld build va screenshot tekshiruvi.
+
+Quyidagi Liquid Glass va Lynxos platforma nomi haqidagi yozuvlar tarixiy; yangi talab ularning o'rnini bosadi.
 
 ## Tungi Liquid Glass — 2026-09-28
 

@@ -9,7 +9,7 @@ namespace CraDev.MainMenu
     public partial class LobbyContent
     {
         [SerializeField] Texture educationImage, friendsImage;
-        [SerializeField] Sprite[] businessIcons;
+        [SerializeField] Sprite[] businessIcons, placeIcons;
         void Portrait(Transform parent,string avatarId,float x,float y,float side)
         {
             var card=Lobby.FindAvatar(avatarId)?.card;
@@ -21,7 +21,7 @@ namespace CraDev.MainMenu
         void Photo(Texture texture,Rect crop,float x,float y,float w,float h)
         {
             var frame=Rect("PhotoFrame",surface,x,y,w,h).gameObject.AddComponent<Image>();
-            frame.sprite=rounded;frame.type=Image.Type.Sliced;frame.pixelsPerUnitMultiplier=1;
+            frame.sprite=rounded;frame.type=Image.Type.Sliced;frame.pixelsPerUnitMultiplier=3;
             frame.raycastTarget=false;frame.gameObject.AddComponent<Mask>().showMaskGraphic=false;
             var image=Rect("Photo",frame.transform,0,0,w,h).gameObject.AddComponent<RawImage>();
             image.texture=texture;image.uvRect=crop;image.raycastTarget=false;
@@ -37,12 +37,12 @@ namespace CraDev.MainMenu
             for(int n=0;n<results.Length;n++)
             {
                 int i=results[n];
-                var card=Button(names[i],n%4*(cell+16),n/4*155,cell,138,()=>Lobby.Toast(Loc.F("shops.store_soon",names[i])));
+                var card=Button(names[i],n%4*(cell+16),n/4*104,cell,88,()=>Lobby.Toast(Loc.F("shops.store_soon",names[i])));
                 card.GetComponent<Image>().color=Glass;
-                var label=card.GetComponentInChildren<Text>(); label.color=new Color32(231,236,244,255);label.font=font;label.fontSize=25;label.alignment=TextAnchor.MiddleCenter;
+                var label=card.GetComponentInChildren<Text>(); label.color=new Color32(231,236,244,255);label.font=font;label.fontSize=21;label.alignment=TextAnchor.MiddleCenter;
             }
             if(results.Length==0) Message("shops.no_results");
-            ContentHeight(Mathf.Max(300,Mathf.Ceil(results.Length/4f)*155));
+            ContentHeight(Mathf.Max(300,Mathf.Ceil(results.Length/4f)*104));
         }
         void Places(bool fun)
         {
@@ -54,6 +54,15 @@ namespace CraDev.MainMenu
             {
                 if(section!=0 && categories[i]!=section) continue;
                 string key=names[i];float cell=(width-45)/4;int column=n%4,row=n/4;n++;
+                if(fun)
+                {
+                    var card=Button(Loc.T(key),column*(cell+15),row*144,cell,128,()=>Lobby.Soon(Loc.T(key)));
+                    var glyph=Panel("PlaceIcon",20,18,32,32,Color.white,card.transform);
+                    glyph.sprite=placeIcons[i%placeIcons.Length];glyph.type=Image.Type.Simple;
+                    var caption=card.GetComponentInChildren<Text>().rectTransform;
+                    caption.anchoredPosition=new Vector2(20,-60);caption.sizeDelta=new Vector2(cell-40,54);
+                    continue;
+                }
                 var button=Button(Loc.T(key),column*(cell+15),row*270+195,cell,64,()=>Lobby.Soon(Loc.T(key)));
                 if(educationImage!=null && !fun)
                     Photo(educationImage,new Rect((i%2)*.5f+.003f,1-((i%4)/2+1)*.5f+.003f,.494f,.494f),column*(cell+15),row*270,cell,190);
@@ -63,7 +72,7 @@ namespace CraDev.MainMenu
                     Text(Loc.T(key),20,25,cell-40,130,30,image.transform);
                 }
             }
-            ContentHeight(Mathf.Ceil(n/4f)*270);
+            ContentHeight(Mathf.Ceil(n/4f)*(fun?144:270));
         }
         void Business()
         {
@@ -77,11 +86,11 @@ namespace CraDev.MainMenu
             for(int i=0;i<actions.Length;i++)
             {
                 string key="business.action."+actions[i];
-                var button=Button(Loc.T(key),i*(width/actions.Length),y,width/actions.Length-22,185,()=>Lobby.Toast(Loc.F("business.action_soon",Loc.T(key))));
-                var icon=Panel("ActionIcon",22,20,52,52,Color.white,button.transform);
+                var button=Button(Loc.T(key),i*(width/actions.Length),y,width/actions.Length-22,132,()=>Lobby.Toast(Loc.F("business.action_soon",Loc.T(key))));
+                var icon=Panel("ActionIcon",20,18,32,32,Color.white,button.transform);
                 icon.sprite=businessIcons[i%businessIcons.Length];icon.type=Image.Type.Simple;
                 var caption=button.GetComponentInChildren<Text>().rectTransform;
-                caption.anchoredPosition=new Vector2(20,-90);caption.sizeDelta=new Vector2(width/actions.Length-62,80);
+                caption.anchoredPosition=new Vector2(20,-60);caption.sizeDelta=new Vector2(width/actions.Length-62,60);
             }
         }
         void Friends()
@@ -93,9 +102,9 @@ namespace CraDev.MainMenu
             if(friendsImage!=null)
             {
                 Photo(friendsImage,new Rect(0,0,1,1),630,45,width-640,605);
-                Panel("HeroOverlay",650,65,width-680,145,new Color(.05f,.065f,.085f,.78f));
-                Text(Loc.T("friends.hero"),680,80,width-730,115,42).font=bold;
-                Button(Loc.T("friends.find"),840,440,510,85,()=>{search.Select();search.ActivateInputField();},true);
+                Panel("HeroOverlay",650,65,width-680,108,new Color(.05f,.065f,.085f,.92f));
+                Text(Loc.T("friends.hero"),676,82,width-730,72,34).font=bold;
+                Button(Loc.T("friends.find"),840,475,320,56,()=>{search.Select();search.ActivateInputField();},true);
             }
             Text(Loc.T("common.connecting"),20,80,550,80).name="Loading";
             if(search!=null && !string.IsNullOrWhiteSpace(search.text))
@@ -131,6 +140,7 @@ namespace CraDev.MainMenu
         {
             if(players==null || players.Length==0)
             {
+                if(!friends && surface.Cast<Transform>().Any(t=>t.name.StartsWith("Player_")))return y;
                 Text(Loc.T(friends?"friends.no_friends":"friends.no_results"),20,y,545,75,23).color=Muted;return y+85;
             }
             foreach(var player in players)

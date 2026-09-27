@@ -14,8 +14,8 @@ namespace CraDev.EditorTools
         const string V2Art = "Assets/CraDev/MainMenu/Pages/";
         static UiKit v2;
         static readonly Dictionary<string,Texture2D> v2Textures=new Dictionary<string,Texture2D>();
-        static readonly Color V2Blue = new Color32(77, 103, 128, 245);
-        static readonly Color V2Glass = new Color32(28, 33, 42, 226);
+        static readonly Color V2Blue = new Color32(55, 102, 132, 255);
+        static readonly Color V2Glass = new Color32(24, 31, 41, 242);
 
         // Faqat lobby qayta quriladi: tekshirilgan avatar niqoblarini qayta pishirmaydi.
         public static void RebuildLobby()
@@ -67,15 +67,14 @@ namespace CraDev.EditorTools
 
         static Image V2Panel(Transform parent, string name, float x, float y, float w, float h, Color color)
         {
-            var image = CreateSliced(name, parent, v2.RoundFill, 14, 24, color);
+            var image = CreateSliced(name, parent, v2.RoundFill, 8, 24, color);
             PlaceTopLeft(image.rectTransform, x, y, w, h);
-            GlassSurface.Apply(image, Mathf.Min(30,h*.5f));
             return image;
         }
 
         static Text V2Text(Transform parent, string text, float x, float y, float w, float h, int size = 26, bool localized = true)
         {
-            var label = CreateLabel("Text_" + text, parent, v2.Medium, localized ? "" : text, size, Color.white, TextAnchor.MiddleLeft);
+            var label = CreateLabel("Text_" + text, parent, v2.Medium, localized ? "" : text, Mathf.Max(17,Mathf.RoundToInt(size*.88f)), new Color32(229,235,242,255), TextAnchor.MiddleLeft);
             PlaceTopLeft(label.rectTransform, x, y, w, h);
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             label.verticalOverflow = VerticalWrapMode.Truncate;
@@ -96,14 +95,14 @@ namespace CraDev.EditorTools
             var fill = V2Panel(parent, "Button_" + (value ?? key), x, y, w, h, blue ? V2Blue : V2Glass);
             fill.raycastTarget = true;
             var button = TintButton(fill);
-            var colors=button.colors;colors.normalColor=Color.white;colors.highlightedColor=Color.white;
+            var colors=button.colors;colors.normalColor=Color.white;colors.highlightedColor=new Color(1.15f,1.15f,1.15f);
             colors.pressedColor=new Color(.85f,.88f,.92f);colors.selectedColor=Color.white;
             colors.fadeDuration=.14f;button.colors=colors;
-            float left = icon == null ? 20 : 64;
-            if (icon != null) V2Icon(fill.transform, icon, 20, (h - 30) / 2, 30);
-            var label = V2Text(fill.transform, key, left, 0, w - left - 12, h, 25, localized);
+            float left = icon == null ? 18 : 54;
+            if (icon != null) V2Icon(fill.transform, icon, 18, (h - 24) / 2, 24);
+            var label = V2Text(fill.transform, key, left, 0, w - left - 12, h, 24, localized);
             label.name = "Label";
-            label.resizeTextForBestFit=true; label.resizeTextMinSize=18; label.resizeTextMaxSize=25;
+            label.resizeTextForBestFit=false;
             if (action != null)
             {
                 var command = fill.gameObject.AddComponent<LobbyCommand>();
@@ -116,7 +115,7 @@ namespace CraDev.EditorTools
         {
             if(!name.StartsWith("Background"))
             {
-                var mask=CreateSliced(name+"Frame",parent,v2.RoundFill,Mathf.Min(24,h*.35f),24,Color.white);
+                var mask=CreateSliced(name+"Frame",parent,v2.RoundFill,8,24,Color.white);
                 PlaceTopLeft(mask.rectTransform,x,y,w,h);
                 mask.gameObject.AddComponent<Mask>().showMaskGraphic=false;
                 parent=mask.transform;x=y=0;
@@ -132,7 +131,6 @@ namespace CraDev.EditorTools
         static void BuildMainMenu()
         {
             v2 = Kit();
-            PrepareLobbyGlass();
             v2Textures.Clear();
             var root = NewUiScene(out var scene);
             root.gameObject.AddComponent<GraphicRaycaster>();
@@ -206,7 +204,7 @@ namespace CraDev.EditorTools
             var toast = V2Panel(root, "Toast", 560, 945, 800, 78, V2Glass);
             Set(screen, "toastGroup", toast.gameObject.AddComponent<CanvasGroup>());
             Set(screen, "toastText", V2Text(toast.transform, "", 24, 0, 752, 78, 26, false));
-            Set(screen, "dialog", GlassDialog(root));
+            Set(screen, "dialog", FlatDialog(root));
             Set(screen, "fader", CreateFullscreen("Fader", root, Color.black));
             AddUiSounds();
             Save(scene, MenuScene);
@@ -247,49 +245,48 @@ namespace CraDev.EditorTools
         static void V2Navigation(Transform root, MainMenuScreen screen)
         {
             var nav = CreateRect("Navigation", root); Stretch(nav);
-            V2Panel(nav,"NavigationDock",500,20,762,88,new Color(.07f,.085f,.11f,.88f));
-            var brand = V2Button(nav, "Lynxos", null, 70, 30, 240, 70, "page", "home", false, false);
+            V2Panel(nav,"NavigationDock",50,24,1820,76,new Color(.045f,.06f,.085f,.96f));
+            var brand = V2Button(nav, "NewWorld", null, 78, 36, 280, 52, "page", "home", false, false);
             brand.GetComponent<Image>().color = Color.clear;
-            var tile=V2Panel(brand.transform,"Logo",0,12,48,48,V2Blue);
-            var glyph=CreateImage("Glyph",tile.transform,LoadSprite(IntroArt+"CraDev_Glyph.png"),new Vector2(42,42),Vector2.zero,Color.white);
-            Place(glyph.rectTransform,new Vector2(.5f,.5f),new Vector2(.5f,.5f),Vector2.zero,new Vector2(42,42));
-            brand.GetComponentInChildren<Text>().font=v2.Bold;
-            PlaceTopLeft(brand.transform.Find("Label").GetComponent<RectTransform>(), 66, 0, 174, 70);
+            V2Panel(brand.transform,"BrandAccent",0,17,4,18,V2Blue);
+            brand.GetComponentInChildren<Text>().font=v2.SemiBold;
+            brand.GetComponentInChildren<Text>().fontSize=28;
+            PlaceTopLeft(brand.transform.Find("Label").GetComponent<RectTransform>(), 18, 0, 250, 52);
             string[] keys = { "home", "world", "friends", "top", "settings" };
             var buttons = new List<Button>();
             for (int i = 0; i < keys.Length; i++)
-                buttons.Add(V2Button(nav, "nav." + keys[i], null, 525 + i * 142, 30, 140, 68));
+                buttons.Add(V2Button(nav, "nav." + keys[i], null, 525 + i * 142, 36, 140, 52));
             var tabs = nav.gameObject.AddComponent<SelectList>();
             foreach(var button in buttons)
             {
                 var text=button.GetComponentInChildren<Text>();
-                text.resizeTextForBestFit=false;text.fontSize=22;
+                text.resizeTextForBestFit=false;text.fontSize=20;
                 text.horizontalOverflow=HorizontalWrapMode.Overflow;text.alignment=TextAnchor.MiddleCenter;
             }
             SetArray(tabs, "items", buttons.Cast<Object>().ToArray());
             SetArray(tabs, "fills", buttons.Select(b => (Object)b.GetComponent<Image>()).ToArray());
-            Set(tabs, "normalFill", Color.clear); Set(tabs, "selectedFill", new Color(.24f,.29f,.36f,.9f));
+            Set(tabs, "normalFill", Color.clear); Set(tabs, "selectedFill", new Color(.14f,.20f,.26f,1));
             Set(screen, "navTabs", tabs);
-            var language = V2Button(nav, "UZ", "Globe", 1350, 30, 160, 68, null, null, false, false);
+            var language = V2Button(nav, "UZ", "Globe", 1370, 36, 125, 52, null, null, false, false);
             language.GetComponent<Image>().color = V2Glass;
             Set(language.gameObject.AddComponent<LanguageToggle>(), "label", language.GetComponentInChildren<Text>());
-            var bell = V2Button(nav, "", "Bell", 1510, 30, 70, 68, null, null, false, false);
+            var bell = V2Button(nav, "", "Bell", 1510, 36, 60, 52, null, null, false, false);
             Set(screen, "bellButton", bell);
             Set(screen, "bellDot", V2Panel(bell.transform, "NotificationDot", 43, 14, 10, 10, new Color32(243,65,95,255)));
-            var profile = V2Button(nav, "Lynxos_user", "User", 1600, 30, 250, 68, null, null, false, false);
+            var profile = V2Button(nav, "", "User", 1600, 36, 250, 52, null, null, false, false);
             Set(screen, "profileButton", profile); Set(screen, "profileName", profile.GetComponentInChildren<Text>());
-            PlaceTopLeft(profile.GetComponentInChildren<Text>().rectTransform,80,0,150,68);
+            PlaceTopLeft(profile.GetComponentInChildren<Text>().rectTransform,62,0,165,52);
             Set(screen, "profileIcon", profile.transform.Find("User").GetComponent<Image>());
-            Set(screen, "profileThumb", V2Picture(profile.transform, "Avatar", null, 18, 10, 48, 48));
+            Set(screen, "profileThumb", V2Picture(profile.transform, "Avatar", null, 12, 8, 36, 36));
             var blocker = CreateFullscreen("ProfileMenuBlocker", root, Color.clear);
             blocker.raycastTarget = true; Set(screen, "profileMenuBlocker", TintButton(blocker));
-            var menu = V2Panel(root, "ProfileMenu", 1470, 110, 380, 304, V2Glass);
+            var menu = V2Panel(root, "ProfileMenu", 1510, 110, 340, 260, V2Glass);
             Set(screen, "profileMenu", menu.gameObject.AddComponent<CanvasGroup>());
             var menuButtons = new List<Button>();
             string[] menuKeys = { "wardrobe", "customize", "settings", "quit" };
             string[] icons = { "Shirt", "User", "Gear", "Logout" };
             for (int i = 0; i < 4; i++)
-                menuButtons.Add(V2Button(menu.transform, "menu." + menuKeys[i], icons[i], 8, 8 + i * 72, 364, 68));
+                menuButtons.Add(V2Button(menu.transform, "menu." + menuKeys[i], icons[i], 8, 8 + i * 62, 324, 56));
             SetArray(screen, "profileMenuButtons", menuButtons.Cast<Object>().ToArray());
         }
 
@@ -304,12 +301,13 @@ namespace CraDev.EditorTools
             Set(page, "shirt", LineIcon("Shirt")); Set(page, "shoe", LineIcon("Shoe")); Set(page, "hair", LineIcon("Hair"));
             Set(page, "educationImage", V2Texture("education-cards")); Set(page, "friendsImage", V2Texture("hero-friends"));
             SetArray(page,"businessIcons",new Object[]{LineIcon("Office"),LineIcon("Coworking"),LineIcon("Rocket"),LineIcon("Coins")});
+            SetArray(page,"placeIcons",new Object[]{LineIcon("Music"),LineIcon("Film"),LineIcon("Gamepad"),LineIcon("Ball"),LineIcon("Home"),LineIcon("Music")});
             string bg = id == "world" ? "map" : id;
             Set(page, "background", V2Texture("clean-" + bg));
             if (id == "home") { V2Home(rect,page); return page; }
             string prefix = id == "entertainment" ? "fun" : id;
-            V2Text(rect, prefix + ".title", 65, 153, id == "friends" ? 660 : 590, 78, 46).font = v2.Bold;
-            var subtitle = V2Text(rect, prefix + ".subtitle", 68, 232, 650, 42, 27);
+            V2Text(rect, prefix + ".title", 65, 153, id == "friends" ? 660 : 590, 64, 38).font = v2.SemiBold;
+            var subtitle = V2Text(rect, prefix + ".subtitle", 68, 217, 650, 38, 23);
             subtitle.color = new Color32(185,199,219,255);
 
             string[] categories;
@@ -340,17 +338,17 @@ namespace CraDev.EditorTools
                 default: categories = new string[0]; categoryIcons = new string[0]; break;
             }
             var categoriesButtons = new List<Button>();
-            if(categories.Length>0)V2Panel(rect,"SidebarGlass",49,299,417,categories.Length*80+22,new Color(.05f,.065f,.085f,.7f));
+            if(categories.Length>0)V2Panel(rect,"Sidebar",49,283,367,categories.Length*64+24,new Color(.045f,.06f,.085f,.94f));
             for (int i = 0; i < categories.Length; i++)
-                categoriesButtons.Add(V2Button(rect, categories[i], categoryIcons[i], 65, 315+i*80, 385, 74, "choose", i.ToString(), i == 0));
+                categoriesButtons.Add(V2Button(rect, categories[i], categoryIcons[i], 61, 295+i*64, 343, 56, "choose", i.ToString(), i == 0));
             SetArray(page, "categories", categoriesButtons.Cast<Object>().ToArray());
             if (id == "world")
             {
                 V2Map(rect);
                 Set(page, "search", V2Search(rect, "world.search", 1340, 155, 510));
-                var status = V2Panel(rect, "CityStatus", 1320, 930, 530, 105, V2Glass);
-                V2Text(status.transform, "world.center", 24, 6, 480, 45, 25);
-                Set(page, "status", V2Text(status.transform, Loc.T("world.online_unknown"), 24, 50, 480, 42, 22,false));
+                var status = V2Panel(rect, "CityStatus", 1390, 930, 460, 96, V2Glass);
+                V2Text(status.transform, "world.center", 24, 6, 410, 40, 24);
+                Set(page, "status", V2Text(status.transform, Loc.T("world.online_unknown"), 24, 46, 410, 38, 21,false));
                 return page;
             }
             var body = CreateRect("Content", rect);
@@ -360,7 +358,7 @@ namespace CraDev.EditorTools
             if(id=="settings") PlaceTopLeft(body,705,210,1145,820);
             if(id=="wardrobe")
             {
-                PlaceTopLeft(body,1030,195,820,690);
+                PlaceTopLeft(body,1030,195,820,708);
                 var footer=CreateRect("WardrobeFooter",rect);PlaceTopLeft(footer,1030,915,820,110);
                 Set(page,"footer",footer);
             }
@@ -369,7 +367,7 @@ namespace CraDev.EditorTools
             {
                 string[] tabs = { "friends", "groups", "events", "chat" };
                 var friendTabs=new List<Button>();
-                for (int i=0;i<4;i++) friendTabs.Add(V2Button(rect, "friends.tab."+tabs[i], null, 865+i*245, 183, 239, 65, "choose", i.ToString(), i==0));
+                for (int i=0;i<4;i++) friendTabs.Add(V2Button(rect, "friends.tab."+tabs[i], null, 865+i*245, 183, 239, 52, "choose", i.ToString(), i==0));
                 SetArray(page,"categories",friendTabs.Cast<Object>().ToArray());
                 Set(page,"search",V2Search(rect,"friends.search",865,265,975));
                 PlaceTopLeft(body,65,355,1785,650);
@@ -377,24 +375,24 @@ namespace CraDev.EditorTools
             if (id == "education" || id == "entertainment")
             {
                 var hero = V2Picture(rect, "Hero", V2Texture(id == "education" ? "hero-education" : "clean-map"), 545, 168, 1300, 480);
-                var box = V2Panel(rect,"HeroInfo",1300,205,500,390,V2Glass);
-                V2Text(box.transform,prefix+".hero.title",35,35,430,80,36).font=v2.Bold;
-                V2Text(box.transform,prefix+".hero.subtitle",35,125,420,75,26);
-                V2Button(box.transform,prefix+".visit","ArrowRight",35,260,430,84,"soon",prefix+".title",true);
+                var box = V2Panel(rect,"HeroInfo",1320,250,480,300,V2Glass);
+                V2Text(box.transform,prefix+".hero.title",28,25,420,60,32).font=v2.SemiBold;
+                V2Text(box.transform,prefix+".hero.subtitle",28,95,410,65,24);
+                V2Button(box.transform,prefix+".visit","ArrowRight",28,210,320,56,"soon",prefix+".title",true);
                 V2Text(rect,prefix+".recommended",545,670,600,60,30);
-                PlaceTopLeft(body,545,745,1300,290);
+                PlaceTopLeft(body,545,745,1300,id=="education"?260:290);
             }
             return page;
         }
 
         static InputField V2Search(Transform root, string key, float x, float y, float w)
         {
-            var fill = V2Panel(root, "Search", x, y, w, 76, new Color(.7f,.78f,.9f,.22f));
+            var fill = V2Panel(root, "Search", x, y, w, 56, V2Glass);
             fill.raycastTarget = true;
-            V2Icon(fill.transform,"Search",22,22,30);
+            V2Icon(fill.transform,"Search",18,16,24);
             var field = fill.gameObject.AddComponent<InputField>();
-            field.textComponent = V2Text(fill.transform,"",70,0,w-85,76,24,false);
-            var placeholder = V2Text(fill.transform,key,70,0,w-85,76,24);
+            field.textComponent = V2Text(fill.transform,"",58,0,w-76,56,23,false);
+            var placeholder = V2Text(fill.transform,key,58,0,w-76,56,23);
             placeholder.color = new Color(1,1,1,.55f); field.placeholder = placeholder;
             field.characterLimit = 40;
             return field;
@@ -402,11 +400,10 @@ namespace CraDev.EditorTools
 
         static void V2Home(Transform root,LobbyContent page)
         {
-            var welcome=V2Panel(root,"WelcomeGlass",65,198,560,360,new Color(.05f,.06f,.08f,.72f));
-            GlassSurface.Apply(welcome,40);
-            V2Text(root,"Lynxos",100,230,500,100,72,false).font=v2.Bold;
-            V2Text(root,"home.subtitle",104,340,475,60,30).color = new Color32(190,199,212,255);
-            V2Button(root,"home.enter","Play",100,442,488,78,"page","world",true);
+            V2Panel(root,"WelcomePanel",65,220,520,286,new Color(.045f,.06f,.085f,.9f));
+            V2Text(root,"NewWorld",100,248,450,76,54,false).font=v2.SemiBold;
+            V2Text(root,"home.subtitle",102,328,450,48,25).color = new Color32(178,190,204,255);
+            V2Button(root,"home.enter","Play",100,410,290,56,"page","world",true);
             var note=V2Panel(root,"WorldNote",1430,225,415,160,new Color(.05f,.06f,.08f,.72f));
             V2Text(note.transform,"home.tagline1",26,26,365,46,25).color = new Color32(224,231,241,255);
             V2Text(note.transform,"home.tagline2",26,77,365,46,25).color = new Color32(183,195,212,255);
@@ -415,23 +412,23 @@ namespace CraDev.EditorTools
             PlaceTopLeft(eventLabel.rectTransform,135,10,245,40);eventLabel.fontSize=20;
             V2Picture(eventCard.transform,"EventPhoto",V2Texture("home"),18,20,100,100,new Rect(584f/766,1-268f/415,46f/766,48f/415));
             Set(page,"eventTitle",V2Text(eventCard.transform,Loc.T("home.event_none"),135,55,245,76,24,false));
-            V2Button(root,"menu.wardrobe","Shirt",770,817,280,64,"page","wardrobe");
-            V2Panel(root,"ExploreDock",50,912,1820,134,new Color(.04f,.055f,.075f,.8f));
+            V2Button(root,"menu.wardrobe","Shirt",785,830,240,52,"page","wardrobe");
+            V2Panel(root,"ExploreDock",50,942,1820,102,new Color(.045f,.06f,.085f,.96f));
             string[] ids={"world","shops","education","business","entertainment"};
             string[] icons={"Map","Bag","GradCap","Buildings","Gamepad"};
             for(int i=0;i<5;i++)
             {
                 string key=i==0?"home.card.world":"zone."+ids[i];
-                var card=V2Button(root,key,icons[i],66+i*360,926,348,106,"page",ids[i]);
+                var card=V2Button(root,key,icons[i],66+i*360,954,348,78,"page",ids[i]);
                 if(i<2)
                 {
                     card.transform.Find(icons[i]).gameObject.SetActive(false);
-                    V2Picture(card.transform,"Photo",V2Texture(i==0?"clean-map":"clean-shops"),16,18,70,70,new Rect(.4f,.1f,.45f,.8f));
+                    V2Picture(card.transform,"Photo",V2Texture(i==0?"clean-map":"clean-shops"),12,13,52,52,new Rect(.4f,.1f,.45f,.8f));
                 }
-                card.GetComponentInChildren<Text>().fontSize=24;
+                card.GetComponentInChildren<Text>().fontSize=21;
                 var label=card.GetComponentInChildren<Text>();
-                PlaceTopLeft(label.rectTransform,96,10,238,46);
-                V2Text(card.transform,i==0?"home.card.world.sub":key+".sub",96,55,238,42,19).color=new Color32(178,188,204,255);
+                PlaceTopLeft(label.rectTransform,78,7,254,32);
+                V2Text(card.transform,i==0?"home.card.world.sub":key+".sub",78,39,254,30,19).color=new Color32(157,174,191,255);
             }
         }
 
@@ -444,11 +441,11 @@ namespace CraDev.EditorTools
             for(int i=0;i<ids.Length;i++)
             {
                 string key=i<4?"zone."+ids[i]:"world.cat."+ids[i];
-                var button=V2Button(root,key,icons[i],points[i].x,points[i].y,305,88,i<4?"page":i==5?"choose":"soon",i<4?ids[i]:i==5?"events":key);
+                var button=V2Button(root,key,icons[i],points[i].x,points[i].y,280,58,i<4?"page":i==5?"choose":"soon",i<4?ids[i]:i==5?"events":key);
                 button.name="Map_"+i; button.GetComponent<Image>().color=colors[i];
             }
-            V2Button(root,"+","Plus",1780,315,70,70,"choose","zoom-in",false,false);
-            V2Button(root,"","Minus",1780,390,70,70,"choose","zoom-out",false,false);
+            V2Button(root,"","Plus",1790,315,60,52,"choose","zoom-in",false,false);
+            V2Button(root,"","Minus",1790,377,60,52,"choose","zoom-out",false,false);
         }
     }
 }

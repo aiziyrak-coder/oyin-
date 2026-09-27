@@ -67,13 +67,15 @@ namespace CraDev
             Loc.Current=language;
             lobby.Show("settings");yield return new WaitForSecondsRealtime(.5f);
             ((LobbyContent)lobby.Current).Choose("2");yield return null;
-            var switches=lobby.Current.GetComponentsInChildren<GlassSurface>().Where(g=>g.name=="Switch").ToArray();
-            Check(switches.Length==3&&switches.All(g=>g.Solid),"glass notification switches");
-            var glass=lobby.Current.GetComponentsInChildren<GlassSurface>();
-            Check(glass.Length>8&&glass.All(g=>g.GetComponent<Image>().material.shader.name=="CraDev/UI/LobbyGlass"&&g.GetComponent<Image>().material.shader.isSupported),"supported glass materials");
+            var switches=lobby.Current.GetComponentsInChildren<Image>().Where(g=>g.name=="Switch").ToArray();
+            Check(switches.Length==3&&switches.All(g=>g.material.shader.name=="UI/Default"),"flat notification switches");
+            var images=lobby.GetComponentsInChildren<Image>(true);
+            Check(!images.Any(g=>g.GetComponent<GlassSurface>()!=null || g.material.shader.name=="CraDev/UI/LobbyGlass"),"no glass or grab-pass surfaces");
+            Check(lobby.GetComponentsInChildren<Text>(true).Count(t=>t.text=="NewWorld")==2,"NewWorld platform branding");
             lobby.Show("wardrobe");yield return new WaitForSecondsRealtime(1);
             var garment=UnityEngine.Object.FindObjectsByType<RawImage>(FindObjectsSortMode.None).FirstOrDefault(i=>i.name=="Garment");
             Check(garment!=null&&garment.texture!=null,"3D garment thumbnails");
+            Check(garment!=null&&garment.texture is RenderTexture,"GPU-only garment previews");
             if(garment!=null)
             {
                 var button=garment.GetComponentInParent<Button>();
@@ -87,6 +89,7 @@ namespace CraDev
                 if(discard!=null) discard.onClick.Invoke();
                 yield return new WaitForSecondsRealtime(.5f);
                 Check(PlayerProfile.Outfit==outfit,"preview did not change saved outfit");
+                Check(lobby.Viewer.Outfit.SameAs(Wardrobe.Outfit.FromJson(outfit)),"discard restored visible outfit");
             }
             Loc.Current=language==Language.Uz?Language.En:Language.Uz;
             yield return null;
@@ -94,7 +97,66 @@ namespace CraDev
             Loc.Current=language;
             lobby.Show("home");
             yield return new WaitForSecondsRealtime(.5f);
+            lobby.Show("world");lobby.Show("home");
+            yield return new WaitForSecondsRealtime(.5f);
+            Check(lobby.Current.Id=="home","rapid navigation cancels pending page");
             Debug.Log("[LobbyTest] COMPLETE: "+failures+" failures");
+        }
+
+        public static IEnumerator PreviewRegression(MainMenuScreen lobby)
+        {
+            var original=lobby.Viewer.CurrentOption;
+            var outfit=lobby.Viewer.Outfit;
+            string saved=PlayerProfile.Outfit, nickname=PlayerProfile.Nickname;
+            int failed=0;
+            lobby.Show("home");yield return new WaitForSecondsRealtime(.5f);
+            try
+            {
+                lobby.Stage.Apply(1);
+                foreach(string id in new[]{"M1","M2","M3","M5","F1","F2","F3","F4","F5"})
+                {
+                    var option=lobby.FindAvatar(id);
+                    if(option==null){failed++;continue;}
+                    lobby.Viewer.SetAvatar(option);yield return null;
+                    var model=GameObject.Find(id);
+                    var materials=model.GetComponentsInChildren<Renderer>().SelectMany(r=>r.materials).ToArray();
+                    var textures=materials.Select(m=>m.mainTexture).ToArray();
+                    bool valid=true;
+                    foreach(Wardrobe.OutfitSlot slot in Enum.GetValues(typeof(Wardrobe.OutfitSlot)))
+                    {
+                        var item=Wardrobe.WardrobeCatalog.For(slot).First();
+                        var result=lobby.Viewer.CaptureGarment(item);
+                        var active=RenderTexture.active;
+                        Texture2D pixels=null;
+                        try
+                        {
+                            RenderTexture.active=result;
+                            pixels=new Texture2D(192,192,TextureFormat.RGBA32,false);
+                            // Readback is only in this explicit regression test, never normal navigation.
+                            pixels.ReadPixels(new Rect(0,0,192,192),0,0);pixels.Apply();
+                            valid &= pixels.GetPixels32().Count(p=>p.a>32&&(p.r+p.g+p.b)>30)>100;
+                            valid &= materials.Select((m,i)=>m.mainTexture==textures[i]).All(s=>s);
+                            valid &= lobby.Viewer.Outfit.SameAs(outfit);
+                        }
+                        finally
+                        {
+                            RenderTexture.active=active;
+                            if(pixels!=null)UnityEngine.Object.Destroy(pixels);
+                            if(result!=null){result.Release();UnityEngine.Object.Destroy(result);}
+                        }
+                        yield return null;
+                    }
+                    if(!valid)failed++;
+                    Debug.Log($"[PreviewTest] {id}: {(valid?"PASS":"FAIL")} four slots, material and outfit unchanged");
+                }
+            }
+            finally
+            {
+                lobby.Viewer.SetAvatar(original);lobby.Viewer.SetOutfit(outfit);
+                lobby.Stage.Apply(lobby.Current.StagePose);
+            }
+            if(saved!=PlayerProfile.Outfit || nickname!=PlayerProfile.Nickname)failed++;
+            Debug.Log($"[PreviewTest] COMPLETE: {failed} failures; profile preserved");
         }
     }
 }

@@ -30,9 +30,13 @@ namespace CraDev.MainMenu
         GameEvent nextEvent;
         int? onlineCount;
         bool saving;
-        readonly Dictionary<string,Texture2D> thumbnails = new Dictionary<string,Texture2D>();
-        static readonly Color Blue = new Color32(77, 103, 128, 245);
-        static readonly Color Glass = new Color32(28, 33, 42, 226);
+        bool rendered;
+        Language renderedLanguage;
+        readonly Dictionary<string,RenderTexture> thumbnails = new Dictionary<string,RenderTexture>();
+        readonly Queue<(string key,WardrobeItem item,RawImage image)> previewQueue = new Queue<(string,WardrobeItem,RawImage)>();
+        Coroutine previewRoutine;
+        static readonly Color Blue = new Color32(55, 102, 132, 255);
+        static readonly Color Glass = new Color32(24, 31, 41, 242);
         static readonly Color Muted = new Color32(180, 189, 203, 255);
         [Serializable] class LookList { public List<string> items = new List<string>(); }
 
@@ -48,7 +52,8 @@ namespace CraDev.MainMenu
         public override void OnShow()
         {
             if (Id == "wardrobe") { draft = Outfit.FromJson(PlayerProfile.Outfit); saved = draft.Clone(); }
-            Render();
+            // Static pages retain their existing hierarchy; live data still refreshes on entry.
+            if(!rendered || renderedLanguage!=Loc.Current || Id=="wardrobe" || Id=="settings" || Id=="friends" || Id=="top") Render();
             if(Id=="home" && eventTitle!=null) StartCoroutine(Lobby.Api.Events(result=>{
                 var evt=result.Ok?result.Data.items?.FirstOrDefault():null;
                 nextEvent=evt; RefreshLiveLabels();
@@ -61,6 +66,7 @@ namespace CraDev.MainMenu
         public override void OnHide()
         {
             revision++; StopAllCoroutines(); searchRoutine = null;
+            previewRoutine=null;previewQueue.Clear();
             if (Id == "world") SetMapZoom(1);
             if (Id == "wardrobe") Lobby.Viewer.SetOutfit(Outfit.FromJson(PlayerProfile.Outfit));
         }
@@ -108,6 +114,9 @@ namespace CraDev.MainMenu
         void Render()
         {
             revision++;
+            rendered=true;renderedLanguage=Loc.Current;
+            previewQueue.Clear();
+            if(previewRoutine!=null){StopCoroutine(previewRoutine);previewRoutine=null;}
             RefreshLiveLabels();
             if (categories != null)
                 for (int i=0;i<categories.Length;i++) categories[i].GetComponent<Image>().color = i==section ? Blue : Glass;
@@ -164,26 +173,25 @@ namespace CraDev.MainMenu
         Text Text(string text,float x,float y,float w,float h,int size=26,Transform parent=null)
         {
             var label=Rect("Label",parent??surface,x,y,w,h).gameObject.AddComponent<Text>();
-            label.font=font; label.fontSize=size; label.text=text; label.color=Color.white;
+            label.font=font; label.fontSize=Mathf.Max(17,Mathf.RoundToInt(size*.82f)); label.text=text; label.color=new Color32(229,235,242,255);
             label.alignment=TextAnchor.MiddleLeft; label.raycastTarget=false;
             label.horizontalOverflow=HorizontalWrapMode.Wrap; label.verticalOverflow=VerticalWrapMode.Truncate; return label;
         }
         Image Panel(string name,float x,float y,float w,float h,Color color,Transform parent=null)
         {
             var image=Rect(name,parent??surface,x,y,w,h).gameObject.AddComponent<Image>();
-            image.sprite=rounded; image.type=Image.Type.Sliced; image.pixelsPerUnitMultiplier=2;
+            image.sprite=rounded; image.type=Image.Type.Sliced; image.pixelsPerUnitMultiplier=3;
             image.color=color; image.raycastTarget=false;
-            if(name!="ActionIcon")GlassSurface.Apply(image,Mathf.Min(28,h*.5f));
             return image;
         }
         Button Button(string text,float x,float y,float w,float h,Action action,bool primary=false,Transform parent=null)
         {
             var image=Panel("Item_"+text,x,y,w,h,primary?Blue:Glass,parent); image.raycastTarget=true;
             var button=image.gameObject.AddComponent<Button>(); button.targetGraphic=image;
-            var colors=button.colors;colors.highlightedColor=Color.white;colors.selectedColor=Color.white;
+            var colors=button.colors;colors.highlightedColor=new Color(1.15f,1.15f,1.15f);colors.selectedColor=Color.white;colors.colorMultiplier=1;
             colors.pressedColor=new Color(.85f,.88f,.92f);colors.fadeDuration=.14f;button.colors=colors;
             var label=Text(text,14,0,w-28,h,25,image.transform);
-            label.resizeTextForBestFit=true;label.resizeTextMinSize=18;label.resizeTextMaxSize=25;
+            label.resizeTextForBestFit=false;
             if(action!=null) button.onClick.AddListener(()=>action());
             return button;
         }
@@ -228,10 +236,10 @@ namespace CraDev.MainMenu
                 var card=Button("",(i%4)*(cell+12),140+(i/4)*190,cell,178,()=>{draft.Set(slot,item.Id,item.Color);Lobby.Viewer.SetOutfit(draft);Render();},draft.Item(slot)==item.Id);
                 ColorUtility.TryParseHtmlString("#"+item.Color,out var color);
                 string previewKey=Lobby.Viewer.CurrentOption.id+":"+item.Id;
-                if(!thumbnails.TryGetValue(previewKey,out var thumbnail))
-                    thumbnails[previewKey]=thumbnail=Lobby.Viewer.CaptureGarment(item);
+                thumbnails.TryGetValue(previewKey,out var thumbnail);
                 var icon=Rect("Garment",card.transform,14,5,cell-28,115).gameObject.AddComponent<RawImage>();
-                icon.texture=thumbnail;icon.raycastTarget=false;
+                icon.texture=thumbnail;icon.raycastTarget=false;icon.color=thumbnail==null?Color.clear:Color.white;
+                if(thumbnail==null) previewQueue.Enqueue((previewKey,item,icon));
                 var label=card.GetComponentInChildren<Text>(); label.text=item.Name; label.fontSize=19;
                 label.rectTransform.anchoredPosition=new Vector2(12,-112); label.rectTransform.sizeDelta=new Vector2(cell-24,60);
             }
@@ -245,10 +253,25 @@ namespace CraDev.MainMenu
                     draft.Set(slot,item.Id,color); Lobby.Viewer.SetOutfit(draft); Render();
                 },false,footer);
                 ColorUtility.TryParseHtmlString("#"+color,out var tint); swatch.GetComponent<Image>().color=tint;
-                swatch.GetComponent<GlassSurface>().Solid=true;
             }
             Button(Loc.T("wardrobe.original"),width-300,0,145,45,()=>{draft=new Outfit();Lobby.Viewer.SetOutfit(draft);Render();},false,footer);
             SaveButton(50); ContentHeight(y);
+            if(previewQueue.Count>0) previewRoutine=StartCoroutine(FillPreviews());
+        }
+        IEnumerator FillPreviews()
+        {
+            // Give the page its first frame before rendering at most one small preview per frame.
+            while(previewQueue.Count>0)
+            {
+                yield return null;
+                var request=previewQueue.Dequeue();
+                if(request.image==null)continue;
+                if(!thumbnails.TryGetValue(request.key,out var texture))
+                    thumbnails[request.key]=texture=Lobby.Viewer.CaptureGarment(request.item);
+                request.image.texture=texture;
+                request.image.color=texture==null?Color.clear:Color.white;
+            }
+            previewRoutine=null;
         }
         void SaveButton(float y)
         {
@@ -278,7 +301,7 @@ namespace CraDev.MainMenu
             looks.items.Add(draft.ToJson()); PlayerProfile.SetSavedLooks(JsonUtility.ToJson(looks));
             Lobby.Toast(Loc.T("wardrobe.look_saved")); Render();
         }
-        void OnDestroy() {foreach(var texture in thumbnails.Values) if(texture!=null) Destroy(texture);}
+        void OnDestroy() {foreach(var texture in thumbnails.Values) if(texture!=null){texture.Release();Destroy(texture);}}
         // CONTENT
     }
 }

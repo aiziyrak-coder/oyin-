@@ -8,31 +8,31 @@ namespace CraDev.MainMenu
     {
         UnityEngine.UI.Button Row(string key,string value,int index,Action action=null)
         {
-            float y=(section==0?180:100)+index*91;
-            var row=Button("",0,y,width-10,85,action);
-            row.GetComponent<UnityEngine.UI.Image>().color=new Color(.1f,.12f,.15f,.8f);
-            Text(Loc.T(key),28,0,410,85,27,row.transform).color=Muted;
-            Text(value,440,0,width-475,85,26,row.transform);
+            float y=(section==0?160:90)+index*78;
+            var row=Button("",0,y,width-10,72,action);
+            row.GetComponent<UnityEngine.UI.Image>().color=new Color(.09f,.115f,.15f,.95f);
+            Text(Loc.T(key),24,0,410,72,27,row.transform).color=Muted;
+            Text(value,440,0,width-475,72,26,row.transform);
             return row;
         }
         void ToggleRow(string key,bool value,int i,Action<bool> change)
         {
             var row=Row(key,"",i,()=>{change(!value);Render();});
-            var track=Panel("Switch",width-126,22,82,42,value?new Color(.3f,.52f,.48f,1):new Color(.2f,.23f,.28f,1),row.transform);
-            track.GetComponent<GlassSurface>().Solid=true;
-            var knob=Panel("SwitchKnob",value?44:4,4,34,34,new Color(.91f,.94f,.97f),track.transform);
-            knob.GetComponent<GlassSurface>().Solid=true;
+            var track=Panel("Switch",width-108,19,64,34,value?new Color(.22f,.43f,.52f,1):new Color(.2f,.23f,.28f,1),row.transform);
+            track.pixelsPerUnitMultiplier=1.4f;
+            var knob=Panel("SwitchKnob",value?34:4,4,26,26,new Color(.91f,.94f,.97f),track.transform);
+            knob.pixelsPerUnitMultiplier=1.8f;
         }
         void Settings()
         {
             string[] sections={"profile","security","notifications","sound","controls","privacy","language","help"};
             if(section==0)
             {
-                Panel("ProfileGlass",0,0,width-5,700,new Color(.08f,.095f,.12f,.88f));
-                Portrait(surface,PlayerProfile.AvatarId,25,25,120);
-                Text(PlayerProfile.Nickname,175,30,width-440,60,36).font=bold;
-                Text(Loc.F("settings.id",PlayerProfile.PublicId.ToString("D6")),175,96,width-440,40,23).color=Muted;
-                Button(Loc.T("settings.edit"),width-240,57,210,65,()=>Lobby.Customize());
+                Panel("ProfilePanel",0,0,width-5,580,new Color(.065f,.085f,.115f,.96f));
+                Portrait(surface,PlayerProfile.AvatarId,25,25,96);
+                Text(PlayerProfile.Nickname,150,24,width-415,56,34).font=bold;
+                Text(Loc.F("settings.id",PlayerProfile.PublicId.ToString("D6")),150,80,width-415,36,23).color=Muted;
+                Button(Loc.T("settings.edit"),width-220,47,190,54,()=>Lobby.Customize());
             }
             else Text(Loc.T("settings.section."+sections[section]),25,0,width-50,85,36).font=bold;
             switch(section)

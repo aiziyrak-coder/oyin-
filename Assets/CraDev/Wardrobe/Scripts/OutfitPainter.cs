@@ -23,7 +23,7 @@ namespace CraDev.Wardrobe
         /// Tana: ustki kiyim, shim, oyoq kiyim. Hech narsa o'zgartirilmagan bo'lsa false (asl tekstura qoladi).
         /// color va gloss qayta ishlatiladi (o'lchami mos bo'lsa), yo'q bo'lsa yaratiladi.
         /// </summary>
-        public static bool PaintBody(Texture source, AvatarOption option, Outfit outfit, Material material, ref RenderTexture color, ref RenderTexture gloss)
+        public static bool PaintBody(Texture source, AvatarOption option, Outfit outfit, Material material, ref RenderTexture color, ref RenderTexture gloss, int maxSize = int.MaxValue)
         {
             if (source == null || material == null || option == null || !option.SupportsOutfit || outfit == null)
                 return false;
@@ -35,11 +35,12 @@ namespace CraDev.Wardrobe
             material.SetTexture(MaskId, option.outfitMask);
             material.SetFloat(MaskFromAlphaId, 0f);
             material.SetFloat(SmoothnessId, DefaultSmoothness);
-            color = Ensure(color, source.width, source.height, true, "OutfitBody");
+            int width = Mathf.Min(source.width,maxSize), height = Mathf.Min(source.height,maxSize);
+            color = Ensure(color, width, height, true, "OutfitBody");
             var previous = RenderTexture.active;
             Graphics.Blit(source, color, material, 0);
             color.GenerateMips();
-            gloss = Ensure(gloss, source.width / 2, source.height / 2, false, "OutfitGloss");
+            gloss = Ensure(gloss, width / 2, height / 2, false, "OutfitGloss");
             Graphics.Blit(source, gloss, material, 1);
             gloss.GenerateMips();
             RenderTexture.active = previous;
@@ -47,7 +48,7 @@ namespace CraDev.Wardrobe
         }
 
         /// <summary>Soch: bosh teksturasida (niqob bo'yicha) yoki soch/kiprik teksturasida (alfa bo'yicha).</summary>
-        public static bool PaintHair(Texture source, AvatarOption option, Outfit outfit, Material material, bool fromAlpha, ref RenderTexture color)
+        public static bool PaintHair(Texture source, AvatarOption option, Outfit outfit, Material material, bool fromAlpha, ref RenderTexture color, int maxSize = int.MaxValue)
         {
             if (source == null || material == null || option == null || !option.SupportsHair || outfit == null)
                 return false;
@@ -57,7 +58,7 @@ namespace CraDev.Wardrobe
                 material.SetVector(ColorIds[k], Vector4.zero);
             material.SetTexture(MaskId, fromAlpha ? Texture2D.blackTexture : option.hairMask);
             material.SetFloat(MaskFromAlphaId, fromAlpha ? 1f : 0f);
-            color = Ensure(color, source.width, source.height, true, fromAlpha ? "OutfitHairCards" : "OutfitHead");
+            color = Ensure(color, Mathf.Min(source.width,maxSize), Mathf.Min(source.height,maxSize), true, fromAlpha ? "OutfitHairCards" : "OutfitHead");
             var previous = RenderTexture.active;
             Graphics.Blit(source, color, material, 0);
             color.GenerateMips();

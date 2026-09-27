@@ -1,4 +1,18 @@
-# Ishni boshqa AI yordamchida davom ettirish (Lynxos lobby v2)
+# Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
+
+## Hozirgi talab va holat — NewWorld, 2026-09-28
+
+Foydalanuvchi Liquid Glass uslubini RAD ETDI. Tungi fonlarni yoqtirdi: `Pages/Night/` fayllarini o'zgartirmang. Platforma nomi **NewWorld**; Lynxos haqiqiy o'yinchi nickname'i bo'lishi mumkin, profil/DB nomlarini almashtirmang. Quyidagi Liquid Glass bo'limlari faqat tarix.
+
+Hozirgi UI: tekis, 8 px radiusli standart UI Image panellari; 52–56 px asosiy tugmalar, Manrope Medium/SemiBold, kichikroq sarlavhalar va yozuvlar. Hech bir faol panelda GlassSurface yoki GrabPass materiali yo'q. Eski shader va material aktiv emas; `FlatDialog` standart UI orqali quriladi. Runtime product/company identifikatorlari profil saqlash manzilini buzmaslik uchun o'zgartirilmagan.
+
+Qotish tuzatishlari: garderob kartalari CPU ReadPixels bilan birdaniga chizilmaydi. 192x192 RenderTexture, alohida 512 px yordamchi kiyim teksturalari, kadriga bittadan navbat va avatar/buyum keshi ishlaydi. Asosiy avatar sifati pasaymagan; yuz/kiyim materiallari previewdan keyin aynan tiklanadi. O'zgarmagan outfit qayta bo'yalmaydi; oddiy kiyim tanlash yuzni qayta hisoblamaydi. Statik sahifalar qayta ochilganda UI saqlanadi. Tez bosib qaytishda pending sahifa bekor qilinadi.
+
+Sinovlar: `Logs/lobby-flat-final-build.log` Succeeded; `Logs/lobby-flat-final-player.log` UI 39/39, 9 avatar x 4 slot preview tekshiruvi muvaffaqiyatli, profil o'zgarmagan. Birinchi garderob transition worst frame: oldin 82.99 ms (`lobby-baseline-player.log`), keyin 22.06 ms; qayta ochish 10.85 ms. Bu shu qurilmadagi 1920x1080 qisqa o'lchov, universal FPS kafolati emas.
+
+Yakuniy kosmetik tartib (ko'ngilochar kartalarda takroriy matn o'rniga ikonka, ta'lim kartasi cheti) `Logs/newworld-build.log` va `Logs/newworld-player.log` bilan qayta tekshiriladi. Skrinshotlar `Logs/NewWorld/`. Test bayroqlari: `-cradevTransitionTest -cradevAllPages -cradevUiSmoke -cradevAvatarPreviews -cradevUiDetails`. Avatar testi faqat ko'rinadigan obyektlarni vaqtincha almashtiradi, profil/serverga yozmaydi va avvalgi avatarni qaytaradi.
+
+O'yin: `Play-LobbyV2.cmd` yoki `Builds/LobbyV2/CraDev.exe`. Saqlash nuqtasi: **2b9a3d8** (tasdiqlangan tungi fonlar, eski shisha UI). Design/LobbyV2 Git'ga qo'shilmagan, push qilinmagan.
 
 ## Eng so'nggi dizayn — 2026-09-28
 

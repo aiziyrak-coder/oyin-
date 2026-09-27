@@ -52,6 +52,24 @@ namespace CraDev
             }
             string page = Argument(System.Environment.GetCommandLineArgs(), "-cradevPage");
             var lobby = FindFirstObjectByType<MainMenu.MainMenuScreen>();
+            if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevTransitionTest")>=0)
+            {
+                yield return new WaitForSecondsRealtime(2);
+                for(int pass=0;pass<2;pass++)
+                    foreach(string id in new[]{"world","wardrobe","shops","education","business","friends","settings","top","entertainment","home"})
+                    {
+                        var timer=System.Diagnostics.Stopwatch.StartNew();
+                        lobby.Show(id);
+                        double worst=0;
+                        while(timer.Elapsed.TotalSeconds<1.2)
+                        {
+                            double before=timer.Elapsed.TotalMilliseconds;
+                            yield return null;
+                            worst=System.Math.Max(worst,timer.Elapsed.TotalMilliseconds-before);
+                        }
+                        Debug.Log($"[TransitionTest] pass={pass+1} page={id} worst={worst:0.00} ms");
+                    }
+            }
             if (lobby != null && page != null)
             {
                 yield return null;
@@ -72,8 +90,10 @@ namespace CraDev
 
             if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevUiSmoke")>=0)
                 yield return DevLobbySmoke.Run(lobby);
+            if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevAvatarPreviews")>=0)
+                yield return DevLobbySmoke.PreviewRegression(lobby);
 
-            if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevGlassDetails")>=0)
+            if(lobby!=null && (System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevUiDetails")>=0 || System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevGlassDetails")>=0))
             {
                 string folder=System.IO.Path.GetDirectoryName(path)??"";
                 lobby.Show("settings");yield return new WaitForSecondsRealtime(.5f);
@@ -85,7 +105,7 @@ namespace CraDev
                 yield return new WaitForSecondsRealtime(.6f);
                 float elapsed=0;const int frames=120;
                 for(int i=0;i<frames;i++){yield return null;elapsed+=Time.unscaledDeltaTime;}
-                Debug.Log($"[CraDev] Glass steady-frame sample: {frames/Mathf.Max(.001f,elapsed):0.0} FPS, {elapsed/frames*1000:0.00} ms; {Screen.width}x{Screen.height}.");
+                Debug.Log($"[CraDev] UI steady-frame sample: {frames/Mathf.Max(.001f,elapsed):0.0} FPS, {elapsed/frames*1000:0.00} ms; {Screen.width}x{Screen.height}.");
             }
 
             if (!string.IsNullOrEmpty(press))
