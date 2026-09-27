@@ -1,0 +1,46 @@
+# Unity avtomatik yaratadigan papkalar
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# .meta fayllar albatta saqlanadi
+!/[Aa]ssets/**/*.meta
+
+# IDE fayllari
+.vs/
+.vscode/
+.idea/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# Build natijalari
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logo manbalarining vaqtinchalik chiqishi
+/Design/Logo/.out/
