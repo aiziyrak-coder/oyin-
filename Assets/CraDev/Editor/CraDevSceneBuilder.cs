@@ -368,6 +368,7 @@ namespace CraDev.EditorTools
             var femaleIdle = IdleController("f_idle_neutral_01", "Idle_Female");
             var cardPictures = RenderAvatarCards(maleIdle, femaleIdle);
             var faceMaps = BakeFaceMaps(maleIdle, femaleIdle);
+            BakeOutfitMaps(faceMaps); // garderob niqoblari: SetAvatars ularni OutfitMaps.json dan oladi
 
             var accent = (Color)new Color32(61, 90, 254, 255);
             var field = (Color)new Color32(22, 23, 26, 255);
@@ -718,6 +719,7 @@ namespace CraDev.EditorTools
             var so = new SerializedObject(screen);
             var list = so.FindProperty("avatars");
             list.arraySize = 0;
+            var outfitMaps = LoadOutfitMaps(); // BuildCharacterCreation hisoblab saqlagan
             foreach (var info in AvatarList)
             {
                 var model = AssetDatabase.LoadAssetAtPath<GameObject>(info.ModelPath);
@@ -746,6 +748,14 @@ namespace CraDev.EditorTools
                 triProp.arraySize = map?.Triangles.Length ?? 0;
                 for (int i = 0; i < triProp.arraySize; i++)
                     triProp.GetArrayElementAtIndex(i).intValue = map.Triangles[i];
+
+                outfitMaps.TryGetValue(info.Id, out var outfit);
+                item.FindPropertyRelative("outfitMask").objectReferenceValue = outfit != null ? AssetDatabase.LoadAssetAtPath<Texture2D>(outfit.BodyMask) : null;
+                item.FindPropertyRelative("hairMask").objectReferenceValue = outfit?.HairMask != null ? AssetDatabase.LoadAssetAtPath<Texture2D>(outfit.HairMask) : null;
+                var baseProp = item.FindPropertyRelative("outfitBase");
+                baseProp.arraySize = outfit != null ? 4 : 0;
+                for (int i = 0; i < baseProp.arraySize; i++)
+                    baseProp.GetArrayElementAtIndex(i).colorValue = outfit.Base[i];
             }
             so.ApplyModifiedPropertiesWithoutUndo();
         }

@@ -55,6 +55,22 @@ namespace CraDev.EditorTools
             }
         }
 
+        /// <summary>Faqat garderob kiyim niqoblarini hisoblaydi (tekshiruv rasmlari Logs/Outfit/ da).</summary>
+        public static void BakeOutfits()
+        {
+            try
+            {
+                CraDevSceneBuilder.BakeOutfitsOnly();
+                Debug.Log("[CraDev] BATCH OK: kiyim niqoblari tayyor.");
+                EditorApplication.Exit(0);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError("[CraDev] BATCH XATO: " + e);
+                EditorApplication.Exit(1);
+            }
+        }
+
         static BuildTarget ResolveTarget()
         {
             var name = Argument("-customBuildTarget");

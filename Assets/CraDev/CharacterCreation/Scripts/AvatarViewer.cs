@@ -1,4 +1,5 @@
 using CraDev.Face;
+using CraDev.Wardrobe;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -22,6 +23,10 @@ namespace CraDev.CharacterCreation
         [SerializeField] RuntimeAnimatorController femaleIdle;
         [Tooltip("O'yinchi yuzini bosh teksturasiga chizuvchi material (Hidden/CraDev/FaceProject).")]
         [SerializeField] Material facePaint;
+        [Tooltip("Garderob: kiyim va soch rangini bo'yovchi material (Hidden/CraDev/OutfitRecolor).")]
+        [SerializeField] Material outfitPaint;
+        [Tooltip("O'yinga Standard shaderning silliqlik xaritali variantini qo'shish uchun (garderob charm, jinsi kabi matolarda ishlatadi).")]
+        [SerializeField] Material glossVariant;
 
         [Header("Boshqaruv")]
         [Tooltip("Sichqoncha 1 birlik (1920x1080) surilganda necha gradus aylanadi.")]
@@ -47,9 +52,12 @@ namespace CraDev.CharacterCreation
         GameObject current;
         AvatarOption currentOption;
         FaceData face;
-        RenderTexture faceTexture;
+        Outfit outfit = new Outfit();
+        RenderTexture faceTexture, hairTexture, bodyTexture, glossTexture, hairCardTexture;
         readonly System.Collections.Generic.List<(Material material, Texture original)> heads =
             new System.Collections.Generic.List<(Material, Texture)>();
+        Material bodyMaterial, hairCardMaterial;
+        Texture bodyOriginal, hairCardOriginal;
         float bodyHeight = 1.75f;
         float yaw;        // 0 = kameraga qaragan, 90 = o'ng yoni, 180 = orqasi
         float targetYaw;
@@ -78,8 +86,9 @@ namespace CraDev.CharacterCreation
         {
             if (current != null)
                 Destroy(current);
-            heads.Clear();
+            current = null;
             currentOption = option;
+            CollectMaterials();
             if (option.model == null)
                 return;
 
@@ -105,14 +114,30 @@ namespace CraDev.CharacterCreation
                     break;
                 }
             swapTime = 0f;
-            ApplyFace();
+            CollectMaterials();
+            ApplyHeads();
+            ApplyOutfit();
         }
+
+        /// <summary>Hozirgi avatar (garderob rasmchalari uchun).</summary>
+        public AvatarOption CurrentOption => currentOption;
+
+        /// <summary>Hozirgi kiyim (nusxasi).</summary>
+        public Outfit Outfit => outfit.Clone();
 
         /// <summary>O'yinchi yuzini qo'yadi (null - olib tashlaydi). Avatar almashsa yuz yangisiga ham qo'yiladi.</summary>
         public void SetFace(FaceData data)
         {
             face = data;
-            ApplyFace();
+            ApplyHeads();
+        }
+
+        /// <summary>Kiyimni qo'yadi (garderob). Avatar almashsa kiyim yangisiga ham qo'yiladi.</summary>
+        public void SetOutfit(Outfit value)
+        {
+            outfit = value?.Clone() ?? new Outfit();
+            ApplyHeads();
+            ApplyOutfit();
         }
 
         /// <summary>Kamerani yuzga yaqinlashtirib, qahramonni old tomoniga buradi: yuz natijasi ko'rinadi.</summary>
@@ -122,16 +147,33 @@ namespace CraDev.CharacterCreation
             targetZoom = 1f;
         }
 
-        void ApplyFace()
+        /// <summary>Avatar materiallarining nusxalari (asl model materiallariga tegilmaydi): bosh, tana, soch/kipriklar.</summary>
+        void CollectMaterials()
+        {
+            heads.Clear();
+            bodyMaterial = hairCardMaterial = null;
+            bodyOriginal = hairCardOriginal = null;
+            if (current == null)
+                return;
+            foreach (var renderer in current.GetComponentsInChildren<Renderer>())
+                foreach (var material in renderer.materials)
+                {
+                    if (material.mainTexture == null)
+                        continue;
+                    if (material.name.Contains("_head"))
+                        heads.Add((material, material.mainTexture));
+                    else if (material.name.Contains("_body") && bodyMaterial == null)
+                        (bodyMaterial, bodyOriginal) = (material, material.mainTexture);
+                    else if (material.name.Contains("_opacity") && hairCardMaterial == null)
+                        (hairCardMaterial, hairCardOriginal) = (material, material.mainTexture);
+                }
+        }
+
+        /// <summary>Bosh: avval o'yinchi yuzi chiziladi, ustidan soch rangi.</summary>
+        void ApplyHeads()
         {
             if (current == null)
                 return;
-            if (heads.Count == 0)
-                foreach (var renderer in current.GetComponentsInChildren<Renderer>())
-                    foreach (var material in renderer.materials) // nusxa: asl model materiallariga tegilmaydi
-                        if (material.name.Contains("_head") && material.mainTexture != null)
-                            heads.Add((material, material.mainTexture));
-
             var old = faceTexture;
             faceTexture = null;
             bool paint = face != null && currentOption != null && currentOption.SupportsFace && facePaint != null;
@@ -139,16 +181,43 @@ namespace CraDev.CharacterCreation
             {
                 if (paint && faceTexture == null)
                     faceTexture = FacePainter.Paint(original, face, currentOption.faceUv, currentOption.faceTriangles, facePaint);
-                material.mainTexture = paint ? faceTexture : original;
+                Texture result = paint ? faceTexture : original;
+                if (OutfitPainter.PaintHair(result, currentOption, outfit, outfitPaint, false, ref hairTexture))
+                    result = hairTexture;
+                material.mainTexture = result;
             }
             if (old != null)
                 old.Release();
+
+            if (hairCardMaterial != null)
+                hairCardMaterial.mainTexture = OutfitPainter.PaintHair(hairCardOriginal, currentOption, outfit, outfitPaint, true, ref hairCardTexture)
+                    ? hairCardTexture : hairCardOriginal;
+        }
+
+        /// <summary>Tana: ustki kiyim, shim, oyoq kiyim rangi va matosi (charm yaltiroq, jinsi xira).</summary>
+        void ApplyOutfit()
+        {
+            if (bodyMaterial == null)
+                return;
+            if (OutfitPainter.PaintBody(bodyOriginal, currentOption, outfit, outfitPaint, ref bodyTexture, ref glossTexture))
+            {
+                bodyMaterial.mainTexture = bodyTexture;
+                bodyMaterial.SetTexture("_MetallicGlossMap", glossTexture);
+                bodyMaterial.SetFloat("_GlossMapScale", 1f);
+                bodyMaterial.EnableKeyword("_METALLICGLOSSMAP");
+            }
+            else
+            {
+                bodyMaterial.mainTexture = bodyOriginal;
+                bodyMaterial.DisableKeyword("_METALLICGLOSSMAP");
+            }
         }
 
         void OnDestroy()
         {
-            if (faceTexture != null)
-                faceTexture.Release();
+            foreach (var texture in new[] { faceTexture, hairTexture, bodyTexture, glossTexture, hairCardTexture })
+                if (texture != null)
+                    texture.Release();
         }
 
         /// <summary>Qahramonni berilgan tomonga eng qisqa yo'l bilan buradi.</summary>

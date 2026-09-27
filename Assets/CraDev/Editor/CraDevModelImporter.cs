@@ -32,6 +32,8 @@ namespace CraDev.EditorTools
             string file = Path.GetFileNameWithoutExtension(assetPath).ToLowerInvariant();
             importer.textureType = file.Contains("normal") ? TextureImporterType.NormalMap : TextureImporterType.Default;
             importer.alphaIsTransparency = file.Contains("opacity");
+            // Garderob niqobi (builder yaratadi): rang emas, ma'lumot - chiziqli, o'yinda o'qiladi
+            importer.sRGBTexture = !file.EndsWith("_outfit");
             importer.mipmapEnabled = true;
             importer.maxTextureSize = 2048;
             importer.textureCompression = TextureImporterCompression.CompressedHQ;

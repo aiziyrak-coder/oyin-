@@ -1,97 +1,274 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
+import { MAX_PENDING_REQUESTS } from './db.js';
+import { upcomingEvents } from './events.js';
 import { GENDERS, isValidAvatar, nicknameKey, validateNickname } from './nickname.js';
 
 const MAX_BODY_BYTES = 4 * 1024;
+const MAX_OUTFIT_LENGTH = 1024;
+const MAX_QUERY_LENGTH = 24;
+const LEADERBOARD_DEFAULT = 20;
+const LEADERBOARD_MAX = 50;
+
+// Daqiqasiga (windowMs) ruxsat etilgan so'rovlar. social: do'stlar va tavsiyalar uchun umumiy.
+// Odatda bir IP uchun; profil (me) va heartbeat (presence) esa har bir o'yinchi uchun alohida hisoblanadi,
+// chunki bitta IP ortida (kompyuter klubi, NAT, proksi) ko'p o'yinchi bo'lishi mumkin.
+export const DEFAULT_RATE_LIMITS = { check: 60, create: 10, social: 120, search: 60, presence: 120 };
 
 /**
  * HTTP so'rovlarini qayta ishlovchi funksiyani yaratadi.
+ * (A) - "Authorization: Bearer <token>" kerak, aks holda 401 { error: 'unauthorized' }.
+ * Cheklovdan oshsa 429 { error: 'too_many_requests' }, buzilgan so'rov manzili 400 { error: 'bad_request' }.
  *
- * GET  /health                                  -> { ok: true }
- * GET  /api/nicknames/availability?name=<nick>  -> { name, available, reason?, message? }
- * POST /api/players { nickname, gender, avatarId } -> 201 { id, nickname, gender, avatarId, token, createdAt }
- *                                                  409 { error: 'nickname_taken' }
- * GET   /api/players/me   (Authorization: Bearer <token>) -> { id, nickname, gender, avatarId, createdAt } | 401
- * PATCH /api/players/me   { avatarId }                    -> yangilangan o'yinchi | 400 invalid_avatar | 401
+ * GET   /health                                  -> { ok: true }
+ * GET   /api/nicknames/availability?name=<nick>  -> { name, available, reason?, message? }
+ * POST  /api/players { nickname, gender, avatarId }
+ *                          -> 201 { id, publicId, nickname, gender, avatarId, token, createdAt }
+ *                             409 { error: 'nickname_taken' }
+ * GET   /api/players/me (A) -> { id, publicId, nickname, gender, avatarId, outfit, country, showOnline, allowRequests,
+ *                                createdAt, onlineSeconds }
+ * PATCH /api/players/me (A) { avatarId?, outfit?, country?, showOnline?, allowRequests? } -> yangilangan o'yinchi
+ *                             400 invalid_avatar | invalid_outfit | invalid_country | invalid_showOnline |
+ *                                 invalid_allowRequests | nothing_to_update
+ * POST  /api/presence (A)   -> { online, players }  (mijoz har 30 soniyada yuboradigan heartbeat)
+ * GET   /api/stats          -> { online, players }
+ * GET   /api/players/search?q=<matn> (A) -> [summary] (ko'pi bilan 20) | 400 invalid_query
+ * GET   /api/players/suggested (A)       -> [summary] (ko'pi bilan 10)
+ * GET   /api/friends (A)                 -> { friends: [summary], incoming: [summary], outgoing: [summary] }
+ *                                           (incoming va outgoing ko'pi bilan MAX_PENDING_REQUESTS ta)
+ * POST  /api/friends/request (A) { nickname } -> { friendship } | 404 not_found | 400 self | 403 requests_disabled
+ *                                              | 403 too_many_pending (chiquvchi so'rovlar MAX_PENDING_REQUESTS ta)
+ * POST  /api/friends/accept  (A) { nickname } -> { friendship: 'friends' } | 404 no_request
+ * POST  /api/friends/remove  (A) { nickname } -> { friendship: 'none' } (munosabat yoki o'yinchi bo'lmasa ham)
+ *       friends/* tanasi noto'g'ri bo'lsa: 400 bad_json | invalid_nickname
+ * GET   /api/leaderboard?limit=N -> [{ rank, nickname, avatarId, gender, minutes }] (N: 20, ko'pi bilan 50;
+ *                                   onlayn holatini yashirgan o'yinchilar ko'rsatilmaydi)
+ * GET   /api/events              -> [{ id, zone, title: { uz, en }, place: { uz, en }, startsAt, endsAt }]
+ *
+ * summary = { nickname, avatarId, gender, online, friendship: 'none' | 'friends' | 'outgoing' | 'incoming' }
+ *
+ * `now` - joriy vaqt manbai (testlar uchun almashtiriladi).
  */
-export function createApp(db, { rateLimits = { check: 60, create: 10 }, windowMs = 60_000 } = {}) {
+export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => new Date() } = {}) {
+  const limits = { ...DEFAULT_RATE_LIMITS, ...rateLimits };
   const limiter = createRateLimiter(windowMs);
 
-  return async function handle(req, res) {
-    setCors(res);
-    if (req.method === 'OPTIONS') return send(res, 204);
+  // "METOD /yo'l" -> { limit: rateLimits kaliti, bucket?: cheklovchi kaliti (standart: limit), auth?,
+  //                    perPlayer?: cheklov IP emas, o'yinchi bo'yicha (auth kerak), run }
+  // run(ctx) [status, body] qaytaradi.
+  const routes = new Map(Object.entries({
+    'GET /health': { run: () => [200, { ok: true }] },
+    'GET /api/nicknames/availability': { limit: 'check', run: checkAvailability },
+    'POST /api/players': { limit: 'create', run: createPlayer },
+    'GET /api/players/me': {
+      limit: 'check', bucket: 'me', auth: true, perPlayer: true, run: ({ player }) => [200, player],
+    },
+    'PATCH /api/players/me': { limit: 'check', bucket: 'me', auth: true, perPlayer: true, run: updateMe },
+    'POST /api/presence': { limit: 'presence', auth: true, perPlayer: true, run: heartbeat },
+    'GET /api/stats': { limit: 'check', bucket: 'public', run: ctx => [200, db.stats(ctx.now)] },
+    'GET /api/players/search': { limit: 'search', auth: true, run: searchPlayers },
+    'GET /api/players/suggested': {
+      limit: 'social', auth: true, run: ctx => [200, db.suggestedPlayers(ctx.player.id, ctx.now)],
+    },
+    'GET /api/friends': { limit: 'social', auth: true, run: ctx => [200, db.listFriends(ctx.player.id, ctx.now)] },
+    'POST /api/friends/request': { limit: 'social', auth: true, run: requestFriend },
+    'POST /api/friends/accept': { limit: 'social', auth: true, run: acceptFriend },
+    'POST /api/friends/remove': { limit: 'social', auth: true, run: removeFriend },
+    'GET /api/leaderboard': { limit: 'check', bucket: 'public', run: leaderboard },
+    'GET /api/events': { limit: 'check', bucket: 'public', run: ctx => [200, upcomingEvents(ctx.now)] },
+  }));
 
-    const url = new URL(req.url, 'http://localhost');
-    const ip = req.socket.remoteAddress ?? 'unknown';
+  function checkAvailability({ url }) {
+    const name = url.searchParams.get('name') ?? '';
+    const check = validateNickname(name);
+    if (!check.ok) return [200, { name, available: false, reason: check.reason, message: check.message }];
+    const taken = db.isNicknameTaken(nicknameKey(check.nickname));
+    return [200, taken
+      ? { name: check.nickname, available: false, reason: 'taken', message: 'This nickname is already taken.' }
+      : { name: check.nickname, available: true }];
+  }
 
+  async function createPlayer({ req, now }) {
+    const body = await readJson(req);
+    if (body === null) return [400, { error: 'bad_json' }];
+
+    const check = validateNickname(body.nickname);
+    if (!check.ok) return [400, { error: 'invalid_nickname', reason: check.reason, message: check.message }];
+    if (!GENDERS.includes(body.gender)) return [400, { error: 'invalid_gender' }];
+    if (!isValidAvatar(body.avatarId, body.gender)) return [400, { error: 'invalid_avatar' }];
+
+    // Token keyinchalik o'yinchini tanish uchun; bazada faqat uning xeshi saqlanadi
+    const token = randomBytes(32).toString('hex');
+    const player = {
+      id: randomUUID(),
+      nickname: check.nickname,
+      nicknameKey: nicknameKey(check.nickname),
+      gender: body.gender,
+      avatarId: body.avatarId,
+      tokenHash: sha256(token),
+      createdAt: now.toISOString(),
+    };
+    const publicId = db.insertPlayer(player);
+    if (publicId === null) return [409, { error: 'nickname_taken', message: 'This nickname is already taken.' }];
+    return [201, {
+      id: player.id, publicId, nickname: player.nickname, gender: player.gender, avatarId: player.avatarId, token,
+      createdAt: player.createdAt,
+    }];
+  }
+
+  /** Faqat yuborilgan ma'lum maydonlar o'zgaradi; bittasi noto'g'ri bo'lsa hech narsa yozilmaydi. */
+  async function updateMe({ req, player }) {
+    const body = await readJson(req);
+    if (body === null) return [400, { error: 'bad_json' }];
+
+    const changes = {};
+    for (const [field, rule] of Object.entries(PROFILE_FIELDS)) {
+      if (!Object.hasOwn(body, field)) continue;
+      if (!rule.valid(body[field], player)) return [400, { error: rule.error }];
+      changes[field] = body[field];
+    }
+    if (Object.keys(changes).length === 0) return [400, { error: 'nothing_to_update' }];
+
+    db.updatePlayer(player.id, changes);
+    return [200, db.getPlayer(player.id)];
+  }
+
+  function heartbeat({ req, player, now }) {
+    req.resume(); // tana ixtiyoriy va ishlatilmaydi
+    db.touchPresence(player.id, now);
+    return [200, db.stats(now)];
+  }
+
+  function searchPlayers({ url, player, now }) {
+    const query = (url.searchParams.get('q') ?? '').trim();
+    if (query.length < 1 || query.length > MAX_QUERY_LENGTH) return [400, { error: 'invalid_query' }];
+    return [200, db.searchPlayers(player.id, nicknameKey(query), now)];
+  }
+
+  /**
+   * Mavjud munosabat birinchi tekshiriladi: do'stlar yoki so'rov allaqachon yuborilgan bo'lsa o'zgarmaydi,
+   * nishon chaqiruvchiga so'rov yuborgan bo'lsa u qabul qilinadi. requests_disabled faqat yangi so'rovga tegishli.
+   */
+  async function requestFriend(ctx) {
+    const { target, error } = await readTarget(ctx);
+    if (error) return error;
+    if (!target) return [404, { error: 'not_found' }];
+    if (target.id === ctx.player.id) return [400, { error: 'self' }];
+
+    const relation = db.friendship(ctx.player.id, target.id);
+    if (relation === 'friends' || relation === 'outgoing') return [200, { friendship: relation }];
+    if (relation === 'incoming') {
+      db.acceptFriendRequest(target.id, ctx.player.id);
+      return [200, { friendship: 'friends' }];
+    }
+    if (!target.allowRequests) return [403, { error: 'requests_disabled' }];
+    if (db.pendingOutgoingCount(ctx.player.id) >= MAX_PENDING_REQUESTS) return [403, { error: 'too_many_pending' }];
+    db.addFriendRequest(ctx.player.id, target.id, ctx.now);
+    return [200, { friendship: 'outgoing' }];
+  }
+
+  /** Faqat kiruvchi kutilayotgan so'rov qabul qilinadi; boshqa har qanday holatda (o'zi, noma'lum nickname) 404. */
+  async function acceptFriend(ctx) {
+    const { target, error } = await readTarget(ctx);
+    if (error) return error;
+    if (!target || !db.acceptFriendRequest(target.id, ctx.player.id)) return [404, { error: 'no_request' }];
+    return [200, { friendship: 'friends' }];
+  }
+
+  /** Har qanday munosabatni o'chiradi; o'yinchi topilmasa yoki o'zi bo'lsa ham munosabat baribir 'none'. */
+  async function removeFriend(ctx) {
+    const { target, error } = await readTarget(ctx);
+    if (error) return error;
+    if (target) db.removeFriendship(ctx.player.id, target.id);
+    return [200, { friendship: 'none' }];
+  }
+
+  /** Tanadagi { nickname } bo'yicha o'yinchi: { target } (topilmasa undefined) yoki { error: [status, body] }. */
+  async function readTarget({ req }) {
+    const body = await readJson(req);
+    if (body === null) return { error: [400, { error: 'bad_json' }] };
+    if (typeof body.nickname !== 'string') return { error: [400, { error: 'invalid_nickname' }] };
+    return { target: db.findPlayerByNicknameKey(nicknameKey(body.nickname.trim())) };
+  }
+
+  function leaderboard({ url }) {
+    const raw = url.searchParams.get('limit');
+    const limit = raw !== null && /^\d+$/.test(raw)
+      ? Math.min(Math.max(Number(raw), 1), LEADERBOARD_MAX)
+      : LEADERBOARD_DEFAULT;
+    return [200, db.leaderboard(limit)];
+  }
+
+  /** Bitta so'rovni bajaradi va [status, body] qaytaradi. */
+  async function dispatch(req) {
+    let url;
     try {
-      if (req.method === 'GET' && url.pathname === '/health') {
-        return send(res, 200, { ok: true });
-      }
+      url = new URL(req.url, 'http://localhost');
+    } catch {
+      // HTTP tahlilchisi o'tkazib yuboradigan, lekin URL bo'lmagan manzil (masalan "GET http://a:99999/")
+      return [400, { error: 'bad_request' }];
+    }
 
-      if (req.method === 'GET' && url.pathname === '/api/nicknames/availability') {
-        if (!limiter.allow(`check:${ip}`, rateLimits.check)) return send(res, 429, { error: 'too_many_requests' });
-        const name = url.searchParams.get('name') ?? '';
-        const check = validateNickname(name);
-        if (!check.ok) return send(res, 200, { name, available: false, reason: check.reason, message: check.message });
-        const taken = db.isNicknameTaken(nicknameKey(check.nickname));
-        return send(res, 200, taken
-          ? { name: check.nickname, available: false, reason: 'taken', message: 'This nickname is already taken.' }
-          : { name: check.nickname, available: true });
-      }
+    const route = routes.get(`${req.method} ${url.pathname}`);
+    if (!route) return [404, { error: 'not_found' }];
 
-      if (req.method === 'POST' && url.pathname === '/api/players') {
-        if (!limiter.allow(`create:${ip}`, rateLimits.create)) return send(res, 429, { error: 'too_many_requests' });
-        const body = await readJson(req);
-        if (body === null) return send(res, 400, { error: 'bad_json' });
+    const bucket = route.bucket ?? route.limit;
+    // IP bo'yicha cheklov token tekshirilishidan oldin, o'yinchi bo'yicha cheklov esa undan keyin
+    if (route.limit && !route.perPlayer
+      && !limiter.allow(`${bucket}:${req.socket.remoteAddress ?? 'unknown'}`, limits[route.limit])) {
+      return [429, { error: 'too_many_requests' }];
+    }
 
-        const check = validateNickname(body.nickname);
-        if (!check.ok) return send(res, 400, { error: 'invalid_nickname', reason: check.reason, message: check.message });
-        if (!GENDERS.includes(body.gender)) return send(res, 400, { error: 'invalid_gender' });
-        if (!isValidAvatar(body.avatarId, body.gender)) return send(res, 400, { error: 'invalid_avatar' });
+    const ctx = { req, url, now: now() };
+    if (route.auth) {
+      const token = bearerToken(req);
+      ctx.player = token ? db.findPlayerByTokenHash(sha256(token)) : undefined;
+      if (!ctx.player) return [401, { error: 'unauthorized' }];
+    }
+    if (route.perPlayer && !limiter.allow(`${bucket}:player:${ctx.player.id}`, limits[route.limit])) {
+      return [429, { error: 'too_many_requests' }];
+    }
 
-        // Token keyinchalik o'yinchini tanish uchun; bazada faqat uning xeshi saqlanadi
-        const token = randomBytes(32).toString('hex');
-        const player = {
-          id: randomUUID(),
-          nickname: check.nickname,
-          nicknameKey: nicknameKey(check.nickname),
-          gender: body.gender,
-          avatarId: body.avatarId,
-          tokenHash: createHash('sha256').update(token).digest('hex'),
-          createdAt: new Date().toISOString(),
-        };
-        if (!db.insertPlayer(player)) {
-          return send(res, 409, { error: 'nickname_taken', message: 'This nickname is already taken.' });
-        }
-        return send(res, 201, {
-          id: player.id, nickname: player.nickname, gender: player.gender, avatarId: player.avatarId, token, createdAt: player.createdAt,
-        });
-      }
+    return route.run(ctx);
+  }
 
-      if (url.pathname === '/api/players/me' && (req.method === 'GET' || req.method === 'PATCH')) {
-        if (!limiter.allow(`me:${ip}`, rateLimits.check)) return send(res, 429, { error: 'too_many_requests' });
-        const token = bearerToken(req);
-        if (!token) return send(res, 401, { error: 'unauthorized' });
-        const tokenHash = createHash('sha256').update(token).digest('hex');
-        const player = db.findPlayerByTokenHash(tokenHash);
-        if (!player) return send(res, 401, { error: 'unauthorized' });
-
-        if (req.method === 'PATCH') {
-          const body = await readJson(req);
-          if (body === null) return send(res, 400, { error: 'bad_json' });
-          if (!isValidAvatar(body.avatarId, player.gender)) return send(res, 400, { error: 'invalid_avatar' });
-          db.updateAvatar(tokenHash, body.avatarId);
-          player.avatarId = body.avatarId;
-        }
-        return send(res, 200, { ...player });
-      }
-
-      return send(res, 404, { error: 'not_found' });
+  // Hech qachon rad etilgan promise qaytarmaydi: aks holda Node jarayonni to'xtatardi
+  return async function handle(req, res) {
+    try {
+      setCors(res);
+      if (req.method === 'OPTIONS') return send(res, 204);
+      const [status, body] = await dispatch(req);
+      send(res, status, body);
     } catch (err) {
       console.error(err);
-      return send(res, 500, { error: 'server_error' });
+      if (res.headersSent) res.destroy();
+      else send(res, 500, { error: 'server_error' });
     }
   };
+}
+
+// PATCH /api/players/me da o'zgartiriladigan maydonlar: tekshiruv va xato kodi
+const PROFILE_FIELDS = {
+  avatarId: { error: 'invalid_avatar', valid: (value, player) => isValidAvatar(value, player.gender) },
+  outfit: { error: 'invalid_outfit', valid: isValidOutfit },
+  country: { error: 'invalid_country', valid: value => typeof value === 'string' && /^[A-Z]{2}$/.test(value) },
+  showOnline: { error: 'invalid_showOnline', valid: value => typeof value === 'boolean' },
+  allowRequests: { error: 'invalid_allowRequests', valid: value => typeof value === 'boolean' },
+};
+
+/** Kiyim sozlamalari: JSON obyekt matni (ko'pi bilan 1024 belgi) yoki "" (standartga qaytarish). */
+function isValidOutfit(value) {
+  if (typeof value !== 'string' || value.length > MAX_OUTFIT_LENGTH) return false;
+  if (value === '') return true;
+  try {
+    const parsed = JSON.parse(value);
+    return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
+  } catch {
+    return false;
+  }
+}
+
+function sha256(text) {
+  return createHash('sha256').update(text).digest('hex');
 }
 
 function setCors(res) {
