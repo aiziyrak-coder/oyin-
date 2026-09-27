@@ -7,7 +7,7 @@ Unity'da kompyuter uchun (Steam) yaratilayotgan 3D o'yin. O'yinni bosqichma-bosq
 1. **CraDev intro**: kompaniya logosi va "A NEW ERA OF GAMING" yozuvi.
 2. **CDCGroup**: ikkinchi brendning kumush logosi.
 3. **Loading**: keyingi sahnani fonda yuklaydigan ekran (katta foiz raqami va ingichka chiziq).
-4. **Avatar yaratish** (faqat birinchi kirishda): chapda nickname va o'yinchi jinsidagi 5 ta realistik avatar,
+4. **Avatar yaratish** (faqat birinchi kirishda): chapda nickname va o'yinchi jinsidagi realistik avatarlar (4 erkak yoki 5 ayol),
    o'ngda tanlangan avatar katta ko'rinishda. Jins pasportdan olinadi, o'yinchi uni tanlamaydi.
    Nickname server'da noyob bo'lishi shart (multiplayer o'yin).
 
@@ -65,6 +65,34 @@ papkasida ishlashi kerak:
 
 Claude `CLAUDE.md` dagi yo'riqnomani o'qiydi va `tools/unity.ps1` orqali Unity'ni o'zi ishga tushiradi,
 loglarni o'qiydi va xatolarni tuzatadi.
+
+## GitHub'da avtomatik yig'ish (CI)
+
+Har bir push'dan keyin GitHub Actions (`.github/workflows/ci.yml`) o'zi:
+
+1. server testlarini ishlatadi;
+2. o'yinni haqiqiy Unity'da Windows va Linux uchun yig'adi (sahnalar ham o'sha yerda yaratiladi);
+3. Linux build'ni virtual ekranda server bilan birga ishga tushiradi va o'yinchi kabi o'tadi: intro'lar, Loading,
+   nickname yozish, avatar tanlash, qahramonni aylantirish, **Create character** (`tools/ci/smoke.sh`).
+
+Natijalar **Actions** bo'limida, har bir ishga tushirishning pastidagi **Artifacts** qismida:
+
+- **CraDev-Windows**: tayyor o'yin. ZIP'ni oching va `CraDev.exe` ni ishga tushiring.
+- **CraDev-smoke**: tekshiruv videosi (`gameplay.mp4`), skrinshotlar (`overview.jpg`) va loglar.
+
+Unity'ni ishlatish uchun GitHub'ga Unity litsenziyasi kerak. Buni **bir marta** qilasiz:
+
+1. Unity Hub'da akkauntingizga kirgan bo'ling (Personal litsenziya faol bo'lsin).
+2. Explorer manzil satriga `C:\ProgramData\Unity` ni yozing va `Unity_lic.ulf` faylini Notepad bilan oching.
+   Ichidagi hamma matnni nusxalang.
+3. GitHub'da repo → **Settings → Secrets and variables → Actions → New repository secret** va uchta secret qo'shing:
+   - `UNITY_LICENSE`: `Unity_lic.ulf` ning to'liq matni;
+   - `UNITY_EMAIL`: Unity akkauntingiz email'i;
+   - `UNITY_PASSWORD`: Unity akkauntingiz paroli (Google orqali kirgan bo'lsangiz, avval id.unity.com'da parol o'rnating).
+4. **Actions → CraDev CI → Run workflow** (yoki keyingi push'ni kuting).
+
+Secret'lar shifrlangan holda saqlanadi, loglarda ko'rinmaydi. Ularni hech kimga (chatga ham) yubormang.
+Litsenziya qo'shilmaguncha Unity job'lari o'tkazib yuboriladi, server testlari esa baribir ishlaydi.
 
 ## Server (nickname tekshiruvi)
 
@@ -137,7 +165,7 @@ Menyudagi buyruqlar Player sozlamalarini avtomatik o'rnatadi:
 ### 4. Avatar yaratish
 
 - **Chap tomon:** pasportdan olingan jins (faqat ko'rsatiladi), nickname maydoni va uning holati (tekshirilmoqda, bo'sh,
-  band, noto'g'ri), shu jinsdagi 5 ta avatar kartasi va **Create character** tugmasi. Tugma nickname server'da bo'sh
+  band, noto'g'ri), shu jinsdagi avatar kartalari va **Create character** tugmasi. Tugma nickname server'da bo'sh
   bo'lgandagina yonadi. Enter ham ishlaydi.
 - **O'ng tomon:** tanlangan qahramon katta ko'rinishda. Sichqoncha bilan chapga-o'ngga tortilsa 360° aylanadi,
   qo'yib yuborilgach eng yaqin tomonga silliq to'xtaydi. **Front / Side / Back** tugmalari ham bor. Tepasida
@@ -156,19 +184,19 @@ Menyudagi buyruqlar Player sozlamalarini avtomatik o'rnatadi:
 
 ## Realistik avatarlar (tayyorlanmoqda)
 
-Maneken o'rniga o'ta realistik 3D avatarlar bo'ladi: 5 erkak va 5 ayol, yuzsiz. O'yinchi ro'yxatdan
-o'tishda pasport ma'lumotini yuklaydi, jins shundan avtomatik olinadi. Keyin o'z jinsidagi 5 ta avatardan
+Maneken o'rniga o'ta realistik 3D avatarlar bo'ladi: 4 erkak va 5 ayol, yuzsiz. O'yinchi ro'yxatdan
+o'tishda pasport ma'lumotini yuklaydi, jins shundan avtomatik olinadi. Keyin o'z jinsidagi avatarlardan
 birini tanlaydi va yuzini skaner qiladi; yuz tanlangan avatarga qo'yiladi.
 
-Reference rasmlar tayyor: `Design/Characters/references/` (3 tomondan ko'rinish, yuzsiz). Hozircha 9 ta,
-**M4 (Tall)** rasmi hali yo'q. `Design/Characters/` da yana: avatar tavsiflari (`avatars.json`), rasm promptlari
+Reference rasmlar tayyor: `Design/Characters/references/` (3 tomondan ko'rinish, yuzsiz): erkaklar M1, M2, M3, M5
+va ayollar F1–F5. M4 kerak emas deb olib tashlangan, qolganlarining kodi o'zgarmagan. `Design/Characters/` da yana: avatar tavsiflari (`avatars.json`), rasm promptlari
 (`prompts.md`), 3D model talablari (`avatars.html`).
 
 O'yin uchun rasmlar `process_references.py` bilan tayyorlanadi: fon olib tashlanadi va har bir ko'rinish
 (old, yon, orqa) `Assets/CraDev/Avatars/Photos/` ga alohida saqlanadi. Aylanishni silliqroq qilish uchun har bir
 avatarga 45° burchakli rasmlar ham qo'shish mumkin (`prompts_quarter.md`, fayl nomi `references/<ID>_quarter.png`).
 Yangi rasm qo'shish:
-`references/M4.png` ni qo'ying, `python3 process_references.py M4` ni ishga tushiring va Unity'da
+`references/<ID>.png` ni qo'ying, `python3 process_references.py <ID>` ni ishga tushiring va Unity'da
 **CraDev → Sahnalarni yaratish** ni bosing.
 
 ## Fayllar tuzilmasi
@@ -186,7 +214,8 @@ Assets/CraDev/
   UI/Art/           ikonkalar va 9-slice spritelar
   Editor/           CraDevSceneBuilder.cs (sahna quruvchi menyu), CraDevBatch.cs (buyruq qatori), UiBuild.cs, CraDevArtImporter.cs
   Scenes/           Intro, CDCGroup, Loading, CharacterCreation (menyu orqali yaratiladi)
-tools/              unity.ps1 / unity.cmd: Unity'ni buyruq qatoridan boshqarish
+tools/              unity.ps1 / unity.cmd: Unity'ni buyruq qatoridan boshqarish; ci/smoke.sh: CI tekshiruvi
+.github/workflows/  ci.yml: GitHub'da avtomatik test, build va tekshiruv
 CLAUDE.md           Claude uchun loyiha yo'riqnomasi
 Server/             o'yin serveri (Node.js): nickname'lar va o'yinchi profillari
 Design/

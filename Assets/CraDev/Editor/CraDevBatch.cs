@@ -28,17 +28,24 @@ namespace CraDev.EditorTools
             }
         }
 
-        /// <summary>Sahnalarni yaratadi va o'yinni Builds/ papkasiga yig'adi (ishga tushirmaydi).</summary>
+        /// <summary>
+        /// Sahnalarni yaratadi va o'yinni yig'adi (ishga tushirmaydi). Standart: Builds/&lt;tizim&gt;/.
+        /// GitHub Actions (GameCI) uzatadigan <c>-customBuildTarget</c> va <c>-customBuildPath</c> ham qo'llanadi.
+        /// </summary>
         public static void BuildGame()
         {
             try
             {
                 CraDevSceneBuilder.CreateScenes();
-                var report = CraDevSceneBuilder.BuildGame(run: false);
+                var target = ResolveTarget();
+                var path = Argument("-customBuildPath") ?? CraDevSceneBuilder.DefaultBuildPath(target);
+                Debug.Log($"[CraDev] Build: {target} -> {path}");
+
+                var report = CraDevSceneBuilder.BuildGame(target, path, run: false);
                 bool ok = report.summary.result == BuildResult.Succeeded;
                 Debug.Log(ok
                     ? $"[CraDev] BATCH OK: o'yin yig'ildi: {report.summary.outputPath} ({report.summary.totalSize / (1024 * 1024)} MB)"
-                    : $"[CraDev] BATCH XATO: o'yinni yig'ib bo'lmadi ({report.summary.totalErrors} ta xato).");
+                    : $"[CraDev] BATCH XATO: o'yinni yig'ib bo'lmadi ({report.summary.result}, {report.summary.totalErrors} ta xato).");
                 EditorApplication.Exit(ok ? 0 : 1);
             }
             catch (System.Exception e)
@@ -46,6 +53,29 @@ namespace CraDev.EditorTools
                 Debug.LogError("[CraDev] BATCH XATO: " + e);
                 EditorApplication.Exit(1);
             }
+        }
+
+        static BuildTarget ResolveTarget()
+        {
+            var name = Argument("-customBuildTarget");
+            if (name != null)
+                return (BuildTarget)System.Enum.Parse(typeof(BuildTarget), name);
+
+            // "-buildTarget StandaloneLinux64" bilan ochilgan bo'lsa, o'sha tizim faol bo'ladi
+            var active = EditorUserBuildSettings.activeBuildTarget;
+            if (active == BuildTarget.StandaloneWindows64 || active == BuildTarget.StandaloneLinux64 || active == BuildTarget.StandaloneOSX)
+                return active;
+            return CraDevSceneBuilder.EditorPlatformTarget();
+        }
+
+        /// <summary>Buyruq qatoridagi "-nom qiymat" juftligidan qiymatni oladi.</summary>
+        static string Argument(string name)
+        {
+            var args = System.Environment.GetCommandLineArgs();
+            for (int i = 0; i < args.Length - 1; i++)
+                if (string.Equals(args[i], name, System.StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(args[i + 1]))
+                    return args[i + 1];
+            return null;
         }
     }
 }

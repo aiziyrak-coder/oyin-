@@ -47,6 +47,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/unity.ps1 <buyruq>
   `Packages/manifest.json`, `packages-lock.json` va `ProjectSettings/*.asset` fayllarini commit qiling.
   uGUI (`com.unity.ugui`) paketi kerak: u standart paketlar ichida bo'ladi.
 
+## GitHub CI
+
+`.github/workflows/ci.yml` har push'da: server testlari → GameCI (`game-ci/unity-builder`) bilan Unity'da
+Windows va Linux build (`CraDevBatch.BuildGame`, sahnalar ham shu yerda yaratiladi) → Linux build'ni Xvfb'da
+server bilan ishga tushirib, o'yinchi kabi o'tish va OCR bilan tekshirish (`tools/ci/smoke.sh`).
+
+- Unity job'lari `UNITY_LICENSE`, `UNITY_EMAIL`, `UNITY_PASSWORD` secret'larisiz o'tkazib yuboriladi (README'da yo'riqnoma).
+  Ularni hech qachon chatda so'ramang: foydalanuvchi o'zi GitHub Settings'ga kiritadi.
+- Bulutdagi Claude sessiyasi CI loglarini GitHub MCP (`get_job_logs`) orqali o'qiydi. Artifact'larni (video, rasm)
+  u yuklab ololmaydi, shuning uchun `smoke.sh` asosiy natijalarni (OCR matni, Player.log xatolari, PASS/FAIL) logga ham yozadi.
+- `smoke.sh` dagi sichqoncha koordinatalari `BuildCharacterCreation` joylashuvidan olingan (1920x1080):
+  forma o'zgarsa, ularni ham yangilang.
+
 ## O'yin oqimi
 
 `Intro` (CraDev, 4.2 s) → `CDCGroup` (3.5 s) → `Loading` → yangi o'yinchi uchun `CharacterCreation`,
@@ -99,7 +112,8 @@ Hamma tayyor PNG/WAV'lar `Assets/` ga commit qilingan; qayta yaratish faqat manb
 1. **Kod hali haqiqiy Unity'da ishga tushirilmagan**: u bulutda faqat Unity DLL'lariga qarshi kompilyatsiya
    qilib tekshirilgan. Birinchi ish: `check` → `scenes` → `run`, chiqqan xatolarni tuzatish va natijani
    foydalanuvchiga ko'rsatish (Play rejimida yoki `run` bilan).
-2. **M4 (Tall)** avatar rasmi yo'q: hozir erkaklar uchun 4 ta avatar. Foydalanuvchi rasmni berishi kerak.
+2. Avatarlar: erkaklar 4 ta (M1, M2, M3, M5), ayollar 5 ta (F1–F5). **M4 kerak emas** (foydalanuvchi qarori);
+   kodlar o'zgarmaydi. Ro'yxat ikki joyda: `CraDevSceneBuilder.AvatarList` va `Server/src/nickname.js` (`AVATARS`).
 3. Aylanish silliqroq bo'lishi uchun 45° rasmlar (`Design/Characters/prompts_quarter.md`) qo'shish mumkin.
 4. Foydalanuvchi keyinga qoldirgan: pasport bilan ro'yxatdan o'tish (jins shundan olinadi, hozir
    `testGender`), yuzni skaner qilish, realistik 3D modellar, `MainMenu`.

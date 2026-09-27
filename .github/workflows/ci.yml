@@ -1,0 +1,126 @@
+# CraDev CI: har bir push'da server testlari, Unity'da o'yinni yig'ish (Windows va Linux)
+# va Linux build'ni virtual ekranda ishga tushirib tekshirish (tools/ci/smoke.sh).
+#
+# Unity qismi uchun repo'da 3 ta secret kerak (Settings -> Secrets and variables -> Actions):
+#   UNITY_LICENSE  - C:\ProgramData\Unity\Unity_lic.ulf faylining to'liq matni
+#   UNITY_EMAIL    - Unity akkaunti email'i
+#   UNITY_PASSWORD - Unity akkaunti paroli
+# Ular bo'lmasa Unity job'lari o'tkazib yuboriladi (ogohlantirish bilan).
+
+name: CraDev CI
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'Design/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  server:
+    name: Server testlari
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+        working-directory: Server
+
+  license:
+    name: Unity litsenziyasi
+    runs-on: ubuntu-latest
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - id: check
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        run: |
+          if [ -n "$UNITY_LICENSE" ] && [ -n "$UNITY_EMAIL" ] && [ -n "$UNITY_PASSWORD" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Unity litsenziyasi yo'q::UNITY_LICENSE, UNITY_EMAIL va UNITY_PASSWORD secret'larini qo'shing (README: GitHub'da avtomatik yig'ish). Unity build o'tkazib yuborildi."
+          fi
+
+  build:
+    name: Build ${{ matrix.target }}
+    needs: license
+    if: needs.license.outputs.available == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [StandaloneWindows64, StandaloneLinux64]
+    steps:
+      - name: Diskda joy ochish (Unity image ~6 GB)
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          df -h /
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ matrix.target }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-${{ matrix.target }}-
+      - name: Unity build
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          targetPlatform: ${{ matrix.target }}
+          buildName: CraDev
+          # Sahnalar repo'da yo'q: bu metod avval ularni yaratadi, keyin o'yinni yig'adi
+          buildMethod: CraDev.EditorTools.CraDevBatch.BuildGame
+          versioning: None
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CraDev-${{ matrix.target == 'StandaloneWindows64' && 'Windows' || 'Linux' }}
+          path: |
+            build/${{ matrix.target }}
+            !build/${{ matrix.target }}/*DoNotShip*
+          retention-days: 30
+
+  smoke:
+    name: O'yinni ishga tushirib tekshirish
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/download-artifact@v4
+        with:
+          name: CraDev-Linux
+          path: game
+      - name: Paketlar (virtual ekran, OCR, video)
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q xvfb xdotool ffmpeg imagemagick tesseract-ocr libgl1-mesa-dri libglu1-mesa
+      - name: Smoke test
+        run: tools/ci/smoke.sh game smoke
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: CraDev-smoke
+          path: |
+            smoke
+            !smoke/frames/*.png
+          retention-days: 30
