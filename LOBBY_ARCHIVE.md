@@ -6,7 +6,7 @@ Bu sayt emas, o'yin. Asosiy ekran yagona lobby bo'ladi. Header, sahifa navigatsi
 
 - Chap: do'stlar paneli ekran chekkasiga yopishgan, yuqoridan pastgacha to'liq balandlikda (alohida suzuvchi karta emas). Yuqorida qidirish/qo'shish, onlayn filtri, boshqarish/o'chirish, so'rovlar, yangilash ikonkalari. Ro'yxat qolgan balandlikni egallaydi. NewWorld yozuvi paneldan o'ngga surilgan.
 - Markaz: mavjud 3D avatar va tasdiqlangan tungi fon.
-- O'ng: profil, sozlamalar/til/chiqish, hozirgi tadbir.
+- O'ng: bitta 384 px ustun (o'ng chetdan 64 px). Profil va tadbir bir xil kenglikda, orasida 16 px; sozlamalar/til/chiqish tepada. Kirish tugmasi shu ustunning pastiga, pastki chetdan 64 px masofaga mahkamlangan.
 - O'ng past: **NewWorldga kirish**. O'yin dunyosi hali yaratilmagan/ulanmagan; `MainMenuScreen.gameplayScene` bo'sh. Tugma xarita sahifasini ochmaydi, hali ulanmaganini ochiq bildiradi. Haqiqiy sahna keyingi topshiriqda ulanadi.
 
 ## O'chirilmagan, keyin ishlatiladigan qismlar
@@ -35,6 +35,8 @@ Ularni avtomatik qaytarmang. Foydalanuvchi keyin qayerga joylashni aytadi. Garde
 - `DevSingleLobbySmoke` / `-cradevSingleLobbySmoke`: bitta ekran, yashirin yo'llar, do'st qidirish/filtr, o'chirish tasdig'i, sozlamalar va profilni tekshiradi.
 
 Eski `-cradevAllPages` / `-cradevUiSmoke` ko'p sahifali rejim sinovlari tarix uchun saqlangan. Ular singleWindow rejimida ishlatish uchun emas.
+
+Rang: `LobbyPalette.cs` yagona accent `#2463EB` (xira slate o'rniga tiniq ko'k). Primary tugmalar, tanlangan holatlar, do'stlar amallari va switchlar shu rangdan foydalanadi. Oddiy panellar neytral to'q, shisha/blur yo'q. Ushbu o'zgarishdan oldingi saqlash nuqtasi: db71578. Chap panel joylashuvi va tungi rasmlar o'zgarmagan.
 
 ## Yakuniy tekshiruv
 

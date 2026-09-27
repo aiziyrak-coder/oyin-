@@ -25,7 +25,7 @@ namespace CraDev.MainMenu
         Coroutine debounce;
         readonly HashSet<string> busy=new HashSet<string>();
         static readonly Color Fill=new Color32(28,37,49,248);
-        static readonly Color Accent=new Color32(55,102,132,255);
+        static readonly Color Accent=LobbyPalette.Accent;
         public string Mode=>mode;
         public int VisibleCount=>visible.Length;
         public bool VisibleAreOnline=>visible.All(p=>p.online);

@@ -47,34 +47,49 @@ namespace CraDev.EditorTools
             var rows=CreateRect("FriendRows",viewport);PlaceTopLeft(rows,0,0,422,764);scroll.content=rows;
             Set(friends,"rows",rows);
 
-            var eventCard=V2Panel(root,"LobbyEvent",1420,460,430,150,V2Glass);
-            V2Icon(eventCard.transform,"Calendar",22,22,24);
-            V2Text(eventCard.transform,"home.event_next",60,12,344,44,21).color=new Color32(173,189,206,255);
-            Set(page,"eventTitle",V2Text(eventCard.transform,"",24,67,382,60,24,false));
-            V2Text(root,"lobby.enter_hint",1420,863,430,44,21).color=new Color32(190,205,220,255);
-            var enter=V2Button(root,"lobby.enter","ArrowRight",1420,925,430,68,"enter-world",blue:true);
+            // One anchored column, not independently floating cards.
+            var right=CreateRect("LobbyRightRail",root);
+            right.anchorMin=new Vector2(1,0);right.anchorMax=new Vector2(1,1);right.pivot=new Vector2(1,1);
+            right.anchoredPosition=new Vector2(-64,0);right.sizeDelta=new Vector2(384,0);
+            var eventCard=V2Panel(right,"LobbyEvent",0,264,384,126,V2Glass);
+            V2Icon(eventCard.transform,"Calendar",24,22,22).color=new Color32(146,177,241,255);
+            V2Text(eventCard.transform,"home.event_next",58,13,302,40,20).color=new Color32(169,183,204,255);
+            Set(page,"eventTitle",V2Text(eventCard.transform,"",24,60,336,46,23,false));
+            var entryHint=V2Text(right,"lobby.enter_hint",0,0,384,36,20);
+            entryHint.color=new Color32(194,207,224,255);
+            entryHint.rectTransform.anchorMin=entryHint.rectTransform.anchorMax=Vector2.zero;
+            entryHint.rectTransform.anchoredPosition=new Vector2(0,184);
+            var enter=V2Button(right,"lobby.enter","Play",0,0,384,68,"enter-world",blue:true);
             enter.name="EnterNewWorld";
+            var entryRect=(RectTransform)enter.transform;
+            entryRect.anchorMin=entryRect.anchorMax=Vector2.zero;entryRect.anchoredPosition=new Vector2(0,132);
+            var entryLabel=enter.GetComponentInChildren<Text>();entryLabel.font=v2.SemiBold;
+            PlaceTopLeft(entryLabel.rectTransform,24,0,294,68);
+            PlaceTopLeft(enter.transform.Find("Play").GetComponent<RectTransform>(),336,22,24,24);
         }
 
         static void V2GameControls(Transform home,MainMenuScreen screen)
         {
             Set(screen,"friendsPanel",home.GetComponentInChildren<LobbyFriendsPanel>());
-            var language=V2Button(home,"UZ","Globe",1598,65,110,52,localized:false);
+            var right=home.Find("LobbyRightRail");
+            var language=V2Button(right,"UZ","Globe",136,48,120,52,localized:false);
             Set(language.gameObject.AddComponent<LanguageToggle>(),"label",language.GetComponentInChildren<Text>());
-            var settings=V2Button(home,"","Gear",1720,65,60,52,"page","settings");settings.name="LobbySettings";
-            var quit=V2Button(home,"","Logout",1792,65,60,52,"quit");quit.name="LobbyQuit";
-            var hint=V2Text(home,"",1590,126,260,32,19,false);hint.alignment=TextAnchor.MiddleRight;
+            var settings=V2Button(right,"","Gear",268,48,52,52,"page","settings");settings.name="LobbySettings";
+            var quit=V2Button(right,"","Logout",332,48,52,52,"quit");quit.name="LobbyQuit";
+            PlaceTopLeft(settings.transform.Find("Gear").GetComponent<RectTransform>(),14,14,24,24);
+            PlaceTopLeft(quit.transform.Find("Logout").GetComponent<RectTransform>(),14,14,24,24);
+            var hint=V2Text(right,"",0,103,384,30,18,false);hint.alignment=TextAnchor.MiddleRight;
             foreach(var pair in new[]{(settings,"menu.settings"),(quit,"menu.quit")})
             {
                 var tip=pair.Item1.gameObject.AddComponent<LobbyIconHint>();Set(tip,"label",hint);Set(tip,"key",pair.Item2);
             }
-            var profile=V2Button(home,"","User",1420,236,430,132,"page","settings");profile.name="LobbyProfile";
+            var profile=V2Button(right,"","User",0,136,384,112,"page","settings");profile.name="LobbyProfile";
             Set(screen,"profileName",profile.GetComponentInChildren<Text>());
-            PlaceTopLeft(profile.GetComponentInChildren<Text>().rectTransform,112,24,292,45);
-            profile.GetComponentInChildren<Text>().font=v2.SemiBold;profile.GetComponentInChildren<Text>().fontSize=27;
-            var icon=profile.transform.Find("User").GetComponent<Image>();PlaceTopLeft(icon.rectTransform,24,28,64,64);
-            Set(screen,"profileIcon",icon);Set(screen,"profileThumb",V2Picture(profile.transform,"Avatar",null,24,28,64,64));
-            V2Text(profile.transform,"lobby.profile_hint",112,73,294,36,19);
+            PlaceTopLeft(profile.GetComponentInChildren<Text>().rectTransform,96,19,264,40);
+            profile.GetComponentInChildren<Text>().font=v2.SemiBold;profile.GetComponentInChildren<Text>().fontSize=25;
+            var icon=profile.transform.Find("User").GetComponent<Image>();PlaceTopLeft(icon.rectTransform,24,28,52,52);
+            Set(screen,"profileIcon",icon);Set(screen,"profileThumb",V2Picture(profile.transform,"Avatar",null,24,28,52,52));
+            V2Text(profile.transform,"lobby.profile_hint",96,62,264,32,18);
         }
     }
 }

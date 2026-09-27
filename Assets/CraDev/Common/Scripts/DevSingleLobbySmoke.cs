@@ -38,6 +38,12 @@ namespace CraDev
             Check(pages.Length==10,"all ten original pages preserved");
             Check(pages.Count(p=>p.gameObject.activeSelf)==1,"only home visible");
             Check(!lobby.GetComponentsInChildren<Transform>().Any(t=>t.name=="Navigation"||t.name=="ExploreDock"||t.name=="NavigationDock"),"no website navigation or dock");
+            var profileRect=(RectTransform)Find("LobbyProfile").transform;
+            var entryRect=(RectTransform)Find("EnterNewWorld").transform;
+            var eventRect=(RectTransform)lobby.Current.transform.Find("LobbyRightRail/LobbyEvent");
+            Check(profileRect.parent==entryRect.parent&&eventRect.parent==entryRect.parent&&profileRect.rect.width==entryRect.rect.width&&eventRect.rect.width==entryRect.rect.width&&profileRect.anchoredPosition.x==eventRect.anchoredPosition.x,"right cards share one aligned column");
+            Check(Mathf.Abs(entryRect.anchoredPosition.y-entryRect.rect.height-64)<1,"entry button keeps bottom safe margin");
+            Check(Find("EnterNewWorld").GetComponent<Image>().color==LobbyPalette.Accent,"entry uses shared vivid blue");
             foreach(string id in new[]{"world","wardrobe","shops","education","business","friends","top","entertainment"})
             {lobby.Show(id);yield return null;Check(lobby.Current.Id=="home"&&!pages.First(p=>p.Id==id).gameObject.activeSelf,"archived route blocked "+id);}
             var friends=lobby.FriendsPanel;yield return Loaded(friends);

@@ -18,7 +18,7 @@ namespace CraDev.MainMenu
         void ToggleRow(string key,bool value,int i,Action<bool> change)
         {
             var row=Row(key,"",i,()=>{change(!value);Render();});
-            var track=Panel("Switch",width-108,19,64,34,value?new Color(.22f,.43f,.52f,1):new Color(.2f,.23f,.28f,1),row.transform);
+            var track=Panel("Switch",width-108,19,64,34,value?LobbyPalette.Accent:new Color(.2f,.23f,.28f,1),row.transform);
             track.pixelsPerUnitMultiplier=1.4f;
             var knob=Panel("SwitchKnob",value?34:4,4,26,26,new Color(.91f,.94f,.97f),track.transform);
             knob.pixelsPerUnitMultiplier=1.8f;

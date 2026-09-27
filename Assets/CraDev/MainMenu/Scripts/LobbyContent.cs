@@ -35,8 +35,8 @@ namespace CraDev.MainMenu
         readonly Dictionary<string,RenderTexture> thumbnails = new Dictionary<string,RenderTexture>();
         readonly Queue<(string key,WardrobeItem item,RawImage image)> previewQueue = new Queue<(string,WardrobeItem,RawImage)>();
         Coroutine previewRoutine;
-        static readonly Color Blue = new Color32(55, 102, 132, 255);
-        static readonly Color Glass = new Color32(24, 31, 41, 242);
+        static readonly Color Blue = LobbyPalette.Accent;
+        static readonly Color Glass = LobbyPalette.Surface;
         static readonly Color Muted = new Color32(180, 189, 203, 255);
         [Serializable] class LookList { public List<string> items = new List<string>(); }
 

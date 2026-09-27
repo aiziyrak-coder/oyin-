@@ -2,6 +2,8 @@
 
 ## ENG YANGI QAROR: BITTA O'YIN LOBBYSI
 
+Oxirgi bezak tuzatishi: o'ng bloklar bitta 384 px kenglikdagi ustunda, profil/tadbir orasida 16 px, pastki kirish tugmasi 64 px chet masofasida. Ko'k rang xira slate emas, LobbyPalette.Accent = #2463EB; tugmalar/tanlangan holatlar/switchlarda bir xil. Chapdagi full-height panel va fonlar o'zgarmagan. Saqlash nuqtasi db71578; tekshiruv Logs/lobby-blue-player.log: 57 checks, 0 failures. Skrinshotlar Logs/LobbyBlue/.
+
 Foydalanuvchi ko'p sahifali sayt ko'rinishini bekor qildi. Faqat asosiy lobby va uning ustida ochiladigan sozlamalar qoladi. Header, nav va pastki sahifa doci olib tashlandi. Chapda bir panelda do'stlar/onlayn/qidirish/so'rov/o'chirish; o'ngda profil va boshqa zarur boshqaruvlar; o'ng pastda NewWorldga kirish tugmasi.
 **Hech bir eski sahifani o'chirmang yoki avtomatik qaytarmang.** Garderob ham vaqtincha yashirilgan. Foydalanuvchi keyin ularni qayerga joylashni aytadi. Barcha tafsilot va tiklash nuqtalari: `LOBBY_ARCHIVE.md`. Oldingi holat commit: e45788f.
 Yangi builder: `CraDevSceneBuilder.GameLobby.cs`; chap panel: `LobbyFriendsPanel.cs`; test: `-cradevSingleLobbySmoke`. Kirish uchun haqiqiy gameplay sahnasi hali mavjud emas; tugma buni aniq bildiradi, eski xaritaga olib o'tmaydi.

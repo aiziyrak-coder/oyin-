@@ -14,8 +14,8 @@ namespace CraDev.EditorTools
         const string V2Art = "Assets/CraDev/MainMenu/Pages/";
         static UiKit v2;
         static readonly Dictionary<string,Texture2D> v2Textures=new Dictionary<string,Texture2D>();
-        static readonly Color V2Blue = new Color32(55, 102, 132, 255);
-        static readonly Color V2Glass = new Color32(24, 31, 41, 242);
+        static readonly Color V2Blue = LobbyPalette.Accent;
+        static readonly Color V2Glass = LobbyPalette.Surface;
 
         // Faqat lobby qayta quriladi: tekshirilgan avatar niqoblarini qayta pishirmaydi.
         public static void RebuildLobby()

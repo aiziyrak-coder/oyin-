@@ -2,6 +2,9 @@
 
 ## Amaldagi yo'nalish: bitta o'yin lobbysi
 
+- [x] O'ng boshqaruvlar bitta 384 px ustunga tekislandi; profil/tadbir oralig'i 16 px, kirish pastki chetdan 64 px. Tiniq ko'k #2463EB yagona LobbyPalette orqali tarqatildi. Saqlash nuqtasi db71578.
+- [x] Yangi tartib/rang: lobby-blue-build.log Succeeded; lobby-blue-player.log 57/57 tekshiruv, 0 failure; Logs/LobbyBlue/ skrinshotlarida home va sozlamalar ko'rildi. O'yin lobbyda ochiq.
+
 - [x] Keyingi talab: do'stlar paneli chap chekkada, yuqoridan pastgacha to'liq; suzuvchi karta emas. Vertikal stretch anchor, ro'yxat ham ekran balandligiga moslashadi.
 - [x] Chap panel tekshirildi: friends-dock-build.log Succeeded; friends-dock-player.log 54/54, 0 failure. Logs/FriendsDock/home.png vizual tekshirildi.
 
