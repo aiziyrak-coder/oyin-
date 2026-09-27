@@ -497,7 +497,7 @@ namespace CraDev.MainMenu
         public void EnterWorld()
         {
             if(!string.IsNullOrWhiteSpace(gameplayScene) && Application.CanStreamedLevelBeLoaded(gameplayScene))
-                Leave(()=>SceneLoader.Switch(gameplayScene));
+                Leave(()=>SceneLoader.Load(gameplayScene));
             else Toast(Loc.T("lobby.world_pending"));
         }
 

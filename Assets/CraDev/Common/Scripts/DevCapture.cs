@@ -41,6 +41,16 @@ namespace CraDev
 
         IEnumerator Start()
         {
+            bool worldSmoke=System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevWorldSmoke")>=0;
+            bool enterWorld=worldSmoke||System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevEnterWorld")>=0;
+            if(enterWorld)
+            {
+                float enterDeadline=Time.realtimeSinceStartup+90;
+                while(SceneManager.GetActiveScene().name!="MainMenu"&&Time.realtimeSinceStartup<enterDeadline)yield return null;
+                var menu=FindFirstObjectByType<MainMenu.MainMenuScreen>();
+                if(menu!=null){yield return new WaitForSecondsRealtime(1);menu.EnterWorld();}
+                scene="WorldSandbox";
+            }
             float deadline = Time.realtimeSinceStartup + 90;
             while (SceneManager.GetActiveScene().name != scene && Time.realtimeSinceStartup < deadline)
                 yield return null;
@@ -51,6 +61,26 @@ namespace CraDev
                 yield break;
             }
             string page = Argument(System.Environment.GetCommandLineArgs(), "-cradevPage");
+            if(worldSmoke)
+            {
+                yield return DevWorldSmoke.Run();
+                yield return Shot(path);
+                var hud=FindFirstObjectByType<World.WorldHud>();hud.SetSettings(true);
+                yield return Shot(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path),"world-settings.png"));
+                hud.SetSettings(false);
+                hud.ReturnToLobby();
+                float returnDeadline=Time.realtimeSinceStartup+30;
+                while(SceneManager.GetActiveScene().name!="MainMenu"&&Time.realtimeSinceStartup<returnDeadline)yield return null;
+                bool returned=SceneManager.GetActiveScene().name=="MainMenu";
+                Debug.Log("[WorldTest] "+(returned?"PASS":"FAIL")+": return to lobby through loading");
+                if(returned)
+                {
+                    yield return new WaitForSecondsRealtime(.6f);
+                    yield return Shot(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path),"returned-lobby.png"));
+                }
+                if(quit)Application.Quit(DevWorldSmoke.Failures>0||!returned?1:0);
+                yield break;
+            }
             var lobby = FindFirstObjectByType<MainMenu.MainMenuScreen>();
             if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevPartySmoke")>=0)
                 yield return DevPartySmoke.Run(lobby,System.IO.Path.GetDirectoryName(path));
@@ -217,6 +247,8 @@ namespace CraDev
 
         IEnumerator Shot(string file)
         {
+            var directory=System.IO.Path.GetDirectoryName(file);
+            if(!string.IsNullOrEmpty(directory))System.IO.Directory.CreateDirectory(directory);
             yield return new WaitForSecondsRealtime(delay);
             yield return new WaitForEndOfFrame();
             var screenshot = ScreenCapture.CaptureScreenshotAsTexture();

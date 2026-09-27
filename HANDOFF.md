@@ -1,5 +1,17 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI — BIRINCHI SHAXS SINOV OLAMI (2026-09-28)
+
+Lobbydan NewWorldga kirish endi Loading orqali WorldSandbox sahnasini ochadi. Oddiy yer/osmon, tekis maydon, devor, 3 pog'ona, past shift, yumshoq/tik rampa va sakrash bloklari — harakat sifatini sinash uchun. Bu hozircha MAHALLIY birinchi-shaxs olami; olam ichida multiplayer/avatar locomotion replikatsiyasi hali qo'shilmagan. Lobbydagi do'stlar tizimi o'z holicha.
+
+WorldPlayerController: WASD/arrows, Shift sprint, Ctrl/C cho'kkalash (ushlab yoki sozlamadan toggle), Space sakrash, mouse-look. CharacterController collider, silliq tezlanish/to'xtash, gravitatsiya, coyote/buffer, qiyalik limiti, shift ostida turishga blok, y<-40 respawn, fokus yo'qolganda pause. Birinchi shaxsda tana modeli ko'rsatilmaydi. O'tirish bu bosqichda cho'kkalash; kreslo/seat interaction emas.
+
+WorldHud/WorldPreferences: chap yuqori mini-xarita (256 RenderTexture, 30 Hz, north-up, heading arrow), Esc alohida sozlamalar (sensitivity/FOV/invert/headbob/togglecrouch), lobbyga qaytish. cradev.world.* prefiks, lobby sozlamalaridan alohida. Dunyo butun vaqtini to'xtatmaydi, faqat player input/harakat pauza qilinadi.
+
+Qurish: CraDevBatch.BuildLobby endi lobby VA WorldSandbox builderlarini bajaradi; sahna qo'lda tahrirlanmaydi. Yangi asos: CraDevSceneBuilder.World.cs, World/Scripts, World/Shaders/WorldGround.shader. O'yin Builds/LobbyV2/CraDev.exe.
+
+Tekshiruv: Logs/world-build2.log Succeeded (shader xatosiz); Logs/world-player2.log 63 tekshiruv/0 xato, 30/60/120 FPS yurish farqi 0.0046 m, avg239.7 FPS (2.2sec sample, RTX3060). Zina muammosi center-ray ground probe bilan tuzatildi; rampalar ham o'tdi. Server 57/57. Tasvirlar Logs/World/world.png, world-settings.png, returned-lobby.png. Test: -cradevShot <png> -cradevWorldSmoke -cradevQuit; oddiy olamni avtomatik ochish: -cradevShot <png> -cradevEnterWorld. Profilga test ma'lumoti yozilmaydi. Oldingi lobby saqlash nuqtasi c7d51e3.
+
 ## PERSONAJ MASSHTABI VA ARALASH GURUH
 
 Qo'shimcha 0.68 avatar masshtabi olib tashlandi, ModelRoot scale=1; UI va kamera avvalgi ixcham holatda. 5 a'zo bir qatorda emas: mezbon markazda, mehmonlar xavfsiz X yo'laklarida tasodifiy tartib va old-orqa chuqurlikda. Formation(roomId) deterministik, heartbeatda sakramaydi; perspektiva X oralig'ini toraytirmaydi. Tekshiruv: Logs/formation-build.log va formation-player.log.

@@ -22,6 +22,7 @@ namespace CraDev.EditorTools
         {
             AssetDatabase.Refresh();
             BuildMainMenu();
+            BuildWorldSandbox();
             AssetDatabase.SaveAssets();
             Debug.Log("[CraDev] Lobby V2 sahnasi yaratildi.");
         }
@@ -153,6 +154,7 @@ namespace CraDev.EditorTools
             root.gameObject.AddComponent<GraphicRaycaster>();
             CreateEventSystem();
             var screen = root.gameObject.AddComponent<MainMenuScreen>();
+            Set(screen,"gameplayScene","WorldSandbox");
             var camera = Camera.main;
             var bgCamera = new GameObject("BackgroundCamera").AddComponent<Camera>();
             bgCamera.depth = -1; bgCamera.cullingMask = 1 << 5;

@@ -1,5 +1,16 @@
 # NewWorld Lobby
 
+## O'yin olami — tayyor sinov asosi
+
+- [x] Lobby kirish -> Loading -> WorldSandbox, qaytish Esc menyusidan.
+- [x] Oddiy yer/osmon, harakat uchun devor/zina/past shift/rampalar.
+- [x] Birinchi shaxs WASD/mouse, Shift yugurish, Ctrl/C cho'kkalash, Space sakrash; silliq tezlanish va to'xtash.
+- [x] Collider, gravity, step/slope, stand clearance, pitch clamp, fokus/pauza, respawn.
+- [x] Chap-yuqori mini-xarita va olam uchun alohida Esc sozlamalari, UZ/EN.
+- [x] Build hamda 63 runtime assertion xatosiz; server 57 test xatosiz. Zina ilinish bugi topildi va tuzatildi. Logs/World/ va Logs/world-player2.log.
+- [ ] Olam ichidagi multiplayer harakat va ko'rinadigan tana animatsiyasi — bu mahalliy birinchi-shaxs fizik sinoviga kiritilmagan, keyingi alohida bosqich.
+- Saqlash nuqtasi c7d51e3 (olamdan oldingi tayyor lobby).
+
 ## Kattaroq personaj va aralash joylashuv
 
 - Qo'shimcha 0.68 scale bekor qilindi: avatar eski kattaroq scale=1 holatda, UI o'lchami o'zgarmadi.

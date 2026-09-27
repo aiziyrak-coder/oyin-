@@ -31,7 +31,8 @@ namespace CraDev.EditorTools
         const string LoadingScene = ScenesFolder + "Loading.unity";
         const string CreationScene = ScenesFolder + "CharacterCreation.unity";
         const string MenuScene = ScenesFolder + "MainMenu.unity";
-        static readonly string[] AllScenes = { IntroScene, CdcScene, LoadingScene, CreationScene, MenuScene };
+        const string WorldScene = ScenesFolder + "WorldSandbox.unity";
+        static readonly string[] AllScenes = { IntroScene, CdcScene, LoadingScene, CreationScene, MenuScene, WorldScene };
 
         const string IntroArt = "Assets/CraDev/Intro/Art/";
         const string CdcArt = "Assets/CraDev/CDCGroup/Art/";
@@ -80,6 +81,7 @@ namespace CraDev.EditorTools
             BuildLoading();
             BuildCharacterCreation();
             BuildMainMenu();
+            BuildWorldSandbox();
 
             // O'yin shu tartibda boshlanadi; boshqa sahnalar ro'yxatda ulardan keyin qoladi
             var buildScenes = EditorBuildSettings.scenes.Where(s => !AllScenes.Contains(s.path)).ToList();
