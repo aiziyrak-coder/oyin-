@@ -1,5 +1,11 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## SO‘NGGI: FULL-HEIGHT COLLAPSIBLE FRIENDS
+
+Left friends panel now stretches from top offset124 to bottom24 at preserved 65% scale. Footer bottom anchored, scroll viewport expands. LobbyFriendsDrawer slide toggle (‹/›, 0.22sec, no raycasts when hidden), social actions reopen it. Backup90eeed4; logs friends-drawer-build/player, screenshots Logs/FriendsDrawer.
+SEATING CLARIFICATION RESOLVED: host + 4 invited friends = FIVE total. Center THREE-seat sofa (host center), TWO single armchairs at sides. Above each: nickname, online, three-bar connection-quality icon green/yellow/red based on measured ping. Seating, party invites and nameplates are still TODO; old pending-count clarification below is superseded. Do not ask chair count again.
+
+
 ## ENG YANGI TALAB: 35% IXCHAM + O‘TIRADIGAN PARTY LOBBY
 
 35% shrink implemented in builder: UI CanvasScaler reference size /0.65, right action stack bottom anchored, settings centered, avatar camera framing 65%. Backup 78d7626. User also requests seated multiplayer lobby with natural idle motion. Seating/invites are NOT implemented yet. Async clarification pending: one two-person sofa + two armchairs (4 seats), or five two-person sofas + two armchairs (12 seats)? Current assets have only standing generic Rocketbox idle animations, no seat furniture; server currently has friends but no party/invite routes. Continue after resolving chair count; preserve real profiles, backup DB before changes, test invite permissions/capacity/leave/disconnect and multiple clients. No fake friends accepted by tests. Shrink logs compact-lobby-build.log / compact-lobby-player.log and Logs/CompactLobby/.

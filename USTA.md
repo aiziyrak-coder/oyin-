@@ -1,5 +1,13 @@
 # NewWorld Lobby
 
+## Chap panel: pastgacha va yig‘iladigan
+
+- Saqlash nuqtasi 90eeed4. 65% UI masshtabi saqlandi; chap panel yuqoridan 124 UI birlik, pastdan 24 birlik masofada stretch. Ro‘yxat bo‘yi moslashadi, profil/sozlama footer pastga bog‘langan.
+- FriendsDrawerToggle chetdagi ‹/› tugma bilan 0.22 soniyada panelni chetga yig‘adi/ochadi. Yopiq panel inputni to‘smaydi, qidirish fokusi chiqariladi. O‘ngdagi do‘stlar amali yashirilgan panelni qayta ochadi.
+- O‘rindiqlar bo‘yicha noaniqlik HAL QILINGAN: jami 5 kishi (host + 4 do‘st), o‘rtada 3 kishilik divan va ikki chetda bittadan kreslo. Nickname, online va o‘lchangan pingga asoslangan yashil/sariq/qizil 3 ustuncha so‘ralgan. Bu seating/invite/nameplate qismi hali bajarilmagan, qayta o‘rindiq sonini so‘ramang.
+- Panel testlari: Logs/friends-drawer-build.log, Logs/friends-drawer-player.log, Logs/FriendsDrawer/.
+
+
 ## Ixcham UI va o‘tiradigan lobby — davom etayotgan talab
 
 - Foydalanuvchi barcha UI va personajni 35% kichraytirishni so‘radi. Oldingi ma’qullangan holat: 78d7626.

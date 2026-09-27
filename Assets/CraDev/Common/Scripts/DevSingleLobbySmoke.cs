@@ -51,7 +51,12 @@ namespace CraDev
             {lobby.Show(id);yield return null;Check(lobby.Current.Id=="home"&&!pages.First(p=>p.Id==id).gameObject.activeSelf,"archived route blocked "+id);}
             var friends=lobby.FriendsPanel;yield return Loaded(friends);
             var dock=(RectTransform)friends.transform;
-            Check(dock.anchoredPosition==new Vector2(36,-124)&&dock.rect.width==492&&dock.rect.height==896,"reference inset friends panel");
+            Check(dock.anchoredPosition==new Vector2(36,-124)&&dock.rect.width==492&&Mathf.Abs(dock.rect.height-((RectTransform)dock.parent).rect.height+148)<1,"friends panel stretches to bottom margin");
+            var drawer=lobby.Current.GetComponent<LobbyFriendsDrawer>();
+            Click("FriendsDrawerToggle");yield return new WaitForSecondsRealtime(.3f);
+            Check(drawer.Collapsed&&dock.anchoredPosition.x<=-dock.rect.width&&!dock.GetComponent<CanvasGroup>().blocksRaycasts,"drawer hidden and noninteractive");
+            Click("FriendsDrawerToggle");yield return new WaitForSecondsRealtime(.3f);
+            Check(!drawer.Collapsed&&Mathf.Abs(dock.anchoredPosition.x-36)<1&&dock.GetComponent<CanvasGroup>().blocksRaycasts,"drawer reopened with live controls");
             yield return null;Canvas.ForceUpdateCanvases();
             var names=friends.GetComponentsInChildren<Text>().Where(t=>t.name=="FriendNickname").ToArray();
             Check(names.All(t=>!string.IsNullOrEmpty(t.text)&&t.cachedTextGenerator.vertexCount>0),"friend names render inside rows");

@@ -21,6 +21,7 @@ namespace CraDev.MainMenu
         [SerializeField] InputField search;
         [SerializeField] RectTransform rows;
         [SerializeField] Button[] tools;
+        [SerializeField] LobbyFriendsDrawer drawer;
         MainMenuScreen lobby;
         FriendsResponse connections;
         PlayerSummary[] visible=Array.Empty<PlayerSummary>();
@@ -57,6 +58,7 @@ namespace CraDev.MainMenu
         public void Choose(string action)
         {
             if(lobby==null)return;
+            if(drawer!=null)drawer.SetCollapsed(false);
             if(debounce!=null){StopCoroutine(debounce);debounce=null;}
             if(action=="refresh"){Refresh();return;}
             mode=mode==action?"friends":action;

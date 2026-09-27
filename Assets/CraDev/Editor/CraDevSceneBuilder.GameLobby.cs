@@ -18,6 +18,10 @@ namespace CraDev.EditorTools
             V2Text(root,"NewWorld",142,30,350,48,36,false).font=v2.SemiBold;
             V2Text(root,"lobby.caption",144,76,370,30,19).color=new Color32(201,195,187,255);
             var panel=V2Panel(root,"LobbyFriends",36,124,492,896,new Color32(31,30,31,242));
+            panel.rectTransform.anchorMin=Vector2.zero;panel.rectTransform.anchorMax=new Vector2(0,1);
+            panel.rectTransform.sizeDelta=new Vector2(492,-148);
+            var drawer=root.gameObject.AddComponent<LobbyFriendsDrawer>();
+            var panelGroup=panel.gameObject.AddComponent<CanvasGroup>();
             var friends=panel.gameObject.AddComponent<LobbyFriendsPanel>();
             Set(friends,"font",v2.Medium);Set(friends,"rounded",v2.RoundFill);
             Set(friends,"addIcon",LineIcon("UserPlus"));Set(friends,"removeIcon",LineIcon("Minus"));Set(friends,"acceptIcon",LineIcon("Check"));
@@ -35,6 +39,12 @@ namespace CraDev.EditorTools
             var summary=V2Panel(panel.transform,"FriendSummary",388,18,86,80,V2Glass);
             Set(friends,"countLabel",V2Text(summary.transform,"",5,12,76,56,17,false));
             var field=V2Search(panel.transform,"friends.search",18,110,456);Set(friends,"search",field);
+            Set(friends,"drawer",drawer);
+            var handle=V2Button(root,"‹",null,528,148,48,76,localized:false);handle.name="FriendsDrawerToggle";
+            var arrow=handle.GetComponentInChildren<Text>();arrow.alignment=TextAnchor.MiddleCenter;arrow.fontSize=40;
+            PlaceTopLeft(arrow.rectTransform,0,0,48,76);
+            Set(drawer,"panel",panel.rectTransform);Set(drawer,"handle",handle.GetComponent<RectTransform>());Set(drawer,"content",panelGroup);
+            Set(drawer,"button",handle);Set(drawer,"arrow",arrow);Set(drawer,"search",field);
             string[] modes={"find","online","remove","requests","refresh"};
             string[] icons={"UserPlus","Users","Minus","Bell","Refresh"};
             var buttons=new Button[5];
@@ -46,11 +56,13 @@ namespace CraDev.EditorTools
             }
             SetArray(friends,"tools",buttons);
             var viewport=CreateRect("FriendViewport",panel.transform);PlaceTopLeft(viewport,18,242,456,552);
+            viewport.anchorMin=Vector2.zero;viewport.anchorMax=new Vector2(0,1);viewport.sizeDelta=new Vector2(456,-344);
             viewport.gameObject.AddComponent<RectMask2D>();
             var scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.viewport=viewport;scroll.horizontal=false;
             scroll.movementType=ScrollRect.MovementType.Clamped;scroll.scrollSensitivity=35;
             var rows=CreateRect("FriendRows",viewport);PlaceTopLeft(rows,0,0,456,552);scroll.content=rows;Set(friends,"rows",rows);
             var footer=V2Panel(panel.transform,"SelfFooter",16,810,460,70,V2Glass);
+            footer.rectTransform.anchorMin=footer.rectTransform.anchorMax=Vector2.zero;footer.rectTransform.anchoredPosition=new Vector2(16,86);
             Set(friends,"footerPortrait",V2Picture(footer.transform,"SelfPortrait",null,12,8,54,54));
             Set(friends,"footerName",V2Text(footer.transform,"",66,14,215,42,23,false));
             V2Button(footer.transform,"","Gear",326,9,56,52,"page","settings").name="LobbySettings";

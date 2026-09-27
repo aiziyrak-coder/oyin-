@@ -129,6 +129,8 @@ namespace CraDev
                 lobby.FriendsPanel.Choose("find");yield return Shot(System.IO.Path.Combine(folder,"friends-search.png"));
                 lobby.FriendsPanel.Choose("find");
                 yield return Shot(System.IO.Path.Combine(folder,"home-final.png"));
+                var drawer=lobby.Current.GetComponent<MainMenu.LobbyFriendsDrawer>();
+                if(drawer!=null){drawer.SetCollapsed(true);yield return Shot(System.IO.Path.Combine(folder,"friends-collapsed.png"));drawer.SetCollapsed(false);yield return new WaitForSecondsRealtime(.3f);}
                 if(referencePreview&&environment!=null){environment.Preview(-1);yield return new WaitForSecondsRealtime(3.5f);yield return Shot(System.IO.Path.Combine(folder,"live-clock.png"));}
                 Debug.Log("[SingleLobbyTest] CAPTURES COMPLETE; lobby left open");
                 if(quit)Application.Quit();
