@@ -1,0 +1,221 @@
+<title>CraDev Avatarlari</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&family=Unbounded:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* O'yin brendiga mos: bitta qorong'i ko'rinish */
+  :root {
+    color-scheme: dark;
+    --bg: #0e0f11;
+    --surface: #16171a;
+    --surface-2: #1c1d21;
+    --line: #26272c;
+    --text: #f2f2f3;
+    --muted: #8e939a;
+    --accent: #3d5afe;
+    --accent-soft: rgba(61, 90, 254, .14);
+    --ok: #22c55e;
+    --display: "Unbounded", "Manrope", system-ui, sans-serif;
+    --body: "Manrope", "Segoe UI", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  html, body { background: var(--bg); color: var(--text); }
+  body { font-family: var(--body); font-size: 16px; line-height: 1.6; padding-inline: 16px; padding-block: 40px 64px; }
+  .wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 40px; }
+  h1, h2, h3 { font-family: var(--display); letter-spacing: -.02em; line-height: 1.15; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(28px, 4.4vw, 44px); }
+  h2 { font-size: 22px; }
+  p { margin: 0; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+  .lead { color: var(--muted); font-size: 17px; max-width: 64ch; margin-top: 14px; }
+  button { font: inherit; cursor: pointer; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .step { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 6px; }
+  .step b { font-family: var(--display); font-size: 13px; color: var(--accent); }
+  .step span { color: var(--muted); font-size: 15px; }
+
+  .section-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 12px 24px; margin-bottom: 18px; }
+  .section-head p { color: var(--muted); max-width: 60ch; margin-top: 6px; }
+
+  /* Bo'ylar taqqoslanishi */
+  .heights { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px 20px 14px; overflow-x: auto; }
+  .bars { display: grid; grid-template-columns: repeat(10, minmax(52px, 1fr)); gap: 10px; align-items: end; height: 220px; min-width: 620px; position: relative; }
+  .bar { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; height: 100%; }
+  .bar i { display: block; width: 100%; max-width: 44px; border-radius: 8px 8px 3px 3px; background: var(--surface-2); border: 1px solid var(--line); }
+  .bar.m i { background: linear-gradient(180deg, rgba(61, 90, 254, .55), rgba(61, 90, 254, .18)); border-color: rgba(61, 90, 254, .6); }
+  .bar.f i { background: linear-gradient(180deg, rgba(242, 242, 243, .38), rgba(242, 242, 243, .10)); border-color: rgba(242, 242, 243, .35); }
+  .bar em { font-style: normal; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .bar small { font-family: var(--display); font-size: 12px; color: var(--muted); }
+  .legend { display: flex; gap: 18px; margin-top: 12px; font-size: 13px; color: var(--muted); min-width: 620px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+
+  /* Filtr */
+  .filter { display: inline-flex; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 4px; gap: 4px; }
+  .filter button { border: 0; background: transparent; color: var(--muted); font-weight: 700; font-size: 14px; padding: 8px 14px; border-radius: 7px; }
+  .filter button[aria-pressed="true"] { background: var(--surface-2); color: var(--text); box-shadow: inset 0 0 0 1px var(--line); }
+
+  /* Avatar kartalari */
+  .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; gap: 16px; align-content: start; }
+  .card-head { display: flex; align-items: center; gap: 14px; }
+  .code { font-family: var(--display); font-weight: 700; font-size: 20px; width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: #aab6ff; }
+  .card[data-gender="female"] .code { background: rgba(242, 242, 243, .08); color: var(--text); }
+  .card-head h3 { font-size: 18px; }
+  .card-head p { color: var(--muted); font-size: 14px; }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; margin: 0; font-size: 15px; }
+  dt { color: var(--muted); font-weight: 600; }
+  dd { margin: 0; }
+  .prompt { position: relative; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+  .prompt pre { margin: 0; padding: 14px 16px 16px; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; color: #c9cdd3; white-space: pre-wrap; word-break: break-word; max-height: 148px; overflow: auto; }
+  .prompt-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 8px 0 16px; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .copy { border: 1px solid var(--line); background: var(--surface-2); color: var(--text); font-weight: 700; font-size: 13px; padding: 7px 12px; border-radius: 8px; min-width: 92px; }
+  .copy.done { color: var(--ok); border-color: rgba(34, 197, 94, .45); }
+
+  .common { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+
+  /* 3D model talablari */
+  table { width: 100%; border-collapse: collapse; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-weight: 700; width: 30%; }
+  .table-box { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
+  .table-box tr:last-child th, .table-box tr:last-child td { border-bottom: 0; }
+  .note { color: var(--muted); font-size: 15px; max-width: 72ch; }
+
+  @media (max-width: 760px) {
+    .steps, .grid, .common { grid-template-columns: 1fr; }
+    th { width: 40%; }
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">CraDev · avatar yaratish</p>
+    <h1>10 ta asosiy avatar</h1>
+    <p class="lead">5 erkak va 5 ayol. Yuzlari ataylab bo'sh: o'yinchi o'z yuzini skaner qiladi va u tanlangan avatarga qo'yiladi. Jins pasport ma'lumotidan olinadi, shuning uchun o'yinchiga faqat o'z jinsidagi 5 ta avatar ko'rsatiladi. Quyidagi promptlar bilan AI rasm generatorida 3 tomondan ko'rinishli reference rasmlar yaratiladi, 3D modelchi shu rasmlar bo'yicha ishlaydi.</p>
+  </header>
+
+  <section class="steps" aria-label="Qanday ishlatiladi">
+    <div class="step"><b>1. Promptni nusxalang</b><span>Har bir avatar kartasidagi "Nusxalash" tugmasi.</span></div>
+    <div class="step"><b>2. Rasm yarating</b><span>ChatGPT, Midjourney, Leonardo yoki Flux'da. 3–4 variantdan eng yaxshisini tanlang.</span></div>
+    <div class="step"><b>3. 3D modelchiga bering</b><span>Rasmlar va pastdagi "3D model talablari" bilan birga.</span></div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div><h2>Bo'ylar</h2><p>Hamma avatar bir xil masshtabda. 3D modellarda ham shu bo'ylar saqlanadi.</p></div>
+    </div>
+    <div class="heights">
+      <div class="bars" id="bars"></div>
+      <div class="legend"><span style="--c: rgba(61, 90, 254, .6)">Erkak</span><span style="--c: rgba(242, 242, 243, .4)">Ayol</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div><h2>Avatarlar</h2><p>Teri rangi hammasida o'rtacha neytral: o'yinda u o'yinchi yuzining rangiga avtomatik moslanadi.</p></div>
+      <div class="filter" role="group" aria-label="Filtr">
+        <button type="button" id="f-all" aria-pressed="true">Hammasi</button>
+        <button type="button" id="f-male" aria-pressed="false">Erkaklar</button>
+        <button type="button" id="f-female" aria-pressed="false">Ayollar</button>
+      </div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section>
+    <div class="section-head"><div><h2>Barcha promptlar uchun</h2><p>Generator qo'llasa, "negative prompt" maydoniga yozing. Midjourney'da prompt oxiriga qo'shiladi.</p></div></div>
+    <div class="common">
+      <div class="prompt"><div class="prompt-bar">Negative prompt<button type="button" class="copy" data-copy="negative">Nusxalash</button></div><pre id="negative"></pre></div>
+      <div class="prompt"><div class="prompt-bar">Midjourney<button type="button" class="copy" data-copy="midjourney">Nusxalash</button></div><pre id="midjourney"></pre></div>
+    </div>
+    <p class="note" style="margin-top:14px">Yuz joyi bo'sh chiqmasa, rasmni qayta yarating yoki yuzni rasm tahrirlagichida (inpainting) tekislang. Uchta ko'rinish bitta rasmga sig'masa, "front view", "left side view" va "back view" ni alohida-alohida yarating.</p>
+  </section>
+
+  <section>
+    <div class="section-head"><div><h2>3D model talablari</h2><p>Modelchi uchun. Barcha 10 ta avatar bir xil standartda bo'lishi kerak, shunda yuz almashtirish va animatsiyalar hammasida ishlaydi.</p></div></div>
+    <div class="table-box">
+      <table>
+        <tr><th>Realizm</th><td>Foto-realistik, PBR materiallar. 4K teksturalar: rang (albedo), normal, roughness. Teri uchun skin shader.</td></tr>
+        <tr><th>Bosh va yuz</th><td>Bosh alohida mesh. Barcha 10 avatarda bir xil yuz topologiyasi va UV, shunda skaner qilingan yuz istalgan avatarga qo'yiladi. Mimika uchun ARKit'ning 52 ta blendshape'i.</td></tr>
+        <tr><th>Teri rangi</th><td>Shader orqali o'zgaradi: yuz skaneridagi rangga moslash uchun.</td></tr>
+        <tr><th>Skelet</th><td>Unity Humanoid'ga mos standart skelet (Character Creator yoki Mixamo), A-poza. Barcha avatarlarda bir xil suyak nomlari.</td></tr>
+        <tr><th>Poligonlar</th><td>LOD0: 50–80 ming uchburchak (kiyim va soch bilan), LOD1 va LOD2 ham bo'lsin.</td></tr>
+        <tr><th>Kiyim va soch</th><td>Alohida meshlar: keyinchalik kiyim almashtirish uchun. Soch: hair cards.</td></tr>
+        <tr><th>O'lcham va format</th><td>Real o'lcham (1 birlik = 1 metr), bo'ylar yuqoridagi jadval bo'yicha. FBX, Unity 6 uchun.</td></tr>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const DATA = __DATA__;
+  const promptFor = a => DATA.template.replace('{subject}', a.subject).replace('{hair}', a.hair).replace('{outfit}', a.outfit);
+  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // Bo'ylar: noldan boshlanadigan haqiqiy masshtab (eng balandi 190 sm)
+  const bars = document.getElementById('bars');
+  const maxH = 200;
+  for (const a of DATA.avatars) {
+    const pct = a.height / maxH * 100;
+    bars.insertAdjacentHTML('beforeend',
+      `<div class="bar ${a.gender === 'male' ? 'm' : 'f'}"><em>${a.height}</em><i style="height:${pct}%"></i><small>${a.id}</small></div>`);
+  }
+
+  const grid = document.getElementById('grid');
+  const texts = { negative: DATA.negative, midjourney: DATA.midjourney };
+  for (const a of DATA.avatars) {
+    texts[a.id] = promptFor(a);
+    grid.insertAdjacentHTML('beforeend', `
+      <article class="card" data-gender="${a.gender}">
+        <div class="card-head">
+          <div class="code">${a.id}</div>
+          <div><h3>${esc(a.name)}</h3><p>${a.gender === 'male' ? 'Erkak' : 'Ayol'} · ${a.age} yosh · ${a.height} sm</p></div>
+        </div>
+        <dl>
+          <dt>Qomat</dt><dd>${esc(a.build)}</dd>
+          <dt>Soch</dt><dd>${esc(a.hairUz)}</dd>
+          <dt>Kiyim</dt><dd>${esc(a.outfitUz)}</dd>
+        </dl>
+        <div class="prompt">
+          <div class="prompt-bar">Prompt<button type="button" class="copy" data-copy="${a.id}">Nusxalash</button></div>
+          <pre id="p-${a.id}">${esc(texts[a.id])}</pre>
+        </div>
+      </article>`);
+  }
+  document.getElementById('negative').textContent = DATA.negative;
+  document.getElementById('midjourney').textContent = DATA.midjourney;
+
+  document.addEventListener('click', async e => {
+    const btn = e.target.closest('.copy');
+    if (!btn) return;
+    const key = btn.dataset.copy;
+    const text = texts[key];
+    const pre = document.getElementById(key === 'negative' || key === 'midjourney' ? key : 'p-' + key);
+    try {
+      await navigator.clipboard.writeText(text);
+      btn.textContent = 'Nusxalandi';
+      btn.classList.add('done');
+      setTimeout(() => { btn.textContent = 'Nusxalash'; btn.classList.remove('done'); }, 1600);
+    } catch (_) {
+      // Nusxalab bo'lmasa, matnni belgilab beramiz: Ctrl+C bilan olinadi
+      const range = document.createRange();
+      range.selectNodeContents(pre);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      btn.textContent = 'Ctrl+C bosing';
+    }
+  });
+
+  const filters = { all: document.getElementById('f-all'), male: document.getElementById('f-male'), female: document.getElementById('f-female') };
+  for (const [key, btn] of Object.entries(filters)) {
+    btn.addEventListener('click', () => {
+      for (const [k, b] of Object.entries(filters)) b.setAttribute('aria-pressed', String(k === key));
+      grid.querySelectorAll('.card').forEach(c => { c.hidden = key !== 'all' && c.dataset.gender !== key; });
+    });
+  }
+})();
+</script>

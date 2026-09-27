@@ -125,6 +125,16 @@ Menyudagi buyruqlar Player sozlamalarini avtomatik o'rnatadi:
   Built-in, URP va HDRP render pipeline'larining barchasida bir xil ishlaydi.
 - Eski Input Manager ham, yangi Input System ham qo'llab-quvvatlanadi.
 
+## Realistik avatarlar (tayyorlanmoqda)
+
+Maneken o'rniga o'ta realistik 3D avatarlar bo'ladi: 5 erkak va 5 ayol, yuzsiz. O'yinchi ro'yxatdan
+o'tishda pasport ma'lumotini yuklaydi, jins shundan avtomatik olinadi. Keyin o'z jinsidagi 5 ta avatardan
+birini tanlaydi va yuzini skaner qiladi; yuz tanlangan avatarga qo'yiladi.
+
+Birinchi qadam: avatarlarning reference rasmlari. `Design/Characters/` da 10 ta avatar tavsifi
+(`avatars.json`), AI rasm generatori uchun promptlar (`prompts.md`) va 3D model talablari bor
+(`avatars.html`, `python3 build_prompts.py` bilan qayta yaratiladi).
+
 ## Fayllar tuzilmasi
 
 ```
@@ -143,6 +153,7 @@ Server/             o'yin serveri (Node.js): nickname'lar va o'yinchi profillari
 Design/
   CraDev/, CDCGroup/             logo manbalari va qayta yaratish skriptlari (build.sh)
   UI/                            ikonkalar (icons.html) va UI spritelar
+  Characters/                    10 ta avatar tavsifi, rasm promptlari, 3D model talablari
   fonts/                         shriftlar va litsenziyalari
   tools/                         umumiy yordamchi skriptlar
 ```
