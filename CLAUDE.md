@@ -110,9 +110,10 @@ Hamma tayyor PNG/WAV'lar `Assets/` ga commit qilingan; qayta yaratish faqat manb
 
 ## Holat va keyingi qadamlar
 
-1. **Kod hali haqiqiy Unity'da ishga tushirilmagan**: u bulutda faqat Unity DLL'lariga qarshi kompilyatsiya
-   qilib tekshirilgan. Birinchi ish: `check` → `scenes` → `run`, chiqqan xatolarni tuzatish va natijani
-   foydalanuvchiga ko'rsatish (Play rejimida yoki `run` bilan).
+1. Loyiha foydalanuvchi kompyuterida Unity 6000.3.24f1 bilan tekshirildi: `check` → `scenes` → `run` xatosiz,
+   o'yin Intro → CDCGroup → Loading → CharacterCreation gacha to'liq ekranda ishlaydi (server bilan).
+   Unity yaratgan `manifest.json` da uGUI yo'q edi: `com.unity.ugui` qo'lda qo'shildi. `.meta`, `Packages/`,
+   `ProjectSettings/` va sahnalar commit qilingan.
 2. Avatarlar: erkaklar 4 ta (M1, M2, M3, M5), ayollar 5 ta (F1–F5). **M4 kerak emas** (foydalanuvchi qarori);
    kodlar o'zgarmaydi. Ro'yxat ikki joyda: `CraDevSceneBuilder.AvatarList` va `Server/src/nickname.js` (`AVATARS`).
 3. Aylanish silliqroq bo'lishi uchun 45° rasmlar (`Design/Characters/prompts_quarter.md`) qo'shish mumkin.
