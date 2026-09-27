@@ -1,5 +1,19 @@
 # NewWorld Lobby
 
+## Amaldagi yo'nalish: bitta o'yin lobbysi
+
+- [x] Keyingi talab: do'stlar paneli chap chekkada, yuqoridan pastgacha to'liq; suzuvchi karta emas. Vertikal stretch anchor, ro'yxat ham ekran balandligiga moslashadi.
+- [x] Chap panel tekshirildi: friends-dock-build.log Succeeded; friends-dock-player.log 54/54, 0 failure. Logs/FriendsDock/home.png vizual tekshirildi.
+
+- [x] Oldingi ko'p sahifali holat e45788f commitda saqlandi.
+- [x] Bosh ekran + uning ustidagi sozlamalar; header/nav/pastki sahifa doci yo'q.
+- [x] Chap do'stlar paneli: qidirish, onlayn filtr, so'rovlar, tasdiq bilan o'chirish, yangilash. Boshqa sahifaga o'tmaydi.
+- [x] O'ngda profil/boshqaruvlar/tadbir, pastda NewWorldga kirish.
+- [x] Qolgan 8 sahifa va garderob o'chirilmagan, yo'llari yashirilgan. Keyingi joylashuvni foydalanuvchi aytadi. Tafsilot: LOBBY_ARCHIVE.md.
+- [x] Yangi bitta lobby buildi Succeeded; 53/53 avtomatik tekshiruv, 0 failure. Home, qidiruv, sozlamalar va bildirishnomalar skrinshotlari ko'rildi. Profil/kiyim o'zgarmadi, arxivdagi 8 yo'l ochilmasligi tekshirildi. O'yin asosiy lobbyda ochiq.
+- [x] Loglar: Logs/single-lobby-final-build.log, Logs/single-lobby-final-player.log. Skrinshotlar: Logs/SingleLobbyFinal/.
+- [ ] Haqiqiy NewWorld gameplay sahnasini keyingi topshiriqda ulash (hozir mavjud emas; tugma yashirmasdan bildiradi).
+
 ## Silliq, ixcham NewWorld dizayni — 2026-09-28
 
 - [x] Foydalanuvchi talabi: Liquid Glass olib tashlandi; ma'qullangan tungi fonlar o'zgarmadi.

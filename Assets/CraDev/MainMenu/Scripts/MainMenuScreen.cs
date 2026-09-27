@@ -37,6 +37,14 @@ namespace CraDev.MainMenu
         [Tooltip("Navigatsiya yorliqlari tartibida: har biri qaysi sahifani ochadi.")]
         [SerializeField] string[] navPages = { "home", "world", "friends", "top", "settings" };
         [SerializeField] SelectList navTabs;
+        [SerializeField] bool singleWindow;
+        [SerializeField] LobbyFriendsPanel friendsPanel;
+        [SerializeField] string gameplayScene;
+        LobbyPage settingsOverlay;
+        bool settingsOpen;
+        public bool SingleWindow => singleWindow;
+        public bool SettingsOpen => settingsOpen;
+        public LobbyFriendsPanel FriendsPanel => friendsPanel;
 
         [Header("Fon")]
         [SerializeField] RawImage backgroundA;
@@ -101,19 +109,22 @@ namespace CraDev.MainMenu
         void Start()
         {
             Cursor.visible = true;
-            navTabs.Changed += index => Show(navPages[index]);
-            bellButton.onClick.AddListener(OnBell);
-            profileButton.onClick.AddListener(() => SetMenu(!menuOpen));
-            profileMenuBlocker.onClick.AddListener(() => SetMenu(false));
-            profileMenuButtons[0].onClick.AddListener(() => { SetMenu(false); Show("wardrobe"); });
-            profileMenuButtons[1].onClick.AddListener(() => { SetMenu(false); Customize(); });
-            profileMenuButtons[2].onClick.AddListener(() => { SetMenu(false); Show("settings"); });
-            profileMenuButtons[3].onClick.AddListener(() => { SetMenu(false); AskQuit(); });
-            profileMenu.alpha = 0f;
-            profileMenu.blocksRaycasts = false;
-            profileMenuBlocker.gameObject.SetActive(false);
+            if(navTabs!=null)navTabs.Changed += index => Show(navPages[index]);
+            if(bellButton!=null)bellButton.onClick.AddListener(OnBell);
+            if(profileButton!=null)profileButton.onClick.AddListener(() => {if(singleWindow)Show("settings");else SetMenu(!menuOpen);});
+            if(profileMenu!=null)
+            {
+                profileMenuBlocker.onClick.AddListener(() => SetMenu(false));
+                profileMenuButtons[0].onClick.AddListener(() => { SetMenu(false); Show("wardrobe"); });
+                profileMenuButtons[1].onClick.AddListener(() => { SetMenu(false); Customize(); });
+                profileMenuButtons[2].onClick.AddListener(() => { SetMenu(false); Show("settings"); });
+                profileMenuButtons[3].onClick.AddListener(() => { SetMenu(false); AskQuit(); });
+                profileMenu.alpha = 0f;
+                profileMenu.blocksRaycasts = false;
+                profileMenuBlocker.gameObject.SetActive(false);
+            }
             toastGroup.alpha = 0f;
-            bellDot.enabled = false;
+            if(bellDot!=null)bellDot.enabled = false;
 
             profileName.text = PlayerProfile.Nickname;
             ShowAvatar(PlayerProfile.AvatarId);
@@ -123,9 +134,10 @@ namespace CraDev.MainMenu
             ShowProfileThumb(face);
 
             Show(homePage, immediate: true);
+            if(friendsPanel!=null)friendsPanel.Begin(this);
             Presence.Begin(serverUrl);
             StartCoroutine(CheckProfile());
-            StartCoroutine(PollNotifications());
+            if(friendsPanel==null)StartCoroutine(PollNotifications());
         }
 
         // ------------------------------------------------------------------ Sahifalar
@@ -134,6 +146,12 @@ namespace CraDev.MainMenu
 
         void Show(string id, bool immediate)
         {
+            if(singleWindow)
+            {
+                if(id=="settings"){SetSettings(true);return;}
+                if(id!=homePage)return; // Archived pages remain in the scene, but have no live route.
+                SetSettings(false);
+            }
             var page = Array.Find(pages, p => p.Id == id);
             if (page == null || leavingAt >= 0f)
                 return;
@@ -192,6 +210,7 @@ namespace CraDev.MainMenu
 
         void SyncNav(LobbyPage page)
         {
+            if(navTabs==null)return;
             if (page.NavTab >= 0)
                 navTabs.Select(page.NavTab);
             else
@@ -262,15 +281,19 @@ namespace CraDev.MainMenu
             Anim.SetAlpha(fader, Mathf.Max(fadeIn, fadeOut));
 
             menuShown = Mathf.MoveTowards(menuShown, menuOpen ? 1f : 0f, dt / 0.12f);
-            profileMenu.alpha = Ease.OutCubic(menuShown);
-            profileMenu.transform.localScale = Vector3.one * Mathf.Lerp(0.97f, 1f, Ease.OutCubic(menuShown));
+            if(profileMenu!=null)
+            {
+                profileMenu.alpha = Ease.OutCubic(menuShown);
+                profileMenu.transform.localScale = Vector3.one * Mathf.Lerp(0.97f, 1f, Ease.OutCubic(menuShown));
+            }
 
             if (toastUntil >= 0f)
                 toastGroup.alpha = Mathf.Clamp01((toastUntil - time) / 0.35f) * Mathf.Clamp01((time - (toastUntil - 3.2f)) / 0.2f);
 
             if (!ModalWindow.AnyOpen && leavingAt < 0f && Anim.BackPressed())
             {
-                if (menuOpen)
+                if(settingsOpen)SetSettings(false);
+                else if (menuOpen)
                     SetMenu(false);
                 else if (current != null && current.OnBack())
                 {
@@ -286,6 +309,7 @@ namespace CraDev.MainMenu
 
         void SetMenu(bool open)
         {
+            if(profileMenu==null)return;
             menuOpen = open;
             profileMenu.blocksRaycasts = open;
             profileMenu.interactable = open;
@@ -294,6 +318,7 @@ namespace CraDev.MainMenu
 
         void OnBell()
         {
+            if(singleWindow){friendsPanel?.Choose("requests");return;}
             if (IncomingRequests > 0)
                 Show("friends");
             else
@@ -317,7 +342,7 @@ namespace CraDev.MainMenu
         public void SetIncoming(int count)
         {
             IncomingRequests = count;
-            bellDot.enabled = count > 0 && LobbyPrefs.NotifyFriendRequests;
+            if(bellDot!=null)bellDot.enabled = count > 0 && LobbyPrefs.NotifyFriendRequests;
         }
 
         void ShowProfileThumb(FaceData face)
@@ -434,6 +459,41 @@ namespace CraDev.MainMenu
         }
 
         // ------------------------------------------------------------------ Amallar
+
+        public void SetSettings(bool open)
+        {
+            if(!singleWindow || settingsOpen==open)return;
+            settingsOverlay ??= Array.Find(pages,p=>p.Id=="settings");
+            if(settingsOverlay==null)return;
+            settingsOpen=open;
+            if(open)
+            {
+                settingsOverlay.gameObject.SetActive(true);
+                settingsOverlay.Group.alpha=1;
+                settingsOverlay.Group.blocksRaycasts=true;
+                settingsOverlay.OnShow();
+            }
+            else
+            {
+                settingsOverlay.OnHide();
+                settingsOverlay.Group.blocksRaycasts=false;
+                settingsOverlay.gameObject.SetActive(false);
+            }
+            if(current!=null){current.Group.interactable=!open;current.Group.blocksRaycasts=!open;}
+        }
+
+        public void ChooseSection(string value)
+        {
+            var target=settingsOpen?settingsOverlay:current;
+            if(target is LobbyContent content)content.Choose(value);
+        }
+
+        public void EnterWorld()
+        {
+            if(!string.IsNullOrWhiteSpace(gameplayScene) && Application.CanStreamedLevelBeLoaded(gameplayScene))
+                Leave(()=>SceneLoader.Switch(gameplayScene));
+            else Toast(Loc.T("lobby.world_pending"));
+        }
 
         public void Customize() => Leave(() =>
         {

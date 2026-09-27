@@ -1,5 +1,12 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI QAROR: BITTA O'YIN LOBBYSI
+
+Foydalanuvchi ko'p sahifali sayt ko'rinishini bekor qildi. Faqat asosiy lobby va uning ustida ochiladigan sozlamalar qoladi. Header, nav va pastki sahifa doci olib tashlandi. Chapda bir panelda do'stlar/onlayn/qidirish/so'rov/o'chirish; o'ngda profil va boshqa zarur boshqaruvlar; o'ng pastda NewWorldga kirish tugmasi.
+**Hech bir eski sahifani o'chirmang yoki avtomatik qaytarmang.** Garderob ham vaqtincha yashirilgan. Foydalanuvchi keyin ularni qayerga joylashni aytadi. Barcha tafsilot va tiklash nuqtalari: `LOBBY_ARCHIVE.md`. Oldingi holat commit: e45788f.
+Yangi builder: `CraDevSceneBuilder.GameLobby.cs`; chap panel: `LobbyFriendsPanel.cs`; test: `-cradevSingleLobbySmoke`. Kirish uchun haqiqiy gameplay sahnasi hali mavjud emas; tugma buni aniq bildiradi, eski xaritaga olib o'tmaydi.
+Tekshirildi: `Logs/single-lobby-final-build.log` Succeeded; `Logs/single-lobby-final-player.log` 53 checks, 0 failures, runtime exception yo'q. `Logs/SingleLobbyFinal/` home-final.png, settings.png, notifications.png, friends-search.png. O'yin asosiy lobbyda ochiq qoldirildi. Tungi rasmlar o'zgarmagan. Do'stlar panelidagi eski Lynxos yozuvi haqiqiy o'yinchi nomi, platforma brendi emas.
+
 ## Hozirgi talab va holat — NewWorld, 2026-09-28
 
 Foydalanuvchi Liquid Glass uslubini RAD ETDI. Tungi fonlarni yoqtirdi: `Pages/Night/` fayllarini o'zgartirmang. Platforma nomi **NewWorld**; Lynxos haqiqiy o'yinchi nickname'i bo'lishi mumkin, profil/DB nomlarini almashtirmang. Quyidagi Liquid Glass bo'limlari faqat tarix.

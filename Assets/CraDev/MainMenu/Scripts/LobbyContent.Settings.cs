@@ -32,17 +32,17 @@ namespace CraDev.MainMenu
                 Portrait(surface,PlayerProfile.AvatarId,25,25,96);
                 Text(PlayerProfile.Nickname,150,24,width-415,56,34).font=bold;
                 Text(Loc.F("settings.id",PlayerProfile.PublicId.ToString("D6")),150,80,width-415,36,23).color=Muted;
-                Button(Loc.T("settings.edit"),width-220,47,190,54,()=>Lobby.Customize());
+                if(!Lobby.SingleWindow)Button(Loc.T("settings.edit"),width-220,47,190,54,()=>Lobby.Customize());
             }
             else Text(Loc.T("settings.section."+sections[section]),25,0,width-50,85,36).font=bold;
             switch(section)
             {
                 case 0:
-                    Row("settings.row.name",PlayerProfile.Nickname+"   ›",0,()=>Lobby.Customize());
+                    Row("settings.row.name",PlayerProfile.Nickname,0,Lobby.SingleWindow?(Action)null:()=>Lobby.Customize());
                     Row("settings.row.email",Loc.T("settings.email_none"),1,()=>Lobby.Toast(Loc.T("settings.email_soon")));
                     Row("settings.row.country",Loc.T("country."+PlayerProfile.Country)+"   ›",2,Country);
                     Row("settings.row.language",Loc.Current==Language.Uz?"O'zbekcha   ›":"English   ›",3,ToggleLanguage);
-                    Row("settings.row.style",Loc.T(string.IsNullOrEmpty(PlayerProfile.Outfit)?"settings.style_original":"settings.style_custom")+"   ›",4,()=>Lobby.Show("wardrobe"));
+                    Row("settings.row.style",Loc.T(string.IsNullOrEmpty(PlayerProfile.Outfit)?"settings.style_original":"settings.style_custom"),4,Lobby.SingleWindow?(Action)null:()=>Lobby.Show("wardrobe"));
                     break;
                 case 1:
                     Row("settings.security.account",Loc.T("settings.security.account_value"),0);

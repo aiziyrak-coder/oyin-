@@ -52,6 +52,23 @@ namespace CraDev
             }
             string page = Argument(System.Environment.GetCommandLineArgs(), "-cradevPage");
             var lobby = FindFirstObjectByType<MainMenu.MainMenuScreen>();
+            if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevSingleLobbySmoke")>=0)
+            {
+                yield return new WaitForSecondsRealtime(2);
+                yield return DevSingleLobbySmoke.Run(lobby);
+                yield return new WaitForSecondsRealtime(3.5f);
+                yield return Shot(path);
+                string folder=System.IO.Path.GetDirectoryName(path)??"";
+                lobby.Show("settings");lobby.ChooseSection("0");yield return Shot(System.IO.Path.Combine(folder,"settings.png"));
+                lobby.ChooseSection("2");yield return Shot(System.IO.Path.Combine(folder,"notifications.png"));
+                lobby.SetSettings(false);
+                lobby.FriendsPanel.Choose("find");yield return Shot(System.IO.Path.Combine(folder,"friends-search.png"));
+                lobby.FriendsPanel.Choose("find");
+                yield return Shot(System.IO.Path.Combine(folder,"home-final.png"));
+                Debug.Log("[SingleLobbyTest] CAPTURES COMPLETE; lobby left open");
+                if(quit)Application.Quit();
+                yield break;
+            }
             if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevTransitionTest")>=0)
             {
                 yield return new WaitForSecondsRealtime(2);

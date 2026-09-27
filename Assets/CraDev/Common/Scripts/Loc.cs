@@ -57,6 +57,22 @@ namespace CraDev
         static readonly Dictionary<string, (string uz, string en)> Table = new Dictionary<string, (string, string)>
         {
             // ---------------- Umumiy
+            ["lobby.caption"] = ("Sizning yangi dunyongiz", "Your new world"),
+            ["lobby.enter"] = ("NewWorldga kirish", "Enter NewWorld"),
+            ["lobby.enter_hint"] = ("Sarguzasht shu yerdan boshlanadi", "Your adventure starts here"),
+            ["lobby.profile_hint"] = ("Shaxsiy profil · Sozlamalar", "Your profile · Settings"),
+            ["lobby.world_pending"] = ("NewWorld dunyosi hali ulanmagan. Kirish shu tugma orqali bo'ladi.", "The NewWorld game world is not connected yet. This is where you will enter."),
+            ["lobby.friends_hint"] = ("Do'stlaringiz bilan birga", "Together with your friends"),
+            ["lobby.tool.find"] = ("Yangi do'st qidirish", "Find new friends"),
+            ["lobby.tool.online"] = ("Faqat onlayn do'stlar", "Online friends only"),
+            ["lobby.tool.remove"] = ("Do'stlarni boshqarish", "Manage friends"),
+            ["lobby.tool.requests"] = ("Do'stlik so'rovlari", "Friend requests"),
+            ["lobby.tool.refresh"] = ("Ro'yxatni yangilash", "Refresh list"),
+            ["lobby.friend_count"] = ("{0} onlayn / {1} do'st", "{0} online / {1} friends"),
+            ["lobby.empty_friends"] = ("Hozircha do'stlar yo'q. Yuqoridagi + orqali do'st qidiring.", "No friends yet. Use + above to find someone."),
+            ["lobby.empty_online"] = ("Hozir onlayn do'stlar yo'q.", "No friends online right now."),
+            ["lobby.empty_requests"] = ("Do'stlik so'rovlari yo'q.", "No friend requests."),
+            ["lobby.remove_confirm"] = ("{0} bilan do'stlikni yoki so'rovni bekor qilasizmi?", "Remove the friendship or request with {0}?"),
             ["common.cancel"] = ("Bekor qilish", "Cancel"),
             ["common.quit"] = ("Chiqish", "Quit"),
             ["common.ok"] = ("Tushunarli", "Got it"),

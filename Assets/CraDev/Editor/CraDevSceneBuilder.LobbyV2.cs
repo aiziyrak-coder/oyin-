@@ -200,7 +200,8 @@ namespace CraDev.EditorTools
             foreach (string id in new[] { "home", "world", "wardrobe", "shops", "education", "business", "friends", "settings", "top", "entertainment" })
                 pages.Add(V2Page(root, id));
             SetArray(screen, "pages", pages.Cast<Object>().ToArray());
-            V2Navigation(root, screen);
+            Set(screen,"singleWindow",true);
+            V2GameControls(pages.First(p=>p.Id=="home").transform,screen);
             var toast = V2Panel(root, "Toast", 560, 945, 800, 78, V2Glass);
             Set(screen, "toastGroup", toast.gameObject.AddComponent<CanvasGroup>());
             Set(screen, "toastText", V2Text(toast.transform, "", 24, 0, 752, 78, 26, false));
@@ -304,7 +305,13 @@ namespace CraDev.EditorTools
             SetArray(page,"placeIcons",new Object[]{LineIcon("Music"),LineIcon("Film"),LineIcon("Gamepad"),LineIcon("Ball"),LineIcon("Home"),LineIcon("Music")});
             string bg = id == "world" ? "map" : id;
             Set(page, "background", V2Texture("clean-" + bg));
-            if (id == "home") { V2Home(rect,page); return page; }
+            if (id == "home") { V2GameHome(rect,page); return page; }
+            if(id=="settings")
+            {
+                var dim=CreateFullscreen("SettingsBackdrop",rect,new Color(0,0,0,.62f));dim.raycastTarget=true;
+                V2Panel(rect,"SettingsSheet",40,140,1830,900,new Color32(16,22,30,255)).raycastTarget=true;
+                V2Button(rect,"","Close",1788,156,60,52,"close-settings").name="SettingsClose";
+            }
             string prefix = id == "entertainment" ? "fun" : id;
             V2Text(rect, prefix + ".title", 65, 153, id == "friends" ? 660 : 590, 64, 38).font = v2.SemiBold;
             var subtitle = V2Text(rect, prefix + ".subtitle", 68, 217, 650, 38, 23);
