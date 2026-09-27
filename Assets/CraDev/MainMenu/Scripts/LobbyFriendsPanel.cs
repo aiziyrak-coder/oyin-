@@ -15,6 +15,9 @@ namespace CraDev.MainMenu
         [SerializeField] Sprite rounded, addIcon, removeIcon, acceptIcon;
         [SerializeField] Text countLabel;
         [SerializeField] Text footerName;
+        [SerializeField] RawImage footerPortrait;
+        [SerializeField] Image[] filters;
+        [SerializeField] Text[] filterCounts;
         [SerializeField] InputField search;
         [SerializeField] RectTransform rows;
         [SerializeField] Button[] tools;
@@ -37,6 +40,7 @@ namespace CraDev.MainMenu
         {
             lobby=screen;
             if(footerName!=null)footerName.text=PlayerProfile.Nickname;
+            if(footerPortrait!=null){var avatar=lobby.FindAvatar(PlayerProfile.AvatarId);if(avatar?.card!=null){footerPortrait.texture=avatar.card.texture;footerPortrait.uvRect=new Rect(.32f,.76f,.36f,.2112f);}}
             string[] actions={"find","online","remove","requests","refresh"};
             for(int i=0;i<tools.Length;i++){string action=actions[i];tools[i].onClick.AddListener(()=>Choose(action));}
             search.onValueChanged.AddListener(_=>{
@@ -65,8 +69,12 @@ namespace CraDev.MainMenu
             if(lobby==null)return;
             int request=++revision;
             Loading=true;
-            for(int i=0;i<tools.Length;i++)tools[i].GetComponent<Image>().color=
-                mode==new[]{"find","online","remove","requests","refresh"}[i]?Accent:Fill;
+            for(int i=0;i<tools.Length;i++)
+            {
+                var surface=tools[i].GetComponent<ReferenceSurface>();
+                if(surface!=null)surface.Style=mode==new[]{"find","online","remove","requests","refresh"}[i]?4:5;
+            }
+            if(filters!=null)for(int i=0;i<filters.Length;i++)filters[i].GetComponent<ReferenceSurface>().Style=mode==new[]{"friends","online","offline"}[i]?4:5;
             if(connections==null)Empty(Loc.T("common.connecting"));
             StartCoroutine(Load(request));
         }
@@ -100,7 +108,8 @@ namespace CraDev.MainMenu
         void UpdateCount()
         {
             var list=connections?.friends??Array.Empty<PlayerSummary>();
-            countLabel.text=Loc.F("lobby.friend_count",list.Count(p=>p.online),list.Length);
+            countLabel.text=list.Length.ToString();countLabel.alignment=TextAnchor.MiddleCenter;
+            if(filterCounts!=null&&filterCounts.Length==3){filterCounts[0].text=list.Length.ToString();filterCounts[1].text=list.Count(p=>p.online).ToString();filterCounts[2].text=list.Count(p=>!p.online).ToString();}
         }
         void Clear()
         {
@@ -126,19 +135,19 @@ namespace CraDev.MainMenu
             for(int i=0;i<visible.Length;i++)
             {
                 var player=visible[i];
-                var row=Panel("Friend_"+player.nickname,rows,0,i*90,w,82,Fill);
-                var portrait=Panel("Portrait",row.transform,12,16,48,48,new Color32(56,72,90,255));
+                var row=Panel("Friend_"+player.nickname,rows,0,i*72,w,70,Fill);ReferenceSurface.Apply(row,player.online?4:5,14);
+                var portrait=Panel("Portrait",row.transform,10,8,54,54,new Color32(56,72,90,255));
                 var option=lobby.FindAvatar(player.avatarId);
                 if(option?.card!=null)
                 {
-                    var photo=Rect("Avatar",portrait.transform,0,0,48,48).gameObject.AddComponent<RawImage>();
+                    var photo=Rect("Avatar",portrait.transform,0,0,54,54).gameObject.AddComponent<RawImage>();
                     photo.texture=option.card.texture;photo.uvRect=new Rect(.32f,.76f,.36f,.2112f);photo.raycastTarget=false;
                 }
                 var name=Label(row.transform,player.nickname,74,5,w-180,38,22);
                 name.name="FriendNickname";
                 name.resizeTextForBestFit=true;name.resizeTextMinSize=17;name.resizeTextMaxSize=22;
                 string state=player.friendship=="incoming"?"friends.status.incoming":player.friendship=="outgoing"?"friends.status.outgoing":player.online?"common.online":"common.offline";
-                Label(row.transform,Loc.T(state),74,43,w-90,27,17).color=player.online?new Color32(116,193,164,255):new Color32(154,172,191,255);
+                Label(row.transform,Loc.T(state),74,36,w-90,27,17).color=player.online?new Color32(53,211,139,255):new Color32(154,155,167,255);
                 if(player.friendship=="incoming")
                 {
                     ActionButton(row.transform,w-98,acceptIcon,"Accept",()=>Change(player,true),!busy.Contains(player.nickname));
@@ -149,7 +158,7 @@ namespace CraDev.MainMenu
                 else if(player.friendship!="friends")
                     ActionButton(row.transform,w-50,addIcon,"Add",()=>Change(player,false),!busy.Contains(player.nickname));
             }
-            rows.sizeDelta=new Vector2(w,Mathf.Max(rows.parent.GetComponent<RectTransform>().rect.height,visible.Length*90));
+            rows.sizeDelta=new Vector2(w,Mathf.Max(rows.parent.GetComponent<RectTransform>().rect.height,visible.Length*72));
         }
         void ConfirmRemove(PlayerSummary player)
         {

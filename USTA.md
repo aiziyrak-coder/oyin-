@@ -1,5 +1,17 @@
 # NewWorld Lobby
 
+## Reference sirtlarini tuzatish — joriy
+
+- User old brown/flat cards and two-color button rejected. Backup: 3bd3b32 (tested time/weather system).
+- New ReferenceSurface component + shared shader: charcoal vertical surfaces, soft rims, full landscape promo scrim, emerald center / golden edge primary, separate play orb. No GrabPass/blur/per-frame allocations.
+- Explicit sRGB/linear conversion preserves authored dark shades in the project's linear renderer. First QA caught over-bright grey, corrected before delivery.
+- Native filled play/users/compass glyphs; title bold 104; live friend/online/offline counts and footer portrait; 72px rows. No fabricated friends or level data.
+- Built-in generated card art: Assets/CraDev/MainMenu/Pages/reference-world.png; prompt Design/LobbyV2/ReferenceSurface/PROMPTS.md.
+- All time/weather behavior and archived pages preserved. -cradevReferencePreview is developer screenshot-only, restores local-clock mode after captures.
+- Logs: reference-surface-build-final.log / reference-surface-player-final.log. Screenshots Logs/ReferenceSurfaceFinal/. Reference screenshot uses original sunset plate; live-clock.png shows restored actual clock.
+- Final sampled-color pass: reference-surface-build-matched.log Succeeded; reference-matched-player.log 59 checks, 0 failures. Logs/ReferenceMatched contains comparison and restored live-clock captures. Primary midpoint adjusted from saturated emerald to reference grey-green, gold edge intensity reduced, native halo added.
+
+
 ## Qurilma soati va ob-havo — eng yangi qo'shimcha
 
 - Saqlash nuqtasi: fa9c4d1. Oldingi gradient dizayn saqlangan.

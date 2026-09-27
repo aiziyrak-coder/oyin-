@@ -1,5 +1,10 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## CURRENT VISUAL CORRECTION
+
+User rejected brown flat cards / flat mint-gold CTA. ReferenceSurface shader + component replaces those with charcoal gradients and thin rims, landscape promo and emerald/gold play CTA with separate orb. Shader authored colors are sRGB and explicitly converted for Linear renderer. Do not remove that conversion (otherwise cards become light grey). Landscape art in Pages/reference-world.png, prompt Design/LobbyV2/ReferenceSurface/PROMPTS.md, built-in mode. Backup 3bd3b32. Dynamic clock/weather and all archived pages remain intact. No fake friend records or level. Logs reference-surface-build-final.log / reference-surface-player-final.log; captures ReferenceSurfaceFinal. -cradevReferencePreview temporarily displays original sunset for comparison and restores real clock after capture.
+
+
 ## ENG YANGI: DYNAMIC TIME / WEATHER
 
 LobbyEnvironment mahalliy qurilma soatidan 6 kun qismi tanlaydi; soatni o'zgartirmaydi. Sozlamalar ovoz/grafika bo'limida weather selector va motion toggle bor, PlayerPrefs'da saqlanadi. User explicitly chose manual weather selection. Clear=clock, cloudy/rain/snow=manual override. 9 image files: Assets/CraDev/MainMenu/Resources/LobbyTimes; prompt manifest Design/LobbyV2/TimeWeather/PROMPTS.md. Shader CraDev/LobbyAtmosphere animates sky/water/weather without GrabPass. Async Resources loading + 2s crossfade releases old image. Backup commit fa9c4d1. Run -cradevEnvironmentTest with -cradevShot for all 9 screenshots and clock tests. Existing -cradevSingleLobbySmoke remains available. All archived pages preserved, world gameplay still unconnected.

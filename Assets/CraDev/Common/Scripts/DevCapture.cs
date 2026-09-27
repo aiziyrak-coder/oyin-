@@ -112,6 +112,14 @@ namespace CraDev
             {
                 yield return new WaitForSecondsRealtime(2);
                 yield return DevSingleLobbySmoke.Run(lobby);
+                bool referencePreview=System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevReferencePreview")>=0;
+                var environment=lobby.GetComponent<MainMenu.LobbyEnvironment>();
+                if(referencePreview&&environment!=null)
+                {
+                    environment.Preview(3);float until=Time.realtimeSinceStartup+15;
+                    while((environment.Current!=3||environment.Loading)&&Time.realtimeSinceStartup<until)yield return null;
+                    lobby.SetEnvironmentBackground(lobby.Current.Background);
+                }
                 yield return new WaitForSecondsRealtime(3.5f);
                 yield return Shot(path);
                 string folder=System.IO.Path.GetDirectoryName(path)??"";
@@ -121,6 +129,7 @@ namespace CraDev
                 lobby.FriendsPanel.Choose("find");yield return Shot(System.IO.Path.Combine(folder,"friends-search.png"));
                 lobby.FriendsPanel.Choose("find");
                 yield return Shot(System.IO.Path.Combine(folder,"home-final.png"));
+                if(referencePreview&&environment!=null){environment.Preview(-1);yield return new WaitForSecondsRealtime(3.5f);yield return Shot(System.IO.Path.Combine(folder,"live-clock.png"));}
                 Debug.Log("[SingleLobbyTest] CAPTURES COMPLETE; lobby left open");
                 if(quit)Application.Quit();
                 yield break;

@@ -43,7 +43,9 @@ namespace CraDev
             var eventRect=(RectTransform)lobby.Current.transform.Find("LobbyRightRail/LobbyEvent");
             Check(profileRect.parent==entryRect.parent&&eventRect.parent==entryRect.parent&&entryRect.rect.width==650,"reference right column and compact profile");
             Check(Mathf.Abs(entryRect.anchoredPosition.y+821)<1,"entry positioned below feature tiles");
-            Check(Find("EnterNewWorld").GetComponent<LobbyGradient>()!=null,"entry uses green gold vertex gradient");
+            Check(Find("EnterNewWorld").GetComponent<ReferenceSurface>()?.Style==1,"entry uses reference emerald gold landscape surface");
+            Check(Find("EnterNewWorld").transform.Find("PlayOrb")?.GetComponent<ReferenceSurface>()?.Style==2,"entry has separate illuminated play orb");
+            Check(lobby.Current.transform.Find("LobbyRightRail/LobbyPromo").GetComponent<ReferenceSurface>()?.Style==3,"promo uses edge-to-edge landscape with dark text scrim");
             foreach(string id in new[]{"world","wardrobe","shops","education","business","friends","top","entertainment"})
             {lobby.Show(id);yield return null;Check(lobby.Current.Id=="home"&&!pages.First(p=>p.Id==id).gameObject.activeSelf,"archived route blocked "+id);}
             var friends=lobby.FriendsPanel;yield return Loaded(friends);

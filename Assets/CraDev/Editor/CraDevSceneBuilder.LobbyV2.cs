@@ -130,6 +130,10 @@ namespace CraDev.EditorTools
 
         static void BuildMainMenu()
         {
+            const string referencePath="Assets/CraDev/MainMenu/Resources/ReferenceSurface.mat";
+            var reference=AssetDatabase.LoadAssetAtPath<Material>(referencePath);
+            if(reference==null){reference=new Material(Shader.Find("CraDev/ReferenceSurface"));AssetDatabase.CreateAsset(reference,referencePath);}
+            reference.SetTexture("_Art",V2Texture("reference-world"));EditorUtility.SetDirty(reference);
             foreach(string name in LobbyEnvironment.Names)
             {
                 string path="Assets/CraDev/MainMenu/Resources/LobbyTimes/"+name+".png";
