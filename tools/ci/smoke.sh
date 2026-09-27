@@ -125,25 +125,25 @@ click 262 698                       # 2-avatar kartasi
 sleep 0.8
 shot 06-avatar-2
 
-# Qahramonni sichqoncha bilan aylantirish (o'ng panel markazi)
-xdotool mousemove 1440 560 mousedown 1
+# Qahramonni sichqoncha bilan aylantirish (3D qahramon ekranning o'ng qismida, x ~ 1286)
+xdotool mousemove 1290 500 mousedown 1
 for _ in $(seq 1 16); do xdotool mousemove_relative -- 14 0; sleep 0.03; done
 shot 07-rotating
 xdotool mouseup 1
 sleep 1.5
 shot 08-rotated
 # Faqat qahramon turgan joy solishtiriladi (kursor va boshqa elementlar hisobga olinmaydi)
-stage='[800x780+1040+140]'
+stage='[800x820+890+120]'
 diff=$(compare -metric AE -fuzz 8% "$OUT/06-avatar-2.png$stage" "$OUT/08-rotated.png$stage" null: 2>&1 | cut -d' ' -f1)
 log "aylanishdan keyin o'zgargan piksellar: $diff"
 rotated=1
 [ "${diff%.*}" -gt 5000 ] 2>/dev/null && rotated=0
 check "qahramon aylandi (rasm o'zgardi)" "$rotated"
 
-click 1532 996                      # "Back" tugmasi
+click 1378 984                      # "Back" tugmasi
 sleep 1.5
 shot 09-back
-click 1348 996                      # "Front" tugmasi
+click 1194 984                      # "Front" tugmasi
 sleep 1.5
 shot 10-front
 

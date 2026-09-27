@@ -20,7 +20,7 @@ namespace CraDev.CharacterCreation
 
         public void Show(AvatarOption avatar)
         {
-            picture.sprite = avatar.front;
+            picture.sprite = avatar.card;
             picture.preserveAspect = true;
             gameObject.SetActive(true);
         }

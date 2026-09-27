@@ -9,7 +9,7 @@ namespace CraDev.CharacterCreation
     /// Avatar yaratish ekrani (faqat birinchi kirishda).
     ///
     /// Jins pasport bosqichidan keladi va o'zgartirilmaydi. Chap tomonda nickname yoziladi va shu jinsdagi
-    /// 5 ta avatardan biri tanlanadi, o'ngda tanlangan avatar katta ko'rinadi (old, yon, orqa).
+    /// avatarlardan biri tanlanadi, o'ngda tanlangan qahramon 3D sahnada turadi (aylantirish va yaqinlashtirish mumkin).
     /// Nickname yozilayotganda server'da band yoki bo'shligi tekshiriladi (kichik kechikish bilan).
     /// "Create character" bosilganda server nickname'ni band qiladi; bir vaqtda boshqa o'yinchi
     /// olib qo'ygan bo'lsa, server rad etadi va o'yinchi boshqa nom tanlaydi.
@@ -259,7 +259,7 @@ namespace CraDev.CharacterCreation
 
             var list = new System.Collections.Generic.List<AvatarOption>();
             foreach (var a in avatars)
-                if (a != null && a.gender == gender && a.front != null)
+                if (a != null && a.gender == gender && a.model != null)
                     list.Add(a);
             choices = list.ToArray();
 
@@ -278,7 +278,7 @@ namespace CraDev.CharacterCreation
             if (choices.Length > 0)
                 SelectAvatar(choices[0]);
             else
-                Debug.LogWarning("[CraDev] Bu jins uchun avatar rasmlari topilmadi: Assets/CraDev/Avatars/Photos");
+                Debug.LogWarning("[CraDev] Bu jins uchun 3D avatarlar topilmadi: Assets/CraDev/Avatars/Models");
         }
 
         void SelectAvatar(AvatarOption option)

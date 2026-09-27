@@ -71,16 +71,20 @@ qaytgan o'yinchi uchun `MainMenu` (hali yo'q, Loading "READY" da to'xtaydi). Pro
 |---|---|
 | `Assets/CraDev/Common/` | `SplashSequence` (splash asosi: vaqt o'qi, fade, ovoz, o'tkazib yuborish), `SceneLoader`, `Anim` (easing, input) |
 | `Assets/CraDev/Intro/`, `CDCGroup/`, `Loading/` | splash va yuklash ekranlari |
-| `Assets/CraDev/CharacterCreation/` | nickname + avatar tanlash ekrani; `AvatarViewer` qahramonni sichqoncha bilan 360° aylantiradi |
+| `Assets/CraDev/CharacterCreation/` | nickname + avatar tanlash ekrani: 3D studiyada qahramon turadi; `AvatarViewer` uni sichqoncha bilan aylantiradi, g'ildirakcha bilan yuziga yaqinlashtiradi |
 | `Assets/CraDev/Online/` | `GameApi` (server), `NicknameRules` (server bilan bir xil qoidalar), `PlayerProfile`, `RegistrationSession` |
-| `Assets/CraDev/Avatars/Photos/` | avatarlarning fonsiz rasmlari: `<ID>_Front/Side/Back[/FrontQuarter/BackQuarter].png` |
-| `Assets/CraDev/Editor/` | `CraDevSceneBuilder` (sahnalar), `CraDevBatch` (batchmode), `CraDevArtImporter` (rasm import sozlamalari), `UiBuild` |
+| `Assets/CraDev/Avatars/Models/<ID>/` | 3D avatarlar: Microsoft Rocketbox (MIT, `LICENSE-Rocketbox.md`), `.fbx` + `Textures/` (.tga lar .jpg/.png ga siqilgan) |
+| `Assets/CraDev/Avatars/Animations/` | idle animatsiyalar (Rocketbox, Generic `Bip01` skelet) va ularning Animator Controller'lari |
+| `Assets/CraDev/Avatars/Cards/` | kartadagi rasmlar: builder 3D modeldan chizadi (qo'lda tahrirlanmaydi) |
+| `Assets/CraDev/Avatars/Photos/` | eski 2D avatar rasmlari: endi ishlatilmaydi |
+| `Assets/CraDev/Editor/` | `CraDevSceneBuilder` (sahnalar), `CraDevBatch` (batchmode), `CraDevArtImporter` (rasm import sozlamalari), `CraDevModelImporter` (Rocketbox modellari: material, LOD, animatsiya), `UiBuild` |
 | `Server/` | Node.js o'yin serveri: nickname noyobligi, o'yinchi profillari |
 | `Design/` | logolar, ikonkalar, avatar promptlari va ularni PNG/WAV ga aylantiruvchi skriptlar |
 
 ## Kod qoidalari
 
-- UI: uGUI, Canvas Screen Space - Overlay, CanvasScaler 1920x1080 (Expand). Render pipeline'ga bog'liq emas.
+- UI: uGUI, Canvas Screen Space - Overlay, CanvasScaler 1920x1080 (Expand).
+- 3D: Built-in render pipeline, Standard shader, Linear rang fazosi. Materiallar, pol, chiroqlar va taglik builder'da`n  (`BuildStage`) yaratiladi; Rocketbox materiallari `CraDevModelImporter` da material nomidan (`m024_body` →`n  `m024_body_color/normal`) quriladi. Import qoidasi o'zgarsa `GetVersion()` ni oshiring.
 - Rasmlar 2x o'lchamda chizilgan (`UiBuild.ArtScale`). `CreateImage` `raycastTarget = false` qiladi:
   bosiladigan elementlarda uni `true` qiling.
 - Input: eski Input Manager ham, yangi Input System ham ishlashi shart (`#if ENABLE_INPUT_SYSTEM` /
@@ -105,8 +109,10 @@ Hamma tayyor PNG/WAV'lar `Assets/` ga commit qilingan; qayta yaratish faqat manb
 
 - Logolar: `Design/CraDev|CDCGroup/build.sh` (Node.js + playwright, Python 3 + numpy + pillow).
 - Ikonkalar: `Design/UI/build.sh`.
-- Avatarlar: `Design/Characters/references/<ID>.png` (foydalanuvchi ChatGPT'da `prompts.md` bo'yicha yaratgan) →
-  `python3 Design/Characters/process_references.py <ID>` (rembg bilan fonni olib tashlaydi) → `scenes`.
+- 3D avatarlar: github.com/microsoft/Microsoft-Rocketbox `Assets/Avatars/Adults/<Nomi>/` dan `Export/<Nomi>.fbx` va
+  `Textures/*.tga` (specular kerak emas) olinadi, teksturalar .jpg (rang, normal) va .png (`*_opacity_color`, alfa bilan)
+  ga aylantiriladi. Avatar almashtirilsa: `CraDevSceneBuilder.AvatarList` dagi model nomi, keyin `scenes`.
+- Eski 2D avatar rasmlari (`Design/Characters/`, `Avatars/Photos/`) endi ishlatilmaydi.
 
 ## Holat va keyingi qadamlar
 
@@ -114,10 +120,12 @@ Hamma tayyor PNG/WAV'lar `Assets/` ga commit qilingan; qayta yaratish faqat manb
    o'yin Intro → CDCGroup → Loading → CharacterCreation gacha to'liq ekranda ishlaydi (server bilan).
    Unity yaratgan `manifest.json` da uGUI yo'q edi: `com.unity.ugui` qo'lda qo'shildi. `.meta`, `Packages/`,
    `ProjectSettings/` va sahnalar commit qilingan.
-2. Avatarlar: erkaklar 4 ta (M1, M2, M3, M5), ayollar 5 ta (F1–F5). **M4 kerak emas** (foydalanuvchi qarori);
+2. Foydalanuvchi talabi: o'yin **sayt emas, haqiqiy o'yindek** ko'rinishi kerak. Shuning uchun avatar yaratish ekrani
+   3D: studiyada realistik Rocketbox qahramoni turadi (idle animatsiya, aylantirish, yaqinlashtirish), forma ustida.
+3. Avatarlar: erkaklar 4 ta (M1, M2, M3, M5), ayollar 5 ta (F1–F5). **M4 kerak emas** (foydalanuvchi qarori);
    kodlar o'zgarmaydi. Ro'yxat ikki joyda: `CraDevSceneBuilder.AvatarList` va `Server/src/nickname.js` (`AVATARS`).
-3. Aylanish silliqroq bo'lishi uchun 45° rasmlar (`Design/Characters/prompts_quarter.md`) qo'shish mumkin.
-4. Foydalanuvchi keyinga qoldirgan: pasport bilan ro'yxatdan o'tish (jins shundan olinadi, hozir
-   `testGender`), yuzni skaner qilish, realistik 3D modellar, `MainMenu`.
+4. O'yin janri hali tanlanmagan (foydalanuvchi keyin hal qiladi). O'yin qismida kamera **birinchi shaxs** bo'ladi.
+5. Foydalanuvchi keyinga qoldirgan: pasport bilan ro'yxatdan o'tish (jins shundan olinadi, hozir
+   `testGender`), yuzni skaner qilish (yuz avatarga qo'yiladi), `MainMenu`.
 
 Git: ish `claude/gallant-dijkstra-r0opib` branch'ida. `Library/`, `Temp/`, `Logs/`, `Builds/` commit qilinmaydi.

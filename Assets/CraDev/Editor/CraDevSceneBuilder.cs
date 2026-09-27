@@ -161,6 +161,21 @@ namespace CraDev.EditorTools
             PlayerSettings.SplashScreen.show = false;
             // Multiplayer o'yin: boshqa oynaga o'tilganda ham to'xtamaydi (server bilan aloqa uzilmaydi)
             PlayerSettings.runInBackground = true;
+            PlayerSettings.colorSpace = ColorSpace.Linear;
+
+            // 3D sahnalar uchun: silliq qirralar va yaqin masofada tiniq soyalar (barcha sifat darajalarida)
+            int level = QualitySettings.GetQualityLevel();
+            for (int i = 0; i < QualitySettings.names.Length; i++)
+            {
+                QualitySettings.SetQualityLevel(i, false);
+                QualitySettings.antiAliasing = 4;
+                QualitySettings.shadows = ShadowQuality.All;
+                QualitySettings.shadowResolution = ShadowResolution.VeryHigh;
+                QualitySettings.shadowDistance = 25f;
+                QualitySettings.shadowCascades = 2;
+                QualitySettings.vSyncCount = 1;
+            }
+            QualitySettings.SetQualityLevel(level, false);
             // Unity 6 da bepul litsenziyada ham ishlaydi; eski versiyalarning Personal litsenziyasida Unity logotipi baribir chiqadi
 #if UNITY_2022_1_OR_NEWER
             // Hozircha server http://localhost da ishlaydi. Haqiqiy serverga HTTPS bilan o'tganda buni o'chirish kerak.
@@ -313,28 +328,37 @@ namespace CraDev.EditorTools
 
         // ---------------------------------------------------------------- Avatar yaratish
 
-        const string AvatarPhotos = "Assets/CraDev/Avatars/Photos/";
+        const string AvatarModels = "Assets/CraDev/Avatars/Models/";
+        const string AvatarCards = "Assets/CraDev/Avatars/Cards/";
+        const string AvatarAnimations = "Assets/CraDev/Avatars/Animations/";
+        const string StageMaterials = "Assets/CraDev/CharacterCreation/Materials/";
 
         struct AvatarInfo
         {
-            public string Id, Gender, Title;
+            public string Id, Gender, Title, Model;
             public int Height;
-            public AvatarInfo(string id, string gender, string title, int height) { Id = id; Gender = gender; Title = title; Height = height; }
+            public AvatarInfo(string id, string gender, string title, int height, string model) { Id = id; Gender = gender; Title = title; Height = height; Model = model; }
+            public string ModelPath => AvatarModels + Id + "/" + Model + ".fbx";
         }
 
-        // Design/Characters/avatars.json dagi avatarlar (erkaklar 4 ta: M4 kerak emas, kodlar o'zgarmasligi uchun M5 qoldi).
-        // Rasmi bo'lmaganlari o'tkazib yuboriladi. Ro'yxat Server/src/nickname.js dagi AVATARS bilan bir xil bo'lishi kerak.
+        // Avatarlar (erkaklar 4 ta: M4 kerak emas, kodlar o'zgarmasligi uchun M5 qoldi) va ularning Microsoft Rocketbox
+        // modellari. Modeli yo'qlari o'tkazib yuboriladi. Ro'yxat Server/src/nickname.js dagi AVATARS bilan bir xil bo'lishi kerak.
         static readonly AvatarInfo[] AvatarList =
         {
-            new AvatarInfo("M1", "male", "Athletic", 183), new AvatarInfo("M2", "male", "Slim", 177),
-            new AvatarInfo("M3", "male", "Strong", 180), new AvatarInfo("M5", "male", "Classic", 176),
-            new AvatarInfo("F1", "female", "Sporty", 170), new AvatarInfo("F2", "female", "Petite", 164),
-            new AvatarInfo("F3", "female", "Curvy", 168), new AvatarInfo("F4", "female", "Tall", 178),
-            new AvatarInfo("F5", "female", "Elegant", 167),
+            new AvatarInfo("M1", "male", "Athletic", 183, "Male_Adult_10"), new AvatarInfo("M2", "male", "Slim", 177, "Male_Adult_09"),
+            new AvatarInfo("M3", "male", "Strong", 180, "Male_Adult_17"), new AvatarInfo("M5", "male", "Classic", 176, "Male_Adult_07"),
+            new AvatarInfo("F1", "female", "Sporty", 170, "Female_Adult_12"), new AvatarInfo("F2", "female", "Petite", 164, "Female_Adult_17"),
+            new AvatarInfo("F3", "female", "Casual", 168, "Female_Adult_08"), new AvatarInfo("F4", "female", "Tall", 178, "Female_Adult_04"),
+            new AvatarInfo("F5", "female", "Elegant", 167, "Female_Adult_15"),
         };
 
         static void BuildCharacterCreation()
         {
+            // Sahnadan oldin: idle animatsiya boshqaruvchilari va kartalar uchun 3D modellardan olingan rasmlar
+            var maleIdle = IdleController("m_idle_neutral_01", "Idle_Male");
+            var femaleIdle = IdleController("f_idle_neutral_01", "Idle_Female");
+            var cardPictures = RenderAvatarCards(maleIdle, femaleIdle);
+
             var accent = (Color)new Color32(61, 90, 254, 255);
             var field = (Color)new Color32(22, 23, 26, 255);
             var line = (Color)new Color32(38, 39, 44, 255);
@@ -356,10 +380,20 @@ namespace CraDev.EditorTools
             root.gameObject.AddComponent<GraphicRaycaster>();
             CreateEventSystem();
 
-            // ---------- Chap panel ----------
-            var left = CreateImage("LeftPanel", root, null, Vector2.zero, Vector2.zero, new Color32(11, 11, 12, 255));
+            // ---------- 3D sahna: studiya, taglik va chiroqlar ----------
+            var stageCamera = Object.FindFirstObjectByType<Camera>();
+            var turntable = BuildStage(stageCamera);
+
+            // Butun ekran bo'ylab shaffof qatlam: qahramonni sichqoncha bilan aylantirish va yaqinlashtirish.
+            // Formadan oldin yaratiladi, shunda forma elementlari bosilganda u xalaqit bermaydi.
+            var stage = CreateFullscreen("StageInput", root, new Color(0f, 0f, 0f, 0f));
+            stage.raycastTarget = true;
+            var stageT = stage.transform;
+
+            // ---------- Chap panel: 3D sahna ustida qorayib boruvchi fon, matn o'qilishi uchun ----------
+            var left = CreateImage("LeftShade", root, ShadeSprite(), Vector2.zero, Vector2.zero, new Color(Background.r, Background.g, Background.b, 0.94f));
             left.rectTransform.anchorMin = Vector2.zero;
-            left.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            left.rectTransform.anchorMax = new Vector2(0.6f, 1f);
             left.rectTransform.offsetMin = left.rectTransform.offsetMax = Vector2.zero;
             var leftT = left.transform;
 
@@ -464,24 +498,11 @@ namespace CraDev.EditorTools
             var errorText = CreateLabel("ErrorText", form, medium, "", 14, bad, TextAnchor.MiddleLeft);
             Place(errorText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(24f, -760f), new Vector2(456f, 22f));
 
-            // ---------- O'ng panel: tanlangan avatar ----------
-            var stage = CreateImage("RightPanel", root, null, Vector2.zero, Vector2.zero, new Color32(19, 20, 23, 255));
-            stage.rectTransform.anchorMin = new Vector2(0.5f, 0f);
-            stage.rectTransform.anchorMax = Vector2.one;
-            stage.rectTransform.offsetMin = stage.rectTransform.offsetMax = Vector2.zero;
-            stage.raycastTarget = true; // sichqoncha bilan tortib aylantirish uchun
-            var stageT = stage.transform;
-
-            var shadow = CreateSliced("FloorShadow", stageT, pillFill, 15f, 32f, new Color(0f, 0f, 0f, 0.45f));
-            Place(shadow.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 180f), new Vector2(320f, 30f));
-            // Ikki qatlam: aylanish paytida qo'shni ko'rinishlar orasida o'tish uchun
-            var layerA = CreateImage("AvatarLayerA", stageT, null, new Vector2(390f, 780f), Vector2.zero, Color.white);
-            Place(layerA.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 172f), new Vector2(390f, 780f));
-            var layerB = CreateImage("AvatarLayerB", stageT, null, new Vector2(390f, 780f), Vector2.zero, Color.white);
-            Place(layerB.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 172f), new Vector2(390f, 780f));
-
+            // ---------- O'ng tomon: qahramon ustidagi nom va pastdagi boshqaruv ----------
+            // Qahramon ekran markazidan StageOffset qadar o'ngda turadi (AvatarViewer.screenOffset)
+            float stageX = 0.5f + StageOffset;
             var plate = CreateSliced("Nameplate", stageT, pillFill, 22f, 32f, new Color(1f, 1f, 1f, 0.06f));
-            Place(plate.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), new Vector2(200f, 44f));
+            Place(plate.rectTransform, new Vector2(stageX, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), new Vector2(200f, 44f));
             var plateBorder = CreateSliced("Border", plate.transform, pillStroke, 22f, 32f, new Color(1f, 1f, 1f, 0.10f));
             Stretch(plateBorder.rectTransform);
             var plateIcon = CreateImage("Icon", plate.transform, Icon("Male"), new Vector2(18f, 18f), Vector2.zero, accent);
@@ -490,7 +511,7 @@ namespace CraDev.EditorTools
 
             // Old / Yon / Orqa tugmalari
             var switcher = CreateSliced("ViewSwitch", stageT, pillFill, 22f, 32f, new Color32(28, 29, 33, 255));
-            Place(switcher.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 84f), new Vector2(284f, 44f));
+            Place(switcher.rectTransform, new Vector2(stageX, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 96f), new Vector2(284f, 44f));
             string[] viewNames = { "Front", "Side", "Back" };
             var viewButtons = new Button[3];
             var viewFills = new Image[3];
@@ -509,9 +530,21 @@ namespace CraDev.EditorTools
                 viewLabels[i] = label;
             }
 
+            // Boshqaruv bo'yicha qisqa ko'rsatma
+            var hint = CreateRect("Hint", stageT);
+            Place(hint, new Vector2(stageX, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 48f), new Vector2(300f, 20f));
+            var hintIcon = CreateImage("Icon", hint, Icon("Rotate"), new Vector2(16f, 16f), Vector2.zero, faint);
+            var hintText = CreateLabel("Text", hint, medium, "Drag to rotate · Scroll to zoom", 13, faint, TextAnchor.MiddleLeft);
+            float hintWidth = 16f + 8f + hintText.preferredWidth;
+            hintIcon.rectTransform.anchoredPosition = new Vector2(-hintWidth / 2f + 8f, 0f);
+            Place(hintText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 0.5f), new Vector2(-hintWidth / 2f + 24f, 0f), new Vector2(hintText.preferredWidth + 4f, 20f));
+
             var viewer = stage.gameObject.AddComponent<AvatarViewer>();
-            Set(viewer, "layerA", layerA);
-            Set(viewer, "layerB", layerB);
+            Set(viewer, "stageCamera", stageCamera);
+            Set(viewer, "turntable", turntable);
+            Set(viewer, "maleIdle", maleIdle);
+            Set(viewer, "femaleIdle", femaleIdle);
+            Set(viewer, "screenOffset", StageOffset);
             SetArray(viewer, "viewButtons", viewButtons);
             SetArray(viewer, "viewFills", viewFills);
             SetArray(viewer, "viewLabels", viewLabels);
@@ -531,7 +564,7 @@ namespace CraDev.EditorTools
             Set(screen, "genderChip", chip.rectTransform);
             Set(screen, "genderIcon", chipIcon);
             Set(screen, "genderText", chipText);
-            SetAvatars(screen);
+            SetAvatars(screen, cardPictures);
             SetArray(screen, "avatarCards", cards);
             Set(screen, "avatarInfo", avatarInfo);
             Set(screen, "viewer", viewer);
@@ -558,18 +591,21 @@ namespace CraDev.EditorTools
 
         static readonly Color UiMuted = new Color32(142, 147, 154, 255);
 
-        /// <summary>Rasmlari bor avatarlarni ekranning "avatars" ro'yxatiga yozadi.</summary>
-        static void SetAvatars(CharacterCreationScreen screen)
+        /// <summary>Qahramon ekran markazidan qancha o'ngda turadi (ekran kengligiga nisbatan).</summary>
+        const float StageOffset = 0.17f;
+
+        /// <summary>3D modeli bor avatarlarni ekranning "avatars" ro'yxatiga yozadi.</summary>
+        static void SetAvatars(CharacterCreationScreen screen, System.Collections.Generic.Dictionary<string, Sprite> cards)
         {
             var so = new SerializedObject(screen);
             var list = so.FindProperty("avatars");
             list.arraySize = 0;
             foreach (var info in AvatarList)
             {
-                var front = LoadPhoto(AvatarPhotos + info.Id + "_Front.png");
-                if (front == null)
+                var model = AssetDatabase.LoadAssetAtPath<GameObject>(info.ModelPath);
+                if (model == null)
                 {
-                    Debug.Log($"[CraDev] {info.Id} avatarining rasmi hali yo'q, ro'yxatga qo'shilmadi.");
+                    Debug.Log($"[CraDev] {info.Id} avatarining 3D modeli yo'q ({info.ModelPath}), ro'yxatga qo'shilmadi.");
                     continue;
                 }
                 int index = list.arraySize;
@@ -579,25 +615,280 @@ namespace CraDev.EditorTools
                 item.FindPropertyRelative("gender").stringValue = info.Gender;
                 item.FindPropertyRelative("title").stringValue = info.Title;
                 item.FindPropertyRelative("heightCm").intValue = info.Height;
-                item.FindPropertyRelative("front").objectReferenceValue = front;
-                item.FindPropertyRelative("side").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_Side.png");
-                item.FindPropertyRelative("back").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_Back.png");
-                item.FindPropertyRelative("frontQuarter").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_FrontQuarter.png");
-                item.FindPropertyRelative("backQuarter").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_BackQuarter.png");
+                item.FindPropertyRelative("model").objectReferenceValue = model;
+                cards.TryGetValue(info.Id, out var card);
+                item.FindPropertyRelative("card").objectReferenceValue = card;
             }
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
-        static Sprite LoadPhoto(string path)
+        // ---------------------------------------------------------------- 3D sahna
+
+        /// <summary>
+        /// Qahramon turadigan studiya: to'q pol (uzoqda tuman bilan fonga qo'shilib ketadi), past dumaloq taglik,
+        /// asosiy yorug'lik (soya bilan) va orqadan chiziq yorug'lik. Qaytaradi: qahramon qo'yiladigan aylanma nuqta.
+        /// </summary>
+        static Transform BuildStage(Camera camera)
         {
-            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
-                return null;
-            if (importer.textureType != TextureImporterType.Sprite)
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = Background;
+            camera.cullingMask = ~(1 << LayerMask.NameToLayer("UI"));
+            camera.fieldOfView = 26f;
+            camera.nearClipPlane = 0.05f;
+            camera.farClipPlane = 60f;
+            camera.allowMSAA = true;
+            camera.transform.SetPositionAndRotation(new Vector3(-1.6f, 0.95f, -4.8f), Quaternion.identity);
+
+            RenderSettings.fog = true;
+            RenderSettings.fogMode = FogMode.Linear;
+            RenderSettings.fogColor = Background;
+            RenderSettings.fogStartDistance = 6f;
+            RenderSettings.fogEndDistance = 16f;
+            RenderSettings.skybox = null;
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(0.22f, 0.24f, 0.28f);
+            RenderSettings.ambientEquatorColor = new Color(0.15f, 0.16f, 0.18f);
+            RenderSettings.ambientGroundColor = new Color(0.05f, 0.05f, 0.06f);
+
+            var stage = new GameObject("Stage").transform;
+
+            var floor = Primitive(PrimitiveType.Plane, "Floor", stage, StageMaterial("Floor", new Color32(26, 27, 31, 255), 0.05f));
+            floor.localScale = new Vector3(4f, 1f, 4f);
+
+            // Taglik: 3 sm balandlikdagi silliq disk
+            const float plinthTop = 0.03f;
+            var plinth = Primitive(PrimitiveType.Cylinder, "Plinth", stage, StageMaterial("Plinth", new Color32(36, 37, 42, 255), 0.15f));
+            plinth.GetComponent<MeshFilter>().sharedMesh = DiscMesh(0.55f, plinthTop, 128);
+
+            // Studiya yorug'ligi: yuqoridan qahramonga qaratilgan projektorlar. Pol faqat qahramon atrofida
+            // yoritiladi va chetlarga qarab qorong'ilashadi.
+            var key = Spot("KeyLight", stage, new Vector3(1.4f, 3.4f, -2.4f), new Vector3(0f, 1.1f, 0f), new Color(1f, 0.95f, 0.88f), 2.4f, 42f);
+            key.shadows = LightShadows.Soft;
+            key.shadowStrength = 0.8f;
+            key.shadowBias = 0.02f;
+            key.shadowNormalBias = 0.3f;
+            Spot("RimLight", stage, new Vector3(-1.2f, 3f, 2.4f), new Vector3(0f, 1.3f, 0f), new Color(0.7f, 0.78f, 1f), 3f, 40f);
+            Spot("FillLight", stage, new Vector3(-2.6f, 1.8f, -2f), new Vector3(0f, 1.2f, 0f), new Color(0.85f, 0.88f, 1f), 0.9f, 45f);
+
+            var turntable = new GameObject("Turntable").transform;
+            turntable.SetParent(stage, false);
+            turntable.localPosition = new Vector3(0f, plinthTop, 0f);
+            return turntable;
+        }
+
+        /// <summary>Ko'p qirrali (silliq ko'rinadigan) disk: ust tomoni, yon devori. Mesh fayl sifatida saqlanadi.</summary>
+        static Mesh DiscMesh(float radius, float height, int segments)
+        {
+            string path = StageMaterials + "Plinth.asset";
+            var mesh = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            if (mesh == null)
             {
-                CraDevArtImporter.ApplyPhoto(importer);
-                importer.SaveAndReimport();
+                mesh = new Mesh { name = "Plinth" };
+                Directory.CreateDirectory(StageMaterials);
+                AssetDatabase.CreateAsset(mesh, path);
             }
-            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            var vertices = new System.Collections.Generic.List<Vector3>();
+            var normals = new System.Collections.Generic.List<Vector3>();
+            var triangles = new System.Collections.Generic.List<int>();
+            // Ust tomoni: markaz + aylana
+            vertices.Add(new Vector3(0f, height, 0f));
+            normals.Add(Vector3.up);
+            for (int i = 0; i <= segments; i++)
+            {
+                float a = i * Mathf.PI * 2f / segments;
+                vertices.Add(new Vector3(Mathf.Cos(a) * radius, height, Mathf.Sin(a) * radius));
+                normals.Add(Vector3.up);
+                if (i > 0)
+                    triangles.AddRange(new[] { 0, i + 1, i });
+            }
+            // Yon devor
+            int side = vertices.Count;
+            for (int i = 0; i <= segments; i++)
+            {
+                float a = i * Mathf.PI * 2f / segments;
+                var n = new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a));
+                vertices.Add(n * radius + Vector3.up * height);
+                vertices.Add(n * radius);
+                normals.Add(n);
+                normals.Add(n);
+                if (i > 0)
+                {
+                    int v = side + i * 2;
+                    triangles.AddRange(new[] { v - 2, v, v - 1, v, v + 1, v - 1 });
+                }
+            }
+            mesh.Clear();
+            mesh.SetVertices(vertices);
+            mesh.SetNormals(normals);
+            mesh.SetTriangles(triangles, 0);
+            mesh.RecalculateBounds();
+            EditorUtility.SetDirty(mesh);
+            return mesh;
+        }
+
+        static Transform Primitive(PrimitiveType type, string name, Transform parent, Material material)
+        {
+            var go = GameObject.CreatePrimitive(type);
+            go.name = name;
+            Object.DestroyImmediate(go.GetComponent<Collider>());
+            go.transform.SetParent(parent, false);
+            var renderer = go.GetComponent<MeshRenderer>();
+            renderer.sharedMaterial = material;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            return go.transform;
+        }
+
+        static Light NewLight(string name, Transform parent, LightType type, Color color, float intensity, Quaternion rotation)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.localRotation = rotation;
+            var light = go.AddComponent<Light>();
+            light.type = type;
+            light.color = color;
+            light.intensity = intensity;
+            light.shadows = LightShadows.None;
+            return light;
+        }
+
+        static Light Spot(string name, Transform parent, Vector3 position, Vector3 target, Color color, float intensity, float angle)
+        {
+            var light = NewLight(name, parent, LightType.Spot, color, intensity, Quaternion.LookRotation(target - position));
+            light.transform.localPosition = position;
+            light.range = 12f;
+            light.spotAngle = angle;
+            light.innerSpotAngle = angle * 0.4f;
+            light.renderMode = LightRenderMode.ForcePixel;
+            return light;
+        }
+
+        /// <summary>Sahna materiali (Standard shader): yo'q bo'lsa yaratadi, bor bo'lsa rangini yangilaydi.</summary>
+        static Material StageMaterial(string name, Color color, float smoothness)
+        {
+            string path = StageMaterials + name + ".mat";
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                Directory.CreateDirectory(StageMaterials);
+                material = new Material(Shader.Find("Standard"));
+                AssetDatabase.CreateAsset(material, path);
+            }
+            material.color = color;
+            material.SetFloat("_Metallic", 0f);
+            material.SetFloat("_Glossiness", smoothness);
+            EditorUtility.SetDirty(material);
+            return material;
+        }
+
+        /// <summary>Bitta idle animatsiyali Animator Controller (yo'q bo'lsa yaratadi).</summary>
+        static RuntimeAnimatorController IdleController(string clipFile, string name)
+        {
+            string path = AvatarAnimations + name + ".controller";
+            var existing = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(path);
+            if (existing != null)
+                return existing;
+            var clip = AssetDatabase.LoadAllAssetsAtPath(AvatarAnimations + clipFile + ".fbx")
+                .OfType<AnimationClip>().FirstOrDefault(c => !c.name.StartsWith("__preview__"));
+            if (clip == null)
+                throw new FileNotFoundException("Idle animatsiyasi topilmadi: " + AvatarAnimations + clipFile + ".fbx");
+            return UnityEditor.Animations.AnimatorController.CreateAnimatorControllerAtPathWithClip(path, clip);
+        }
+
+        static AnimationClip ControllerClip(RuntimeAnimatorController controller) => controller.animationClips.FirstOrDefault();
+
+        /// <summary>
+        /// Har bir avatar uchun kartadagi rasmni 3D modeldan chizadi (shaffof fonda, idle holatida)
+        /// va Assets/CraDev/Avatars/Cards/&lt;ID&gt;.png ga yozadi.
+        /// </summary>
+        static System.Collections.Generic.Dictionary<string, Sprite> RenderAvatarCards(RuntimeAnimatorController maleIdle, RuntimeAnimatorController femaleIdle)
+        {
+            const int width = 176, height = 300; // karta rasmi 2x o'lchamda
+            var result = new System.Collections.Generic.Dictionary<string, Sprite>();
+            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            Directory.CreateDirectory(AvatarCards);
+
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(0.38f, 0.40f, 0.45f);
+            RenderSettings.ambientEquatorColor = new Color(0.2f, 0.21f, 0.23f);
+            RenderSettings.ambientGroundColor = new Color(0.06f, 0.06f, 0.07f);
+            NewLight("Key", null, LightType.Directional, new Color(1f, 0.96f, 0.9f), 1.2f, Quaternion.Euler(30f, 25f, 0f));
+            NewLight("Rim", null, LightType.Directional, new Color(0.72f, 0.8f, 1f), 0.8f, Quaternion.Euler(18f, 200f, 0f));
+
+            var camera = new GameObject("CardCamera").AddComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0f, 0f, 0f, 0f);
+            camera.fieldOfView = 18f;
+            camera.aspect = (float)width / height;
+            var rt = new RenderTexture(width * 2, height * 2, 24, RenderTextureFormat.ARGB32) { antiAliasing = 8 };
+            camera.targetTexture = rt;
+
+            foreach (var info in AvatarList)
+            {
+                var model = AssetDatabase.LoadAssetAtPath<GameObject>(info.ModelPath);
+                if (model == null)
+                    continue;
+                var go = (GameObject)Object.Instantiate(model);
+                go.transform.rotation = Quaternion.Euler(0f, ModelFacing, 0f);
+                var clip = ControllerClip(info.Gender == "female" ? femaleIdle : maleIdle);
+                if (clip != null)
+                    clip.SampleAnimation(go, 0.5f);
+
+                var bounds = new Bounds(go.transform.position, Vector3.zero);
+                foreach (var r in go.GetComponentsInChildren<Renderer>())
+                    bounds.Encapsulate(r.bounds);
+                float half = bounds.size.y * 0.54f;
+                float distance = half / Mathf.Tan(camera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+                camera.transform.position = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z - distance);
+                camera.transform.rotation = Quaternion.identity;
+                camera.Render();
+
+                // 2x chizib, yarmiga kichraytiramiz: qirralar silliqroq bo'ladi
+                var small = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32);
+                Graphics.Blit(rt, small);
+                var previous = RenderTexture.active;
+                RenderTexture.active = small;
+                var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+                texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+                texture.Apply();
+                RenderTexture.active = previous;
+                RenderTexture.ReleaseTemporary(small);
+
+                string path = AvatarCards + info.Id + ".png";
+                File.WriteAllBytes(path, texture.EncodeToPNG());
+                Object.DestroyImmediate(texture);
+                Object.DestroyImmediate(go);
+                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
+                result[info.Id] = LoadSprite(path);
+            }
+
+            camera.targetTexture = null;
+            rt.Release();
+            Object.DestroyImmediate(rt);
+            return result;
+        }
+
+        /// <summary>Rocketbox modellarini kameraga (-Z tomonga) qaratish uchun burilish.</summary>
+        const float ModelFacing = 180f;
+
+        /// <summary>Chapdan o'ngga shaffoflashib boruvchi soya: 3D sahna ustida forma o'qilishi uchun.</summary>
+        static Sprite ShadeSprite()
+        {
+            string path = UiArt + "UI_Shade.png";
+            if (!File.Exists(path))
+            {
+                var texture = new Texture2D(256, 4, TextureFormat.RGBA32, false);
+                for (int x = 0; x < 256; x++)
+                {
+                    float t = x / 255f;
+                    float alpha = 1f - Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.45f, 1f, t));
+                    for (int y = 0; y < 4; y++)
+                        texture.SetPixel(x, y, new Color(1f, 1f, 1f, alpha));
+                }
+                File.WriteAllBytes(path, texture.EncodeToPNG());
+                Object.DestroyImmediate(texture);
+                AssetDatabase.ImportAsset(path);
+            }
+            return LoadSprite(path);
         }
 
         static AvatarCard CreateAvatarCard(string name, Transform parent, float x, float y, Sprite roundFill, Sprite roundStroke,

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -6,25 +5,28 @@ using UnityEngine.UI;
 namespace CraDev.CharacterCreation
 {
     /// <summary>
-    /// O'ng paneldagi katta qahramon. Sichqoncha bilan chapga-o'ngga tortilsa 360° aylanadi.
+    /// Tanlangan avatarni 3D sahnada ko'rsatadi: qahramon aylanma tagligida turadi va nafas oladi (idle animatsiya).
     ///
-    /// Qahramonning bir necha tomondan rasmlari bor (old, yon, orqa, bo'lsa 45° burchaklar ham).
-    /// Burilish burchagiga qarab ikki qo'shni rasm orasida o'tish qilinadi va rasm biroz torayib-kengayadi,
-    /// shunda aylanish hissi paydo bo'ladi. Qo'yib yuborilgach, qahramon eng yaqin tomonga silliq to'xtaydi.
-    /// Chap tomon rasmlari o'ng tomon rasmlarining ko'zgu aksidan olinadi.
+    /// Bu komponent ekran bo'ylab cho'zilgan shaffof UI qatlamida turadi: sichqoncha bilan chapga-o'ngga
+    /// tortilsa qahramon aylanadi (qo'yib yuborilgach inersiya bilan sekinlashadi), g'ildirakcha bilan kamera
+    /// yuziga yaqinlashadi. Qahramon ekranning o'ng tomonida turadi, chapda forma bor.
     /// </summary>
-    public class AvatarViewer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+    public class AvatarViewer : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IScrollHandler
     {
-        [SerializeField] Image layerA;
-        [SerializeField] Image layerB;
-        [Tooltip("Qahramon rasmining ekrandagi balandligi (1920x1080 birliklarida).")]
-        [SerializeField] float height = 780f;
-        [Tooltip("Sichqoncha 1 birlik surilganda necha gradus aylanadi.")]
-        [SerializeField] float dragSensitivity = 0.45f;
-        [Tooltip("Qo'yib yuborilgach eng yaqin tomonga qaytish tezligi.")]
-        [SerializeField] float snapSpeed = 9f;
-        [Tooltip("Burilish paytida rasm qanchalik torayadi (aylanish hissi uchun).")]
-        [SerializeField, Range(0f, 0.5f)] float turnSquash = 0.2f;
+        [Header("3D sahna")]
+        [SerializeField] Camera stageCamera;
+        [Tooltip("Qahramon shu obyekt ichida paydo bo'ladi va u bilan birga aylanadi.")]
+        [SerializeField] Transform turntable;
+        [SerializeField] RuntimeAnimatorController maleIdle;
+        [SerializeField] RuntimeAnimatorController femaleIdle;
+
+        [Header("Boshqaruv")]
+        [Tooltip("Sichqoncha 1 birlik (1920x1080) surilganda necha gradus aylanadi.")]
+        [SerializeField] float dragSensitivity = 0.4f;
+        [Tooltip("G'ildirakchaning bir aylanishi qancha yaqinlashtiradi (0..1).")]
+        [SerializeField] float zoomStep = 0.25f;
+        [Tooltip("Qahramon ekran markazidan qancha o'ngda turadi (ekran kengligiga nisbatan).")]
+        [SerializeField, Range(0f, 0.4f)] float screenOffset = 0.17f;
 
         [Header("Ko'rinish tugmalari (Front, Side, Back)")]
         [SerializeField] Button[] viewButtons;
@@ -34,19 +36,19 @@ namespace CraDev.CharacterCreation
         static readonly Color ActiveFill = new Color32(42, 43, 49, 255);
         static readonly Color Muted = new Color32(142, 147, 154, 255);
         static readonly float[] ButtonAngles = { 0f, 90f, 180f };
+        /// <summary>Bosh suyagidan boshning tepasigacha (metr).</summary>
+        const float HeadTop = 0.2f;
 
-        struct View
-        {
-            public float Angle;
-            public Sprite Sprite;
-            public bool Mirror;
-        }
-
-        readonly List<View> views = new List<View>();
-        float yaw;       // 0 = old, 90 = o'ngga qaragan, 180 = orqa, 270 = chapga qaragan
-        float target;
-        float velocity;  // gradus/soniya, qo'yib yuborilgandan keyingi inersiya
+        GameObject current;
+        float bodyHeight = 1.75f;
+        float yaw;        // 0 = kameraga qaragan, 90 = o'ng yoni, 180 = orqasi
+        float targetYaw;
+        float velocity;   // gradus/soniya, qo'yib yuborilgandan keyingi inersiya
         bool dragging;
+        bool turning;     // tugma bosilganda berilgan burchakka silliq burilish
+        float zoom;       // 0 = to'liq bo'y, 1 = yuz
+        float targetZoom;
+        float swapTime = 1f;
         Canvas canvas;
 
         void Awake()
@@ -61,29 +63,41 @@ namespace CraDev.CharacterCreation
 
         public void SetAvatar(AvatarOption option)
         {
-            views.Clear();
-            Add(0f, option.front, false);
-            Add(45f, option.frontQuarter, false);
-            Add(90f, option.side, false);
-            Add(135f, option.backQuarter, false);
-            Add(180f, option.back, false);
-            Add(225f, option.backQuarter, true);
-            Add(270f, option.side, true);
-            Add(315f, option.frontQuarter, true);
-            Apply();
-        }
+            if (current != null)
+                Destroy(current);
+            if (option.model == null)
+                return;
 
-        void Add(float angle, Sprite sprite, bool mirror)
-        {
-            if (sprite != null)
-                views.Add(new View { Angle = angle, Sprite = sprite, Mirror = mirror });
+            current = Instantiate(option.model, turntable, false);
+            current.name = option.id;
+            current.transform.localPosition = Vector3.zero;
+            current.transform.localRotation = Quaternion.identity;
+
+            var animator = current.GetComponent<Animator>();
+            if (animator == null)
+                animator = current.AddComponent<Animator>();
+            animator.runtimeAnimatorController = option.gender == "female" ? femaleIdle : maleIdle;
+            animator.applyRootMotion = false;
+            animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+
+            // Kamera qahramon bo'yiga moslashadi: bo'y bosh suyagidan olinadi (Rocketbox skeleti: "Bip01 Head"),
+            // chunki birinchi kadrgacha terining chegaralari hali hisoblanmagan bo'ladi
+            bodyHeight = 1.75f;
+            foreach (var bone in current.GetComponentsInChildren<Transform>())
+                if (bone.name == "Bip01 Head")
+                {
+                    bodyHeight = Mathf.Clamp(bone.position.y - turntable.position.y + HeadTop, 1.3f, 2.2f);
+                    break;
+                }
+            swapTime = 0f;
         }
 
         /// <summary>Qahramonni berilgan tomonga eng qisqa yo'l bilan buradi.</summary>
         public void RotateTo(float angle)
         {
             velocity = 0f;
-            target = yaw + Mathf.DeltaAngle(yaw, angle);
+            turning = true;
+            targetYaw = yaw + Mathf.DeltaAngle(yaw, angle);
         }
 
         void Update()
@@ -91,81 +105,54 @@ namespace CraDev.CharacterCreation
             float dt = Time.unscaledDeltaTime;
             if (!dragging)
             {
-                if (Mathf.Abs(velocity) > 20f)
+                if (turning)
                 {
-                    // Qo'yib yuborilgandan keyin biroz o'zi aylanib, sekinlashadi
-                    yaw += velocity * dt;
-                    velocity *= Mathf.Exp(-5f * dt);
-                    target = NearestViewAngle(yaw);
+                    yaw = Mathf.Lerp(yaw, targetYaw, 1f - Mathf.Exp(-8f * dt));
+                    if (Mathf.Abs(targetYaw - yaw) < 0.1f)
+                        turning = false;
                 }
                 else
                 {
-                    velocity = 0f;
-                    yaw = Mathf.Lerp(yaw, target, 1f - Mathf.Exp(-snapSpeed * dt));
+                    yaw += velocity * dt;
+                    velocity *= Mathf.Exp(-4f * dt);
                 }
             }
-            Apply();
+
+            // Yangi avatar tanlanganda qahramon qisqa burilish bilan chiqadi
+            swapTime += dt;
+            float swap = 1f - Ease.OutCubic(Mathf.Clamp01(swapTime / 0.45f));
+            turntable.localRotation = Quaternion.Euler(0f, 180f - yaw - swap * 40f, 0f);
+
+            zoom = Mathf.Lerp(zoom, targetZoom, 1f - Mathf.Exp(-7f * dt));
+            PlaceCamera();
+            UpdateButtons(Mathf.Repeat(yaw, 360f));
         }
 
-        float NearestViewAngle(float angle)
+        void PlaceCamera()
         {
-            float best = angle, bestDistance = float.MaxValue;
-            foreach (var v in views)
-            {
-                float d = Mathf.Abs(Mathf.DeltaAngle(angle, v.Angle));
-                if (d < bestDistance)
-                {
-                    bestDistance = d;
-                    best = angle + Mathf.DeltaAngle(angle, v.Angle);
-                }
-            }
-            return best;
-        }
-
-        void Apply()
-        {
-            if (views.Count == 0)
+            if (stageCamera == null)
                 return;
+            float halfFov = stageCamera.fieldOfView * 0.5f * Mathf.Deg2Rad;
+            Vector3 origin = turntable.position;
 
-            // Joriy burchakni o'rab turgan ikki ko'rinishni topamiz
-            float a = Mathf.Repeat(yaw, 360f);
-            int i = views.Count - 1;
-            for (int k = 0; k < views.Count; k++)
-                if (views[k].Angle <= a) i = k;
-            View from = views[i];
-            View to = views[(i + 1) % views.Count];
-            float span = Mathf.Repeat(to.Angle - from.Angle, 360f);
-            if (span <= 0f) span = 360f;
-            float t = Mathf.Clamp01(Mathf.Repeat(a - from.Angle, 360f) / span);
+            // To'liq bo'y: qahramon kadr balandligining ~68% ini egallaydi, oyog'i pastdagi tugmalardan yuqorida.
+            // Yaqin: yelkadan yuqorisi.
+            float fullLook = bodyHeight * 0.47f;
+            float fullDistance = bodyHeight * 0.735f / Mathf.Tan(halfFov);
+            float closeLook = bodyHeight - 0.22f;
+            float closeDistance = 0.42f / Mathf.Tan(halfFov);
 
-            // Birinchi yarmida yangi rasm paydo bo'ladi, ikkinchi yarmida eskisi yo'qoladi: shaffoflik "cho'kmaydi"
-            float appear = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.15f, 0.5f, t));
-            float vanish = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.5f, 0.85f, t));
-            float squash = 1f - turnSquash * Mathf.Sin(t * Mathf.PI);
+            float t = Ease.InOutSine(zoom);
+            float look = Mathf.Lerp(fullLook, closeLook, t);
+            float distance = Mathf.Lerp(fullDistance, closeDistance, t);
+            float height = Mathf.Lerp(bodyHeight * 0.58f, closeLook + 0.02f, t);
 
-            Place(layerA, from, 1f - vanish, squash);
-            Place(layerB, to, appear, squash);
-
-            // O'tishning birinchi yarmida eski ko'rinish ustida, ikkinchi yarmida yangisi
-            Transform top = (t < 0.5f ? layerA : layerB).transform;
-            Transform bottom = (t < 0.5f ? layerB : layerA).transform;
-            if (top.GetSiblingIndex() < bottom.GetSiblingIndex())
-            {
-                int low = top.GetSiblingIndex();
-                top.SetSiblingIndex(bottom.GetSiblingIndex());
-                bottom.SetSiblingIndex(low);
-            }
-
-            UpdateButtons(a);
-        }
-
-        void Place(Image image, View view, float alpha, float squash)
-        {
-            image.sprite = view.Sprite;
-            float aspect = view.Sprite.rect.width / view.Sprite.rect.height;
-            image.rectTransform.sizeDelta = new Vector2(height * aspect, height);
-            image.rectTransform.localScale = new Vector3((view.Mirror ? -1f : 1f) * squash, 1f, 1f);
-            Anim.SetAlpha(image, alpha);
+            // Kamera to'g'ri oldinga qaraydi va chapga suriladi: qahramon ekranning o'ng qismida ko'rinadi
+            float halfWidth = distance * Mathf.Tan(halfFov) * stageCamera.aspect;
+            float side = halfWidth * 2f * screenOffset;
+            var position = origin + new Vector3(-side, height, -distance);
+            stageCamera.transform.position = position;
+            stageCamera.transform.rotation = Quaternion.LookRotation(origin + new Vector3(-side, look, 0f) - position);
         }
 
         void UpdateButtons(float angle)
@@ -184,13 +171,14 @@ namespace CraDev.CharacterCreation
         public void OnBeginDrag(PointerEventData eventData)
         {
             dragging = true;
+            turning = false;
             velocity = 0f;
         }
 
         public void OnDrag(PointerEventData eventData)
         {
             float scale = canvas != null ? canvas.rootCanvas.scaleFactor : 1f;
-            float delta = eventData.delta.x / scale * dragSensitivity;
+            float delta = -eventData.delta.x / scale * dragSensitivity;
             yaw += delta;
             float dt = Mathf.Max(Time.unscaledDeltaTime, 0.001f);
             velocity = Mathf.Lerp(velocity, delta / dt, 0.3f);
@@ -199,7 +187,11 @@ namespace CraDev.CharacterCreation
         public void OnEndDrag(PointerEventData eventData)
         {
             dragging = false;
-            target = NearestViewAngle(yaw + velocity * 0.12f);
+        }
+
+        public void OnScroll(PointerEventData eventData)
+        {
+            targetZoom = Mathf.Clamp01(targetZoom + Mathf.Sign(eventData.scrollDelta.y) * zoomStep);
         }
     }
 }
