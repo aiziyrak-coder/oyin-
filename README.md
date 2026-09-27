@@ -41,6 +41,31 @@ qisqa va silliq harakatlar. Uchqun, nur yoki "kosmik" effektlar yo'q.
 Loyihani avval ochgan bo'lsangiz ham, yangilangandan keyin shu menyuni bir marta bosing:
 u sahnalarni yangi skriptlar bilan qayta yaratadi.
 
+## Unity oynasini ochmasdan (buyruq qatoridan)
+
+`tools/unity.ps1` Unity Hub o'rnatgan Unity 6 ni o'zi topadi va uni oynasiz (batchmode) ishga tushiradi.
+Loyiha papkasida terminal (PowerShell yoki cmd) oching:
+
+```
+tools\unity.cmd check     # skriptlarni kompilyatsiya qiladi, xatolarni ko'rsatadi
+tools\unity.cmd scenes    # sahnalarni qayta yaratadi
+tools\unity.cmd run       # o'yinni yig'adi va alohida oynada ochadi
+tools\unity.cmd playerlog # o'yin logining oxiri
+```
+
+Buyruqlar loyiha Unity'da ochiq bo'lmaganda ishlaydi. Loglar `Logs/` papkasida.
+
+### Claude bilan kompyuterda ishlash
+
+Claude o'yinni to'g'ridan-to'g'ri Unity bilan qurishi uchun Claude Code kompyuterning o'zida, shu loyiha
+papkasida ishlashi kerak:
+
+- **Claude Desktop → Code** bo'limida loyiha papkasini tanlang; yoki
+- terminalda loyiha papkasida `claude` (yoki telefondan boshqarish uchun `claude remote-control`) ni ishga tushiring.
+
+Claude `CLAUDE.md` dagi yo'riqnomani o'qiydi va `tools/unity.ps1` orqali Unity'ni o'zi ishga tushiradi,
+loglarni o'qiydi va xatolarni tuzatadi.
+
 ## Server (nickname tekshiruvi)
 
 `Server/` papkasida kichik o'yin serveri bor: o'yinchi profillarini saqlaydi va har bir nickname
@@ -159,8 +184,10 @@ Assets/CraDev/
   Avatars/Photos/   avatarlarning fonsiz rasmlari (old, yon, orqa)
   Online/           server bilan ishlash: GameApi.cs, NicknameRules.cs, PlayerProfile.cs, RegistrationSession.cs
   UI/Art/           ikonkalar va 9-slice spritelar
-  Editor/           CraDevSceneBuilder.cs (sahna quruvchi menyu), UiBuild.cs, CraDevArtImporter.cs
-  Scenes/           Intro, CDCGroup, Loading (menyu orqali yaratiladi)
+  Editor/           CraDevSceneBuilder.cs (sahna quruvchi menyu), CraDevBatch.cs (buyruq qatori), UiBuild.cs, CraDevArtImporter.cs
+  Scenes/           Intro, CDCGroup, Loading, CharacterCreation (menyu orqali yaratiladi)
+tools/              unity.ps1 / unity.cmd: Unity'ni buyruq qatoridan boshqarish
+CLAUDE.md           Claude uchun loyiha yo'riqnomasi
 Server/             o'yin serveri (Node.js): nickname'lar va o'yinchi profillari
 Design/
   CraDev/, CDCGroup/             logo manbalari va qayta yaratish skriptlari (build.sh)

@@ -28,6 +28,7 @@ namespace CraDev.EditorTools
         const string CdcScene = ScenesFolder + "CDCGroup.unity";
         const string LoadingScene = ScenesFolder + "Loading.unity";
         const string CreationScene = ScenesFolder + "CharacterCreation.unity";
+        static readonly string[] AllScenes = { IntroScene, CdcScene, LoadingScene, CreationScene };
 
         const string IntroArt = "Assets/CraDev/Intro/Art/";
         const string CdcArt = "Assets/CraDev/CDCGroup/Art/";
@@ -43,8 +44,7 @@ namespace CraDev.EditorTools
         [MenuItem("CraDev/Sahnalarni yaratish", priority = 1)]
         static void BuildAll()
         {
-            string[] scenes = { IntroScene, CdcScene, LoadingScene, CreationScene };
-            if (scenes.Any(File.Exists) &&
+            if (AllScenes.Any(File.Exists) &&
                 !EditorUtility.DisplayDialog("CraDev sahnalari",
                     "Intro, CDCGroup, Loading va CharacterCreation sahnalari noldan qayta yaratiladi. Ularda qo'lda qilingan o'zgarishlar yo'qoladi. Davom etamizmi?",
                     "Ha, yaratish", "Bekor qilish"))
@@ -55,10 +55,7 @@ namespace CraDev.EditorTools
 
             try
             {
-                BuildIntro();
-                BuildCdcGroup();
-                BuildLoading();
-                BuildCharacterCreation();
+                CreateScenes();
             }
             catch (System.Exception e)
             {
@@ -67,16 +64,26 @@ namespace CraDev.EditorTools
                 return;
             }
 
-            // O'yin shu tartibda boshlanadi; boshqa sahnalar ro'yxatda ulardan keyin qoladi
-            var buildScenes = EditorBuildSettings.scenes.Where(s => !scenes.Contains(s.path)).ToList();
-            buildScenes.InsertRange(0, scenes.Select(p => new EditorBuildSettingsScene(p, true)));
-            EditorBuildSettings.scenes = buildScenes.ToArray();
-
-            ConfigurePlayer();
-
             EditorSceneManager.OpenScene(IntroScene);
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<SceneAsset>(IntroScene));
             Debug.Log("[CraDev] Sahnalar yaratildi: Intro -> CDCGroup -> Loading -> CharacterCreation. Ko'rish uchun Intro sahnasida Play tugmasini bosing.");
+        }
+
+        /// <summary>Barcha sahnalarni yaratadi, Build Settings va Player sozlamalarini o'rnatadi. Xatoda istisno tashlaydi.</summary>
+        internal static void CreateScenes()
+        {
+            BuildIntro();
+            BuildCdcGroup();
+            BuildLoading();
+            BuildCharacterCreation();
+
+            // O'yin shu tartibda boshlanadi; boshqa sahnalar ro'yxatda ulardan keyin qoladi
+            var buildScenes = EditorBuildSettings.scenes.Where(s => !AllScenes.Contains(s.path)).ToList();
+            buildScenes.InsertRange(0, AllScenes.Select(p => new EditorBuildSettingsScene(p, true)));
+            EditorBuildSettings.scenes = buildScenes.ToArray();
+
+            ConfigurePlayer();
+            AssetDatabase.SaveAssets();
         }
 
         [MenuItem("CraDev/O'yinni alohida oynada ishga tushirish (Build and Run)", priority = 2)]
@@ -87,6 +94,14 @@ namespace CraDev.EditorTools
                 EditorUtility.DisplayDialog("CraDev", "Avval \"CraDev > Sahnalarni yaratish\" buyrug'ini bajaring.", "OK");
                 return;
             }
+            var report = BuildGame(run: true);
+            if (report.summary.result != BuildResult.Succeeded)
+                EditorUtility.DisplayDialog("CraDev", "O'yinni yig'ib bo'lmadi. Tafsilotlar Console oynasida.", "OK");
+        }
+
+        /// <summary>O'yinni tahrirlovchi ishlayotgan tizim uchun Builds/ papkasiga yig'adi.</summary>
+        internal static BuildReport BuildGame(bool run)
+        {
             ConfigurePlayer();
 
             // Tahrirlovchi qaysi tizimda ishlayotgan bo'lsa, o'sha tizim uchun o'yin yig'iladi
@@ -104,11 +119,9 @@ namespace CraDev.EditorTools
                 scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray(),
                 locationPathName = Path.Combine("Builds", target.ToString(), file),
                 target = target,
-                options = BuildOptions.AutoRunPlayer,
+                options = run ? BuildOptions.AutoRunPlayer : BuildOptions.None,
             };
-            var report = BuildPipeline.BuildPlayer(options);
-            if (report.summary.result != BuildResult.Succeeded)
-                EditorUtility.DisplayDialog("CraDev", "O'yinni yig'ib bo'lmadi. Tafsilotlar Console oynasida.", "OK");
+            return BuildPipeline.BuildPlayer(options);
         }
 
         /// <summary>
