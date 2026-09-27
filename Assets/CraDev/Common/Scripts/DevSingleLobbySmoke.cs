@@ -42,7 +42,8 @@ namespace CraDev
             var entryRect=(RectTransform)Find("EnterNewWorld").transform;
             var eventRect=(RectTransform)lobby.Current.transform.Find("LobbyRightRail/LobbyEvent");
             Check(profileRect.parent==entryRect.parent&&eventRect.parent==entryRect.parent&&entryRect.rect.width==650,"reference right column and compact profile");
-            Check(Mathf.Abs(entryRect.anchoredPosition.y+821)<1,"entry positioned below feature tiles");
+            Check(entryRect.anchorMin==Vector2.zero&&Mathf.Abs(entryRect.anchoredPosition.y-259)<1,"compact entry stays bottom anchored");
+            Check(Vector2.Distance(lobby.GetComponent<CanvasScaler>().referenceResolution,new Vector2(1920,1080)/.65f)<1,"all interface elements scaled to 65 percent");
             Check(Find("EnterNewWorld").GetComponent<ReferenceSurface>()?.Style==1,"entry uses reference emerald gold landscape surface");
             Check(Find("EnterNewWorld").transform.Find("PlayOrb")?.GetComponent<ReferenceSurface>()?.Style==2,"entry has separate illuminated play orb");
             Check(lobby.Current.transform.Find("LobbyRightRail/LobbyPromo").GetComponent<ReferenceSurface>()?.Style==3,"promo uses edge-to-edge landscape with dark text scrim");

@@ -1,5 +1,10 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI TALAB: 35% IXCHAM + O‘TIRADIGAN PARTY LOBBY
+
+35% shrink implemented in builder: UI CanvasScaler reference size /0.65, right action stack bottom anchored, settings centered, avatar camera framing 65%. Backup 78d7626. User also requests seated multiplayer lobby with natural idle motion. Seating/invites are NOT implemented yet. Async clarification pending: one two-person sofa + two armchairs (4 seats), or five two-person sofas + two armchairs (12 seats)? Current assets have only standing generic Rocketbox idle animations, no seat furniture; server currently has friends but no party/invite routes. Continue after resolving chair count; preserve real profiles, backup DB before changes, test invite permissions/capacity/leave/disconnect and multiple clients. No fake friends accepted by tests. Shrink logs compact-lobby-build.log / compact-lobby-player.log and Logs/CompactLobby/.
+
+
 ## CURRENT VISUAL CORRECTION
 
 User rejected brown flat cards / flat mint-gold CTA. ReferenceSurface shader + component replaces those with charcoal gradients and thin rims, landscape promo and emerald/gold play CTA with separate orb. Shader authored colors are sRGB and explicitly converted for Linear renderer. Do not remove that conversion (otherwise cards become light grey). Landscape art in Pages/reference-world.png, prompt Design/LobbyV2/ReferenceSurface/PROMPTS.md, built-in mode. Backup 3bd3b32. Dynamic clock/weather and all archived pages remain intact. No fake friend records or level. Logs reference-surface-build-final.log / reference-surface-player-final.log; captures ReferenceSurfaceFinal. -cradevReferencePreview temporarily displays original sunset for comparison and restores real clock after capture.

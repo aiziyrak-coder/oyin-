@@ -148,6 +148,8 @@ namespace CraDev.EditorTools
             v2 = Kit();
             v2Textures.Clear();
             var root = NewUiScene(out var scene);
+            // Barcha UI o'lchamlari oldingi ko'rinishning 65 foizi, fon esa o'zgarmaydi.
+            root.GetComponent<CanvasScaler>().referenceResolution=new Vector2(1920,1080)/.65f;
             root.gameObject.AddComponent<GraphicRaycaster>();
             CreateEventSystem();
             var screen = root.gameObject.AddComponent<MainMenuScreen>();
@@ -240,6 +242,7 @@ namespace CraDev.EditorTools
                 // Proportsiyalar manba rasmdagi bosh va oyoq nuqtalaridan hisoblangan.
                 float head = i == 0 ? 75.8f / 415 : 46.3f / 309;
                 float feet = i == 0 ? 650f / 720 : 296f / 309;
+                if(i==0)head=feet-(feet-head)*.65f;
                 float x = i == 0 ? 610f / 1280 : 197f / 519;
                 float fov = 30, height = 1.85f, viewHeight = height / (feet - head);
                 float distance = viewHeight / (2 * Mathf.Tan(fov * Mathf.Deg2Rad / 2));
@@ -328,6 +331,8 @@ namespace CraDev.EditorTools
             if (id == "home") { Set(page,"background",V2Texture("sunset-home")); V2GameHome(rect,page); return page; }
             if(id=="settings")
             {
+                rect.anchorMin=rect.anchorMax=rect.pivot=new Vector2(.5f,.5f);
+                rect.sizeDelta=new Vector2(1920,1080);rect.anchoredPosition=Vector2.zero;
                 var dim=CreateFullscreen("SettingsBackdrop",rect,new Color(0,0,0,.62f));dim.raycastTarget=true;
                 V2Panel(rect,"SettingsSheet",40,140,1830,900,new Color32(16,22,30,255)).raycastTarget=true;
                 V2Button(rect,"","Close",1788,156,60,52,"close-settings").name="SettingsClose";

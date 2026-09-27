@@ -1,5 +1,14 @@
 # NewWorld Lobby
 
+## Ixcham UI va o‘tiradigan lobby — davom etayotgan talab
+
+- Foydalanuvchi barcha UI va personajni 35% kichraytirishni so‘radi. Oldingi ma’qullangan holat: 78d7626.
+- CanvasScaler referenceResolution = (1920,1080)/0.65; barcha UI bir xil 65% masshtab. O‘ng promo/kartalar/CTA pastga bog‘langan; sozlama oynasi markazlangan. Personajning kamera ichidagi balandligi ham 65%.
+- Keyingi talab: do‘stlarni lobbiga chaqirish, divan/kreslolarda o‘tirish, tabiiy qo‘l/oyoq idle harakatlari. BU QISM HALI QO‘SHILMAGAN. Hozir faqat tik turish animatsiyalari mavjud; sofa/chair 3D model va party/invite API yo‘q.
+- O‘rindiqlar soni uchun savol yuborilgan: 1 ta ikki kishilik divan + 2 kreslo yoki 5 ta ikki kishilik divan + 2 kreslo? Javob kelmaguncha joylashuvni taxmin qilib qurmaslik.
+- Kichraytirish build/test: Logs/compact-lobby-build.log, Logs/compact-lobby-player.log, Logs/CompactLobby/.
+
+
 ## Reference sirtlarini tuzatish — joriy
 
 - User old brown/flat cards and two-color button rejected. Backup: 3bd3b32 (tested time/weather system).

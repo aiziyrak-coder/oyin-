@@ -102,6 +102,11 @@ namespace CraDev.EditorTools
             ReferenceSurface.Apply(promoArrow.GetComponent<Image>(),0,31);
             foreach(string n in new[]{"LobbyFeature0","LobbyFeature1","LobbyEvent"})ReferenceSurface.Apply(right.Find(n).GetComponent<Image>(),0,27);
             ReferenceSurface.Apply(filters[0],4,16);
+            // Ixcham kartalar va kirish tugmasi ekranning pastki o'ng chetida qoladi.
+            foreach(var item in new[]{promo.rectTransform,(RectTransform)right.Find("LobbyFeature0"),(RectTransform)right.Find("LobbyFeature1"),(RectTransform)right.Find("LobbyEvent"),entryGlow.rectTransform,(RectTransform)enter.transform,sign.rectTransform})
+            {
+                float y=item.anchoredPosition.y;item.anchorMin=item.anchorMax=Vector2.zero;item.anchoredPosition=new Vector2(item.anchoredPosition.x,1080+y);
+            }
         }
         static void V2GameControls(Transform home,MainMenuScreen screen)
         {
