@@ -1,5 +1,18 @@
 # Lynxos Lobby V2
 
+## Tungi Liquid Glass — 2026-09-28
+
+- [x] Foydalanuvchi yo'nalishi: tungi shahar/interyerlar; eski yorqin fonlar butunlay yangisiga almashtirildi.
+- [x] Oldingi holat lokal commitda saqlandi: 8671410; push qilinmadi.
+- [x] Yangi 8 ta raster fayl: Assets/CraDev/MainMenu/Pages/Night/. Oldingi rasmlar o'chirilmagan.
+- [x] 10 lobby sahifasi: umumiy shisha shader, yumaloq navigatsiya va yon menyu, kartalar, qidiruv, profil, rasmlar niqobi, toast va dialog.
+- [x] Sozlamalarda yumaloq switchlar; hover/press holatlari; ko'k neon o'rniga sokin slate ranglar; tungi avatarga mos yorug'lik.
+- [x] Unity build Succeeded. Birinchi to'liq UI tekshiruvi: 33/33.
+- [x] Yakuniy UI tekshiruvi: 35/35, 0 failure; 10 sahifa + switchlar + dialog skrinshotlari ko'rildi. Shader xatosi va runtime exception yo'q.
+- [x] 1920x1080 da 120 kadrli qisqa namuna: 239.7 FPS / 4.17 ms (shu qurilmadagi namuna, universal kafolat emas). O'yin ochiq qoldirildi.
+
+UI native iOS emas: Apple Liquid Glass tamoyillaridan ilhomlangan Unity desktop ko'rinishi. Rasm generatsiyasi built-in image_gen; native 4K emas (asosiy fonlar 1672x941). Promptlar: Design/LobbyV2/Night/PROMPTS.md.
+
 ## Fon sifatini yaxshilash — davom etmoqda
 
 - [x] Asl fonlar tekshirildi: kengligi 1449–2060 px, 4K emas.

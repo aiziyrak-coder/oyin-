@@ -1,5 +1,12 @@
 # Ishni boshqa AI yordamchida davom ettirish (Lynxos lobby v2)
 
+## Eng so'nggi dizayn — 2026-09-28
+
+Foydalanuvchi eski yorqin dizaynni rad etdi, tungi shahar/interyerlar va butun lobby uchun iOS 27 Liquid Glass yo'nalishini tanladi. Hozir 10 sahifada yangi umumiy shisha dizayn ishlaydi. `GlassSurface.cs` vertexlarda o'lcham, radius va hover holatini uzatadi; `LobbyGlass.shader` bitta named GrabPass bilan fonni yumshatib, mayin shisha chetlarini chizadi. Material `MainMenu/Resources/LobbyGlass.mat`da.
+Yangi fonlar `Assets/CraDev/MainMenu/Pages/Night/` ichida; V2Texture avval shu papkani tanlaydi. Eski yorqin fayllarni qayta ulab yubormang. Fonlar yangidan yaratilgan, shunchaki rang filtri emas. O'lchamlari 4K emas, bu foydalanuvchiga aytilgan. Promptlar `Design/LobbyV2/Night/PROMPTS.md`.
+Sahnalar avvalgidek builderdan yaratiladi. `CraDevSceneBuilder.Glass.cs` material va dialogni quradi. Saqlash nuqtasi: 8671410. Build/log: `Logs/lobby-night-build.log`; skrinshotlar `Logs/LobbyNight/`; runtime log `Logs/lobby-night-player.log`.
+Yakuniy tekshiruv: build Succeeded; UI 35/35; 12 ta skrinshot (10 sahifa, switchlar, dialog); shader xatosi/runtime exception yo'q. `-cradevGlassDetails` qo'shimcha skrinshot va qisqa FPS namunasini beradi; oxirida home sahifaga qaytadi. O'yin ochiq qoldirilgan.
+
 ## Yangilangan holat — 2026-09-27, Codex
 
 Fon sifati bo'yicha keyingi yangilanish: 7 ta fon/hero va o'quv kartalari yangilangan. Bino fonlaridagi brend yozuvlari/logolari olib tashlangan, katalogda sun'iy brendlar emas umumiy mahsulot turlari bor. O'yinning o'z Lynxos nomi navigatsiyada saqlangan.

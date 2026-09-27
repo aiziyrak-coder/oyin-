@@ -6,24 +6,29 @@ namespace CraDev.MainMenu
 {
     public partial class LobbyContent
     {
-        void Row(string key,string value,int index,Action action=null)
+        UnityEngine.UI.Button Row(string key,string value,int index,Action action=null)
         {
             float y=(section==0?180:100)+index*91;
             var row=Button("",0,y,width-10,85,action);
-            if(section==0) row.GetComponent<UnityEngine.UI.Image>().color=new Color(1,1,1,.025f);
+            row.GetComponent<UnityEngine.UI.Image>().color=new Color(.1f,.12f,.15f,.8f);
             Text(Loc.T(key),28,0,410,85,27,row.transform).color=Muted;
             Text(value,440,0,width-475,85,26,row.transform);
+            return row;
         }
         void ToggleRow(string key,bool value,int i,Action<bool> change)
         {
-            Row(key,Loc.T(value?"settings.on":"settings.off")+"   ›",i,()=>{change(!value);Render();});
+            var row=Row(key,"",i,()=>{change(!value);Render();});
+            var track=Panel("Switch",width-126,22,82,42,value?new Color(.3f,.52f,.48f,1):new Color(.2f,.23f,.28f,1),row.transform);
+            track.GetComponent<GlassSurface>().Solid=true;
+            var knob=Panel("SwitchKnob",value?44:4,4,34,34,new Color(.91f,.94f,.97f),track.transform);
+            knob.GetComponent<GlassSurface>().Solid=true;
         }
         void Settings()
         {
             string[] sections={"profile","security","notifications","sound","controls","privacy","language","help"};
             if(section==0)
             {
-                Panel("ProfileGlass",0,0,width-5,700,new Color(.19f,.26f,.36f,.6f));
+                Panel("ProfileGlass",0,0,width-5,700,new Color(.08f,.095f,.12f,.88f));
                 Portrait(surface,PlayerProfile.AvatarId,25,25,120);
                 Text(PlayerProfile.Nickname,175,30,width-440,60,36).font=bold;
                 Text(Loc.F("settings.id",PlayerProfile.PublicId.ToString("D6")),175,96,width-440,40,23).color=Muted;

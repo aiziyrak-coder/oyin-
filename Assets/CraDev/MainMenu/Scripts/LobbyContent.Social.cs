@@ -20,7 +20,10 @@ namespace CraDev.MainMenu
         }
         void Photo(Texture texture,Rect crop,float x,float y,float w,float h)
         {
-            var image=Rect("Photo",surface,x,y,w,h).gameObject.AddComponent<RawImage>();
+            var frame=Rect("PhotoFrame",surface,x,y,w,h).gameObject.AddComponent<Image>();
+            frame.sprite=rounded;frame.type=Image.Type.Sliced;frame.pixelsPerUnitMultiplier=1;
+            frame.raycastTarget=false;frame.gameObject.AddComponent<Mask>().showMaskGraphic=false;
+            var image=Rect("Photo",frame.transform,0,0,w,h).gameObject.AddComponent<RawImage>();
             image.texture=texture;image.uvRect=crop;image.raycastTarget=false;
         }
         void Shops()
@@ -35,8 +38,8 @@ namespace CraDev.MainMenu
             {
                 int i=results[n];
                 var card=Button(names[i],n%4*(cell+16),n/4*155,cell,138,()=>Lobby.Toast(Loc.F("shops.store_soon",names[i])));
-                card.GetComponent<Image>().color=new Color32(238,243,251,248);
-                var label=card.GetComponentInChildren<Text>(); label.color=new Color32(23,38,61,255);label.font=bold;label.fontSize=35;label.alignment=TextAnchor.MiddleCenter;
+                card.GetComponent<Image>().color=Glass;
+                var label=card.GetComponentInChildren<Text>(); label.color=new Color32(231,236,244,255);label.font=font;label.fontSize=25;label.alignment=TextAnchor.MiddleCenter;
             }
             if(results.Length==0) Message("shops.no_results");
             ContentHeight(Mathf.Max(300,Mathf.Ceil(results.Length/4f)*155));
@@ -90,7 +93,7 @@ namespace CraDev.MainMenu
             if(friendsImage!=null)
             {
                 Photo(friendsImage,new Rect(0,0,1,1),630,45,width-640,605);
-                Panel("HeroOverlay",630,45,width-640,160,new Color(0.02f,.08f,.15f,.7f));
+                Panel("HeroOverlay",650,65,width-680,145,new Color(.05f,.065f,.085f,.78f));
                 Text(Loc.T("friends.hero"),680,80,width-730,115,42).font=bold;
                 Button(Loc.T("friends.find"),840,440,510,85,()=>{search.Select();search.ActivateInputField();},true);
             }

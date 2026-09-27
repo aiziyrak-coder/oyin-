@@ -31,9 +31,9 @@ namespace CraDev.MainMenu
         int? onlineCount;
         bool saving;
         readonly Dictionary<string,Texture2D> thumbnails = new Dictionary<string,Texture2D>();
-        static readonly Color Blue = new Color32(36, 99, 255, 255);
-        static readonly Color Glass = new Color32(29, 48, 70, 230);
-        static readonly Color Muted = new Color32(182, 199, 221, 255);
+        static readonly Color Blue = new Color32(77, 103, 128, 245);
+        static readonly Color Glass = new Color32(28, 33, 42, 226);
+        static readonly Color Muted = new Color32(180, 189, 203, 255);
         [Serializable] class LookList { public List<string> items = new List<string>(); }
 
         void Start()
@@ -172,12 +172,16 @@ namespace CraDev.MainMenu
         {
             var image=Rect(name,parent??surface,x,y,w,h).gameObject.AddComponent<Image>();
             image.sprite=rounded; image.type=Image.Type.Sliced; image.pixelsPerUnitMultiplier=2;
-            image.color=color; image.raycastTarget=false; return image;
+            image.color=color; image.raycastTarget=false;
+            if(name!="ActionIcon")GlassSurface.Apply(image,Mathf.Min(28,h*.5f));
+            return image;
         }
         Button Button(string text,float x,float y,float w,float h,Action action,bool primary=false,Transform parent=null)
         {
             var image=Panel("Item_"+text,x,y,w,h,primary?Blue:Glass,parent); image.raycastTarget=true;
             var button=image.gameObject.AddComponent<Button>(); button.targetGraphic=image;
+            var colors=button.colors;colors.highlightedColor=Color.white;colors.selectedColor=Color.white;
+            colors.pressedColor=new Color(.85f,.88f,.92f);colors.fadeDuration=.14f;button.colors=colors;
             var label=Text(text,14,0,w-28,h,25,image.transform);
             label.resizeTextForBestFit=true;label.resizeTextMinSize=18;label.resizeTextMaxSize=25;
             if(action!=null) button.onClick.AddListener(()=>action());
@@ -241,6 +245,7 @@ namespace CraDev.MainMenu
                     draft.Set(slot,item.Id,color); Lobby.Viewer.SetOutfit(draft); Render();
                 },false,footer);
                 ColorUtility.TryParseHtmlString("#"+color,out var tint); swatch.GetComponent<Image>().color=tint;
+                swatch.GetComponent<GlassSurface>().Solid=true;
             }
             Button(Loc.T("wardrobe.original"),width-300,0,145,45,()=>{draft=new Outfit();Lobby.Viewer.SetOutfit(draft);Render();},false,footer);
             SaveButton(50); ContentHeight(y);

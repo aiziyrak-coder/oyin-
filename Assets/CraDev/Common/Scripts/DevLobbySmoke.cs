@@ -65,6 +65,12 @@ namespace CraDev
                 search.text="";yield return new WaitForSecondsRealtime(.4f);
             }
             Loc.Current=language;
+            lobby.Show("settings");yield return new WaitForSecondsRealtime(.5f);
+            ((LobbyContent)lobby.Current).Choose("2");yield return null;
+            var switches=lobby.Current.GetComponentsInChildren<GlassSurface>().Where(g=>g.name=="Switch").ToArray();
+            Check(switches.Length==3&&switches.All(g=>g.Solid),"glass notification switches");
+            var glass=lobby.Current.GetComponentsInChildren<GlassSurface>();
+            Check(glass.Length>8&&glass.All(g=>g.GetComponent<Image>().material.shader.name=="CraDev/UI/LobbyGlass"&&g.GetComponent<Image>().material.shader.isSupported),"supported glass materials");
             lobby.Show("wardrobe");yield return new WaitForSecondsRealtime(1);
             var garment=UnityEngine.Object.FindObjectsByType<RawImage>(FindObjectsSortMode.None).FirstOrDefault(i=>i.name=="Garment");
             Check(garment!=null&&garment.texture!=null,"3D garment thumbnails");

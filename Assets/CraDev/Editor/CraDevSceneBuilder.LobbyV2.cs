@@ -14,8 +14,8 @@ namespace CraDev.EditorTools
         const string V2Art = "Assets/CraDev/MainMenu/Pages/";
         static UiKit v2;
         static readonly Dictionary<string,Texture2D> v2Textures=new Dictionary<string,Texture2D>();
-        static readonly Color V2Blue = new Color32(36, 99, 255, 255);
-        static readonly Color V2Glass = new Color32(20, 36, 55, 210);
+        static readonly Color V2Blue = new Color32(77, 103, 128, 245);
+        static readonly Color V2Glass = new Color32(28, 33, 42, 226);
 
         // Faqat lobby qayta quriladi: tekshirilgan avatar niqoblarini qayta pishirmaydi.
         public static void RebuildLobby()
@@ -30,6 +30,8 @@ namespace CraDev.EditorTools
         {
             if(v2Textures.TryGetValue(name,out var cached)) return cached;
             string path = V2Art + name + ".png";
+            string night = V2Art + "Night/" + name + ".png";
+            if (System.IO.File.Exists(night)) path=night;
             if (!System.IO.File.Exists(path)) return null;
             if (AssetImporter.GetAtPath(path) is TextureImporter importer)
             {
@@ -67,6 +69,7 @@ namespace CraDev.EditorTools
         {
             var image = CreateSliced(name, parent, v2.RoundFill, 14, 24, color);
             PlaceTopLeft(image.rectTransform, x, y, w, h);
+            GlassSurface.Apply(image, Mathf.Min(30,h*.5f));
             return image;
         }
 
@@ -91,9 +94,11 @@ namespace CraDev.EditorTools
             string action = null, string value = null, bool blue = false, bool localized = true)
         {
             var fill = V2Panel(parent, "Button_" + (value ?? key), x, y, w, h, blue ? V2Blue : V2Glass);
-            if(blue) {fill.sprite=GradientSprite();fill.color=Color.white;}
             fill.raycastTarget = true;
             var button = TintButton(fill);
+            var colors=button.colors;colors.normalColor=Color.white;colors.highlightedColor=Color.white;
+            colors.pressedColor=new Color(.85f,.88f,.92f);colors.selectedColor=Color.white;
+            colors.fadeDuration=.14f;button.colors=colors;
             float left = icon == null ? 20 : 64;
             if (icon != null) V2Icon(fill.transform, icon, 20, (h - 30) / 2, 30);
             var label = V2Text(fill.transform, key, left, 0, w - left - 12, h, 25, localized);
@@ -109,6 +114,13 @@ namespace CraDev.EditorTools
 
         static RawImage V2Picture(Transform parent, string name, Texture texture, float x, float y, float w, float h, Rect? crop = null)
         {
+            if(!name.StartsWith("Background"))
+            {
+                var mask=CreateSliced(name+"Frame",parent,v2.RoundFill,Mathf.Min(24,h*.35f),24,Color.white);
+                PlaceTopLeft(mask.rectTransform,x,y,w,h);
+                mask.gameObject.AddComponent<Mask>().showMaskGraphic=false;
+                parent=mask.transform;x=y=0;
+            }
             var rect = CreateRect(name, parent);
             PlaceTopLeft(rect, x, y, w, h);
             var image = rect.gameObject.AddComponent<RawImage>();
@@ -120,6 +132,7 @@ namespace CraDev.EditorTools
         static void BuildMainMenu()
         {
             v2 = Kit();
+            PrepareLobbyGlass();
             v2Textures.Clear();
             var root = NewUiScene(out var scene);
             root.gameObject.AddComponent<GraphicRaycaster>();
@@ -129,7 +142,7 @@ namespace CraDev.EditorTools
             var bgCamera = new GameObject("BackgroundCamera").AddComponent<Camera>();
             bgCamera.depth = -1; bgCamera.cullingMask = 1 << 5;
             bgCamera.clearFlags = CameraClearFlags.SolidColor;
-            bgCamera.backgroundColor = new Color32(13, 29, 48, 255);
+            bgCamera.backgroundColor = new Color32(10, 13, 19, 255);
             var bgRoot = new GameObject("BackgroundCanvas", typeof(RectTransform), typeof(Canvas));
             bgRoot.layer = 5;
             var canvas = bgRoot.GetComponent<Canvas>();
@@ -146,10 +159,10 @@ namespace CraDev.EditorTools
             if(backdrop == null)
             {
                 backdrop = new Texture2D(2,2,TextureFormat.RGB24,false);
-                backdrop.SetPixels(new[]{new Color32(10,26,42,255),new Color32(20,38,58,255),new Color32(16,32,52,255),new Color32(42,67,99,255)}.Select(c=>(Color)c).ToArray());
-                backdrop.Apply(); backdrop.wrapMode=TextureWrapMode.Clamp;
                 AssetDatabase.CreateAsset(backdrop,backdropPath);
             }
+            backdrop.SetPixels(new[]{new Color32(9,12,18,255),new Color32(17,22,31,255),new Color32(15,19,27,255),new Color32(29,35,46,255)}.Select(c=>(Color)c).ToArray());
+            backdrop.Apply();backdrop.wrapMode=TextureWrapMode.Clamp;EditorUtility.SetDirty(backdrop);
             Set(screen, "defaultBackground", backdrop);
 
             camera.clearFlags = CameraClearFlags.Depth; camera.depth = 0;
@@ -193,7 +206,7 @@ namespace CraDev.EditorTools
             var toast = V2Panel(root, "Toast", 560, 945, 800, 78, V2Glass);
             Set(screen, "toastGroup", toast.gameObject.AddComponent<CanvasGroup>());
             Set(screen, "toastText", V2Text(toast.transform, "", 24, 0, 752, 78, 26, false));
-            Set(screen, "dialog", BuildConfirmDialog(root, v2));
+            Set(screen, "dialog", GlassDialog(root));
             Set(screen, "fader", CreateFullscreen("Fader", root, Color.black));
             AddUiSounds();
             Save(scene, MenuScene);
@@ -218,15 +231,15 @@ namespace CraDev.EditorTools
                 pose.FindPropertyRelative("fieldOfView").floatValue = fov;
                 pose.FindPropertyRelative("imageAspect").floatValue = 16f/9;
                 pose.FindPropertyRelative("sunRotation").vector3Value = new Vector3(28,-32,0);
-                pose.FindPropertyRelative("sunColor").colorValue = new Color(1,.9f,.8f);
-                pose.FindPropertyRelative("sunIntensity").floatValue = 1.2f;
+                pose.FindPropertyRelative("sunColor").colorValue = new Color(.87f,.91f,1f);
+                pose.FindPropertyRelative("sunIntensity").floatValue = .85f;
                 pose.FindPropertyRelative("rimRotation").vector3Value = new Vector3(20,155,0);
                 pose.FindPropertyRelative("rimColor").colorValue = new Color(.65f,.8f,1);
-                pose.FindPropertyRelative("rimIntensity").floatValue = .65f;
+                pose.FindPropertyRelative("rimIntensity").floatValue = .4f;
                 pose.FindPropertyRelative("shadowStrength").floatValue = .55f;
-                pose.FindPropertyRelative("ambientSky").colorValue = new Color(.52f,.56f,.64f);
-                pose.FindPropertyRelative("ambientEquator").colorValue = new Color(.38f,.36f,.34f);
-                pose.FindPropertyRelative("ambientGround").colorValue = new Color(.22f,.21f,.21f);
+                pose.FindPropertyRelative("ambientSky").colorValue = new Color(.32f,.36f,.43f);
+                pose.FindPropertyRelative("ambientEquator").colorValue = new Color(.24f,.26f,.31f);
+                pose.FindPropertyRelative("ambientGround").colorValue = new Color(.12f,.14f,.18f);
             }
             so.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -234,6 +247,7 @@ namespace CraDev.EditorTools
         static void V2Navigation(Transform root, MainMenuScreen screen)
         {
             var nav = CreateRect("Navigation", root); Stretch(nav);
+            V2Panel(nav,"NavigationDock",500,20,762,88,new Color(.07f,.085f,.11f,.88f));
             var brand = V2Button(nav, "Lynxos", null, 70, 30, 240, 70, "page", "home", false, false);
             brand.GetComponent<Image>().color = Color.clear;
             var tile=V2Panel(brand.transform,"Logo",0,12,48,48,V2Blue);
@@ -252,17 +266,15 @@ namespace CraDev.EditorTools
                 text.resizeTextForBestFit=false;text.fontSize=22;
                 text.horizontalOverflow=HorizontalWrapMode.Overflow;text.alignment=TextAnchor.MiddleCenter;
             }
-            var underline=V2Panel(nav,"SelectedUnderline",525,95,140,3,new Color32(130,187,255,255));
-            Set(tabs,"indicator",underline.rectTransform);
             SetArray(tabs, "items", buttons.Cast<Object>().ToArray());
             SetArray(tabs, "fills", buttons.Select(b => (Object)b.GetComponent<Image>()).ToArray());
-            Set(tabs, "normalFill", Color.clear); Set(tabs, "selectedFill", new Color(.13f,.28f,.65f,.85f));
+            Set(tabs, "normalFill", Color.clear); Set(tabs, "selectedFill", new Color(.24f,.29f,.36f,.9f));
             Set(screen, "navTabs", tabs);
             var language = V2Button(nav, "UZ", "Globe", 1350, 30, 160, 68, null, null, false, false);
-            language.GetComponent<Image>().color = Color.clear;
+            language.GetComponent<Image>().color = V2Glass;
             Set(language.gameObject.AddComponent<LanguageToggle>(), "label", language.GetComponentInChildren<Text>());
             var bell = V2Button(nav, "", "Bell", 1510, 30, 70, 68, null, null, false, false);
-            bell.GetComponent<Image>().color = Color.clear; Set(screen, "bellButton", bell);
+            Set(screen, "bellButton", bell);
             Set(screen, "bellDot", V2Panel(bell.transform, "NotificationDot", 43, 14, 10, 10, new Color32(243,65,95,255)));
             var profile = V2Button(nav, "Lynxos_user", "User", 1600, 30, 250, 68, null, null, false, false);
             Set(screen, "profileButton", profile); Set(screen, "profileName", profile.GetComponentInChildren<Text>());
@@ -296,7 +308,7 @@ namespace CraDev.EditorTools
             Set(page, "background", V2Texture("clean-" + bg));
             if (id == "home") { V2Home(rect,page); return page; }
             string prefix = id == "entertainment" ? "fun" : id;
-            V2Text(rect, prefix + ".title", 65, 153, id == "friends" ? 660 : 590, 78, 52).font = v2.Bold;
+            V2Text(rect, prefix + ".title", 65, 153, id == "friends" ? 660 : 590, 78, 46).font = v2.Bold;
             var subtitle = V2Text(rect, prefix + ".subtitle", 68, 232, 650, 42, 27);
             subtitle.color = new Color32(185,199,219,255);
 
@@ -328,6 +340,7 @@ namespace CraDev.EditorTools
                 default: categories = new string[0]; categoryIcons = new string[0]; break;
             }
             var categoriesButtons = new List<Button>();
+            if(categories.Length>0)V2Panel(rect,"SidebarGlass",49,299,417,categories.Length*80+22,new Color(.05f,.065f,.085f,.7f));
             for (int i = 0; i < categories.Length; i++)
                 categoriesButtons.Add(V2Button(rect, categories[i], categoryIcons[i], 65, 315+i*80, 385, 74, "choose", i.ToString(), i == 0));
             SetArray(page, "categories", categoriesButtons.Cast<Object>().ToArray());
@@ -389,32 +402,36 @@ namespace CraDev.EditorTools
 
         static void V2Home(Transform root,LobbyContent page)
         {
-            V2Text(root,"Lynxos",100,190,550,135,88,false).font=v2.Display;
-            V2Text(root,"home.subtitle",104,327,560,65,34).color = new Color32(190,204,224,255);
-            V2Button(root,"home.enter","Play",92,427,485,108,"page","world",true);
-            V2Text(root,"home.tagline1",1540,207,340,50,28).color = new Color32(18,33,50,255);
-            V2Text(root,"home.tagline2",1540,252,340,50,28).color = new Color32(18,33,50,255);
-            var eventCard = V2Button(root,"home.event_next",null,1460,545,405,145,"choose","events");
+            var welcome=V2Panel(root,"WelcomeGlass",65,198,560,360,new Color(.05f,.06f,.08f,.72f));
+            GlassSurface.Apply(welcome,40);
+            V2Text(root,"Lynxos",100,230,500,100,72,false).font=v2.Bold;
+            V2Text(root,"home.subtitle",104,340,475,60,30).color = new Color32(190,199,212,255);
+            V2Button(root,"home.enter","Play",100,442,488,78,"page","world",true);
+            var note=V2Panel(root,"WorldNote",1430,225,415,160,new Color(.05f,.06f,.08f,.72f));
+            V2Text(note.transform,"home.tagline1",26,26,365,46,25).color = new Color32(224,231,241,255);
+            V2Text(note.transform,"home.tagline2",26,77,365,46,25).color = new Color32(183,195,212,255);
+            var eventCard = V2Button(root,"home.event_next",null,1430,552,415,156,"choose","events");
             var eventLabel=eventCard.GetComponentInChildren<Text>();
             PlaceTopLeft(eventLabel.rectTransform,135,10,245,40);eventLabel.fontSize=20;
             V2Picture(eventCard.transform,"EventPhoto",V2Texture("home"),18,20,100,100,new Rect(584f/766,1-268f/415,46f/766,48f/415));
             Set(page,"eventTitle",V2Text(eventCard.transform,Loc.T("home.event_none"),135,55,245,76,24,false));
-            V2Button(root,"menu.wardrobe","Shirt",770,805,280,65,"page","wardrobe");
+            V2Button(root,"menu.wardrobe","Shirt",770,817,280,64,"page","wardrobe");
+            V2Panel(root,"ExploreDock",50,912,1820,134,new Color(.04f,.055f,.075f,.8f));
             string[] ids={"world","shops","education","business","entertainment"};
             string[] icons={"Map","Bag","GradCap","Buildings","Gamepad"};
             for(int i=0;i<5;i++)
             {
                 string key=i==0?"home.card.world":"zone."+ids[i];
-                var card=V2Button(root,key,icons[i],75+i*360,906,335,131,"page",ids[i]);
+                var card=V2Button(root,key,icons[i],66+i*360,926,348,106,"page",ids[i]);
                 if(i<2)
                 {
                     card.transform.Find(icons[i]).gameObject.SetActive(false);
-                    V2Picture(card.transform,"Photo",V2Texture(i==0?"clean-map":"clean-shops"),18,26,70,78,new Rect(.4f,.1f,.45f,.8f));
+                    V2Picture(card.transform,"Photo",V2Texture(i==0?"clean-map":"clean-shops"),16,18,70,70,new Rect(.4f,.1f,.45f,.8f));
                 }
                 card.GetComponentInChildren<Text>().fontSize=24;
                 var label=card.GetComponentInChildren<Text>();
-                PlaceTopLeft(label.rectTransform,96,16,225,50);
-                V2Text(card.transform,i==0?"home.card.world.sub":key+".sub",96,65,225,50,20);
+                PlaceTopLeft(label.rectTransform,96,10,238,46);
+                V2Text(card.transform,i==0?"home.card.world.sub":key+".sub",96,55,238,42,19).color=new Color32(178,188,204,255);
             }
         }
 
@@ -423,7 +440,7 @@ namespace CraDev.EditorTools
             string[] ids={"business","education","shops","entertainment","housing","events","services"};
             string[] icons={"Buildings","GradCap","Bag","Gamepad","Home","Calendar","Gear"};
             Vector2[] points={new Vector2(780,230),new Vector2(1200,290),new Vector2(625,390),new Vector2(1370,480),new Vector2(630,620),new Vector2(990,740),new Vector2(1440,790)};
-            Color[] colors={new Color32(32,92,163,235),new Color32(43,132,97,235),new Color32(159,37,74,235),new Color32(104,56,169,235),new Color32(154,96,52,235),new Color32(121,51,152,235),new Color32(37,105,166,235)};
+            Color[] colors={new Color32(55,75,96,238),new Color32(53,80,73,238),new Color32(87,58,72,238),new Color32(70,62,90,238),new Color32(86,72,56,238),new Color32(77,60,81,238),new Color32(54,76,88,238)};
             for(int i=0;i<ids.Length;i++)
             {
                 string key=i<4?"zone."+ids[i]:"world.cat."+ids[i];

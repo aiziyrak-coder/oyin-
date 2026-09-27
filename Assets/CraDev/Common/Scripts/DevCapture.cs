@@ -73,6 +73,21 @@ namespace CraDev
             if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevUiSmoke")>=0)
                 yield return DevLobbySmoke.Run(lobby);
 
+            if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevGlassDetails")>=0)
+            {
+                string folder=System.IO.Path.GetDirectoryName(path)??"";
+                lobby.Show("settings");yield return new WaitForSecondsRealtime(.5f);
+                ((MainMenu.LobbyContent)lobby.Current).Choose("2");
+                yield return Shot(System.IO.Path.Combine(folder,"settings-switches.png"));
+                lobby.Dialog.Show(Loc.T("wardrobe.unsaved_title"),Loc.T("wardrobe.unsaved_message"),Loc.T("wardrobe.discard"),()=>{},Loc.T("common.cancel"));
+                yield return Shot(System.IO.Path.Combine(folder,"dialog.png"));
+                lobby.Dialog.Close();lobby.Show("home");
+                yield return new WaitForSecondsRealtime(.6f);
+                float elapsed=0;const int frames=120;
+                for(int i=0;i<frames;i++){yield return null;elapsed+=Time.unscaledDeltaTime;}
+                Debug.Log($"[CraDev] Glass steady-frame sample: {frames/Mathf.Max(.001f,elapsed):0.0} FPS, {elapsed/frames*1000:0.00} ms; {Screen.width}x{Screen.height}.");
+            }
+
             if (!string.IsNullOrEmpty(press))
             {
                 var button = FindButton(press);
