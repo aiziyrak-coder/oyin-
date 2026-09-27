@@ -33,6 +33,8 @@ namespace CraDev.EditorTools
                 return !string.IsNullOrEmpty(hex) && ColorUtility.TryParseHtmlString("#" + hex, out c);
             }
 
+            // Konsept o'lchovlarida burilish hozir ishlatilmaydi. Builder uni bir xil API orqali o'qiydi.
+            public float Rotation => 0f;
             public float Width => X1 - X0;
             public float Height => Y1 - Y0;
             public Vector2 Center => new Vector2((X0 + X1) / 2f, (Y0 + Y1) / 2f);
@@ -117,6 +119,19 @@ namespace CraDev.EditorTools
                 ["home.card_4_subtitle"] = new Item(653.20f, 382.10f, 710.80f, 389.90f, 9.40f, "AEB6C6", "", "", 0.00f, "bc", "regular", "O'yin va tadbirlar"),
             })
             { CharacterX = 357.20f, CharacterHeadY = 75.80f, CharacterFeetY = 332.60f, HorizonY = 236.00f };
+        // Eski builder faqat to'liq qayta yozilguncha kompilyatsiyalanib turishi uchun moslik qatlami.
+        // Yangi sahifali builder sahifani aniq (Home, Map, Wardrobe...) tanlaydi.
+        public static float Width => Home.W;
+        public static float Height => Home.H;
+        public static float CharacterX => Home.CharacterX;
+        public static float CharacterHeadY => Home.CharacterHeadY;
+        public static float CharacterFeetY => Home.CharacterFeetY;
+        public static float PlatformX => Home.CharacterX;
+        public static float PlatformY => Home.CharacterFeetY + 8f;
+        public static float PlatformOuterRx => 92f;
+        public static float PlatformOuterRy => 24f;
+        public static Item Get(string id) => Home[id];
+
         public static readonly Page Map = new Page("map", 759.00f, 415.00f,
             new Dictionary<string, Item>
             {

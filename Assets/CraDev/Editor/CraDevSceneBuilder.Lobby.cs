@@ -40,7 +40,7 @@ namespace CraDev.EditorTools
             ("community", "People", new Vector2(1160f, 286f)),
         };
 
-        static void BuildMainMenu()
+        static void BuildLegacyMainMenu()
         {
             var kit = Kit();
             var maleIdle = IdleController("m_idle_neutral_01", "Idle_Male");
@@ -298,7 +298,7 @@ namespace CraDev.EditorTools
             camera.farClipPlane = 80f;
             camera.allowHDR = false;
             camera.transform.SetPositionAndRotation(new Vector3(side, height, -distance), Quaternion.Euler(pitch, 0f, 0f));
-            Set(camera.gameObject.AddComponent<LobbyCamera>(), "fieldOfView16x9", fov);
+            Set(camera.gameObject.AddComponent<LobbyCamera>(), "baseFieldOfView", fov);
 
             // Yorug'lik: rasmdagidek kechki iliq quyosh (oldindan-o'ngdan, rasmda quyosh o'ng tomonda) va
             // chap-orqadan sovuq ko'k chiziq yorug'lik
@@ -342,7 +342,7 @@ namespace CraDev.EditorTools
         /// <summary>Kamera parametrlarini rasmdagi qahramon va platformaga moslash (koordinata bo'yicha tushish).</summary>
         static float[] SolveLobbyCamera(float bodyHeight)
         {
-            const float aspect = LobbyLayout.Width / LobbyLayout.Height;
+            float aspect = LobbyLayout.Width / LobbyLayout.Height;
             float Error(float[] p)
             {
                 var position = new Vector3(p[4], p[1], -p[0]);

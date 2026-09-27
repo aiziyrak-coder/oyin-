@@ -41,9 +41,37 @@ namespace CraDev
 
         IEnumerator Start()
         {
-            while (SceneManager.GetActiveScene().name != scene)
+            float deadline = Time.realtimeSinceStartup + 90;
+            while (SceneManager.GetActiveScene().name != scene && Time.realtimeSinceStartup < deadline)
                 yield return null;
+            if (SceneManager.GetActiveScene().name != scene)
+            {
+                Debug.LogError("[CraDev] Capture: kutilgan sahna ochilmadi: " + scene);
+                if (quit) Application.Quit(1);
+                yield break;
+            }
+            string page = Argument(System.Environment.GetCommandLineArgs(), "-cradevPage");
+            var lobby = FindFirstObjectByType<MainMenu.MainMenuScreen>();
+            if (lobby != null && page != null)
+            {
+                yield return null;
+                lobby.Show(page);
+            }
             yield return Shot(path);
+
+            if (lobby != null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(), "-cradevAllPages") >= 0)
+                foreach (string id in new[] { "world", "wardrobe", "shops", "education", "business", "friends", "settings", "top", "entertainment" })
+                {
+                    lobby.Show(id);
+                    string file = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path) ?? "", id + ".png");
+                    yield return Shot(file);
+                    if (lobby.Current == null || lobby.Current.Id != id)
+                        Debug.LogError("[CraDev] Capture: sahifa ochilmadi: " + id);
+                    else Debug.Log("[CraDev] PAGE OK: " + id);
+                }
+
+            if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevUiSmoke")>=0)
+                yield return DevLobbySmoke.Run(lobby);
 
             if (!string.IsNullOrEmpty(press))
             {
@@ -54,7 +82,8 @@ namespace CraDev
                 {
                     Debug.Log("[CraDev] DevCapture: bosildi: " + press);
                     button.onClick.Invoke();
-                    while (SceneManager.GetActiveScene().name == scene)
+                    float until = Time.realtimeSinceStartup + 3;
+                    while (SceneManager.GetActiveScene().name == scene && Time.realtimeSinceStartup < until)
                         yield return null;
                     string second = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path) ?? "",
                         System.IO.Path.GetFileNameWithoutExtension(path) + "_2" + System.IO.Path.GetExtension(path));
@@ -69,7 +98,17 @@ namespace CraDev
         {
             yield return new WaitForSecondsRealtime(delay);
             yield return new WaitForEndOfFrame();
-            ScreenCapture.CaptureScreenshot(file);
+            var screenshot = ScreenCapture.CaptureScreenshotAsTexture();
+            var pixels = screenshot.GetPixels32();
+            int lo=255, hi=0;
+            for(int i=0;i<pixels.Length;i+=997)
+            {
+                int light=(pixels[i].r+pixels[i].g+pixels[i].b)/3;
+                lo=Mathf.Min(lo,light);hi=Mathf.Max(hi,light);
+            }
+            if(hi-lo<15) Debug.LogError("[CraDev] Capture: ekran bir xil rang yoki qora: "+file);
+            System.IO.File.WriteAllBytes(file,screenshot.EncodeToPNG());
+            Destroy(screenshot);
             Debug.Log("[CraDev] Skrinshot: " + file);
             yield return new WaitForSecondsRealtime(1f);
         }

@@ -375,10 +375,16 @@ namespace CraDev.MainMenu
         public void SaveOutfit(Outfit outfit, Action<bool> done = null)
         {
             string json = WardrobeCatalog.Sanitize(outfit).ToJson();
-            PlayerProfile.SetOutfit(json);
-            viewer.SetOutfit(outfit);
-            ProfileChanged?.Invoke();
-            StartCoroutine(api.UpdateOutfit(PlayerProfile.Token, json, result => done?.Invoke(result.Ok)));
+            StartCoroutine(api.UpdateOutfit(PlayerProfile.Token, json, result =>
+            {
+                if (result.Ok)
+                {
+                    PlayerProfile.SetOutfit(json);
+                    viewer.SetOutfit(outfit);
+                    ProfileChanged?.Invoke();
+                }
+                done?.Invoke(result.Ok);
+            }));
         }
 
         public void NotifyProfileChanged() => ProfileChanged?.Invoke();

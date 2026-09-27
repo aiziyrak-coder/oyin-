@@ -12,6 +12,19 @@ namespace CraDev.EditorTools
     /// </summary>
     public static class CraDevBatch
     {
+        public static void BuildLobby()
+        {
+            try
+            {
+                CraDevSceneBuilder.RebuildLobby();
+                var target = ResolveTarget();
+                var path = Argument("-customBuildPath") ?? "Builds/LobbyV2/CraDev.exe";
+                var report = CraDevSceneBuilder.BuildGame(target, path, run: false);
+                Debug.Log("[CraDev] Lobby V2 build: " + report.summary.result);
+                EditorApplication.Exit(report.summary.result == BuildResult.Succeeded ? 0 : 1);
+            }
+            catch (System.Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
+        }
         /// <summary>Barcha sahnalarni noldan yaratadi (menyudagi "CraDev → Sahnalarni yaratish" bilan bir xil).</summary>
         public static void CreateScenes()
         {

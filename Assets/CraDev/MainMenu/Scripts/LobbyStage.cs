@@ -46,6 +46,10 @@ namespace CraDev.MainMenu
         public void Apply(int index)
         {
             Current = index;
+            // Sahna builderi UI'ni alohida tekshirayotganda 3D qismlar hali ulanmagan bo'lishi mumkin.
+            // Bunday holda sahifa ishlashda davom etadi, avatar esa ko'rsatilmaydi.
+            if (turntable == null || stageCamera == null || lobbyCamera == null || poses == null)
+                return;
             bool visible = index >= 0 && index < poses.Length;
             turntable.gameObject.SetActive(visible);
             stageCamera.enabled = visible;

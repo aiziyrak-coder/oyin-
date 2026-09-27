@@ -36,11 +36,13 @@ namespace CraDev.Wardrobe
             material.SetFloat(MaskFromAlphaId, 0f);
             material.SetFloat(SmoothnessId, DefaultSmoothness);
             color = Ensure(color, source.width, source.height, true, "OutfitBody");
+            var previous = RenderTexture.active;
             Graphics.Blit(source, color, material, 0);
             color.GenerateMips();
             gloss = Ensure(gloss, source.width / 2, source.height / 2, false, "OutfitGloss");
             Graphics.Blit(source, gloss, material, 1);
             gloss.GenerateMips();
+            RenderTexture.active = previous;
             return true;
         }
 
@@ -56,8 +58,10 @@ namespace CraDev.Wardrobe
             material.SetTexture(MaskId, fromAlpha ? Texture2D.blackTexture : option.hairMask);
             material.SetFloat(MaskFromAlphaId, fromAlpha ? 1f : 0f);
             color = Ensure(color, source.width, source.height, true, fromAlpha ? "OutfitHairCards" : "OutfitHead");
+            var previous = RenderTexture.active;
             Graphics.Blit(source, color, material, 0);
             color.GenerateMips();
+            RenderTexture.active = previous;
             return true;
         }
 

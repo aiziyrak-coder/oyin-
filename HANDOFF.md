@@ -1,5 +1,26 @@
 # Ishni boshqa AI yordamchida davom ettirish (Lynxos lobby v2)
 
+## Yangilangan holat — 2026-09-27, Codex
+
+**Quyidagi eski handoffdan farqli ravishda loyiha endi kompilyatsiya bo'ladi va Lobby V2 buildi ishlaydi.**
+Eski StandaloneWindows64 buildini ochmang: yangisi `Builds/LobbyV2/CraDev.exe`.
+`Play-LobbyV2.cmd` server bilan birga ochadi. `powershell -File tools/lobby.ps1 -Build` yangi build yaratadi.
+
+- Yangi builder: `Assets/CraDev/Editor/CraDevSceneBuilder.LobbyV2.cs`. 8 asosiy sahifa + Top-lar + Ko'ngilochar zona.
+- Sahifa funksiyalari: `MainMenu/Scripts/LobbyContent*.cs`, tugmalar: `LobbyCommand.cs`.
+- Home/world/wardrobe/shops/business fonlari tozalangan; education/friends hero rasmlarida matn va UI yo'q.
+- Garderob kartalari ishlayotgan avatardan 3D chiziladi; rang, mato, soch, uslub, saqlangan obrazlar va saqlamasdan chiqish dialogi bor.
+- Kiyim faqat server tasdiqlagach saqlangan hisoblanadi; xato bo'lsa draft qoladi.
+- Do'st qidirish, so'rov/qabul qilish/o'chirish, tadbirlar, reyting, profil va sozlamalar API'ga ulangan.
+- Serverning eski jarayoni yangilandi. Migratsiya oldi SQLite zaxirasi: `Logs/cradev-before-lobby-v2-20260927.db`.
+- Tekshiruv: server 56/56; `-cradevAllPages -cradevUiSmoke` sahifalar, raycast, navigatsiya, kategoriyalar, 3D kartalar, preview va discard'ni sinaydi.
+- Kadrlar: `Logs/LobbyV2/`; build log: `Logs/lobby-v2-build.log`; runtime log: `Logs/lobby-v2-player.log`.
+- Grafik holat xatosi tuzatildi: FacePainter va OutfitPainter RenderTexture.active ni avvalgi holatiga qaytaradi.
+
+Oldindan keyinga qoldirilganlar hali tayyor deb ko'rsatilmaydi: dunyo/interyerlar, chat/guruhlar, email/parol va aksessuar modellari.
+`Design/LobbyV2` manba fayllarini o'chirmang va Git'ga qo'shmang. Kerakli runtime rasmlar `Assets/CraDev/MainMenu/Pages` da.
+Hozirgi qisqa checklist: `USTA.md`. Quyida Claude Code'dan olingan boshlang'ich handoff tarix uchun saqlangan.
+
 Sana: 2026-09-27. Branch: `claude/gallant-dijkstra-r0opib`. Oxirgi commit: `34a48b0` (ishlaydigan eski bosh menyu).
 GitHub'ga push qilinmagan 6 ta commit bor.
 

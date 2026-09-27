@@ -25,6 +25,8 @@ Material:
     m_TexEnvs: []
     m_Ints: []
     m_Floats:
+    - _BlobRadius: 0.32
+    - _BlobStrength: 0.45
     - _Strength: 0.55
     m_Colors:
     - _ShadowColor: {r: 0.02, g: 0.04, b: 0.079999976, a: 1}

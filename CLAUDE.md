@@ -144,6 +144,11 @@ Hamma tayyor PNG/WAV'lar `Assets/` ga commit qilingan; qayta yaratish faqat manb
 
 ## Holat va keyingi qadamlar
 
+**Lobby V2 yangilanishi (2026-09-27):** yangi 10 bo'limli menyu `CraDevSceneBuilder.LobbyV2.cs` orqali quriladi.
+`Play-LobbyV2.cmd` yangi build va serverni ochadi; `tools/lobby.ps1 -Build` faqat lobbyni qayta yig'adi.
+Yangi build `Builds/LobbyV2/CraDev.exe` da. Eski `StandaloneWindows64` buildi yangilanmagan.
+Joriy holat uchun `HANDOFF.md` boshidagi yangilanish va `USTA.md` ni o'qing; pastdagi eski menyu tavsifi tarixiy.
+
 1. Loyiha foydalanuvchi kompyuterida Unity 6000.3.24f1 bilan tekshirildi: `check` → `scenes` → `run` xatosiz,
    o'yin Intro → CDCGroup → Loading → CharacterCreation gacha to'liq ekranda ishlaydi (server bilan).
    Unity yaratgan `manifest.json` da uGUI yo'q edi: `com.unity.ugui` qo'lda qo'shildi. `.meta`, `Packages/`,

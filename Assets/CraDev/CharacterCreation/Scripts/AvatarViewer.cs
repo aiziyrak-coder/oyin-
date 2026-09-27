@@ -140,6 +140,49 @@ namespace CraDev.CharacterCreation
             ApplyOutfit();
         }
 
+        /// <summary>Katalog kartasi: aynan shu avatar va matodan shaffof 3D tasvir. Profilga yozmaydi.</summary>
+        public Texture2D CaptureGarment(WardrobeItem item)
+        {
+            if (current == null) return null;
+            var previous = outfit;
+            var rotation = turntable.rotation;
+            var transforms = current.GetComponentsInChildren<Transform>();
+            var layers = new int[transforms.Length];
+            var cameraGo = new GameObject("WardrobePreviewCamera");
+            var camera = cameraGo.AddComponent<Camera>();
+            camera.enabled = false; camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = Color.clear; camera.cullingMask = 1 << 30;
+            camera.orthographic = true; camera.allowHDR = false; camera.nearClipPlane = .05f;
+            float y = item.Slot == OutfitSlot.Top ? bodyHeight * .67f : item.Slot == OutfitSlot.Bottom ? bodyHeight * .33f :
+                item.Slot == OutfitSlot.Shoes ? .13f : bodyHeight * .91f;
+            camera.orthographicSize = item.Slot == OutfitSlot.Top ? .49f : item.Slot == OutfitSlot.Bottom ? .52f : item.Slot == OutfitSlot.Shoes ? .23f : .27f;
+            camera.transform.position = turntable.position + new Vector3(0,y,-3);
+            camera.transform.rotation = Quaternion.identity;
+            var target = RenderTexture.GetTemporary(192,192,24,RenderTextureFormat.ARGB32);
+            var active = RenderTexture.active;
+            try
+            {
+                for(int i=0;i<transforms.Length;i++) {layers[i]=transforms[i].gameObject.layer;transforms[i].gameObject.layer=30;}
+                turntable.rotation = Quaternion.Euler(0,180,0);
+                outfit = new Outfit(); outfit.Set(item.Slot,item.Id,item.Color);
+                if(item.Slot==OutfitSlot.Hair) ApplyHeads(); else ApplyOutfit();
+                camera.targetTexture=target; camera.Render(); RenderTexture.active=target;
+                var texture=new Texture2D(192,192,TextureFormat.RGBA32,false);
+                texture.ReadPixels(new Rect(0,0,192,192),0,0); texture.Apply();
+                texture.name="Garment_"+currentOption.id+"_"+item.Id;
+                return texture;
+            }
+            finally
+            {
+                outfit=previous;
+                if(item.Slot==OutfitSlot.Hair) ApplyHeads(); else ApplyOutfit();
+                turntable.rotation=rotation;
+                for(int i=0;i<transforms.Length;i++) transforms[i].gameObject.layer=layers[i];
+                RenderTexture.active=active;camera.targetTexture=null;
+                RenderTexture.ReleaseTemporary(target);Destroy(cameraGo);
+            }
+        }
+
         /// <summary>Kamerani yuzga yaqinlashtirib, qahramonni old tomoniga buradi: yuz natijasi ko'rinadi.</summary>
         public void FocusFace()
         {

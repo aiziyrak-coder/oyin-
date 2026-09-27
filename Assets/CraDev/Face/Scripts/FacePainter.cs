@@ -57,6 +57,7 @@ namespace CraDev.Face
                 name = "PlayerFace",
             };
             result.Create();
+            var previous = RenderTexture.active;
             Graphics.Blit(head, result);
 
             material.mainTexture = face.Photo;
@@ -64,7 +65,6 @@ namespace CraDev.Face
             var gain = SkinGain(head, face, faceUv);
             material.SetVector("_Gain", new Vector4(gain.r, gain.g, gain.b, 1f));
 
-            var previous = RenderTexture.active;
             RenderTexture.active = result;
             GL.PushMatrix();
             GL.LoadOrtho();
@@ -108,8 +108,8 @@ namespace CraDev.Face
             // Bosh teksturasini kichraytirib o'qiymiz (to'liq 2048x2048 ni o'qish shart emas)
             const int size = 256;
             var small = RenderTexture.GetTemporary(size, size, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
-            Graphics.Blit(head, small);
             var previous = RenderTexture.active;
+            Graphics.Blit(head, small);
             RenderTexture.active = small;
             var readback = new Texture2D(size, size, TextureFormat.RGBA32, false, false);
             readback.ReadPixels(new Rect(0, 0, size, size), 0, 0);
