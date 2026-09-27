@@ -2,6 +2,10 @@
 
 ## Yangilangan holat — 2026-09-27, Codex
 
+Fon sifati bo'yicha keyingi yangilanish: 7 ta fon/hero va o'quv kartalari yangilangan. Bino fonlaridagi brend yozuvlari/logolari olib tashlangan, katalogda sun'iy brendlar emas umumiy mahsulot turlari bor. O'yinning o'z Lynxos nomi navigatsiyada saqlangan.
+Bu native 4K emas: ko'p fonlar 1672x941, education hero 2060x763, kartalar atlasi 1586x992. Unity ularni siqilmagan RGBA32, asl o'lchamda yuklaydi. Aniq 4K uchun API/CLI roziligi hali olinmagan.
+Yangi tekshiruv: build Succeeded, UI 33/33. Skrinshotlar `Logs/LobbyArtRefresh/`; loglar `Logs/lobby-art-refresh-build.log`, `Logs/lobby-art-refresh-player.log`. Prompt va fayl ro'yxati `Design/LobbyV2/quality-preview/ART-REFRESH.md`.
+
 **Quyidagi eski handoffdan farqli ravishda loyiha endi kompilyatsiya bo'ladi va Lobby V2 buildi ishlaydi.**
 Eski StandaloneWindows64 buildini ochmang: yangisi `Builds/LobbyV2/CraDev.exe`.
 `Play-LobbyV2.cmd` server bilan birga ochadi. `powershell -File tools/lobby.ps1 -Build` yangi build yaratadi.

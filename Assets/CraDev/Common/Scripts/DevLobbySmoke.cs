@@ -49,6 +49,22 @@ namespace CraDev
                 page.Choose("0");
                 Check(page.Id==pair.Item1,"categories "+pair.Item1);
             }
+            lobby.Show("shops");yield return new WaitForSecondsRealtime(.5f);
+            foreach(var testLanguage in new[]{Language.Uz,Language.En})
+            {
+                Loc.Current=testLanguage;yield return null;
+                var page=(LobbyContent)lobby.Current;
+                var labels=page.GetComponentsInChildren<Text>().Select(t=>t.text).ToArray();
+                Check(labels.Contains(Loc.T("shops.store.clothing")),"generic store labels "+testLanguage);
+                string[] removed={"AUREL","VELO","ATLAS","NEXORA","ORBIT","MIRA","ÉLAN","PULSE","DOMA","LUMA","STRIDE","NOVA"};
+                Check(!labels.Any(t=>removed.Contains(t)),"no store brands "+testLanguage);
+                var search=page.GetComponentInChildren<InputField>();
+                search.text=Loc.T("shops.store.computers");yield return new WaitForSecondsRealtime(.4f);
+                var cards=page.GetComponentsInChildren<Button>().Where(b=>b.name.StartsWith("Item_")).ToArray();
+                Check(cards.Length==1&&cards[0].GetComponentInChildren<Text>().text==Loc.T("shops.store.computers"),"generic store search "+testLanguage);
+                search.text="";yield return new WaitForSecondsRealtime(.4f);
+            }
+            Loc.Current=language;
             lobby.Show("wardrobe");yield return new WaitForSecondsRealtime(1);
             var garment=UnityEngine.Object.FindObjectsByType<RawImage>(FindObjectsSortMode.None).FirstOrDefault(i=>i.name=="Garment");
             Check(garment!=null&&garment.texture!=null,"3D garment thumbnails");

@@ -290,7 +290,7 @@ namespace CraDev.EditorTools
             Set(page, "stagePose", id == "home" ? 0 : id == "wardrobe" ? 1 : -1);
             Set(page, "font", v2.Medium); Set(page, "bold", v2.Bold); Set(page, "rounded", v2.RoundFill);
             Set(page, "shirt", LineIcon("Shirt")); Set(page, "shoe", LineIcon("Shoe")); Set(page, "hair", LineIcon("Hair"));
-            Set(page, "educationImage", V2Texture("education")); Set(page, "friendsImage", V2Texture("hero-friends"));
+            Set(page, "educationImage", V2Texture("education-cards")); Set(page, "friendsImage", V2Texture("hero-friends"));
             SetArray(page,"businessIcons",new Object[]{LineIcon("Office"),LineIcon("Coworking"),LineIcon("Rocket"),LineIcon("Coins")});
             string bg = id == "world" ? "map" : id;
             Set(page, "background", V2Texture("clean-" + bg));
@@ -365,7 +365,7 @@ namespace CraDev.EditorTools
             {
                 var hero = V2Picture(rect, "Hero", V2Texture(id == "education" ? "hero-education" : "clean-map"), 545, 168, 1300, 480);
                 var box = V2Panel(rect,"HeroInfo",1300,205,500,390,V2Glass);
-                V2Text(box.transform,id == "education" ? "Lynxos Education" : "Lynxos Arena",35,35,430,80,36,false).font=v2.Bold;
+                V2Text(box.transform,prefix+".hero.title",35,35,430,80,36).font=v2.Bold;
                 V2Text(box.transform,prefix+".hero.subtitle",35,125,420,75,26);
                 V2Button(box.transform,prefix+".visit","ArrowRight",35,260,430,84,"soon",prefix+".title",true);
                 V2Text(rect,prefix+".recommended",545,670,600,60,30);
@@ -409,7 +409,7 @@ namespace CraDev.EditorTools
                 if(i<2)
                 {
                     card.transform.Find(icons[i]).gameObject.SetActive(false);
-                    V2Picture(card.transform,"Photo",V2Texture("home"),18,26,70,78,new Rect((i==0?40f:175f)/766,1-390f/415,34f/766,34f/415));
+                    V2Picture(card.transform,"Photo",V2Texture(i==0?"clean-map":"clean-shops"),18,26,70,78,new Rect(.4f,.1f,.45f,.8f));
                 }
                 card.GetComponentInChildren<Text>().fontSize=24;
                 var label=card.GetComponentInChildren<Text>();

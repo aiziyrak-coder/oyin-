@@ -25,7 +25,8 @@ namespace CraDev.MainMenu
         }
         void Shops()
         {
-            string[] names={"AUREL","VELO","ATLAS","NEXORA","ORBIT","MIRA","ÉLAN","PULSE","DOMA","LUMA","STRIDE","NOVA"};
+            string[] names={"clothing","sportswear","shoes","electronics","computers","casual","accessories","audio","home","beauty","sports","gifts"};
+            names=names.Select(key=>Loc.T("shops.store."+key)).ToArray();
             int[] groups={1,6,1,2,2,1,3,2,4,5,6,7};
             var results=Enumerable.Range(0,names.Length).Where(i=>(section==0||groups[i]==section) &&
                 (search==null||names[i].IndexOf(search.text,StringComparison.OrdinalIgnoreCase)>=0)).ToArray();
@@ -52,7 +53,7 @@ namespace CraDev.MainMenu
                 string key=names[i];float cell=(width-45)/4;int column=n%4,row=n/4;n++;
                 var button=Button(Loc.T(key),column*(cell+15),row*270+195,cell,64,()=>Lobby.Soon(Loc.T(key)));
                 if(educationImage!=null && !fun)
-                    Photo(educationImage,new Rect(.267f+(i%4)*.17f,.115f,.16f,.18f),column*(cell+15),row*270,cell,190);
+                    Photo(educationImage,new Rect((i%2)*.5f+.003f,1-((i%4)/2+1)*.5f+.003f,.494f,.494f),column*(cell+15),row*270,cell,190);
                 else
                 {
                     var image=Panel("Place",column*(cell+15),row*270,cell,190,new Color(.15f+.04f*i,.22f,.36f,1));

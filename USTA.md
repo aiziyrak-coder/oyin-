@@ -3,7 +3,11 @@
 ## Fon sifatini yaxshilash — davom etmoqda
 
 - [x] Asl fonlar tekshirildi: kengligi 1449–2060 px, 4K emas.
-- [x] Bosh sahifa uchun tiniqroq namuna yaratildi: Design/LobbyV2/quality-preview/home-detail-preview.png. Natija 1672x941; o'yinga o'rnatilmadi, 4K deb hisoblanmaydi.
+- [x] Bosh sahifaning tiniqroq 1672x941 nusxasi endi o'yinga o'rnatildi; bu 4K emas.
+- [x] 7 ta asosiy fon/hero yangilandi, education-cards atlasidagi 4 ta bino rasmi qayta tiklandi. Fonlardagi brend, logo va shiorlar olib tashlandi.
+- [x] Sun'iy do'kon brendlari o'rniga ikki tildagi umumiy mahsulot turlari qo'yildi. Ta'lim/ko'ngilochar hero nomlari ham umumiylashtirildi. O'yinning navigatsiyadagi o'z nomi saqlandi.
+- [x] Yangi build Succeeded; 10 sahifa skrinshoti, UI 33/33 sinov o'tdi (ikki tildagi brendsiz katalog va qidiruv ham). O'yin bosh sahifada ochiq. Logs/LobbyArtRefresh, Logs/lobby-art-refresh-build.log, Logs/lobby-art-refresh-player.log.
+- [x] Rasm yo'llari, haqiqiy o'lchamlar va promptlar: Design/LobbyV2/quality-preview/ART-REFRESH.md. Built-in image_gen; CLI/API ishlatilmadi.
 - [x] Unity desktop importi: siqilmagan RGBA32, 4096 limit, asl o'lcham saqlanishini avtomatik tekshirish.
 - [x] Import o'zgarishi tekshirildi: Lobby build Succeeded; 9 ta tekstura asl o'lchamda RGBA32; 10 sahifa skrinshoti; UI test 0 failures. O'yin ochiq qoldirildi. Loglar: Logs/lobby-quality-build.log va Logs/lobby-quality-player.log.
 - [ ] Haqiqiy 3840x2160 fonlar: aniq o'lchamli API/CLI yo'li uchun foydalanuvchi roziligi kerak; built-in so'ralgan o'lchamni bermadi.
