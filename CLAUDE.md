@@ -49,7 +49,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/unity.ps1 <buyruq>
 
 ## GitHub CI
 
-`.github/workflows/ci.yml` har push'da: server testlari → GameCI (`game-ci/unity-builder`) bilan Unity'da
+`.github/workflows/ci.yml` har push'da: server testlari va `CraDevServer.exe` (`tools/ci/server-exe.sh`, Node SEA) → GameCI (`game-ci/unity-builder`) bilan Unity'da
 Windows va Linux build (`CraDevBatch.BuildGame`, sahnalar ham shu yerda yaratiladi) → Linux build'ni Xvfb'da
 server bilan ishga tushirib, o'yinchi kabi o'tish va OCR bilan tekshirish (`tools/ci/smoke.sh`).
 
@@ -57,6 +57,7 @@ server bilan ishga tushirib, o'yinchi kabi o'tish va OCR bilan tekshirish (`tool
   Ularni hech qachon chatda so'ramang: foydalanuvchi o'zi GitHub Settings'ga kiritadi.
 - Bulutdagi Claude sessiyasi CI loglarini GitHub MCP (`get_job_logs`) orqali o'qiydi. Artifact'larni (video, rasm)
   u yuklab ololmaydi, shuning uchun `smoke.sh` asosiy natijalarni (OCR matni, Player.log xatolari, PASS/FAIL) logga ham yozadi.
+- Windows artifact'ida o'yin yonida `CraDevServer.exe` va `Play.cmd` (`tools/ci/Play.cmd`: server + o'yin) bo'ladi.
 - `smoke.sh` dagi sichqoncha koordinatalari `BuildCharacterCreation` joylashuvidan olingan (1920x1080):
   forma o'zgarsa, ularni ham yangilang.
 

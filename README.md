@@ -70,14 +70,17 @@ loglarni o'qiydi va xatolarni tuzatadi.
 
 Har bir push'dan keyin GitHub Actions (`.github/workflows/ci.yml`) o'zi:
 
-1. server testlarini ishlatadi;
+1. server testlarini ishlatadi va serverni Node.js'siz ishlaydigan bitta `CraDevServer.exe` ga yig'adi;
 2. o'yinni haqiqiy Unity'da Windows va Linux uchun yig'adi (sahnalar ham o'sha yerda yaratiladi);
 3. Linux build'ni virtual ekranda server bilan birga ishga tushiradi va o'yinchi kabi o'tadi: intro'lar, Loading,
    nickname yozish, avatar tanlash, qahramonni aylantirish, **Create character** (`tools/ci/smoke.sh`).
 
 Natijalar **Actions** bo'limida, har bir ishga tushirishning pastidagi **Artifacts** qismida:
 
-- **CraDev-Windows**: tayyor o'yin. ZIP'ni oching va `CraDev.exe` ni ishga tushiring.
+- **CraDev-Windows**: tayyor o'yin. ZIP'ni oching va **`Play.cmd`** ni ishga tushiring: u avval serverni
+  (kichraytirilgan oynada), keyin o'yinni ochadi va o'yin yopilgach serverni ham to'xtatadi.
+  Node.js o'rnatish shart emas. Faqat o'yinning o'zi: `CraDev.exe`.
+- **CraDevServer-Windows**: faqat server (`CraDevServer.exe`), litsenziyasiz ham har push'da yig'iladi.
 - **CraDev-smoke**: tekshiruv videosi (`gameplay.mp4`), skrinshotlar (`overview.jpg`) va loglar.
 
 Unity'ni ishlatish uchun GitHub'ga Unity litsenziyasi kerak. Buni **bir marta** qilasiz:

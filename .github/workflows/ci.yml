@@ -1,5 +1,5 @@
-# CraDev CI: har bir push'da server testlari, Unity'da o'yinni yig'ish (Windows va Linux)
-# va Linux build'ni virtual ekranda ishga tushirib tekshirish (tools/ci/smoke.sh).
+# CraDev CI: har bir push'da server testlari va serverni bitta .exe ga yig'ish, Unity'da o'yinni yig'ish
+# (Windows va Linux) va Linux build'ni virtual ekranda ishga tushirib tekshirish (tools/ci/smoke.sh).
 #
 # Unity qismi uchun repo'da 3 ta secret kerak (Settings -> Secrets and variables -> Actions):
 #   UNITY_LICENSE  - C:\ProgramData\Unity\Unity_lic.ulf faylining to'liq matni
@@ -25,7 +25,7 @@ concurrency:
 
 jobs:
   server:
-    name: Server testlari
+    name: Server (testlar va .exe)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,6 +34,22 @@ jobs:
           node-version: 22
       - run: npm test
         working-directory: Server
+      - name: Serverni bitta faylga yig'ish (Node.js'siz ishlaydi)
+        run: tools/ci/server-exe.sh dist
+      - name: Yig'ilgan serverni tekshirish
+        run: |
+          PORT=18080 DB_PATH="$RUNNER_TEMP/check.db" dist/cradev-server > "$RUNNER_TEMP/server.log" 2>&1 &
+          pid=$!
+          ok=1
+          for _ in $(seq 1 30); do curl -sf http://localhost:18080/health && { ok=0; break; }; sleep 0.5; done
+          kill "$pid"
+          cat "$RUNNER_TEMP/server.log"
+          exit "$ok"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CraDevServer-Windows
+          path: dist/CraDevServer.exe
+          retention-days: 30
 
   license:
     name: Unity litsenziyasi
@@ -56,7 +72,7 @@ jobs:
 
   build:
     name: Build ${{ matrix.target }}
-    needs: license
+    needs: [license, server]
     if: needs.license.outputs.available == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -88,6 +104,17 @@ jobs:
           # Sahnalar repo'da yo'q: bu metod avval ularni yaratadi, keyin o'yinni yig'adi
           buildMethod: CraDev.EditorTools.CraDevBatch.BuildGame
           versioning: None
+      # Windows o'yini yonida server va ikkalasini birga ochadigan Play.cmd
+      - uses: actions/download-artifact@v4
+        if: matrix.target == 'StandaloneWindows64'
+        with:
+          name: CraDevServer-Windows
+          path: server-exe
+      - name: Server'ni o'yin yoniga qo'yish
+        if: matrix.target == 'StandaloneWindows64'
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" build
+          cp server-exe/CraDevServer.exe tools/ci/Play.cmd build/StandaloneWindows64/
       - uses: actions/upload-artifact@v4
         with:
           name: CraDev-${{ matrix.target == 'StandaloneWindows64' && 'Windows' || 'Linux' }}
