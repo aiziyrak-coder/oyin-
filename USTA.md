@@ -1,5 +1,14 @@
 # Lynxos Lobby V2
 
+## Fon sifatini yaxshilash — davom etmoqda
+
+- [x] Asl fonlar tekshirildi: kengligi 1449–2060 px, 4K emas.
+- [x] Bosh sahifa uchun tiniqroq namuna yaratildi: Design/LobbyV2/quality-preview/home-detail-preview.png. Natija 1672x941; o'yinga o'rnatilmadi, 4K deb hisoblanmaydi.
+- [x] Unity desktop importi: siqilmagan RGBA32, 4096 limit, asl o'lcham saqlanishini avtomatik tekshirish.
+- [x] Import o'zgarishi tekshirildi: Lobby build Succeeded; 9 ta tekstura asl o'lchamda RGBA32; 10 sahifa skrinshoti; UI test 0 failures. O'yin ochiq qoldirildi. Loglar: Logs/lobby-quality-build.log va Logs/lobby-quality-player.log.
+- [ ] Haqiqiy 3840x2160 fonlar: aniq o'lchamli API/CLI yo'li uchun foydalanuvchi roziligi kerak; built-in so'ralgan o'lchamni bermadi.
+- [ ] Yangi 4K fonlarni o'yinda tekshirish.
+
 - [x] Mavjud yarim qolgan ishlar lokal Git saqlash nuqtasiga yozildi (dizayn manbalari kiritilmadi).
 - [x] Hozirgi kompilyatsiya to'sig'i aniqlandi: eski lobby builder yangi `LobbyLayout` API bilan mos emas.
 - [x] Yangi lobby builderi: 8 asosiy sahifa + Top-lar va Ko'ngilochar zona.

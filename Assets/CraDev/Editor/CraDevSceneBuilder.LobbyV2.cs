@@ -38,10 +38,29 @@ namespace CraDev.EditorTools
                 importer.mipmapEnabled = false;
                 importer.npotScale = TextureImporterNPOTScale.None;
                 importer.wrapMode = TextureWrapMode.Clamp;
-                importer.textureCompression = TextureImporterCompression.CompressedHQ;
+                // Full-screen artwork must retain source detail, including future 3840x2160 assets.
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.crunchedCompression = false;
+                importer.filterMode = FilterMode.Bilinear;
+                var desktop = importer.GetPlatformTextureSettings("Standalone");
+                desktop.overridden = true;
+                desktop.maxTextureSize = 4096;
+                desktop.format = TextureImporterFormat.RGBA32;
+                desktop.textureCompression = TextureImporterCompression.Uncompressed;
+                desktop.crunchedCompression = false;
+                importer.SetPlatformTextureSettings(desktop);
                 importer.SaveAndReimport();
             }
-            return v2Textures[name]=AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            var texture = AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            if (texture != null)
+            {
+                var source = (TextureImporter)AssetImporter.GetAtPath(path);
+                source.GetSourceTextureWidthAndHeight(out int width, out int height);
+                if (texture.width != width || texture.height != height)
+                    throw new System.InvalidOperationException($"Lobby image was downscaled: {name}, source {width}x{height}, imported {texture.width}x{texture.height}");
+                Debug.Log($"[CraDev] Lobby texture {name}: {texture.width}x{texture.height}, {texture.format}; source size preserved.");
+            }
+            return v2Textures[name] = texture;
         }
 
         static Image V2Panel(Transform parent, string name, float x, float y, float w, float h, Color color)
