@@ -71,6 +71,11 @@ namespace CraDev.EditorTools
             var entryLabel=enter.GetComponentInChildren<Text>();entryLabel.font=v2.SemiBold;entryLabel.fontSize=32;
             PlaceTopLeft(entryLabel.rectTransform,137,0,495,126);
             var sign=V2Text(right,"—   Game On   —",0,965,650,48,27,false);sign.alignment=TextAnchor.MiddleCenter;sign.color=new Color32(199,198,176,255);
+            foreach(var label in right.GetComponentsInChildren<Text>())
+                if(label.transform.parent==right)
+                {
+                    var shadow=label.gameObject.AddComponent<Shadow>();shadow.effectColor=new Color(0,0,0,.8f);shadow.effectDistance=new Vector2(2,-2);
+                }
             foreach(var surface in root.GetComponentsInChildren<Image>())
             {
                 if(surface.type!=Image.Type.Sliced||surface.sprite!=v2.RoundFill)continue;

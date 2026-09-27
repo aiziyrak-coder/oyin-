@@ -52,6 +52,62 @@ namespace CraDev
             }
             string page = Argument(System.Environment.GetCommandLineArgs(), "-cradevPage");
             var lobby = FindFirstObjectByType<MainMenu.MainMenuScreen>();
+            if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevEnvironmentTest")>=0)
+            {
+                yield return new WaitForSecondsRealtime(2);
+                var environment=lobby.GetComponent<MainMenu.LobbyEnvironment>();
+                int failures=0;
+                for(int minute=0;minute<1440;minute++)
+                {
+                    int expected=minute<300?5:minute<540?0:minute<720?1:minute<1020?2:minute<1200?3:4;
+                    if(MainMenu.LobbyEnvironment.Period(minute/60)!=expected)failures++;
+                    for(int weather=1;weather<=3;weather++)if(MainMenu.LobbyEnvironment.Resolve(minute/60,weather)!=weather+5)failures++;
+                }
+                bool motion=MainMenu.LobbyEnvironment.Motion;
+                int savedWeather=MainMenu.LobbyEnvironment.Weather;
+                string folder=System.IO.Path.GetDirectoryName(path)??"";
+                try
+                {
+                    for(int i=0;i<9;i++)
+                    {
+                        environment.Preview(i);
+                        float until=Time.realtimeSinceStartup+20;
+                        while((environment.Current!=i||environment.Loading)&&Time.realtimeSinceStartup<until)yield return null;
+                        if(environment.Current!=i||environment.Loading){failures++;Debug.LogError("[EnvironmentTest] Loading failed "+i);}
+                        yield return Shot(System.IO.Path.Combine(folder,MainMenu.LobbyEnvironment.Names[i]+".png"));
+                    }
+                    environment.Preview(1);
+                    float motionDeadline=Time.realtimeSinceStartup+20;
+                    while((environment.Current!=1||environment.Loading)&&Time.realtimeSinceStartup<motionDeadline)yield return null;
+                    MainMenu.LobbyEnvironment.Motion=false;yield return new WaitForSecondsRealtime(.7f);
+                    if(environment.MotionActive)failures++;
+                    yield return new WaitForEndOfFrame();var stillA=SkyPixels();
+                    yield return new WaitForSecondsRealtime(1);yield return new WaitForEndOfFrame();var stillB=SkyPixels();
+                    int stillDiff=PixelDifference(stillA,stillB);if(stillDiff!=0)failures++;
+                    MainMenu.LobbyEnvironment.Motion=true;yield return new WaitForSecondsRealtime(.7f);
+                    if(Application.isFocused&&!environment.MotionActive)failures++;
+                    yield return new WaitForEndOfFrame();var movingA=SkyPixels();
+                    yield return new WaitForSecondsRealtime(2);yield return new WaitForEndOfFrame();var movingB=SkyPixels();
+                    int movingDiff=PixelDifference(movingA,movingB);if(Application.isFocused&&movingDiff==0)failures++;
+                    Debug.Log($"[EnvironmentTest] Sky pixel differences: motion off={stillDiff}, motion on={movingDiff}, focused={Application.isFocused}");
+                    lobby.Show("settings");lobby.ChooseSection("3");
+                    for(int n=0;n<4;n++)
+                    {
+                        var selector=FindButton("LobbyWeatherSelector");
+                        if(selector==null){failures++;break;}
+                        selector.onClick.Invoke();yield return null;
+                        if(MainMenu.LobbyEnvironment.Weather!=(savedWeather+n+1)%4)failures++;
+                    }
+                    yield return Shot(System.IO.Path.Combine(folder,"weather-settings.png"));lobby.SetSettings(false);
+                }
+                finally {MainMenu.LobbyEnvironment.Motion=motion;MainMenu.LobbyEnvironment.Weather=savedWeather;environment.Preview(-1);}
+                yield return new WaitForSecondsRealtime(3.5f);
+                if(MainMenu.LobbyEnvironment.Weather!=savedWeather)failures++;
+                yield return Shot(path);
+                float elapsed=0;for(int i=0;i<120;i++){yield return null;elapsed+=Time.unscaledDeltaTime;}
+                Debug.Log($"[EnvironmentTest] COMPLETE: 1440 clock minutes, 4320 weather resolutions, 9 loaded captures, motion/settings; {failures} failures; {120/elapsed:0.0} FPS.");
+                if(quit)Application.Quit();yield break;
+            }
             if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevSingleLobbySmoke")>=0)
             {
                 yield return new WaitForSecondsRealtime(2);
@@ -163,6 +219,19 @@ namespace CraDev
             Destroy(screenshot);
             Debug.Log("[CraDev] Skrinshot: " + file);
             yield return new WaitForSecondsRealtime(1f);
+        }
+
+        static Color32[] SkyPixels()
+        {
+            // Test-only GPU readback, never enabled during ordinary gameplay.
+            var texture=ScreenCapture.CaptureScreenshotAsTexture();var all=texture.GetPixels32();
+            var sample=new Color32[1600];int k=0;
+            for(int y=0;y<40;y++)for(int x=0;x<40;x++)sample[k++]=all[(int)(texture.height*(.72f+y*.001f))*texture.width+(int)(texture.width*(.55f+x*.001f))];
+            Destroy(texture);return sample;
+        }
+        static int PixelDifference(Color32[] a,Color32[] b)
+        {
+            int count=0;for(int i=0;i<a.Length;i++)if(Mathf.Abs(a[i].r-b[i].r)+Mathf.Abs(a[i].g-b[i].g)+Mathf.Abs(a[i].b-b[i].b)>2)count++;return count;
         }
 
         static Button FindButton(string name)

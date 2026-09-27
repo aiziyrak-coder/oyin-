@@ -66,6 +66,8 @@ namespace CraDev.MainMenu
                     Row("settings.volume",Mathf.RoundToInt(GameSettings.Volume*100)+"%   ›",4,()=>{
                         GameSettings.Volume=GameSettings.Volume>.95f?0:Mathf.Min(1,GameSettings.Volume+.1f);ApplySettings();Render();
                     });
+                    Row("settings.weather",Loc.T("weather."+LobbyEnvironment.Weather)+"   ›",5,()=>{LobbyEnvironment.Weather=(LobbyEnvironment.Weather+1)%4;Render();}).name="LobbyWeatherSelector";
+                    ToggleRow("settings.atmosphere",LobbyEnvironment.Motion,6,v=>LobbyEnvironment.Motion=v);
                     break;
                 case 4:
                     Row("settings.mouse",LobbyPrefs.MouseSensitivity+"   ›",0,()=>{LobbyPrefs.MouseSensitivity=LobbyPrefs.MouseSensitivity%10+1;Render();});

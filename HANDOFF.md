@@ -1,5 +1,10 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI: DYNAMIC TIME / WEATHER
+
+LobbyEnvironment mahalliy qurilma soatidan 6 kun qismi tanlaydi; soatni o'zgartirmaydi. Sozlamalar ovoz/grafika bo'limida weather selector va motion toggle bor, PlayerPrefs'da saqlanadi. User explicitly chose manual weather selection. Clear=clock, cloudy/rain/snow=manual override. 9 image files: Assets/CraDev/MainMenu/Resources/LobbyTimes; prompt manifest Design/LobbyV2/TimeWeather/PROMPTS.md. Shader CraDev/LobbyAtmosphere animates sky/water/weather without GrabPass. Async Resources loading + 2s crossfade releases old image. Backup commit fa9c4d1. Run -cradevEnvironmentTest with -cradevShot for all 9 screenshots and clock tests. Existing -cradevSingleLobbySmoke remains available. All archived pages preserved, world gameplay still unconnected.
+
+
 ## OXIRGI USTUVOR DIZAYN: YASHIL–OLTIN REFERENCE
 
 Foydalanuvchi oxirgi reference rasmga o'tishni so'radi: ko'k rangdan voz kechildi, iliq sunset penthouse, chap inset friends panel, o'ngda NewWorld sarlavha/promo/uch karta/gradient kirish. Quyidagi eski ko'k va full-height qarorlar tarixiy. Saqlash nuqtasi e361a80. Yangi fon Assets/CraDev/MainMenu/Pages/sunset-home.png; prompt Design/LobbyV2/ReferenceGradient/PROMPTS.md. All ten original pages remain, archived routes blocked. Gameplay remains unconnected. Tests: Logs/lobby-gradient-player-final.log; screenshots: Logs/LobbyGradientFinal/. Do not fabricate reference friends, online counts or level.

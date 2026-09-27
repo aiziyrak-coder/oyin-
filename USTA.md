@@ -1,5 +1,17 @@
 # NewWorld Lobby
 
+## Qurilma soati va ob-havo — eng yangi qo'shimcha
+
+- Saqlash nuqtasi: fa9c4d1. Oldingi gradient dizayn saqlangan.
+- 9 ta yozuvsiz fon: Assets/CraDev/MainMenu/Resources/LobbyTimes/. Built-in image generation, promptlar Design/LobbyV2/TimeWeather/PROMPTS.md. Manba 1672×941; native 4K emas.
+- Mahalliy DateTime.Now: 05–09 tong, 09–12 kunduz, 12–17 peshin, 17–20 shom, 20–24 kechqurun, 00–05 tun. Soat qayta tekshiriladi, dastur qayta ochilmasa ham almashadi.
+- Sozlamalar → Ovoz va grafika → Lobbi ob-havosi: Soat bo'yicha / Bulutli / Yomg'irli / Qorli. Foydalanuvchi shu qo'lda tanlashni tasdiqladi. Real ob-havo/location API ishlatilmaydi.
+- Fon animatsiyasi: osmonning yengil harakati, suv akslari, tungi miltillash, yomg'ir/qor. O'chirish sozlamasi mavjud. Effektlar faqat fon shaderida, UI yoki avatar ustida emas; GrabPass va blur yo'q.
+- Asinxron yuklash, 2 soniya crossfade, eski resurs bo'shatiladi; to'qqiz rasm birga RAMda ushlab turilmaydi.
+- Build: Logs/environment-build.log. Test/captures: -cradevEnvironmentTest, Logs/environment-player.log va Logs/Environment/.
+- Yakuniy build environment-build-final.log Succeeded. environment-player-final.log: 1440 daqiqa va 4320 weather resolution, 9 fon, settings selector 4 holati, motion toggle — 0 failures. Piksel testi: off=0 o'zgarish, on=141 o'zgarish (focus true); 120-frame sample 239.7 FPS. Kunduz va sozlama skrinshotlari vizual ko'rildi. Logs/EnvironmentFinal/.
+
+
 ## Eng yangi dizayn — reference gradient
 
 - Foydalanuvchining oxirgi rasmiga asoslangan iliq sunset penthouse, 492×896 chap panel, 650 px o'ng ustun, uchta ixcham karta, yashil–oltin kirish tugmasi. Bu qaror pastdagi ko'k/full-height dizayn qarorlarini almashtiradi.

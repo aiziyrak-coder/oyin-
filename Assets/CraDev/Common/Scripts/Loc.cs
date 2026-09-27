@@ -58,6 +58,12 @@ namespace CraDev
         {
             // ---------------- Umumiy
             ["lobby.caption"] = ("Sizning yangi dunyongiz", "Your new world"),
+            ["settings.weather"] = ("Lobbi ob-havosi", "Lobby weather"),
+            ["weather.0"] = ("Soat bo‘yicha", "Local clock"),
+            ["weather.1"] = ("Bulutli", "Cloudy"),
+            ["weather.2"] = ("Yomg‘irli", "Rainy"),
+            ["weather.3"] = ("Qorli", "Snowy"),
+            ["settings.atmosphere"] = ("Fon animatsiyasi", "Background animation"),
             ["lobby.online"] = ("Onlayn", "Online"),
             ["lobby.offline"] = ("Oflayn", "Offline"),
             ["lobby.promo"] = ("Yangi sarguzasht\nseni kutmoqda", "Your next adventure\nawaits"),

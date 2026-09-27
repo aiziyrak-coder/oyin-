@@ -78,6 +78,9 @@ namespace CraDev.MainMenu
         float switchAt = -1f;
         float pageShown = 1f;
         float backgroundBlend = 1f;
+        float backgroundDuration = .35f;
+        public bool BackgroundBusy => backgroundBlend < 1f;
+        public void SetEnvironmentBackground(Texture texture) { SetBackground(texture); backgroundDuration=2f; }
         bool menuOpen;
         float menuShown;
 
@@ -219,10 +222,12 @@ namespace CraDev.MainMenu
 
         void SetBackground(Texture texture)
         {
+            backgroundDuration=.35f;
             if (backgroundA.texture == texture)
                 return;
             // B - yangi fon, A ustida paydo bo'ladi; tugagach A ga o'tkaziladi
             backgroundB.texture = texture;
+            backgroundB.enabled = true;
             Fit(backgroundB, texture);
             backgroundBlend = 0f;
         }
@@ -266,13 +271,14 @@ namespace CraDev.MainMenu
 
             if (backgroundBlend < 1f)
             {
-                backgroundBlend = Mathf.MoveTowards(backgroundBlend, 1f, dt / 0.35f);
+                backgroundBlend = Mathf.MoveTowards(backgroundBlend, 1f, dt / backgroundDuration);
                 Anim.SetAlpha(backgroundB, Ease.InOutSine(backgroundBlend));
                 if (backgroundBlend >= 1f)
                 {
                     backgroundA.texture = backgroundB.texture;
                     Fit(backgroundA, backgroundA.texture);
                     Anim.SetAlpha(backgroundB, 0f);
+                    backgroundB.enabled = false;
                 }
             }
 

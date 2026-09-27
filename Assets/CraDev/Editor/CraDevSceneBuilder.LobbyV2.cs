@@ -130,6 +130,17 @@ namespace CraDev.EditorTools
 
         static void BuildMainMenu()
         {
+            foreach(string name in LobbyEnvironment.Names)
+            {
+                string path="Assets/CraDev/MainMenu/Resources/LobbyTimes/"+name+".png";
+                var importer=AssetImporter.GetAtPath(path) as TextureImporter;
+                if(importer==null)throw new System.InvalidOperationException("Missing environment asset: "+path);
+                importer.textureType=TextureImporterType.Default;importer.maxTextureSize=4096;
+                importer.npotScale=TextureImporterNPOTScale.None;importer.mipmapEnabled=false;importer.isReadable=false;
+                importer.textureCompression=TextureImporterCompression.Uncompressed;
+                importer.wrapMode=TextureWrapMode.Clamp;importer.filterMode=FilterMode.Bilinear;
+                importer.SaveAndReimport();
+            }
             v2 = Kit();
             v2Textures.Clear();
             var root = NewUiScene(out var scene);
@@ -152,6 +163,11 @@ namespace CraDev.EditorTools
             backgroundA.color = Color.white;
             backgroundB.color = new Color(1,1,1,0);
             Set(screen, "backgroundA", backgroundA); Set(screen, "backgroundB", backgroundB);
+            const string atmospherePath="Assets/CraDev/MainMenu/Pages/LobbyAtmosphere.mat";
+            var atmosphere=AssetDatabase.LoadAssetAtPath<Material>(atmospherePath);
+            if(atmosphere==null){atmosphere=new Material(Shader.Find("CraDev/LobbyAtmosphere"));AssetDatabase.CreateAsset(atmosphere,atmospherePath);}
+            var environment=root.gameObject.AddComponent<LobbyEnvironment>();
+            Set(environment,"lobby",screen);Set(environment,"backgroundA",backgroundA);Set(environment,"backgroundB",backgroundB);Set(environment,"atmosphere",atmosphere);
             const string backdropPath = V2Art + "Backdrop.asset";
             var backdrop = AssetDatabase.LoadAssetAtPath<Texture2D>(backdropPath);
             if(backdrop == null)
