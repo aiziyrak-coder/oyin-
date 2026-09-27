@@ -4,6 +4,7 @@ using CraDev.CDCGroup;
 using CraDev.Intro;
 using CraDev.Loading;
 using UnityEditor;
+using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
@@ -64,12 +65,61 @@ namespace CraDev.EditorTools
             buildScenes.InsertRange(0, scenes.Select(p => new EditorBuildSettingsScene(p, true)));
             EditorBuildSettings.scenes = buildScenes.ToArray();
 
-            if (PlayerSettings.companyName == "DefaultCompany")
-                PlayerSettings.companyName = "CraDev";
+            ConfigurePlayer();
 
             EditorSceneManager.OpenScene(IntroScene);
             EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<SceneAsset>(IntroScene));
             Debug.Log("[CraDev] Sahnalar yaratildi: Intro -> CDCGroup -> Loading. Ko'rish uchun Intro sahnasida Play tugmasini bosing.");
+        }
+
+        [MenuItem("CraDev/O'yinni alohida oynada ishga tushirish (Build and Run)", priority = 2)]
+        static void BuildAndRun()
+        {
+            if (!File.Exists(IntroScene))
+            {
+                EditorUtility.DisplayDialog("CraDev", "Avval \"CraDev > Sahnalarni yaratish\" buyrug'ini bajaring.", "OK");
+                return;
+            }
+            ConfigurePlayer();
+
+            // Tahrirlovchi qaysi tizimda ishlayotgan bo'lsa, o'sha tizim uchun o'yin yig'iladi
+            BuildTarget target;
+            string file;
+            switch (Application.platform)
+            {
+                case RuntimePlatform.OSXEditor: target = BuildTarget.StandaloneOSX; file = "CraDev.app"; break;
+                case RuntimePlatform.LinuxEditor: target = BuildTarget.StandaloneLinux64; file = "CraDev.x86_64"; break;
+                default: target = BuildTarget.StandaloneWindows64; file = "CraDev.exe"; break;
+            }
+
+            var options = new BuildPlayerOptions
+            {
+                scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray(),
+                locationPathName = Path.Combine("Builds", target.ToString(), file),
+                target = target,
+                options = BuildOptions.AutoRunPlayer,
+            };
+            var report = BuildPipeline.BuildPlayer(options);
+            if (report.summary.result != BuildResult.Succeeded)
+                EditorUtility.DisplayDialog("CraDev", "O'yinni yig'ib bo'lmadi. Tafsilotlar Console oynasida.", "OK");
+        }
+
+        /// <summary>
+        /// O'yin haqiqiy o'yindek ochilishi uchun Player sozlamalari: to'liq ekranli alohida oyna,
+        /// "Made with Unity" ekranisiz, darhol CraDev intro'si bilan boshlanadi.
+        /// </summary>
+        static void ConfigurePlayer()
+        {
+            if (PlayerSettings.companyName == "DefaultCompany")
+                PlayerSettings.companyName = "CraDev";
+            // Standart nom loyiha papkasining nomi bo'ladi; o'yin nomi tanlanguncha oyna sarlavhasi "CraDev"
+            if (PlayerSettings.productName == new DirectoryInfo(Application.dataPath).Parent.Name)
+                PlayerSettings.productName = "CraDev";
+
+            PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;
+            PlayerSettings.defaultIsNativeResolution = true;
+            PlayerSettings.SplashScreen.show = false;
+            // Unity 6 da bepul litsenziyada ham ishlaydi; eski versiyalarning Personal litsenziyasida Unity logotipi baribir chiqadi
         }
 
         // ---------------------------------------------------------------- CraDev intro

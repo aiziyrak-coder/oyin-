@@ -29,16 +29,22 @@ qisqa va silliq harakatlar. Uchqun, nur yoki "kosmik" effektlar yo'q.
 5. Yuqori menyudan **CraDev → Sahnalarni yaratish (Intro, CDCGroup, Loading)** ni bosing.
    Uchala sahna `Assets/CraDev/Scenes/` ga saqlanadi va Build Settings'da shu tartibda
    birinchi o'rinlarga qo'yiladi. Keyin Intro sahnasi ochiladi.
-6. **Play ▶** tugmasini bosing. Game oynasida 16:9 yoki 1920x1080 o'lchamini tanlang.
+6. Tezkor tekshirish uchun **Play ▶** tugmasini bosing (Game oynasida 16:9 yoki 1920x1080 ni tanlang).
+7. Haqiqiy o'yindek alohida oynada ko'rish uchun **CraDev → O'yinni alohida oynada ishga tushirish
+   (Build and Run)** ni bosing. O'yin `Builds/` papkasiga yig'iladi va to'liq ekranda ochiladi:
+   ekranda faqat CraDev intro, CDCGroup va Loading chiqadi. Yopish: Alt+F4.
 
 Loyihani avval 1-bosqichda ochgan bo'lsangiz ham, yangilangandan keyin shu menyuni bir marta
 bosing: u sahnalarni yangi skriptlar bilan qayta yaratadi.
 
-## Unity splash ekranini o'chirish
+## O'yin oynasi sozlamalari
 
-O'yin boshida "Made with Unity" chiqmasdan, darhol CraDev intro'si ko'rinishi uchun:
-**Edit → Project Settings → Player → Splash Image → Show Splash Screen** belgisini olib tashlang.
-Unity 6'da buni bepul (Personal) litsenziyada ham qilish mumkin.
+Menyudagi buyruqlar Player sozlamalarini avtomatik o'rnatadi:
+
+- **"Made with Unity" ekrani o'chiriladi**: o'yin darhol CraDev intro'si bilan boshlanadi.
+  Unity 6'da bu bepul (Personal) litsenziyada ham ishlaydi.
+- **To'liq ekranli oyna** (Fullscreen Window), monitorning o'z o'lchamida.
+- Kompaniya nomi "CraDev". O'yin nomi tanlanguncha oyna sarlavhasi ham "CraDev" bo'ladi.
 
 ## Sahnalar qanday ishlaydi
 
