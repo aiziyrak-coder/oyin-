@@ -46,6 +46,7 @@ namespace CraDev.CharacterCreation
         [SerializeField] AvatarCard[] avatarCards;
         [SerializeField] Text avatarInfo;
         [SerializeField] AvatarViewer viewer;
+        [SerializeField] FaceCapture faceCapture;
 
         [Header("Tugma va xatolar")]
         [SerializeField] Button createButton;
@@ -342,6 +343,8 @@ namespace CraDev.CharacterCreation
                 nicknameInput.interactable = false;
                 foreach (var card in avatarCards)
                     card.Button.interactable = false;
+                if (faceCapture != null)
+                    faceCapture.SetLocked(true);
                 createButton.interactable = false;
                 SetButton($"Welcome, {result.Data.nickname}", checkSprite, Ok);
                 StartCoroutine(GoNext());

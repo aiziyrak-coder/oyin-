@@ -1,3 +1,4 @@
+using CraDev.Face;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -19,6 +20,8 @@ namespace CraDev.CharacterCreation
         [SerializeField] Transform turntable;
         [SerializeField] RuntimeAnimatorController maleIdle;
         [SerializeField] RuntimeAnimatorController femaleIdle;
+        [Tooltip("O'yinchi yuzini bosh teksturasiga chizuvchi material (Hidden/CraDev/FaceProject).")]
+        [SerializeField] Material facePaint;
 
         [Header("Boshqaruv")]
         [Tooltip("Sichqoncha 1 birlik (1920x1080) surilganda necha gradus aylanadi.")]
@@ -40,6 +43,11 @@ namespace CraDev.CharacterCreation
         const float HeadTop = 0.2f;
 
         GameObject current;
+        AvatarOption currentOption;
+        FaceData face;
+        RenderTexture faceTexture;
+        readonly System.Collections.Generic.List<(Material material, Texture original)> heads =
+            new System.Collections.Generic.List<(Material, Texture)>();
         float bodyHeight = 1.75f;
         float yaw;        // 0 = kameraga qaragan, 90 = o'ng yoni, 180 = orqasi
         float targetYaw;
@@ -65,6 +73,8 @@ namespace CraDev.CharacterCreation
         {
             if (current != null)
                 Destroy(current);
+            heads.Clear();
+            currentOption = option;
             if (option.model == null)
                 return;
 
@@ -90,6 +100,50 @@ namespace CraDev.CharacterCreation
                     break;
                 }
             swapTime = 0f;
+            ApplyFace();
+        }
+
+        /// <summary>O'yinchi yuzini qo'yadi (null - olib tashlaydi). Avatar almashsa yuz yangisiga ham qo'yiladi.</summary>
+        public void SetFace(FaceData data)
+        {
+            face = data;
+            ApplyFace();
+        }
+
+        /// <summary>Kamerani yuzga yaqinlashtirib, qahramonni old tomoniga buradi: yuz natijasi ko'rinadi.</summary>
+        public void FocusFace()
+        {
+            RotateTo(0f);
+            targetZoom = 1f;
+        }
+
+        void ApplyFace()
+        {
+            if (current == null)
+                return;
+            if (heads.Count == 0)
+                foreach (var renderer in current.GetComponentsInChildren<Renderer>())
+                    foreach (var material in renderer.materials) // nusxa: asl model materiallariga tegilmaydi
+                        if (material.name.Contains("_head") && material.mainTexture != null)
+                            heads.Add((material, material.mainTexture));
+
+            var old = faceTexture;
+            faceTexture = null;
+            bool paint = face != null && currentOption != null && currentOption.SupportsFace && facePaint != null;
+            foreach (var (material, original) in heads)
+            {
+                if (paint && faceTexture == null)
+                    faceTexture = FacePainter.Paint(original, face, currentOption.faceUv, currentOption.faceTriangles, facePaint);
+                material.mainTexture = paint ? faceTexture : original;
+            }
+            if (old != null)
+                old.Release();
+        }
+
+        void OnDestroy()
+        {
+            if (faceTexture != null)
+                faceTexture.Release();
         }
 
         /// <summary>Qahramonni berilgan tomonga eng qisqa yo'l bilan buradi.</summary>

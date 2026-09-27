@@ -114,14 +114,14 @@ CREATION_AT=$((SECONDS - VIDEO_START))
 WINDOW=$(xdotool search --onlyvisible --name 'CraDev' 2>/dev/null | head -1)
 [ -n "$WINDOW" ] && xdotool windowfocus "$WINDOW" 2>/dev/null
 
-# Joylashuv 1920x1080 da (CraDevSceneBuilder.BuildCharacterCreation): forma chapda x=120, y=145 dan boshlanadi
-click 360 510                       # nickname maydoni
+# Joylashuv 1920x1080 da (CraDevSceneBuilder.BuildCharacterCreation): forma chapda x=120, y=115 dan boshlanadi
+click 360 446                       # nickname maydoni
 sleep 0.3
 xdotool type --delay 90 "$NICK"
 wait_for 05-nickname-available 'nicknameisavailable' 15
 check "nickname server'da tekshirildi (available)" $?
 
-click 262 698                       # 2-avatar kartasi
+click 262 628                       # 2-avatar kartasi
 sleep 0.8
 shot 06-avatar-2
 
@@ -147,7 +147,7 @@ click 1194 984                      # "Front" tugmasi
 sleep 1.5
 shot 10-front
 
-click 360 851                       # "Create character"
+click 360 897                       # "Create character"
 wait_for 11-created 'welcome' 10
 check "profil yaratildi (Welcome, ...)" $?
 

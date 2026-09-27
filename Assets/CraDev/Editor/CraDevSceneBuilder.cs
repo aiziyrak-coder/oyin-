@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using CraDev.CDCGroup;
 using CraDev.CharacterCreation;
+using CraDev.Face;
 using CraDev.Intro;
 using CraDev.Loading;
 using CraDev.Online;
@@ -11,6 +12,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using Unity.InferenceEngine;
 using static CraDev.EditorTools.UiBuild;
 
 namespace CraDev.EditorTools
@@ -21,7 +23,7 @@ namespace CraDev.EditorTools
     /// Intro (CraDev) -> CDCGroup -> Loading -> CharacterCreation.
     /// Sahnalarni qo'lda yig'ish shart emas: istalgan payt shu buyruq bilan qayta yaratish mumkin.
     /// </summary>
-    static class CraDevSceneBuilder
+    static partial class CraDevSceneBuilder
     {
         const string ScenesFolder = "Assets/CraDev/Scenes/";
         const string IntroScene = ScenesFolder + "Intro.unity";
@@ -358,6 +360,7 @@ namespace CraDev.EditorTools
             var maleIdle = IdleController("m_idle_neutral_01", "Idle_Male");
             var femaleIdle = IdleController("f_idle_neutral_01", "Idle_Female");
             var cardPictures = RenderAvatarCards(maleIdle, femaleIdle);
+            var faceMaps = BakeFaceMaps(maleIdle, femaleIdle);
 
             var accent = (Color)new Color32(61, 90, 254, 255);
             var field = (Color)new Color32(22, 23, 26, 255);
@@ -407,24 +410,24 @@ namespace CraDev.EditorTools
             PlaceTopLeft(brandText.rectTransform, 166f, 72f, 200f, 32f);
 
             var form = CreateRect("Form", leftT);
-            Place(form, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(480f, 790f));
+            Place(form, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(480f, 850f));
 
             PlaceTopLeft(CreateLabel("Eyebrow", form, bold, "NEW PLAYER", 13, accent, TextAnchor.UpperLeft).rectTransform, 0f, 0f, 480f, 20f);
             var title = CreateLabel("Title", form, display, "Create your\ncharacter", 44, Color.white, TextAnchor.UpperLeft);
             title.lineSpacing = 0.92f;
             PlaceTopLeft(title.rectTransform, 0f, 34f, 480f, 110f);
             var sub = CreateLabel("Subtitle", form, medium,
-                "Pick a nickname and one of the avatars. Next, you will scan your face and it will be placed on your avatar.",
+                "Pick a nickname and an avatar, then add your face from a photo.",
                 17, UiMuted, TextAnchor.UpperLeft);
             sub.horizontalOverflow = HorizontalWrapMode.Wrap;
             sub.lineSpacing = 1.1f;
-            PlaceTopLeft(sub.rectTransform, 0f, 152f, 440f, 84f);
+            PlaceTopLeft(sub.rectTransform, 0f, 146f, 440f, 60f);
 
             // Pasportdan olingan jins: faqat ko'rsatiladi, o'zgartirilmaydi
             var chip = CreateSliced("GenderChip", form, pillFill, 16f, 32f, new Color(1f, 1f, 1f, 0.06f));
-            PlaceTopLeft(chip.rectTransform, 0f, 252f, 200f, 32f);
+            PlaceTopLeft(chip.rectTransform, 0f, 222f, 200f, 32f);
             chip.rectTransform.pivot = new Vector2(0f, 0.5f);
-            chip.rectTransform.anchoredPosition = new Vector2(0f, -268f);
+            chip.rectTransform.anchoredPosition = new Vector2(0f, -238f);
             var chipBorder = CreateSliced("Border", chip.transform, pillStroke, 16f, 32f, new Color(1f, 1f, 1f, 0.10f));
             Stretch(chipBorder.rectTransform);
             var chipIcon = CreateImage("Icon", chip.transform, Icon("Male"), new Vector2(16f, 16f), Vector2.zero, accent);
@@ -432,13 +435,13 @@ namespace CraDev.EditorTools
             var chipText = CreateLabel("Text", chip.transform, semiBold, "Male · from passport", 13, Color.white, TextAnchor.MiddleCenter);
             Place(chipText.rectTransform, new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(100f, 0f), new Vector2(300f, 24f));
 
-            PlaceTopLeft(CreateLabel("NicknameLabel", form, bold, "NICKNAME", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 306f, 480f, 18f);
+            PlaceTopLeft(CreateLabel("NicknameLabel", form, bold, "NICKNAME", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 272f, 480f, 18f);
 
             var glow = CreateSliced("FieldGlow", form, roundFill, 16f, 24f, new Color(accent.r, accent.g, accent.b, 0.16f));
-            PlaceTopLeft(glow.rectTransform, -4f, 331f, 488f, 68f);
+            PlaceTopLeft(glow.rectTransform, -4f, 297f, 488f, 68f);
             glow.enabled = false;
             var fieldBg = CreateSliced("NicknameField", form, roundFill, 12f, 24f, field);
-            PlaceTopLeft(fieldBg.rectTransform, 0f, 335f, 480f, 60f);
+            PlaceTopLeft(fieldBg.rectTransform, 0f, 301f, 480f, 60f);
             fieldBg.raycastTarget = true; // maydon bosilganda yozish boshlanadi
             var fieldBorder = CreateSliced("Border", fieldBg.transform, roundStroke, 12f, 24f, line);
             Stretch(fieldBorder.rectTransform);
@@ -464,20 +467,52 @@ namespace CraDev.EditorTools
             input.selectionColor = new Color(accent.r, accent.g, accent.b, 0.35f);
 
             var helpIcon = CreateImage("HelpIcon", form, Icon("Check"), new Vector2(16f, 16f), Vector2.zero, UiMuted);
-            Place(helpIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -416f), new Vector2(16f, 16f));
+            Place(helpIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -382f), new Vector2(16f, 16f));
             var helpText = CreateLabel("HelpText", form, medium, "", 14, UiMuted, TextAnchor.MiddleLeft);
-            Place(helpText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -416f), new Vector2(470f, 22f));
+            Place(helpText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -382f), new Vector2(470f, 22f));
 
             // Avatar kartalari: shu jinsdagi avatarlar (5 tagacha, ortiqcha kartalar yashiriladi)
-            PlaceTopLeft(CreateLabel("AvatarLabel", form, bold, "AVATAR", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 449f, 480f, 18f);
+            PlaceTopLeft(CreateLabel("AvatarLabel", form, bold, "AVATAR", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 412f, 480f, 18f);
             var cards = new AvatarCard[5];
             for (int i = 0; i < cards.Length; i++)
-                cards[i] = CreateAvatarCard("AvatarCard" + (i + 1), form, i * 98f, 478f, roundFill, roundStroke, pillFill, Icon("Check"), accent, field, line);
+                cards[i] = CreateAvatarCard("AvatarCard" + (i + 1), form, i * 98f, 438f, roundFill, roundStroke, pillFill, Icon("Check"), accent, field, line);
             var avatarInfo = CreateLabel("AvatarInfo", form, medium, "Athletic · 183 cm", 15, UiMuted, TextAnchor.MiddleLeft);
-            Place(avatarInfo.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -648f), new Vector2(480f, 22f));
+            Place(avatarInfo.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -606f), new Vector2(480f, 22f));
+
+            // ---------- Yuz: kamera bilan suratga tushish yoki rasm yuklash ----------
+            PlaceTopLeft(CreateLabel("FaceLabel", form, bold, "FACE", 12, UiMuted, TextAnchor.UpperLeft).rectTransform, 0f, 632f, 480f, 18f);
+            var thumbFill = CreateSliced("FaceThumb", form, roundFill, 12f, 24f, field);
+            PlaceTopLeft(thumbFill.rectTransform, 0f, 656f, 52f, 52f);
+            var thumbIcon = CreateImage("Icon", thumbFill.transform, Icon("User"), new Vector2(22f, 22f), Vector2.zero, faint);
+            var thumbMask = CreateRect("Mask", thumbFill.transform);
+            Stretch(thumbMask);
+            thumbMask.offsetMin = new Vector2(3f, 3f);
+            thumbMask.offsetMax = new Vector2(-3f, -3f);
+            thumbMask.gameObject.AddComponent<RectMask2D>().softness = new Vector2Int(2, 2);
+            var thumb = new GameObject("Photo", typeof(RectTransform), typeof(RawImage)).GetComponent<RawImage>();
+            thumb.rectTransform.SetParent(thumbMask, false);
+            Stretch(thumb.rectTransform);
+            thumb.raycastTarget = false;
+            var thumbBorder = CreateSliced("Border", thumbFill.transform, roundStroke, 12f, 24f, line);
+            Stretch(thumbBorder.rectTransform);
+            // Yuzni olib tashlash: rasm burchagidagi kichik tugma
+            var removeFill = CreateSliced("Remove", thumbFill.transform, pillFill, 9f, 32f, new Color32(48, 49, 56, 255));
+            Place(removeFill.rectTransform, new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-2f, -2f), new Vector2(18f, 18f));
+            removeFill.raycastTarget = true;
+            var removeButton = removeFill.gameObject.AddComponent<Button>();
+            removeButton.targetGraphic = removeFill;
+            CreateImage("Icon", removeFill.transform, Icon("Close"), new Vector2(10f, 10f), Vector2.zero, Color.white);
+
+            var takeButton = CreateSecondaryButton("TakePhoto", form, "Take photo", DrawnIcon("Camera"), 64f, 660f, 200f, roundFill, roundStroke, semiBold, field, line);
+            var uploadButton = CreateSecondaryButton("UploadPhoto", form, "Upload photo", DrawnIcon("Upload"), 276f, 660f, 204f, roundFill, roundStroke, semiBold, field, line);
+
+            var faceStatusIcon = CreateImage("FaceStatusIcon", form, Icon("Check"), new Vector2(16f, 16f), Vector2.zero, UiMuted);
+            Place(faceStatusIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -728f), new Vector2(16f, 16f));
+            var faceStatus = CreateLabel("FaceStatus", form, medium, "", 14, UiMuted, TextAnchor.MiddleLeft);
+            Place(faceStatus.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, -728f), new Vector2(470f, 22f));
 
             var ctaFill = CreateSliced("CreateButton", form, roundFill, 12f, 24f, accent);
-            PlaceTopLeft(ctaFill.rectTransform, 0f, 676f, 480f, 60f);
+            PlaceTopLeft(ctaFill.rectTransform, 0f, 752f, 480f, 60f);
             ctaFill.raycastTarget = true;
             var cta = ctaFill.gameObject.AddComponent<Button>();
             cta.targetGraphic = ctaFill;
@@ -494,9 +529,9 @@ namespace CraDev.EditorTools
             var ctaIcon = CreateImage("Icon", ctaFill.transform, Icon("Arrow"), new Vector2(22f, 22f), Vector2.zero, Color.white);
 
             var errorIcon = CreateImage("ErrorIcon", form, Icon("Alert"), new Vector2(16f, 16f), Vector2.zero, bad);
-            Place(errorIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -760f), new Vector2(16f, 16f));
+            Place(errorIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -836f), new Vector2(16f, 16f));
             var errorText = CreateLabel("ErrorText", form, medium, "", 14, bad, TextAnchor.MiddleLeft);
-            Place(errorText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(24f, -760f), new Vector2(456f, 22f));
+            Place(errorText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(24f, -836f), new Vector2(456f, 22f));
 
             // ---------- O'ng tomon: qahramon ustidagi nom va pastdagi boshqaruv ----------
             // Qahramon ekran markazidan StageOffset qadar o'ngda turadi (AvatarViewer.screenOffset)
@@ -548,6 +583,64 @@ namespace CraDev.EditorTools
             SetArray(viewer, "viewButtons", viewButtons);
             SetArray(viewer, "viewFills", viewFills);
             SetArray(viewer, "viewLabels", viewLabels);
+            Set(viewer, "facePaint", FacePaintMaterial());
+
+            // ---------- Kamera oynasi: suratga tushish ----------
+            var modal = CreateFullscreen("FaceModal", root, new Color(0f, 0f, 0f, 0.82f));
+            modal.raycastTarget = true; // orqadagi forma bosilmaydi
+            var panel = CreateSliced("Panel", modal.transform, roundFill, 16f, 24f, new Color32(19, 20, 23, 255));
+            Place(panel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(720f, 690f));
+            var panelBorder = CreateSliced("Border", panel.transform, roundStroke, 16f, 24f, line);
+            Stretch(panelBorder.rectTransform);
+            PlaceTopLeft(CreateLabel("Title", panel.transform, display, "Take a photo", 24, Color.white, TextAnchor.MiddleLeft).rectTransform, 40f, 32f, 640f, 36f);
+
+            var frame = CreateSliced("Frame", panel.transform, roundFill, 12f, 24f, Color.black);
+            PlaceTopLeft(frame.rectTransform, 40f, 92f, 640f, 480f);
+            var frameMask = CreateRect("Mask", frame.transform);
+            Stretch(frameMask);
+            frameMask.gameObject.AddComponent<RectMask2D>();
+            var preview = new GameObject("Preview", typeof(RectTransform), typeof(RawImage), typeof(AspectRatioFitter));
+            preview.transform.SetParent(frameMask, false);
+            var previewImage = preview.GetComponent<RawImage>();
+            previewImage.raycastTarget = false;
+            var fitter = preview.GetComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fitter.aspectRatio = 16f / 9f;
+            var oval = CreateImage("Oval", frameMask, OvalSprite(), new Vector2(280f, 360f), new Vector2(0f, 6f), new Color(1f, 1f, 1f, 0.75f));
+            oval.raycastTarget = false;
+
+            var modalStatus = CreateLabel("Status", panel.transform, medium, "", 15, UiMuted, TextAnchor.MiddleCenter);
+            PlaceTopLeft(modalStatus.rectTransform, 40f, 580f, 640f, 24f);
+            var cancelButton = CreateSecondaryButton("Cancel", panel.transform, "Cancel", null, 40f, 614f, 300f, roundFill, roundStroke, semiBold, field, line);
+            var captureFill = CreateSliced("Capture", panel.transform, roundFill, 12f, 24f, accent);
+            PlaceTopLeft(captureFill.rectTransform, 380f, 614f, 300f, 44f);
+            captureFill.raycastTarget = true;
+            var captureButton = captureFill.gameObject.AddComponent<Button>();
+            captureButton.targetGraphic = captureFill;
+            var captureLabel = CreateLabel("Label", captureFill.transform, bold, "Capture", 16, Color.white, TextAnchor.MiddleCenter);
+            Place(captureLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(280f, 30f));
+
+            var faceGo = new GameObject("FaceCapture");
+            var faceCapture = faceGo.AddComponent<FaceCapture>();
+            Set(faceCapture, "detectorModel", AssetDatabase.LoadAssetAtPath<ModelAsset>(FaceModels + "face_detector.onnx"));
+            Set(faceCapture, "landmarkModel", AssetDatabase.LoadAssetAtPath<ModelAsset>(FaceModels + "face_landmarks_detector.onnx"));
+            Set(faceCapture, "viewer", viewer);
+            Set(faceCapture, "takeButton", takeButton);
+            Set(faceCapture, "uploadButton", uploadButton);
+            Set(faceCapture, "thumb", thumb);
+            Set(faceCapture, "thumbIcon", thumbIcon);
+            Set(faceCapture, "removeButton", removeButton);
+            Set(faceCapture, "statusIcon", faceStatusIcon);
+            Set(faceCapture, "statusText", faceStatus);
+            Set(faceCapture, "modal", modal.gameObject);
+            Set(faceCapture, "preview", previewImage);
+            Set(faceCapture, "previewFitter", fitter);
+            Set(faceCapture, "captureButton", captureButton);
+            Set(faceCapture, "cancelButton", cancelButton);
+            Set(faceCapture, "modalStatus", modalStatus);
+            Set(faceCapture, "checkSprite", Icon("Check"));
+            Set(faceCapture, "alertSprite", Icon("Alert"));
+            Set(faceCapture, "spinnerSprite", Icon("Spinner"));
 
             var fader = CreateFullscreen("Fader", root, new Color(0f, 0f, 0f, 0f));
 
@@ -564,10 +657,11 @@ namespace CraDev.EditorTools
             Set(screen, "genderChip", chip.rectTransform);
             Set(screen, "genderIcon", chipIcon);
             Set(screen, "genderText", chipText);
-            SetAvatars(screen, cardPictures);
+            SetAvatars(screen, cardPictures, faceMaps);
             SetArray(screen, "avatarCards", cards);
             Set(screen, "avatarInfo", avatarInfo);
             Set(screen, "viewer", viewer);
+            Set(screen, "faceCapture", faceCapture);
             Set(screen, "createButton", cta);
             Set(screen, "createFill", ctaFill);
             Set(screen, "createLabel", ctaLabel);
@@ -595,7 +689,8 @@ namespace CraDev.EditorTools
         const float StageOffset = 0.17f;
 
         /// <summary>3D modeli bor avatarlarni ekranning "avatars" ro'yxatiga yozadi.</summary>
-        static void SetAvatars(CharacterCreationScreen screen, System.Collections.Generic.Dictionary<string, Sprite> cards)
+        static void SetAvatars(CharacterCreationScreen screen, System.Collections.Generic.Dictionary<string, Sprite> cards,
+            System.Collections.Generic.Dictionary<string, FaceMap> faceMaps)
         {
             var so = new SerializedObject(screen);
             var list = so.FindProperty("avatars");
@@ -618,6 +713,16 @@ namespace CraDev.EditorTools
                 item.FindPropertyRelative("model").objectReferenceValue = model;
                 cards.TryGetValue(info.Id, out var card);
                 item.FindPropertyRelative("card").objectReferenceValue = card;
+
+                var uvProp = item.FindPropertyRelative("faceUv");
+                var triProp = item.FindPropertyRelative("faceTriangles");
+                faceMaps.TryGetValue(info.Id, out var map);
+                uvProp.arraySize = map?.Uv.Length ?? 0;
+                for (int i = 0; i < uvProp.arraySize; i++)
+                    uvProp.GetArrayElementAtIndex(i).vector2Value = map.Uv[i];
+                triProp.arraySize = map?.Triangles.Length ?? 0;
+                for (int i = 0; i < triProp.arraySize; i++)
+                    triProp.GetArrayElementAtIndex(i).intValue = map.Triangles[i];
             }
             so.ApplyModifiedPropertiesWithoutUndo();
         }
@@ -804,6 +909,14 @@ namespace CraDev.EditorTools
         {
             const int width = 176, height = 300; // karta rasmi 2x o'lchamda
             var result = new System.Collections.Generic.Dictionary<string, Sprite>();
+            if (!CanRender)
+            {
+                // Grafikasiz muhitda (CI) oldin chizilgan rasmlar ishlatiladi
+                foreach (var info in AvatarList)
+                    if (File.Exists(AvatarCards + info.Id + ".png"))
+                        result[info.Id] = LoadSprite(AvatarCards + info.Id + ".png");
+                return result;
+            }
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             Directory.CreateDirectory(AvatarCards);
 

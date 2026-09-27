@@ -16,5 +16,11 @@ namespace CraDev.CharacterCreation
         public GameObject model;
         [Tooltip("Kartadagi kichik rasm: builder 3D modeldan chizib oladi.")]
         public Sprite card;
+        [Tooltip("Yuz nuqtalarining bosh teksturasidagi o'rni (builder topadi; topilmagani -1).")]
+        public Vector2[] faceUv;
+        [Tooltip("faceUv nuqtalari orasidagi uchburchaklar (uchtadan indeks).")]
+        public int[] faceTriangles;
+
+        public bool SupportsFace => faceUv != null && faceUv.Length > 0 && faceTriangles != null && faceTriangles.Length > 0;
     }
 }

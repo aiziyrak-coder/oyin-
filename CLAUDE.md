@@ -72,10 +72,12 @@ qaytgan o'yinchi uchun `MainMenu` (hali yo'q, Loading "READY" da to'xtaydi). Pro
 | `Assets/CraDev/Common/` | `SplashSequence` (splash asosi: vaqt o'qi, fade, ovoz, o'tkazib yuborish), `SceneLoader`, `Anim` (easing, input) |
 | `Assets/CraDev/Intro/`, `CDCGroup/`, `Loading/` | splash va yuklash ekranlari |
 | `Assets/CraDev/CharacterCreation/` | nickname + avatar tanlash ekrani: 3D studiyada qahramon turadi; `AvatarViewer` uni sichqoncha bilan aylantiradi, g'ildirakcha bilan yuziga yaqinlashtiradi |
+| `Assets/CraDev/Face/` | o'yinchi yuzi: `FaceTracker` (MediaPipe BlazeFace + Face Mesh, 478 nuqta, `com.unity.ai.inference`), `FacePainter` (yuzni bosh teksturasiga chizadi), `FacePhoto` (fayl oynasi, EXIF, kamera kadri), `FaceStore` (yuz faqat shu kompyuterda saqlanadi) |
 | `Assets/CraDev/Online/` | `GameApi` (server), `NicknameRules` (server bilan bir xil qoidalar), `PlayerProfile`, `RegistrationSession` |
 | `Assets/CraDev/Avatars/Models/<ID>/` | 3D avatarlar: Microsoft Rocketbox (MIT, `LICENSE-Rocketbox.md`), `.fbx` + `Textures/` (.tga lar .jpg/.png ga siqilgan) |
 | `Assets/CraDev/Avatars/Animations/` | idle animatsiyalar (Rocketbox, Generic `Bip01` skelet) va ularning Animator Controller'lari |
 | `Assets/CraDev/Avatars/Cards/` | kartadagi rasmlar: builder 3D modeldan chizadi (qo'lda tahrirlanmaydi) |
+| `Assets/CraDev/Avatars/FaceMaps.json` | yuz xaritalari: har avatar uchun 478 nuqtaning bosh teksturasidagi o'rni + uchburchaklar. Builder hisoblaydi (tekshiruv rasmlari `Logs/FaceMaps/`); grafikasiz CI shu fayldan o'qiydi |
 | `Assets/CraDev/Avatars/Photos/` | eski 2D avatar rasmlari: endi ishlatilmaydi |
 | `Assets/CraDev/Editor/` | `CraDevSceneBuilder` (sahnalar), `CraDevBatch` (batchmode), `CraDevArtImporter` (rasm import sozlamalari), `CraDevModelImporter` (Rocketbox modellari: material, LOD, animatsiya), `UiBuild` |
 | `Server/` | Node.js o'yin serveri: nickname noyobligi, o'yinchi profillari |
@@ -124,8 +126,12 @@ Hamma tayyor PNG/WAV'lar `Assets/` ga commit qilingan; qayta yaratish faqat manb
    3D: studiyada realistik Rocketbox qahramoni turadi (idle animatsiya, aylantirish, yaqinlashtirish), forma ustida.
 3. Avatarlar: erkaklar 4 ta (M1, M2, M3, M5), ayollar 5 ta (F1–F5). **M4 kerak emas** (foydalanuvchi qarori);
    kodlar o'zgarmaydi. Ro'yxat ikki joyda: `CraDevSceneBuilder.AvatarList` va `Server/src/nickname.js` (`AVATARS`).
-4. O'yin janri hali tanlanmagan (foydalanuvchi keyin hal qiladi). O'yin qismida kamera **birinchi shaxs** bo'ladi.
-5. Foydalanuvchi keyinga qoldirgan: pasport bilan ro'yxatdan o'tish (jins shundan olinadi, hozir
-   `testGender`), yuzni skaner qilish (yuz avatarga qo'yiladi), `MainMenu`.
+4. Yuz: formadagi FACE bo'limi (Take photo - kamera oynasi, Upload photo - Windows fayl oynasi). Yuz 3D qahramon yuziga
+   "teri" sifatida chiziladi (bosh shakli modelniki), rangi qahramon terisiga 70% moslashadi. Yuz serverga yuborilmaydi.
+   Tekshirish: `Unity.exe -batchmode -quit -projectPath . -executeMethod CraDev.EditorTools.CraDevFaceTest.Run -facePhoto <rasm>`.
+   Keyingi: yuzni serverga yuklash (multiplayer'da boshqalar ko'rishi), 3D yuz shakli.
+5. O'yin janri hali tanlanmagan (foydalanuvchi keyin hal qiladi). O'yin qismida kamera **birinchi shaxs** bo'ladi.
+6. Foydalanuvchi keyinga qoldirgan: pasport bilan ro'yxatdan o'tish (jins shundan olinadi, hozir
+   `testGender`), `MainMenu` (profil yaratilgach o'yin Loading "READY" da to'xtaydi).
 
 Git: ish `claude/gallant-dijkstra-r0opib` branch'ida. `Library/`, `Temp/`, `Logs/`, `Builds/` commit qilinmaydi.
