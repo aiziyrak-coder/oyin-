@@ -1,65 +1,21 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
-<!-- CDCGroup kumush logosi manbasi. Qatlamlar build.sh orqali alohida PNG qilib chiqariladi. -->
+<!-- CDCGroup logosi manbasi (zamonaviy, tekis kumush). Qatlamlar build.sh orqali alohida PNG qilib chiqariladi. -->
 <style>
-@font-face{font-family:Michroma;src:url(../fonts/Michroma-400.ttf)}
+@font-face{font-family:Manrope;font-weight:800;src:url(../fonts/Manrope-800.ttf)}
+@font-face{font-family:Manrope;font-weight:500;src:url(../fonts/Manrope-500.ttf)}
 html,body{margin:0;width:1920px;height:1080px;overflow:hidden}
-body{background:#060607;position:relative}
+body{background:#0b0b0c;position:relative}
 body.transparent{background:transparent}
-.lockup{position:absolute;left:50%;top:540px;transform:translate(-50%,-50%);display:flex;align-items:center;gap:40px}
-.emblem svg{width:196px;height:196px;display:block;overflow:visible}
-.text{display:flex;flex-direction:column;align-items:flex-start}
-.cdc{font-family:Michroma;font-size:112px;line-height:1;letter-spacing:.02em;
-  background:linear-gradient(180deg,#ffffff 0%,#e6e9ee 30%,#9aa0a9 49%,#6c7179 52%,#b9bec6 70%,#eef1f4 100%);
-  -webkit-background-clip:text;background-clip:text;color:transparent;padding-bottom:4px}
-.group{font-family:Michroma;font-size:27px;line-height:1;margin-top:14px;white-space:nowrap;
-  background:linear-gradient(180deg,#f2f4f7 0%,#a9afb8 55%,#d9dde2 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-#highlight{filter:brightness(0) invert(1)}
-#line{position:absolute;left:50%;top:700px;transform:translateX(-50%);width:1100px;height:2px;
-  background:linear-gradient(90deg,rgba(210,215,222,0) 0%,rgba(210,215,222,.75) 50%,rgba(210,215,222,0) 100%)}
+.layer{position:absolute;left:50%;transform:translateX(-50%);white-space:nowrap}
+/* kumush: ochiqdan to'qroqqa yumshoq o'tish, yaltiroq xrom emas */
+#cdc{top:392px;font-family:Manrope;font-weight:800;font-size:150px;line-height:1;letter-spacing:.04em;padding-left:.04em;
+  background:linear-gradient(180deg,#eceef1 0%,#c9cdd3 55%,#a7acb3 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#line{top:563px;width:420px;height:3px;background:#b9bdc3}
+#group{top:590px;font-family:Manrope;font-weight:500;font-size:30px;line-height:1;letter-spacing:.95em;padding-left:.95em;color:#9a9fa6}
 </style></head>
 <body>
-<svg width="0" height="0" style="position:absolute"><defs>
-  <!-- xrom effekti: yuqorisi yorqin, o'rtada qorong'i "ufq" chizig'i, pasti yana yorug' -->
-  <linearGradient id="chrome" x1="0" y1="0" x2="0" y2="200" gradientUnits="userSpaceOnUse">
-    <stop offset="0" stop-color="#ffffff"/><stop offset=".3" stop-color="#e3e6eb"/>
-    <stop offset=".49" stop-color="#959ba4"/><stop offset=".52" stop-color="#686d75"/>
-    <stop offset=".74" stop-color="#c3c8cf"/><stop offset="1" stop-color="#f3f5f7"/>
-  </linearGradient>
-</defs></svg>
-<template id="lockupTpl">
-  <div class="emblem"><svg viewBox="0 0 200 200"><g fill="none" stroke="url(#chrome)">
-    <!-- tashqi C -->
-    <path d="M 166 52 A 84 84 0 1 0 166 148" stroke-width="14"/>
-    <!-- D -->
-    <path d="M 66 52 L 96 52 A 48 48 0 0 1 96 148 L 66 148 Z" stroke-width="12" stroke-linejoin="miter"/>
-    <!-- ichki C -->
-    <path d="M 108 86 A 18 18 0 1 0 108 114" stroke-width="9"/>
-  </g></svg></div>
-  <div class="text"><div class="cdc">CDC</div><div class="group">GROUP</div></div>
-</template>
-<div class="lockup" id="lockup"></div>
-<div class="lockup layer" id="highlight" data-preview="off"></div>
-<div class="layer" id="line" data-preview="off"></div>
-<script>
-  window.layersReady = false;
-  const tpl = document.getElementById('lockupTpl');
-  const main = document.getElementById('lockup');
-  main.appendChild(tpl.content.cloneNode(true));
-  main.children[0].id = 'emblem'; main.children[0].classList.add('layer');
-  main.children[1].id = 'wordmark'; main.children[1].classList.add('layer');
-  document.getElementById('highlight').appendChild(tpl.content.cloneNode(true));
-  document.fonts.ready.then(() => {
-    // "GROUP" kengligini "CDC" kengligiga tenglashtiramiz
-    document.querySelectorAll('.text').forEach(t => {
-      const cdc = t.querySelector('.cdc'), group = t.querySelector('.group');
-      const letters = group.textContent.length;
-      group.style.letterSpacing = '0px';
-      const extra = (cdc.getBoundingClientRect().width - group.getBoundingClientRect().width) / (letters - 1);
-      group.style.letterSpacing = extra + 'px';
-      group.style.marginRight = -extra + 'px';
-    });
-    window.layersReady = true;
-  });
-</script>
+<div id="cdc" class="layer">CDC</div>
+<div id="line" class="layer"></div>
+<div id="group" class="layer">GROUP</div>
 </body></html>

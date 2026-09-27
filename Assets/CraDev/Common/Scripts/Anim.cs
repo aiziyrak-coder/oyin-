@@ -11,6 +11,9 @@ namespace CraDev
     {
         public static float OutCubic(float x) => 1f - Mathf.Pow(1f - x, 3f);
 
+        /// <summary>Tez boshlanib, juda yumshoq to'xtaydi. Zamonaviy UI harakatlari uchun.</summary>
+        public static float OutQuint(float x) => 1f - Mathf.Pow(1f - x, 5f);
+
         public static float InOutCubic(float x) =>
             x < 0.5f ? 4f * x * x * x : 1f - Mathf.Pow(-2f * x + 2f, 3f) / 2f;
 

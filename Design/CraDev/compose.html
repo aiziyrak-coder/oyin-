@@ -1,55 +1,34 @@
 <!doctype html>
 <html><head><meta charset="utf-8">
-<!-- CraDev intro logosi manbasi. Har bir qatlam alohida PNG qilib chiqariladi (render.js). -->
+<!-- CraDev logosi manbasi (zamonaviy, tekis). Qatlamlar build.sh orqali alohida PNG qilib chiqariladi. -->
 <style>
-@font-face{font-family:Orbitron;font-weight:900;src:url(../fonts/Orbitron-900.ttf)}
-@font-face{font-family:Rajdhani;font-weight:600;src:url(../fonts/Rajdhani-600.ttf)}
+@font-face{font-family:Unbounded;font-weight:700;src:url(../fonts/Unbounded-700.ttf)}
+@font-face{font-family:Manrope;font-weight:600;src:url(../fonts/Manrope-600.ttf)}
+:root{--blue:#3d5afe;--white:#ffffff;--muted:#8e939a}
 html,body{margin:0;width:1920px;height:1080px;overflow:hidden}
-body{background:#05070d;position:relative}
+body{background:#0b0b0c;position:relative}
 body.transparent{background:transparent}
-.layer{position:absolute;left:50%;transform:translateX(-50%)}
-#emblem{top:250px;width:300px;height:300px}
-#emblem svg{width:300px;height:300px;overflow:visible}
-.word{top:552px;font-family:Orbitron;font-weight:900;font-size:112px;line-height:1;white-space:nowrap;letter-spacing:.02em}
-.word .cra{color:#dfe7f5}
-.word .dev{background:linear-gradient(100deg,#2ee6ff 0%,#4f8dff 55%,#9d5cff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
-#wordglow{filter:blur(22px);opacity:.85}
-#wordglow .cra{color:#3f9dff;background:none}
-#wordglow .dev{background:linear-gradient(100deg,#2ee6ff,#9d5cff);-webkit-background-clip:text;background-clip:text;color:transparent}
-#divider{top:700px;width:560px;height:14px;display:flex;align-items:center;justify-content:center}
-#divider .line{position:absolute;left:0;right:0;top:6px;height:2px;background:linear-gradient(90deg,rgba(46,230,255,0) 0%,rgba(46,230,255,.9) 30%,rgba(157,92,255,.9) 70%,rgba(157,92,255,0) 100%)}
-#divider .gem{width:9px;height:9px;transform:rotate(45deg);background:#dff6ff;box-shadow:0 0 10px 2px rgba(80,200,255,.9)}
-#tagline{top:728px;font-family:Rajdhani;font-weight:600;font-size:28px;letter-spacing:.5em;color:#b4c6e4;white-space:nowrap;padding-left:.5em}
+.lockup{position:absolute;left:50%;top:510px;transform:translate(-50%,-50%);display:flex;align-items:center;gap:36px}
+.mark{position:relative;width:150px;height:150px}
+.mark>*{position:absolute;inset:0}
+.mark svg{width:150px;height:150px;display:block}
+.word{font-family:Unbounded;font-weight:700;font-size:112px;line-height:1;letter-spacing:-.02em;color:var(--white);white-space:nowrap;padding-bottom:6px}
+.word .dev{color:var(--blue)}
+#tagline{position:absolute;left:50%;top:650px;transform:translateX(-50%);font-family:Manrope;font-weight:600;font-size:22px;
+  letter-spacing:.5em;padding-left:.5em;color:var(--muted);white-space:nowrap}
 </style></head>
 <body>
-<div id="emblem" class="layer">
-<svg viewBox="-64 -64 640 640" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="g" x1="60" y1="40" x2="452" y2="472" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#2ee6ff"/>
-      <stop offset=".55" stop-color="#4f8dff"/>
-      <stop offset="1" stop-color="#9d5cff"/>
-    </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="b1"/>
-      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b2"/>
-      <feMerge><feMergeNode in="b1"/><feMergeNode in="b2"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-  <g filter="url(#glow)">
-    <!-- tashqi olti burchak -->
-    <polygon points="256,20 460.4,138 460.4,374 256,492 51.6,374 51.6,138" fill="none" stroke="url(#g)" stroke-width="12" stroke-linejoin="round"/>
-    <!-- ichki ingichka olti burchak -->
-    <polygon points="256,46 437.9,151 437.9,361 256,466 74.1,361 74.1,151" fill="none" stroke="url(#g)" stroke-opacity=".35" stroke-width="3"/>
-    <!-- "C" harfi: o'ng tomoni ochiq olti burchak -->
-    <polyline points="377.2,186 256,116 134.8,186 134.8,326 256,396 377.2,326" fill="none" stroke="url(#g)" stroke-width="40" stroke-linejoin="miter" stroke-linecap="butt"/>
-    <!-- "play" uchburchagi: o'yin belgisi -->
-    <polygon points="222,198 222,314 324,256" fill="#eaf6ff" stroke="#eaf6ff" stroke-width="10" stroke-linejoin="round"/>
-  </g>
-</svg>
+<div class="lockup">
+  <div class="mark">
+    <!-- belgi foni: yumaloq burchakli kvadrat -->
+    <div id="tile" class="layer"><svg viewBox="0 0 100 100"><rect width="100" height="100" rx="24" fill="#3d5afe"/></svg></div>
+    <!-- belgi ichidagi oq "C" va "play" uchburchagi -->
+    <div id="glyph" class="layer"><svg viewBox="0 0 100 100">
+      <path d="M 68 32 A 26 26 0 1 0 68 68" fill="none" stroke="#fff" stroke-width="13"/>
+      <polygon points="45,38 45,62 64,50" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+    </svg></div>
+  </div>
+  <div id="wordmark" class="layer word">Cra<span class="dev">Dev</span></div>
 </div>
-<div id="wordglow" class="layer word"><span class="cra">Cra</span><span class="dev">Dev</span></div>
-<div id="wordmark" class="layer word"><span class="cra">Cra</span><span class="dev">Dev</span></div>
-<div id="divider" class="layer"><div class="line"></div><div class="gem"></div></div>
 <div id="tagline" class="layer">A NEW ERA OF GAMING</div>
 </body></html>

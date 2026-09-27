@@ -4,9 +4,12 @@ Unity'da kompyuter uchun (Steam) yaratilayotgan 3D o'yin. O'yinni bosqichma-bosq
 
 **Hozirgi bosqich — 2: o'yin boshidagi sahnalar.** O'yin ochilganda ketma-ket:
 
-1. **CraDev intro**: kompaniya logosi va "A NEW ERA OF GAMING" yozuvi (animatsiya va ovoz bilan).
+1. **CraDev intro**: kompaniya logosi va "A NEW ERA OF GAMING" yozuvi.
 2. **CDCGroup**: ikkinchi brendning kumush logosi.
-3. **Loading**: keyingi sahnani fonda yuklaydigan ekran (foiz, progress chizig'i, aylanuvchi yoylar).
+3. **Loading**: keyingi sahnani fonda yuklaydigan ekran (katta foiz raqami va ingichka chiziq).
+
+Uslub zamonaviy va minimal: bir xil qora fon, tekis ranglar, aniq shriftlar (Unbounded, Manrope),
+qisqa va silliq harakatlar. Uchqun, nur yoki "kosmik" effektlar yo'q.
 
 | CraDev | CDCGroup |
 |---|---|
@@ -39,31 +42,27 @@ Unity 6'da buni bepul (Personal) litsenziyada ham qilish mumkin.
 
 ## Sahnalar qanday ishlaydi
 
-### 1. CraDev intro (6.6 s)
+### 1. CraDev intro (4.2 s)
 
 | Vaqt (s) | Nima bo'ladi |
 |---|---|
-| 0.0 – 0.8 | Qora ekrandan qorong'i fon ochiladi |
-| 0.55 – 1.05 | Emblema paydo bo'ladi, 1.05 da ovozdagi zarba bilan nur chaqnaydi |
-| 1.45 – 2.45 | "CraDev" yozuvi markazdan ikki tomonga ochiladi |
-| 2.45 – 3.25 | Yozuv ustidan nur o'tadi (ovozda jiringlash) |
-| 2.75 – 3.85 | Ajratuvchi chiziq va "A NEW ERA OF GAMING" |
-| 5.6 – 6.6 | Qorong'ilashish, so'ng CDCGroup |
+| 0.25 – 0.85 | Ko'k belgi ekran markazida paydo bo'ladi, ichidagi oq shakl biroz keyin chiqadi ("pop" ovozi) |
+| 0.95 – 1.80 | Belgi chapga suriladi, uning ortidan "CraDev" yozuvi chiqib keladi (yengil "vish" va akkord) |
+| 1.75 – 2.45 | Ostida "A NEW ERA OF GAMING" paydo bo'ladi |
+| 3.6 – 4.2 | Qorong'ilashish, so'ng CDCGroup |
 
-### 2. CDCGroup (4.8 s)
+### 2. CDCGroup (3.5 s)
 
 | Vaqt (s) | Nima bo'ladi |
 |---|---|
-| 0.0 – 0.6 | Qora ekrandan ochiladi |
-| 0.35 – 1.30 | Kumush emblema (C ichida D, uning ichida C) aylanib joyiga tushadi, ovozda yumshoq zarba |
-| 1.05 – 1.85 | "CDC GROUP" yozuvi chapdan o'ngga ochiladi |
-| 1.95 – 2.70 | Butun logo ustidan kumush yaltirash o'tadi (metall "shiing", chapdan o'ngga) |
-| 2.05 – 2.95 | Logo ostida ingichka chiziq cho'ziladi |
-| 4.0 – 4.8 | Qorong'ilashish, so'ng Loading |
+| 0.2 – 0.9 | Ingichka kumush chiziq markazdan ikki tomonga cho'ziladi |
+| 0.5 – 1.25 | "CDC" chiziq ortidan yuqoriga ko'tariladi (yumshoq past ton) |
+| 0.65 – 1.40 | "GROUP" chiziq ortidan pastga tushadi |
+| 2.9 – 3.5 | Qorong'ilashish, so'ng Loading |
 
 ### 3. Loading
 
-- Keyingi sahnani (`MainMenu`) fonda yuklaydi va foizni ko'rsatadi. Yuklash juda tez tugasa ham
+- Keyingi sahnani (`MainMenu`) fonda yuklaydi va foizni katta raqam hamda ingichka chiziq bilan ko'rsatadi. Yuklash juda tez tugasa ham
   ekran kamida 3 soniya ko'rinib turadi. 100% ga yetgach qorong'ilashib, sahna ochiladi.
 - `MainMenu` hali yo'q, shuning uchun hozircha jarayon namoyish uchun to'ladi va "READY" bo'lib
   to'xtaydi. Console'da shu haqda xabar chiqadi. Menyu keyingi bosqichda qo'shiladi.
@@ -82,15 +81,15 @@ Unity 6'da buni bepul (Personal) litsenziyada ham qilish mumkin.
 
 ```
 Assets/CraDev/
-  Common/Scripts/   SplashSequence.cs (splash asosi), SceneLoader.cs, UiParticles.cs, Anim.cs
-  Common/Fonts/     Rajdhani (Loading yozuvlari uchun)
+  Common/Scripts/   SplashSequence.cs (splash asosi), SceneLoader.cs, Anim.cs
+  Common/Fonts/     Manrope (Loading yozuvlari uchun)
   Intro/            CraDev intro: Art, Audio, Scripts/IntroSequence.cs
   CDCGroup/         CDCGroup splash: Art, Audio, Scripts/CdcGroupSplash.cs
-  Loading/          Loading ekrani: Art, Scripts/LoadingScreen.cs
+  Loading/          Loading ekrani: Scripts/LoadingScreen.cs
   Editor/           CraDevSceneBuilder.cs (sahna quruvchi menyu), UiBuild.cs, CraDevArtImporter.cs
   Scenes/           Intro, CDCGroup, Loading (menyu orqali yaratiladi)
 Design/
-  CraDev/, CDCGroup/, Loading/   logo manbalari va qayta yaratish skriptlari (build.sh)
+  CraDev/, CDCGroup/             logo manbalari va qayta yaratish skriptlari (build.sh)
   fonts/                         shriftlar va litsenziyalari
   tools/                         umumiy yordamchi skriptlar
 ```
@@ -102,5 +101,5 @@ O'zgartirgandan keyin shu papkadagi `build.sh` ni ishga tushiring. U PNG qatlaml
 qayta yaratadi (Node.js + playwright, Python 3 + numpy + pillow kerak). Keyin Unity'da
 **CraDev → Sahnalarni yaratish** ni qayta bosing.
 
-Shriftlar: Orbitron, Rajdhani va Michroma, barchasi SIL Open Font License asosida
+Shriftlar: Unbounded va Manrope, ikkalasi ham SIL Open Font License asosida
 (`Design/fonts/OFL-*.txt`), o'yinda bepul ishlatish mumkin.

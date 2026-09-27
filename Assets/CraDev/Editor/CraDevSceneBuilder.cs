@@ -26,8 +26,12 @@ namespace CraDev.EditorTools
 
         const string IntroArt = "Assets/CraDev/Intro/Art/";
         const string CdcArt = "Assets/CraDev/CDCGroup/Art/";
-        const string LoadingArt = "Assets/CraDev/Loading/Art/";
-        const string FontPath = "Assets/CraDev/Common/Fonts/Rajdhani-SemiBold.ttf";
+        const string FontLight = "Assets/CraDev/Common/Fonts/Manrope-ExtraLight.ttf";
+        const string FontSemiBold = "Assets/CraDev/Common/Fonts/Manrope-SemiBold.ttf";
+
+        // Barcha sahnalar uchun bitta tekis fon
+        static readonly Color Background = new Color32(11, 11, 12, 255);
+        static readonly Color Muted = new Color32(142, 147, 154, 255);
 
         [MenuItem("CraDev/Sahnalarni yaratish (Intro, CDCGroup, Loading)", priority = 1)]
         static void BuildAll()
@@ -72,59 +76,49 @@ namespace CraDev.EditorTools
 
         static void BuildIntro()
         {
-            // Joylashuvlar Design/CraDev/layout.json dan olingan (ekran markaziga nisbatan)
-            var emblemPos = new Vector2(0f, 140f);
-            var wordmarkPos = new Vector2(2.5f, -70.5f);
-            var wordmarkGlowPos = new Vector2(-2.5f, -71f);
-            var dividerPos = new Vector2(0f, -167.5f);
-            var taglinePos = new Vector2(-0.5f, -205f);
+            // Yakuniy joylashuvlar Design/CraDev/layout.json dan olingan (ekran markaziga nisbatan)
+            var markPos = new Vector2(-273.5f, 30f);
+            var glyphOffset = new Vector2(-8f, 0f);
+            var wordmarkPos = new Vector2(96f, 33f);
+            var taglinePos = new Vector2(0f, -125f);
+            // Yozuv niqobi belgi va yozuv orasidagi bo'shliqdan boshlanadi
+            var maskPos = new Vector2(102f, 33f);
+            var maskSize = new Vector2(560f, 150f);
 
             var root = NewUiScene(out var scene);
-            CreateFullscreen("Background", root, new Color32(5, 7, 13, 255));
-            var particles = CreateParticles(root, LoadSprite(IntroArt + "CraDev_Particle.png"), 70,
-                new Color(0.25f, 0.85f, 1f), new Color(0.62f, 0.40f, 1f), new Vector2(4f, 12f));
+            CreateFullscreen("Background", root, Background);
 
             var logo = CreateRect("Logo", root);
-            var glow = CreateImage("Glow", logo, LoadSprite(IntroArt + "CraDev_Glow.png"), new Vector2(1100f, 1100f), emblemPos, Color.white);
-            var emblem = CreateSprite("Emblem", logo, LoadSprite(IntroArt + "CraDev_Emblem.png"), emblemPos);
+            var mask = CreateRect("WordmarkMask", logo);
+            mask.anchoredPosition = maskPos;
+            mask.sizeDelta = maskSize;
+            mask.gameObject.AddComponent<RectMask2D>().softness = new Vector2Int(6, 0);
+            var wordmark = CreateSprite("Wordmark", mask, LoadSprite(IntroArt + "CraDev_Wordmark.png"), wordmarkPos - maskPos);
 
-            // Yozuvni markazdan ochish uchun yumshoq chetli RectMask2D
-            var reveal = CreateRect("WordmarkReveal", logo);
-            reveal.anchoredPosition = wordmarkPos;
-            reveal.sizeDelta = new Vector2(820f, 260f);
-            reveal.gameObject.AddComponent<RectMask2D>().softness = new Vector2Int(90, 0);
-            var wordmarkGlow = CreateSprite("WordmarkGlow", reveal, LoadSprite(IntroArt + "CraDev_WordmarkGlow.png"), wordmarkGlowPos - wordmarkPos);
-            var wordmark = CreateSprite("Wordmark", reveal, LoadSprite(IntroArt + "CraDev_Wordmark.png"), Vector2.zero);
+            // Belgi yozuvdan keyin yaratiladi, shunda harakat paytida yozuv uning ostidan chiqadi
+            var mark = CreateRect("Mark", logo);
+            mark.anchoredPosition = markPos;
+            var tile = CreateSprite("Tile", mark, LoadSprite(IntroArt + "CraDev_Tile.png"), Vector2.zero);
+            var glyph = CreateSprite("Glyph", mark, LoadSprite(IntroArt + "CraDev_Glyph.png"), glyphOffset);
 
-            // Nur faqat harflar ustida ko'rinishi uchun yozuvning o'zi niqob (Mask) vazifasini bajaradi
-            wordmark.gameObject.AddComponent<Mask>().showMaskGraphic = true;
-            var shine = CreateImage("Shine", wordmark.transform, LoadSprite(IntroArt + "CraDev_Shine.png"),
-                new Vector2(80f, 260f), Vector2.zero, new Color(1f, 1f, 1f, 0f));
-            shine.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -18f);
-
-            var divider = CreateSprite("Divider", logo, LoadSprite(IntroArt + "CraDev_Divider.png"), dividerPos);
             var tagline = CreateSprite("Tagline", logo, LoadSprite(IntroArt + "CraDev_Tagline.png"), taglinePos);
             var fader = CreateFullscreen("Fader", root, new Color(0f, 0f, 0f, 0f));
 
             var director = new GameObject("IntroDirector");
-            var sound = AddSound(director, "Assets/CraDev/Intro/Audio/CraDev_IntroSound.wav");
+            var sound = AddSound(director, "Assets/CraDev/Intro/Audio/CraDev_Sound.wav");
             var sequence = director.AddComponent<IntroSequence>();
             Set(sequence, "nextScene", "CDCGroup");
             Set(sequence, "fader", fader);
             Set(sequence, "sound", sound);
-            Set(sequence, "fadeInDuration", 0.8f);
-            Set(sequence, "soundStart", 0.6f);
-            Set(sequence, "fadeOutStart", 5.6f);
-            Set(sequence, "fadeOutDuration", 1.0f);
-            Set(sequence, "logoRoot", logo);
-            Set(sequence, "glow", glow);
-            Set(sequence, "emblem", emblem);
-            Set(sequence, "wordmarkReveal", reveal);
-            Set(sequence, "wordmarkGlow", wordmarkGlow);
-            Set(sequence, "shine", shine);
-            Set(sequence, "divider", divider);
+            Set(sequence, "fadeInDuration", 0.3f);
+            Set(sequence, "soundStart", 0.2f);
+            Set(sequence, "fadeOutStart", 3.6f);
+            Set(sequence, "fadeOutDuration", 0.6f);
+            Set(sequence, "mark", mark);
+            Set(sequence, "tile", tile);
+            Set(sequence, "glyph", glyph);
+            Set(sequence, "wordmark", wordmark.rectTransform);
             Set(sequence, "tagline", tagline);
-            Set(sequence, "particles", particles);
 
             Save(scene, IntroScene);
         }
@@ -134,41 +128,32 @@ namespace CraDev.EditorTools
         static void BuildCdcGroup()
         {
             // Joylashuvlar Design/CDCGroup/layout.json dan olingan
-            var emblemPos = new Vector2(-211.5f, 0f);
-            var wordmarkPos = new Vector2(118.5f, -10f);
-            var highlightPos = new Vector2(3f, 0f);
-            var linePos = new Vector2(0f, -161f);
+            var lettersPos = new Vector2(-0.5f, 70f);
+            var linePos = new Vector2(0f, -24.5f);
+            var groupPos = new Vector2(0.5f, -65.5f);
+            // "CDC" chiziqdan yuqorida, "GROUP" pastda niqoblanadi: ular chiziq ortidan chiqib keladi
+            var upperMaskPos = new Vector2(0f, 58.25f);
+            var upperMaskSize = new Vector2(480f, 162.5f);
+            var lowerMaskPos = new Vector2(0f, -57f);
+            var lowerMaskSize = new Vector2(480f, 62f);
 
             var root = NewUiScene(out var scene);
-            CreateFullscreen("Background", root, new Color32(6, 6, 7, 255));
-            var particles = CreateParticles(root, LoadSprite(IntroArt + "CraDev_Particle.png"), 45,
-                new Color(0.95f, 0.96f, 1f), new Color(0.62f, 0.66f, 0.72f), new Vector2(3f, 9f));
+            CreateFullscreen("Background", root, Background);
 
-            var lockup = CreateRect("Lockup", root);
-            var glow = CreateImage("Glow", lockup, LoadSprite(CdcArt + "CDC_Glow.png"), new Vector2(1000f, 1000f), Vector2.zero, Color.white);
-            var emblem = CreateSprite("Emblem", lockup, LoadSprite(CdcArt + "CDC_Emblem.png"), emblemPos);
+            var logo = CreateRect("Logo", root);
+            var upper = CreateRect("LettersMask", logo);
+            upper.anchoredPosition = upperMaskPos;
+            upper.sizeDelta = upperMaskSize;
+            upper.gameObject.AddComponent<RectMask2D>();
+            var letters = CreateSprite("Letters", upper, LoadSprite(CdcArt + "CDC_Letters.png"), lettersPos - upperMaskPos);
 
-            // Yozuv chapdan o'ngga ochiladi: niqobning chap cheti qimirlamaydi, faqat kengligi o'sadi
-            var wordmarkSprite = LoadSprite(CdcArt + "CDC_Wordmark.png");
-            float wordmarkLeft = wordmarkPos.x - NativeSize(wordmarkSprite).x / 2f;
-            const float revealMargin = 70f; // chap yumshoq chet (60) harflarga tegmasligi uchun
-            var reveal = CreateRect("WordmarkReveal", lockup);
-            reveal.pivot = new Vector2(0f, 0.5f);
-            reveal.anchoredPosition = new Vector2(wordmarkLeft - revealMargin, wordmarkPos.y);
-            reveal.sizeDelta = new Vector2(520f, 220f);
-            reveal.gameObject.AddComponent<RectMask2D>().softness = new Vector2Int(60, 0);
-            var wordmark = CreateSprite("Wordmark", reveal, wordmarkSprite, Vector2.zero);
-            wordmark.rectTransform.anchorMin = wordmark.rectTransform.anchorMax = new Vector2(0f, 0.5f);
-            wordmark.rectTransform.anchoredPosition = new Vector2(revealMargin + NativeSize(wordmarkSprite).x / 2f, 0f);
+            var lower = CreateRect("GroupMask", logo);
+            lower.anchoredPosition = lowerMaskPos;
+            lower.sizeDelta = lowerMaskSize;
+            lower.gameObject.AddComponent<RectMask2D>();
+            var group = CreateSprite("Group", lower, LoadSprite(CdcArt + "CDC_Group.png"), groupPos - lowerMaskPos);
 
-            // Yaltirash: tor, yumshoq chetli oyna ichida logoning oq nusxasi
-            var glint = CreateRect("GlintWindow", lockup);
-            glint.sizeDelta = new Vector2(220f, 260f);
-            glint.gameObject.AddComponent<RectMask2D>().softness = new Vector2Int(80, 0);
-            var highlight = CreateImage("Highlight", glint, LoadSprite(CdcArt + "CDC_Highlight.png"),
-                NativeSize(LoadSprite(CdcArt + "CDC_Highlight.png")), highlightPos, new Color(1f, 1f, 1f, 0f));
-
-            var line = CreateSprite("Line", lockup, LoadSprite(CdcArt + "CDC_Line.png"), linePos);
+            var line = CreateSprite("Line", logo, LoadSprite(CdcArt + "CDC_Line.png"), linePos);
             var fader = CreateFullscreen("Fader", root, new Color(0f, 0f, 0f, 0f));
 
             var director = new GameObject("CDCGroupDirector");
@@ -177,19 +162,13 @@ namespace CraDev.EditorTools
             Set(splash, "nextScene", "Loading");
             Set(splash, "fader", fader);
             Set(splash, "sound", sound);
-            Set(splash, "fadeInDuration", 0.6f);
-            Set(splash, "soundStart", 0.35f);
-            Set(splash, "fadeOutStart", 4.0f);
-            Set(splash, "fadeOutDuration", 0.8f);
-            Set(splash, "lockup", lockup);
-            Set(splash, "glow", glow);
-            Set(splash, "emblem", emblem);
-            Set(splash, "wordmarkReveal", reveal);
-            Set(splash, "wordmark", wordmark.rectTransform);
-            Set(splash, "glintWindow", glint);
-            Set(splash, "glintHighlight", highlight);
+            Set(splash, "fadeInDuration", 0.3f);
+            Set(splash, "soundStart", 0.2f);
+            Set(splash, "fadeOutStart", 2.9f);
+            Set(splash, "fadeOutDuration", 0.6f);
             Set(splash, "line", line);
-            Set(splash, "particles", particles);
+            Set(splash, "letters", letters.rectTransform);
+            Set(splash, "group", group.rectTransform);
 
             Save(scene, CdcScene);
         }
@@ -198,35 +177,22 @@ namespace CraDev.EditorTools
 
         static void BuildLoading()
         {
-            var center = new Vector2(0f, 40f);
-            var font = AssetDatabase.LoadAssetAtPath<Font>(FontPath);
-            if (font == null)
-                throw new FileNotFoundException("Shrift topilmadi: " + FontPath);
+            var light = AssetDatabase.LoadAssetAtPath<Font>(FontLight);
+            var semiBold = AssetDatabase.LoadAssetAtPath<Font>(FontSemiBold);
+            if (light == null || semiBold == null)
+                throw new FileNotFoundException("Manrope shriftlari topilmadi: Assets/CraDev/Common/Fonts");
 
             var root = NewUiScene(out var scene);
-            CreateFullscreen("Background", root, new Color32(5, 7, 13, 255));
-            CreateImage("Glow", root, LoadSprite(IntroArt + "CraDev_Glow.png"), new Vector2(900f, 900f), center, new Color(1f, 1f, 1f, 0.16f));
-            var particles = CreateParticles(root, LoadSprite(IntroArt + "CraDev_Particle.png"), 50,
-                new Color(0.25f, 0.85f, 1f), new Color(0.62f, 0.40f, 1f), new Vector2(3f, 10f));
+            CreateFullscreen("Background", root, Background);
 
-            var spinner = CreateRect("Spinner", root);
-            spinner.anchoredPosition = center;
-            var hex = CreateSprite("Hex", spinner, LoadSprite(LoadingArt + "Loading_Hex.png"), Vector2.zero);
-            hex.color = new Color(0.55f, 0.85f, 1f, 0.22f);
-            var arcSprite = LoadSprite(LoadingArt + "Loading_Arc.png");
-            var outer = CreateImage("ArcOuter", spinner, arcSprite, new Vector2(300f, 300f), Vector2.zero, new Color(0.18f, 0.9f, 1f, 1f));
-            var inner = CreateImage("ArcInner", spinner, arcSprite, new Vector2(210f, 210f), Vector2.zero, new Color(0.62f, 0.36f, 1f, 0.7f));
-            var percent = CreateText("Percent", spinner, font, "0%", 60, Vector2.zero, new Color32(223, 231, 245, 255));
+            var status = CreateText("Status", root, semiBold, "L O A D I N G", 16, new Vector2(0f, 96f), Muted);
+            var percent = CreateText("Percent", root, light, "65<size=48>%</size>", 128, new Vector2(0f, 8f), Color.white);
+            percent.supportRichText = true;
 
-            var status = CreateText("Status", root, font, "L O A D I N G", 22, new Vector2(0f, -150f), new Color32(131, 145, 173, 255));
-
-            var bar = CreateImage("Bar", root, null, new Vector2(560f, 4f), new Vector2(0f, -195f), new Color(1f, 1f, 1f, 0.08f));
-            var fill = CreateImage("Fill", bar.transform, LoadSprite(LoadingArt + "Loading_BarFill.png"), Vector2.zero, Vector2.zero, Color.white);
+            var bar = CreateImage("Bar", root, null, new Vector2(420f, 2f), new Vector2(0f, -90f), new Color(1f, 1f, 1f, 0.12f));
+            var fill = CreateImage("Fill", bar.transform, null, Vector2.zero, Vector2.zero, Color.white);
             Stretch(fill.rectTransform);
             fill.rectTransform.anchorMax = new Vector2(0.65f, 1f); // tahrirlashda ko'rinishi uchun; o'yinda skript boshqaradi
-            var head = CreateImage("Head", fill.transform, LoadSprite(IntroArt + "CraDev_Particle.png"), new Vector2(44f, 44f), Vector2.zero,
-                new Color(0.45f, 0.9f, 1f, 0.9f));
-            head.rectTransform.anchorMin = head.rectTransform.anchorMax = new Vector2(1f, 0.5f);
 
             var fader = CreateFullscreen("Fader", root, new Color(0f, 0f, 0f, 0f));
 
@@ -234,14 +200,9 @@ namespace CraDev.EditorTools
             var loading = director.AddComponent<LoadingScreen>();
             Set(loading, "defaultScene", "MainMenu");
             Set(loading, "fader", fader);
-            Set(loading, "spinnerOuter", outer.rectTransform);
-            Set(loading, "spinnerInner", inner.rectTransform);
-            Set(loading, "hex", hex);
-            Set(loading, "barFill", fill.rectTransform);
-            Set(loading, "barHead", head);
             Set(loading, "percentText", percent);
             Set(loading, "statusText", status);
-            Set(loading, "particles", particles);
+            Set(loading, "barFill", fill.rectTransform);
 
             Save(scene, LoadingScene);
         }

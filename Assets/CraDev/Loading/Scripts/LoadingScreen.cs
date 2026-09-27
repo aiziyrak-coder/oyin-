@@ -5,7 +5,8 @@ using UnityEngine.UI;
 namespace CraDev.Loading
 {
     /// <summary>
-    /// Loading ekrani: keyingi sahnani fonda yuklaydi va jarayonni foizda ko'rsatadi.
+    /// Loading ekrani: keyingi sahnani fonda yuklaydi va jarayonni katta foiz raqami va
+    /// ingichka chiziq bilan ko'rsatadi.
     ///
     /// Yuklanadigan sahna <see cref="SceneLoader.Load"/> orqali beriladi, berilmagan bo'lsa
     /// "Default Scene" (MainMenu) olinadi. Yuklash juda tez tugasa ham ekran kamida
@@ -23,20 +24,15 @@ namespace CraDev.Loading
 
         [Header("Elementlar")]
         [SerializeField] Image fader;
-        [SerializeField] RectTransform spinnerOuter;
-        [SerializeField] RectTransform spinnerInner;
-        [SerializeField] Image hex;
-        [SerializeField] RectTransform barFill;
-        [SerializeField] Image barHead;
         [SerializeField] Text percentText;
         [SerializeField] Text statusText;
-        [SerializeField] UiParticles particles;
+        [Tooltip("Progress chizig'ining to'ladigan qismi (anchorMax.x = foiz).")]
+        [SerializeField] RectTransform barFill;
 
         [Header("Ko'rinish")]
-        [SerializeField] float fadeInDuration = 0.5f;
-        [SerializeField] float fadeOutDuration = 0.6f;
-        [Tooltip("Tashqi yoyning aylanish tezligi, gradus/soniya.")]
-        [SerializeField] float spinnerSpeed = 150f;
+        [SerializeField] float fadeInDuration = 0.4f;
+        [SerializeField] float fadeOutDuration = 0.5f;
+        [SerializeField] int percentSignSize = 48;
         [SerializeField] string loadingLabel = "L O A D I N G";
         [SerializeField] string readyLabel = "R E A D Y";
 
@@ -112,35 +108,20 @@ namespace CraDev.Loading
         {
             float fadeIn = 1f - Ease.OutCubic(Anim.Progress(t, 0f, fadeInDuration));
             float fadeOut = fadeOutAt >= 0f ? Ease.InOutSine(Anim.Progress(t, fadeOutAt, fadeOutDuration)) : 0f;
-            float visible = 1f - fadeOut;
-
             if (fader != null)
                 Anim.SetAlpha(fader, Mathf.Max(fadeIn, fadeOut));
 
-            // Ikki yoy qarama-qarshi tomonga aylanadi
-            if (spinnerOuter != null)
-                spinnerOuter.localRotation = Quaternion.Euler(0f, 0f, -t * spinnerSpeed);
-            if (spinnerInner != null)
-                spinnerInner.localRotation = Quaternion.Euler(0f, 0f, t * spinnerSpeed * 0.65f + 120f);
-            if (hex != null)
-                Anim.SetAlpha(hex, 0.2f + 0.08f * Mathf.Sin(t * 2.4f));
-
             if (barFill != null)
                 barFill.anchorMax = new Vector2(shown, 1f);
-            if (barHead != null)
-                Anim.SetAlpha(barHead, shown > 0.001f ? 0.9f : 0f);
 
             int percent = Mathf.RoundToInt(shown * 100f);
             if (percentText != null && percent != lastPercent)
             {
                 lastPercent = percent;
-                percentText.text = percent + "%";
+                percentText.text = $"{percent}<size={percentSignSize}>%</size>";
             }
             if (statusText != null)
-                Anim.SetAlpha(statusText, waitingWithoutScene ? 0.9f : 0.55f + 0.35f * Mathf.Sin(t * 3f));
-
-            if (particles != null)
-                particles.Intensity = 0.7f * Ease.InOutSine(Anim.Progress(t, 0f, 1f)) * visible;
+                Anim.SetAlpha(statusText, waitingWithoutScene ? 1f : 0.6f + 0.4f * Mathf.Sin(t * 3f));
         }
     }
 }

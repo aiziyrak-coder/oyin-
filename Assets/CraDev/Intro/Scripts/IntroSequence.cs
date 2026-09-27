@@ -4,135 +4,92 @@ using UnityEngine.UI;
 namespace CraDev.Intro
 {
     /// <summary>
-    /// O'yin ochilganda birinchi ko'rsatiladigan CraDev kompaniyasi intro'si.
+    /// O'yin ochilganda birinchi ko'rsatiladigan CraDev kompaniyasi intro'si. Zamonaviy, tekis uslub.
     ///
-    /// Butun animatsiya bitta vaqt o'qiga bog'langan: har kadrda elementlarning holati
-    /// faqat o'tgan vaqtdan (t) hisoblanadi. Shu sababli "Vaqtlar" bo'limidagi
-    /// qiymatlarni Inspector'da bemalol o'zgartirish mumkin.
+    /// Ketma-ketlik: ko'k belgi ekran markazida paydo bo'ladi -> chapga suriladi va uning
+    /// ortidan "CraDev" yozuvi chiqib keladi -> ostida "A NEW ERA OF GAMING" -> qorong'ilashish ->
+    /// keyingi sahna (CDCGroup).
     ///
-    /// Ketma-ketlik: qorong'ilikdan chiqish -> emblema paydo bo'ladi (ovozdagi zarba bilan)
-    /// -> "CraDev" yozuvi markazdan ochiladi -> yozuv ustidan nur o'tadi -> chiziq va
-    /// "A NEW ERA OF GAMING" -> qorong'ilashish -> keyingi sahna (CDCGroup).
+    /// Barcha qiymatlar Inspector'da o'zgartiriladi. Sahna quruvchi elementlarni yakuniy
+    /// joylashuvda saqlaydi, skript esa ularni shu joyga qarab animatsiya qiladi.
     /// </summary>
     public class IntroSequence : SplashSequence
     {
         [Header("Elementlar")]
-        [SerializeField] RectTransform logoRoot;
-        [SerializeField] Image glow;
-        [SerializeField] Image emblem;
-        [SerializeField] RectTransform wordmarkReveal;
-        [SerializeField] Image wordmarkGlow;
-        [SerializeField] Image shine;
-        [SerializeField] Image divider;
+        [Tooltip("Belgi (fon kvadrati + ichidagi oq shakl) konteyneri.")]
+        [SerializeField] RectTransform mark;
+        [SerializeField] Image tile;
+        [SerializeField] Image glyph;
+        [Tooltip("Niqob (RectMask2D) ichidagi \"CraDev\" yozuvi.")]
+        [SerializeField] RectTransform wordmark;
         [SerializeField] Image tagline;
-        [SerializeField] UiParticles particles;
 
         [Header("Vaqtlar (soniya)")]
-        [SerializeField] float emblemStart = 0.55f;
-        [SerializeField] float emblemDuration = 0.5f;
-        [Tooltip("Ovoz faylidagi zarba ovoz boshidan qancha keyin keladi. Nur chaqnashi shunga moslanadi.")]
-        [SerializeField] float soundImpactOffset = 0.45f;
-        [SerializeField] float wordmarkStart = 1.45f;
-        [SerializeField] float wordmarkDuration = 1.0f;
-        [SerializeField] float shineStart = 2.45f;
-        [SerializeField] float shineDuration = 0.8f;
-        [SerializeField] float dividerStart = 2.75f;
-        [SerializeField] float dividerDuration = 0.6f;
-        [SerializeField] float taglineStart = 2.95f;
-        [SerializeField] float taglineDuration = 0.9f;
+        [SerializeField] float markStart = 0.25f;
+        [SerializeField] float markDuration = 0.6f;
+        [SerializeField] float glyphStart = 0.35f;
+        [SerializeField] float glyphDuration = 0.55f;
+        [Tooltip("Belgi chapga surilib, yozuv chiqib keladigan payt.")]
+        [SerializeField] float slideStart = 0.95f;
+        [SerializeField] float slideDuration = 0.85f;
+        [SerializeField] float taglineStart = 1.75f;
+        [SerializeField] float taglineDuration = 0.7f;
 
         [Header("Ko'rinish")]
-        [SerializeField, Range(0f, 1f)] float glowAlpha = 0.35f;
-        [Tooltip("Zarba paytidagi qo'shimcha nur chaqnashi.")]
-        [SerializeField, Range(0f, 1f)] float glowFlash = 0.45f;
-        [SerializeField, Range(0f, 1f)] float wordmarkGlowAlpha = 0.8f;
-        [Tooltip("Yozuv to'liq ochilgandagi niqob kengligi. Yumshoq chetlar harflarni to'smasligi uchun yozuvdan ancha keng.")]
-        [SerializeField] float wordmarkRevealWidth = 820f;
-        [SerializeField] float shineTravel = 330f;
-        [SerializeField] float taglineRise = 14f;
-        [Tooltip("Butun intro davomida logo sekin yaqinlashadi (0.04 = 4%).")]
-        [SerializeField] float logoZoom = 0.04f;
+        [Tooltip("Belgi boshida qanchalik kichik bo'ladi.")]
+        [SerializeField, Range(0f, 1f)] float markStartScale = 0.6f;
+        [Tooltip("Yozuv niqob ortidan qancha masofadan chiqib keladi.")]
+        [SerializeField] float wordmarkTravel = 580f;
+        [SerializeField] float taglineRise = 12f;
 
-        Vector2 taglineBasePosition;
+        Vector2 markFinal;
+        Vector2 wordmarkFinal;
+        Vector2 taglineFinal;
 
         protected override void Awake()
         {
-            if (tagline != null)
-                taglineBasePosition = tagline.rectTransform.anchoredPosition;
+            if (mark != null) markFinal = mark.anchoredPosition;
+            if (wordmark != null) wordmarkFinal = wordmark.anchoredPosition;
+            if (tagline != null) taglineFinal = tagline.rectTransform.anchoredPosition;
             base.Awake();
         }
 
         protected override void Apply(float t, float visible)
         {
-            float impact = soundStart + soundImpactOffset;
-
-            if (logoRoot != null)
+            // Belgi: markazda kichikdan kattalashadi, keyin chapdagi joyiga suriladi
+            float m = Anim.Progress(t, markStart, markDuration);
+            float slide = Ease.InOutCubic(Anim.Progress(t, slideStart, slideDuration));
+            if (mark != null)
             {
-                float zoom = 1f + logoZoom * Ease.InOutSine(Anim.Progress(t, 0f, TotalDuration));
-                logoRoot.localScale = new Vector3(zoom, zoom, 1f);
+                float s = Mathf.Lerp(markStartScale, 1f, Ease.OutQuint(m));
+                mark.localScale = new Vector3(s, s, 1f);
+                mark.anchoredPosition = new Vector2(Mathf.Lerp(0f, markFinal.x, slide), markFinal.y);
+            }
+            if (tile != null)
+                Anim.SetAlpha(tile, Ease.OutCubic(Anim.Progress(t, markStart, markDuration * 0.4f)));
+
+            // Ichidagi oq shakl biroz kechroq "sakrab" chiqadi
+            float g = Anim.Progress(t, glyphStart, glyphDuration);
+            if (glyph != null)
+            {
+                float s = Mathf.LerpUnclamped(0.4f, 1f, Ease.OutBack(g));
+                glyph.rectTransform.localScale = new Vector3(s, s, 1f);
+                Anim.SetAlpha(glyph, Ease.OutCubic(Anim.Progress(t, glyphStart, glyphDuration * 0.4f)));
             }
 
-            // Emblema: kichikdan kattalashib, biroz "sakrab" joyiga tushadi
-            float e = Anim.Progress(t, emblemStart, emblemDuration);
-            if (emblem != null)
+            // Yozuv niqobning chap chetidan o'ngga chiqib keladi
+            if (wordmark != null)
             {
-                float s = Mathf.LerpUnclamped(0.6f, 1f, Ease.OutBack(e));
-                emblem.rectTransform.localScale = new Vector3(s, s, 1f);
-                Anim.SetAlpha(emblem, Ease.OutCubic(Anim.Progress(t, emblemStart, emblemDuration * 0.5f)));
+                float w = Ease.OutQuint(Anim.Progress(t, slideStart + 0.05f, slideDuration));
+                wordmark.anchoredPosition = wordmarkFinal + new Vector2(-wordmarkTravel * (1f - w), 0f);
             }
 
-            // Emblema ortidagi nur: zarba paytida chaqnaydi, so'ng bir tekis yonib turadi
-            if (glow != null)
-            {
-                float flash = t >= impact ? glowFlash * Mathf.Exp(-(t - impact) / 0.35f) : 0f;
-                float breathe = 1f + 0.08f * Mathf.Sin((t - impact) * 1.6f);
-                Anim.SetAlpha(glow, (glowAlpha * breathe + flash) * Ease.OutCubic(e));
-                float gs = Mathf.Lerp(0.75f, 1f, Ease.OutCubic(Anim.Progress(t, emblemStart, 1.2f))) + flash * 0.15f;
-                glow.rectTransform.localScale = new Vector3(gs, gs, 1f);
-            }
-
-            // "CraDev" yozuvi markazdan ikki tomonga ochiladi
-            float w = Ease.InOutCubic(Anim.Progress(t, wordmarkStart, wordmarkDuration));
-            if (wordmarkReveal != null)
-            {
-                Vector2 size = wordmarkReveal.sizeDelta;
-                size.x = wordmarkRevealWidth * w;
-                wordmarkReveal.sizeDelta = size;
-            }
-            if (wordmarkGlow != null)
-            {
-                float pulse = 0.9f + 0.1f * Mathf.Sin(t * 2.2f);
-                Anim.SetAlpha(wordmarkGlow, wordmarkGlowAlpha * pulse * w);
-            }
-
-            // Yozuv ustidan o'tadigan nur
-            float sh = Anim.Progress(t, shineStart, shineDuration);
-            if (shine != null)
-            {
-                Vector2 p = shine.rectTransform.anchoredPosition;
-                p.x = Mathf.Lerp(-shineTravel, shineTravel, Ease.InOutSine(sh));
-                shine.rectTransform.anchoredPosition = p;
-                Anim.SetAlpha(shine, Mathf.Sin(sh * Mathf.PI));
-            }
-
-            // Ajratuvchi chiziq markazdan cho'ziladi
-            float d = Anim.Progress(t, dividerStart, dividerDuration);
-            if (divider != null)
-            {
-                divider.rectTransform.localScale = new Vector3(Ease.OutCubic(d), 1f, 1f);
-                Anim.SetAlpha(divider, Ease.OutCubic(Anim.Progress(t, dividerStart, dividerDuration * 0.5f)));
-            }
-
-            // "A NEW ERA OF GAMING" pastdan ko'tarilib paydo bo'ladi
-            float g = Ease.OutCubic(Anim.Progress(t, taglineStart, taglineDuration));
+            float tg = Ease.OutCubic(Anim.Progress(t, taglineStart, taglineDuration));
             if (tagline != null)
             {
-                Anim.SetAlpha(tagline, g);
-                tagline.rectTransform.anchoredPosition = taglineBasePosition + new Vector2(0f, -taglineRise * (1f - g));
+                Anim.SetAlpha(tagline, tg);
+                tagline.rectTransform.anchoredPosition = taglineFinal + new Vector2(0f, -taglineRise * (1f - tg));
             }
-
-            if (particles != null)
-                particles.Intensity = Ease.InOutSine(Anim.Progress(t, fadeInDuration, 1.2f)) * visible;
         }
     }
 }

@@ -113,19 +113,6 @@ namespace CraDev.EditorTools
             rect.offsetMax = Vector2.zero;
         }
 
-        public static UiParticles CreateParticles(Transform parent, Sprite sprite, int count, Color colorA, Color colorB, Vector2 sizeRange)
-        {
-            var rect = CreateRect("Particles", parent);
-            Stretch(rect);
-            var particles = rect.gameObject.AddComponent<UiParticles>();
-            Set(particles, "sprite", sprite);
-            Set(particles, "count", count);
-            Set(particles, "colorA", colorA);
-            Set(particles, "colorB", colorB);
-            Set(particles, "sizeRange", sizeRange);
-            return particles;
-        }
-
         // --- Komponentlarning private [SerializeField] maydonlariga qiymat yozish ---
 
         public static void Set(Object target, string field, Object value) => Edit(target, field, p => p.objectReferenceValue = value);
