@@ -49,7 +49,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools/unity.ps1 <buyruq>
 
 ## GitHub CI
 
-`.github/workflows/ci.yml` har push'da: server testlari va `CraDevServer.exe` (`tools/ci/server-exe.sh`, Node SEA) → GameCI (`game-ci/unity-builder`) bilan Unity'da
+`.github/workflows/ci.yml` har push'da: server testlari va `CraDevServer.exe` (`tools/ci/server-exe.sh`, Node SEA) → GameCI (`game-ci/unity-builder@v5`) bilan Unity'da
 Windows va Linux build (`CraDevBatch.BuildGame`, sahnalar ham shu yerda yaratiladi) → Linux build'ni Xvfb'da
 server bilan ishga tushirib, o'yinchi kabi o'tish va OCR bilan tekshirish (`tools/ci/smoke.sh`).
 

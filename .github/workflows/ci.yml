@@ -28,8 +28,8 @@ jobs:
     name: Server (testlar va .exe)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - run: npm test
@@ -45,7 +45,7 @@ jobs:
           kill "$pid"
           cat "$RUNNER_TEMP/server.log"
           exit "$ok"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: CraDevServer-Windows
           path: dist/CraDevServer.exe
@@ -57,7 +57,8 @@ jobs:
     outputs:
       available: ${{ steps.check.outputs.available }}
     steps:
-      - id: check
+      - name: Secret'lar bormi
+        id: check
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -85,15 +86,15 @@ jobs:
         run: |
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
           df -h /
-      - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+      - uses: actions/checkout@v5
+      - uses: actions/cache@v5
         with:
           path: Library
           key: Library-${{ matrix.target }}-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
           restore-keys: |
             Library-${{ matrix.target }}-
       - name: Unity build
-        uses: game-ci/unity-builder@v4
+        uses: game-ci/unity-builder@v5
         env:
           UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
@@ -105,7 +106,7 @@ jobs:
           buildMethod: CraDev.EditorTools.CraDevBatch.BuildGame
           versioning: None
       # Windows o'yini yonida server va ikkalasini birga ochadigan Play.cmd
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         if: matrix.target == 'StandaloneWindows64'
         with:
           name: CraDevServer-Windows
@@ -115,7 +116,7 @@ jobs:
         run: |
           sudo chown -R "$(id -u):$(id -g)" build
           cp server-exe/CraDevServer.exe tools/ci/Play.cmd build/StandaloneWindows64/
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: CraDev-${{ matrix.target == 'StandaloneWindows64' && 'Windows' || 'Linux' }}
           path: |
@@ -129,11 +130,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: CraDev-Linux
           path: game
@@ -143,7 +144,7 @@ jobs:
           sudo apt-get install -y -q xvfb xdotool ffmpeg imagemagick tesseract-ocr libgl1-mesa-dri libglu1-mesa
       - name: Smoke test
         run: tools/ci/smoke.sh game smoke
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         if: always()
         with:
           name: CraDev-smoke
