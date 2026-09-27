@@ -114,8 +114,9 @@ Menyudagi buyruqlar Player sozlamalarini avtomatik o'rnatadi:
 - **Chap tomon:** pasportdan olingan jins (faqat ko'rsatiladi), nickname maydoni va uning holati (tekshirilmoqda, bo'sh,
   band, noto'g'ri), shu jinsdagi 5 ta avatar kartasi va **Create character** tugmasi. Tugma nickname server'da bo'sh
   bo'lgandagina yonadi. Enter ham ishlaydi.
-- **O'ng tomon:** tanlangan avatar katta ko'rinishda. **Front / Side / Back** tugmalari yoki sichqoncha bilan tortish
-  orqali aylantiriladi. Tepasida yozilayotgan nickname ko'rinadi (o'yindagi nom yorlig'i kabi).
+- **O'ng tomon:** tanlangan qahramon katta ko'rinishda. Sichqoncha bilan chapga-o'ngga tortilsa 360° aylanadi,
+  qo'yib yuborilgach eng yaqin tomonga silliq to'xtaydi. **Front / Side / Back** tugmalari ham bor. Tepasida
+  yozilayotgan nickname ko'rinadi (o'yindagi nom yorlig'i kabi).
 - Hozircha avatarlar realistik rasmlar. 3D modellar tayyor bo'lgach, o'ng tomondagi rasm 3D ko'rinishga almashtiriladi.
 - Pasport bosqichi hali qurilmagan. Sinov uchun jins **CharacterCreationDirector → Test Gender** maydonidan olinadi.
 
@@ -139,7 +140,9 @@ Reference rasmlar tayyor: `Design/Characters/references/` (3 tomondan ko'rinish,
 (`prompts.md`), 3D model talablari (`avatars.html`).
 
 O'yin uchun rasmlar `process_references.py` bilan tayyorlanadi: fon olib tashlanadi va har bir ko'rinish
-(old, yon, orqa) `Assets/CraDev/Avatars/Photos/` ga alohida saqlanadi. Yangi rasm qo'shish:
+(old, yon, orqa) `Assets/CraDev/Avatars/Photos/` ga alohida saqlanadi. Aylanishni silliqroq qilish uchun har bir
+avatarga 45° burchakli rasmlar ham qo'shish mumkin (`prompts_quarter.md`, fayl nomi `references/<ID>_quarter.png`).
+Yangi rasm qo'shish:
 `references/M4.png` ni qo'ying, `python3 process_references.py M4` ni ishga tushiring va Unity'da
 **CraDev → Sahnalarni yaratish** ni bosing.
 

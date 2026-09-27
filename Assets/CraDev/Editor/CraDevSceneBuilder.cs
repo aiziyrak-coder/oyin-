@@ -439,10 +439,11 @@ namespace CraDev.EditorTools
 
             var shadow = CreateSliced("FloorShadow", stageT, pillFill, 15f, 32f, new Color(0f, 0f, 0f, 0.45f));
             Place(shadow.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 180f), new Vector2(320f, 30f));
-            var previous = CreateImage("AvatarPrevious", stageT, null, new Vector2(390f, 780f), Vector2.zero, Color.white);
-            Place(previous.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 172f), new Vector2(390f, 780f));
-            var current = CreateImage("Avatar", stageT, null, new Vector2(390f, 780f), Vector2.zero, Color.white);
-            Place(current.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 172f), new Vector2(390f, 780f));
+            // Ikki qatlam: aylanish paytida qo'shni ko'rinishlar orasida o'tish uchun
+            var layerA = CreateImage("AvatarLayerA", stageT, null, new Vector2(390f, 780f), Vector2.zero, Color.white);
+            Place(layerA.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 172f), new Vector2(390f, 780f));
+            var layerB = CreateImage("AvatarLayerB", stageT, null, new Vector2(390f, 780f), Vector2.zero, Color.white);
+            Place(layerB.rectTransform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 172f), new Vector2(390f, 780f));
 
             var plate = CreateSliced("Nameplate", stageT, pillFill, 22f, 32f, new Color(1f, 1f, 1f, 0.06f));
             Place(plate.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 0.5f), new Vector2(0f, -80f), new Vector2(200f, 44f));
@@ -474,8 +475,8 @@ namespace CraDev.EditorTools
             }
 
             var viewer = stage.gameObject.AddComponent<AvatarViewer>();
-            Set(viewer, "current", current);
-            Set(viewer, "previous", previous);
+            Set(viewer, "layerA", layerA);
+            Set(viewer, "layerB", layerB);
             SetArray(viewer, "viewButtons", viewButtons);
             SetArray(viewer, "viewFills", viewFills);
             SetArray(viewer, "viewLabels", viewLabels);
@@ -546,6 +547,8 @@ namespace CraDev.EditorTools
                 item.FindPropertyRelative("front").objectReferenceValue = front;
                 item.FindPropertyRelative("side").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_Side.png");
                 item.FindPropertyRelative("back").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_Back.png");
+                item.FindPropertyRelative("frontQuarter").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_FrontQuarter.png");
+                item.FindPropertyRelative("backQuarter").objectReferenceValue = LoadPhoto(AvatarPhotos + info.Id + "_BackQuarter.png");
             }
             so.ApplyModifiedPropertiesWithoutUndo();
         }

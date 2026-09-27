@@ -15,5 +15,9 @@ namespace CraDev.CharacterCreation
         public Sprite front;
         public Sprite side;
         public Sprite back;
+        [Tooltip("Ixtiyoriy: 45° burchakdan old ko'rinish. Bo'lsa, aylanish silliqroq bo'ladi.")]
+        public Sprite frontQuarter;
+        [Tooltip("Ixtiyoriy: 135° burchakdan orqa ko'rinish.")]
+        public Sprite backQuarter;
     }
 }
