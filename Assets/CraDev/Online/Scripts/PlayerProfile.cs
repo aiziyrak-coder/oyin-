@@ -33,6 +33,12 @@ namespace CraDev.Online
             PlayerPrefs.Save();
         }
 
+        public static void SetAvatar(string avatarId)
+        {
+            PlayerPrefs.SetString(AvatarKey, avatarId);
+            PlayerPrefs.Save();
+        }
+
         public static void Clear()
         {
             PlayerPrefs.DeleteKey(IdKey);

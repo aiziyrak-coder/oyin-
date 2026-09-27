@@ -424,15 +424,21 @@ namespace CraDev.EditorTools
             var border = CreateSliced("Border", fill.transform, roundStroke, 12f, 24f, line);
             Stretch(border.rectTransform);
             var label = CreateLabel("Label", fill.transform, font, text, 15, Color.white, TextAnchor.MiddleLeft);
-            float textWidth = label.preferredWidth;
-            float total = icon != null ? 18f + 8f + textWidth : textWidth;
-            if (icon != null)
+            if (icon == null)
             {
+                // Faqat matn: markazda (skript matnni o'zgartirsa ham markazda qoladi)
+                label.alignment = TextAnchor.MiddleCenter;
+                Stretch(label.rectTransform);
+            }
+            else
+            {
+                float textWidth = label.preferredWidth;
+                float total = 18f + 8f + textWidth;
                 var image = CreateImage("Icon", fill.transform, icon, new Vector2(18f, 18f), new Vector2(-total / 2f + 9f, 0f), Color.white);
                 image.raycastTarget = false;
+                Place(label.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 0.5f), new Vector2(-total / 2f + 26f, 0f),
+                    new Vector2(textWidth + 4f, 24f));
             }
-            Place(label.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0f, 0.5f), new Vector2(-total / 2f + (icon != null ? 26f : 0f), 0f),
-                new Vector2(textWidth + 4f, 24f));
 
             var button = fill.gameObject.AddComponent<Button>();
             button.targetGraphic = fill;

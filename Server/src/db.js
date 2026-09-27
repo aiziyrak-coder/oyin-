@@ -26,8 +26,19 @@ export function openDatabase(path = 'data/cradev.db') {
   const findByKey = db.prepare('SELECT id FROM players WHERE nickname_key = ?');
   const insert = db.prepare(
     'INSERT INTO players (id, nickname, nickname_key, gender, avatar_id, token_hash, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)');
+  const findByToken = db.prepare(
+    'SELECT id, nickname, gender, avatar_id AS avatarId, created_at AS createdAt FROM players WHERE token_hash = ?');
+  const setAvatar = db.prepare('UPDATE players SET avatar_id = ? WHERE token_hash = ?');
 
   return {
+    /** Token xeshi bo'yicha o'yinchi (topilmasa undefined). */
+    findPlayerByTokenHash(tokenHash) {
+      return findByToken.get(tokenHash);
+    },
+    /** @returns {boolean} false: bunday o'yinchi yo'q */
+    updateAvatar(tokenHash, avatarId) {
+      return setAvatar.run(avatarId, tokenHash).changes > 0;
+    },
     isNicknameTaken(key) {
       return findByKey.get(key) !== undefined;
     },

@@ -58,6 +58,19 @@ namespace CraDev
 #endif
         }
 
+        /// <summary>Shu kadrda Esc (yoki geympadda B / Start) bosildimi: orqaga, oynani yopish, menyu.</summary>
+        public static bool BackPressed()
+        {
+#if ENABLE_INPUT_SYSTEM
+            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame) return true;
+            return Gamepad.current != null && (Gamepad.current.buttonEast.wasPressedThisFrame || Gamepad.current.startButton.wasPressedThisFrame);
+#elif ENABLE_LEGACY_INPUT_MANAGER
+            return Input.GetKeyDown(KeyCode.Escape);
+#else
+            return false;
+#endif
+        }
+
         /// <summary>Shu kadrda Enter bosildimi (forma yuborish uchun).</summary>
         public static bool SubmitPressed()
         {

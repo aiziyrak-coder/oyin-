@@ -95,6 +95,8 @@ namespace CraDev.CharacterCreation
 
         public bool HasFace => face != null;
 
+        public bool CameraOpen => modal != null && modal.activeSelf;
+
         // ------------------------------------------------------------------ Kamera
 
         void OpenCamera()
@@ -133,7 +135,7 @@ namespace CraDev.CharacterCreation
             StartCoroutine(Process(photo));
         }
 
-        void CloseCamera()
+        public void CloseCamera()
         {
             StopCamera();
             modal.SetActive(false);

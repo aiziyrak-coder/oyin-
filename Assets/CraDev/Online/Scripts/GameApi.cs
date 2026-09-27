@@ -12,6 +12,9 @@ namespace CraDev.Online
     /// </summary>
     public class GameApi
     {
+        /// <summary>O'yin serveri (Server/ papkasi). Haqiqiy serverga o'tganda shu yerda o'zgartiriladi.</summary>
+        public const string DefaultServerUrl = "http://localhost:8080";
+
         const int TimeoutSeconds = 8;
         readonly string baseUrl;
 
@@ -38,6 +41,34 @@ namespace CraDev.Online
                 request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
                 request.downloadHandler = new DownloadHandlerBuffer();
                 request.SetRequestHeader("Content-Type", "application/json");
+                request.timeout = TimeoutSeconds;
+                yield return request.SendWebRequest();
+                done(ApiResult<PlayerResponse>.From(request));
+            }
+        }
+
+        /// <summary>Saqlangan token bo'yicha o'yinchi profili. 401 = serverda bunday o'yinchi yo'q.</summary>
+        public IEnumerator GetMe(string token, Action<ApiResult<PlayerResponse>> done)
+        {
+            using (var request = UnityWebRequest.Get($"{baseUrl}/api/players/me"))
+            {
+                request.SetRequestHeader("Authorization", "Bearer " + token);
+                request.timeout = TimeoutSeconds;
+                yield return request.SendWebRequest();
+                done(ApiResult<PlayerResponse>.From(request));
+            }
+        }
+
+        /// <summary>O'yinchi avatarini o'zgartiradi (jins o'zgarmaydi).</summary>
+        public IEnumerator UpdateAvatar(string token, string avatarId, Action<ApiResult<PlayerResponse>> done)
+        {
+            string json = JsonUtility.ToJson(new UpdateAvatarRequest { avatarId = avatarId });
+            using (var request = new UnityWebRequest($"{baseUrl}/api/players/me", "PATCH"))
+            {
+                request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(json));
+                request.downloadHandler = new DownloadHandlerBuffer();
+                request.SetRequestHeader("Content-Type", "application/json");
+                request.SetRequestHeader("Authorization", "Bearer " + token);
                 request.timeout = TimeoutSeconds;
                 yield return request.SendWebRequest();
                 done(ApiResult<PlayerResponse>.From(request));
@@ -90,6 +121,12 @@ namespace CraDev.Online
         public string createdAt;
         public string error;
         public string message;
+    }
+
+    [Serializable]
+    class UpdateAvatarRequest
+    {
+        public string avatarId;
     }
 
     [Serializable]

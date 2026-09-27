@@ -151,8 +151,14 @@ click 360 897                       # "Create character"
 wait_for 11-created 'welcome' 10
 check "profil yaratildi (Welcome, ...)" $?
 
-wait_for 12-next-loading 'ready|loading' 20
-check "keyingi Loading ochildi" $?
+wait_for 12-main-menu 'welcomeback|customize' 40
+check "bosh menyu ochildi (Welcome back, Play, Customize)" $?
+
+# Esc: chiqishni tasdiqlash oynasi chiqadi, "Cancel" bilan yopiladi
+xdotool key Escape
+wait_for 13-quit-dialog 'quitgame' 10
+check "Esc bosilganda 'Quit game?' so'raladi" $?
+xdotool key Escape
 
 # Server nickname'ni band qilgan bo'lishi kerak
 AVAIL=$(curl -sf "http://localhost:$PORT/api/nicknames/availability?name=$NICK")

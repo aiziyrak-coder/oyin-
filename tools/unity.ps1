@@ -197,6 +197,24 @@ function Invoke-UnityBatch([string]$Name, [string[]]$Extra) {
     exit 1
 }
 
+# O'yin serveri (nickname, profil) ishlamayotgan bo'lsa, alohida kichik oynada yoqadi
+function Start-GameServer {
+    try {
+        Invoke-WebRequest 'http://localhost:8080/health' -UseBasicParsing -TimeoutSec 2 | Out-Null
+        Write-Step "Server ishlayapti: http://localhost:8080"
+        return
+    }
+    catch { }
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        Write-Host "[CraDev] Node.js topilmadi: server yoqilmadi, o'yin 'offline' rejimda bo'ladi." -ForegroundColor Yellow
+        return
+    }
+    $serverDir = Join-Path $ProjectRoot 'Server'
+    Start-Process -FilePath 'node' -ArgumentList @('--disable-warning=ExperimentalWarning', 'src/server.js') `
+        -WorkingDirectory $serverDir -WindowStyle Minimized
+    Write-Step "Server yoqildi: http://localhost:8080 (oynasi vazifalar panelida)"
+}
+
 function Get-PlayerLogPath {
     # O'yin logi: %USERPROFILE%\AppData\LocalLow\<Company>\<Product>\Player.log
     $settings = Join-Path $ProjectRoot 'ProjectSettings\ProjectSettings.asset'
@@ -230,6 +248,7 @@ switch ($Command) {
     }
     'run' {
         Invoke-UnityBatch 'build' @('-executeMethod', "$BatchClass.BuildGame")
+        Start-GameServer
         Write-Step "O'yin ishga tushirilmoqda. Yopish: Alt+F4. Log: $(Get-PlayerLogPath)"
         Start-Process -FilePath $GameExe -WorkingDirectory (Split-Path -Parent $GameExe)
     }

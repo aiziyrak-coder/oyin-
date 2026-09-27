@@ -20,11 +20,16 @@ namespace CraDev.CharacterCreation
 
         [Header("Server")]
         [Tooltip("O'yin serveri manzili (Server/ papkasi). Keyinchalik haqiqiy server manziliga almashtiriladi.")]
-        [SerializeField] string serverUrl = "http://localhost:8080";
+        [SerializeField] string serverUrl = GameApi.DefaultServerUrl;
         [Tooltip("Profil yaratilgach ochiladigan sahna.")]
         [SerializeField] string nextScene = "MainMenu";
         [Tooltip("Yozish to'xtagach, server'dan so'rashdan oldin kutish (soniya).")]
         [SerializeField] float checkDelay = 0.35f;
+
+        [Header("Sarlavha (tahrirlash rejimida o'zgaradi)")]
+        [SerializeField] Text eyebrowText;
+        [SerializeField] Text titleText;
+        [SerializeField] Text subtitleText;
 
         [Header("Nickname")]
         [SerializeField] InputField nicknameInput;
@@ -55,6 +60,9 @@ namespace CraDev.CharacterCreation
         [SerializeField] Image createIcon;
         [SerializeField] Image errorIcon;
         [SerializeField] Text errorText;
+        [Tooltip("Tahrirlash rejimida: o'zgarishlarsiz bosh menyuga qaytish.")]
+        [SerializeField] Button cancelButton;
+        [SerializeField] ConfirmDialog dialog;
 
         [Header("Nom yorlig'i")]
         [SerializeField] RectTransform nameplate;
@@ -70,6 +78,9 @@ namespace CraDev.CharacterCreation
         [SerializeField] Sprite arrowSprite;
         [SerializeField] Sprite maleSprite;
         [SerializeField] Sprite femaleSprite;
+
+        /// <summary>Bosh menyudagi Customize: ekran mavjud profilni tahrirlash uchun ochiladi.</summary>
+        public static bool EditRequested;
 
         const string HelpDefault = "3–16 characters: letters, numbers and _. Starts with a letter.";
 
@@ -90,6 +101,7 @@ namespace CraDev.CharacterCreation
         AvatarOption selected;
         bool submitting;
         bool done;
+        bool editing;
         int checkSeq;
         Coroutine checkRoutine;
         float time;
@@ -98,18 +110,58 @@ namespace CraDev.CharacterCreation
         {
             Cursor.visible = true;
             api = new GameApi(serverUrl);
+            editing = EditRequested && PlayerProfile.Exists;
+            EditRequested = false;
 
             nicknameInput.characterLimit = NicknameRules.MaxLength;
             nicknameInput.onValidateInput += (text, index, c) => NicknameRules.IsAllowedChar(c) ? c : '\0';
+            if (editing)
+            {
+                // Nickname o'zgarmaydi: faqat avatar va yuz tahrirlanadi
+                eyebrowText.text = "CUSTOMIZE";
+                titleText.text = "Edit your\ncharacter";
+                subtitleText.text = "Choose another avatar or update your face.";
+                nicknameInput.text = PlayerProfile.Nickname;
+                nicknameInput.interactable = false;
+            }
             nicknameInput.onValueChanged.AddListener(OnNicknameChanged);
             createButton.onClick.AddListener(Submit);
+            cancelButton.onClick.AddListener(BackToMenu);
+            cancelButton.gameObject.SetActive(editing);
 
             SetupGenderAndAvatars();
-            SetNickState(NickState.Empty);
             SetError(null);
-            SetButton("Create character", arrowSprite, Accent);
+            if (editing)
+            {
+                checkedNickname = PlayerProfile.Nickname;
+                SetNickState(NickState.Available);
+                SetHelp("Your nickname can't be changed.", Muted, null);
+                // Saqlash tugmasi yonida "Cancel" uchun joy
+                var rect = createButton.GetComponent<RectTransform>();
+                rect.sizeDelta = new Vector2(300f, rect.sizeDelta.y);
+                SetButton("Save changes", checkSprite, Accent);
+            }
+            else
+            {
+                SetNickState(NickState.Empty);
+                SetButton("Create character", arrowSprite, Accent);
+                nicknameInput.ActivateInputField();
+            }
             UpdateNameplate();
-            nicknameInput.ActivateInputField();
+            UpdateCreateButton();
+        }
+
+        void BackToMenu()
+        {
+            if (submitting || done)
+                return;
+            done = true;
+            StartCoroutine(GoNext(0f));
+        }
+
+        void AskQuit()
+        {
+            dialog.Show("Quit game?", "Your character is not created yet. Are you sure you want to quit?", "Quit", ConfirmDialog.QuitGame);
         }
 
         void Update()
@@ -135,8 +187,19 @@ namespace CraDev.CharacterCreation
             if (submitting)
                 createIcon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -time * 450f);
 
-            if (Anim.SubmitPressed())
+            if (Anim.SubmitPressed() && !ModalWindow.AnyOpen)
                 Submit();
+
+            // Esc: ochiq oyna o'zi yopiladi; aks holda tahrirlashda menyuga qaytish, yangi o'yinchida chiqish so'rovi
+            if (Anim.BackPressed() && !ModalWindow.AnyOpen && !done && !submitting)
+            {
+                if (faceCapture != null && faceCapture.CameraOpen)
+                    faceCapture.CloseCamera();
+                else if (editing)
+                    BackToMenu();
+                else
+                    AskQuit();
+            }
         }
 
         // ------------------------------------------------------------ Nickname
@@ -245,8 +308,8 @@ namespace CraDev.CharacterCreation
         void SetupGenderAndAvatars()
         {
             // Jins pasportdan keladi; o'yinchi uni tanlamaydi
-            gender = RegistrationSession.HasGender ? RegistrationSession.Gender : testGender;
-            if (!RegistrationSession.HasGender)
+            gender = editing ? PlayerProfile.Gender : RegistrationSession.HasGender ? RegistrationSession.Gender : testGender;
+            if (!editing && !RegistrationSession.HasGender)
                 Debug.Log($"[CraDev] Pasport bosqichi hali yo'q: sinov uchun jins \"{gender}\" olindi (CharacterCreationDirector → Test Gender).");
             bool isFemale = gender == "female";
 
@@ -277,7 +340,11 @@ namespace CraDev.CharacterCreation
                 card.Button.onClick.AddListener(() => SelectAvatar(option));
             }
             if (choices.Length > 0)
-                SelectAvatar(choices[0]);
+            {
+                // Tahrirlashda o'yinchining hozirgi avatari tanlangan bo'ladi
+                var current = System.Array.Find(choices, a => editing && a.id == PlayerProfile.AvatarId);
+                SelectAvatar(current ?? choices[0]);
+            }
             else
                 Debug.LogWarning("[CraDev] Bu jins uchun 3D avatarlar topilmadi: Assets/CraDev/Avatars/Models");
         }
@@ -324,6 +391,11 @@ namespace CraDev.CharacterCreation
         {
             if (!CanSubmit)
                 return;
+            if (editing)
+            {
+                SaveChanges();
+                return;
+            }
             submitting = true;
             SetError(null);
             createButton.interactable = false;
@@ -367,9 +439,48 @@ namespace CraDev.CharacterCreation
             UpdateCreateButton();
         }
 
-        IEnumerator GoNext()
+        // ------------------------------------------------------------ Tahrirlash
+
+        void SaveChanges()
         {
-            yield return new WaitForSecondsRealtime(1.1f);
+            // Yuz shu kompyuterda saqlanadi (FaceCapture); serverga faqat avatar yuboriladi
+            if (selected.id == PlayerProfile.AvatarId)
+            {
+                BackToMenu();
+                return;
+            }
+            submitting = true;
+            SetError(null);
+            createButton.interactable = false;
+            SetButton("Saving…", spinnerSprite, Accent);
+            StartCoroutine(api.UpdateAvatar(PlayerProfile.Token, selected.id, OnSaved));
+        }
+
+        void OnSaved(ApiResult<PlayerResponse> result)
+        {
+            submitting = false;
+            createIcon.rectTransform.localRotation = Quaternion.identity;
+            if (!result.NetworkError && result.Status == 200)
+            {
+                done = true;
+                PlayerProfile.SetAvatar(selected.id);
+                SetButton("Saved", checkSprite, Ok);
+                StartCoroutine(GoNext(0.6f));
+                return;
+            }
+            SetButton("Save changes", checkSprite, Accent);
+            if (result.NetworkError)
+                SetError("Can't reach the server. Check your connection and try again.");
+            else if (result.Status == 401)
+                SetError("Your profile was not found on the server.");
+            else
+                SetError("Something went wrong on the server. Try again.");
+            UpdateCreateButton();
+        }
+
+        IEnumerator GoNext(float wait = 1.1f)
+        {
+            yield return new WaitForSecondsRealtime(wait);
             float t = 0f;
             while (t < 0.5f)
             {

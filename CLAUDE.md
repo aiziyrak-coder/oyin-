@@ -64,12 +64,14 @@ server bilan ishga tushirib, o'yinchi kabi o'tish va OCR bilan tekshirish (`tool
 ## O'yin oqimi
 
 `Intro` (CraDev, 4.2 s) → `CDCGroup` (3.5 s) → `Loading` → yangi o'yinchi uchun `CharacterCreation`,
-qaytgan o'yinchi uchun `MainMenu` (hali yo'q, Loading "READY" da to'xtaydi). Profil PlayerPrefs'da
+qaytgan o'yinchi uchun `MainMenu` (Play - hali "Coming soon", Customize - `CharacterCreation` tahrirlash rejimida,
+Settings, Quit). Bosh menyu profilni serverda tekshiradi (`GET /api/players/me`). Profil PlayerPrefs'da
 (`PlayerProfile.cs`); uni o'chirish: menyu **CraDev > Test: saqlangan profilni o'chirish**.
 
 | Papka | Mazmuni |
 |---|---|
-| `Assets/CraDev/Common/` | `SplashSequence` (splash asosi: vaqt o'qi, fade, ovoz, o'tkazib yuborish), `SceneLoader`, `Anim` (easing, input) |
+| `Assets/CraDev/Common/` | `SplashSequence` (splash asosi), `SceneLoader`, `Anim` (easing, input, Esc), `GameSettings` (ekran, grafika, V-Sync, ovoz; o'yin ochilishi bilan qo'llanadi), `ModalWindow`/`ConfirmDialog`/`SettingsPanel` (oynalar), `UiSounds` (tugma ovozlari) |
+| `Assets/CraDev/MainMenu/` | `MainMenuScreen`: bosh menyu, 3D qahramon o'z yuzi bilan |
 | `Assets/CraDev/Intro/`, `CDCGroup/`, `Loading/` | splash va yuklash ekranlari |
 | `Assets/CraDev/CharacterCreation/` | nickname + avatar tanlash ekrani: 3D studiyada qahramon turadi; `AvatarViewer` uni sichqoncha bilan aylantiradi, g'ildirakcha bilan yuziga yaqinlashtiradi |
 | `Assets/CraDev/Face/` | o'yinchi yuzi: `FaceTracker` (MediaPipe BlazeFace + Face Mesh, 478 nuqta, `com.unity.ai.inference`), `FacePainter` (yuzni bosh teksturasiga chizadi), `FacePhoto` (fayl oynasi, EXIF, kamera kadri), `FaceStore` (yuz faqat shu kompyuterda saqlanadi) |
@@ -132,6 +134,8 @@ Hamma tayyor PNG/WAV'lar `Assets/` ga commit qilingan; qayta yaratish faqat manb
    Keyingi: yuzni serverga yuklash (multiplayer'da boshqalar ko'rishi), 3D yuz shakli.
 5. O'yin janri hali tanlanmagan (foydalanuvchi keyin hal qiladi). O'yin qismida kamera **birinchi shaxs** bo'ladi.
 6. Foydalanuvchi keyinga qoldirgan: pasport bilan ro'yxatdan o'tish (jins shundan olinadi, hozir
-   `testGender`), `MainMenu` (profil yaratilgach o'yin Loading "READY" da to'xtaydi).
+   `testGender`), yuzni serverga yuklash, Play'dan keyingi o'yin dunyosi, musiqa.
+7. `tools/unity.ps1 run` o'yin serverini ham o'zi yoqadi (ishlamayotgan bo'lsa). Har bir sahnada Esc ishlaydi:
+   ochiq oyna yopiladi, bosh menyu va yangi o'yinchida "Quit game?", tahrirlashda menyuga qaytish.
 
 Git: ish `claude/gallant-dijkstra-r0opib` branch'ida. `Library/`, `Temp/`, `Logs/`, `Builds/` commit qilinmaydi.

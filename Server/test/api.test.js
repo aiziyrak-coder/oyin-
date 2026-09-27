@@ -95,6 +95,32 @@ describe('API', () => {
     assert.equal((await check('1abc')).reason, 'invalid');
   });
 
+  test('o\'yinchi o\'z profilini token bilan oladi va avatarini o\'zgartiradi', async () => {
+    const created = await (await create({ nickname: 'Returner', gender: 'female', avatarId: 'F1' })).json();
+    const me = (method, token, body) => fetch(`${base}/api/players/me`, {
+      method,
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: body && JSON.stringify(body),
+    });
+
+    const got = await me('GET', created.token);
+    assert.equal(got.status, 200);
+    const profile = await got.json();
+    assert.equal(profile.nickname, 'Returner');
+    assert.equal(profile.avatarId, 'F1');
+    assert.equal(profile.token, undefined); // token qaytarilmaydi
+
+    const changed = await me('PATCH', created.token, { avatarId: 'F4' });
+    assert.equal(changed.status, 200);
+    assert.equal((await changed.json()).avatarId, 'F4');
+    assert.equal((await (await me('GET', created.token)).json()).avatarId, 'F4');
+
+    // Jinsga mos bo'lmagan avatar, noto'g'ri va yo'q token
+    assert.equal((await me('PATCH', created.token, { avatarId: 'M1' })).status, 400);
+    assert.equal((await me('GET', 'a'.repeat(64))).status, 401);
+    assert.equal((await fetch(`${base}/api/players/me`)).status, 401);
+  });
+
   test('so\'rovlar cheklovi', async () => {
     const limited = createServer(createApp(openDatabase(':memory:'), { rateLimits: { check: 2, create: 1 } }));
     await new Promise(resolve => limited.listen(0, resolve));

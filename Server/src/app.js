@@ -10,6 +10,8 @@ const MAX_BODY_BYTES = 4 * 1024;
  * GET  /api/nicknames/availability?name=<nick>  -> { name, available, reason?, message? }
  * POST /api/players { nickname, gender, avatarId } -> 201 { id, nickname, gender, avatarId, token, createdAt }
  *                                                  409 { error: 'nickname_taken' }
+ * GET   /api/players/me   (Authorization: Bearer <token>) -> { id, nickname, gender, avatarId, createdAt } | 401
+ * PATCH /api/players/me   { avatarId }                    -> yangilangan o'yinchi | 400 invalid_avatar | 401
  */
 export function createApp(db, { rateLimits = { check: 60, create: 10 }, windowMs = 60_000 } = {}) {
   const limiter = createRateLimiter(windowMs);
@@ -66,6 +68,24 @@ export function createApp(db, { rateLimits = { check: 60, create: 10 }, windowMs
         });
       }
 
+      if (url.pathname === '/api/players/me' && (req.method === 'GET' || req.method === 'PATCH')) {
+        if (!limiter.allow(`me:${ip}`, rateLimits.check)) return send(res, 429, { error: 'too_many_requests' });
+        const token = bearerToken(req);
+        if (!token) return send(res, 401, { error: 'unauthorized' });
+        const tokenHash = createHash('sha256').update(token).digest('hex');
+        const player = db.findPlayerByTokenHash(tokenHash);
+        if (!player) return send(res, 401, { error: 'unauthorized' });
+
+        if (req.method === 'PATCH') {
+          const body = await readJson(req);
+          if (body === null) return send(res, 400, { error: 'bad_json' });
+          if (!isValidAvatar(body.avatarId, player.gender)) return send(res, 400, { error: 'invalid_avatar' });
+          db.updateAvatar(tokenHash, body.avatarId);
+          player.avatarId = body.avatarId;
+        }
+        return send(res, 200, { ...player });
+      }
+
       return send(res, 404, { error: 'not_found' });
     } catch (err) {
       console.error(err);
@@ -76,8 +96,14 @@ export function createApp(db, { rateLimits = { check: 60, create: 10 }, windowMs
 
 function setCors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
+/** "Authorization: Bearer <token>" sarlavhasidan token (64 ta hex belgi). */
+function bearerToken(req) {
+  const match = /^Bearer ([0-9a-f]{64})$/i.exec(req.headers.authorization ?? '');
+  return match ? match[1].toLowerCase() : null;
 }
 
 function send(res, status, body) {

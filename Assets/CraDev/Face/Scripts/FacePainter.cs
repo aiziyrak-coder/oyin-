@@ -35,7 +35,10 @@ namespace CraDev.Face
         static readonly int[] SkinSamples = { 151, 108, 337, 50, 280, 205, 425, 199, 118, 347 };
 
         /// <summary>Rasm terisi qahramon terisiga qanchalik moslashtiriladi (0 - o'zgarmaydi, 1 - to'liq).</summary>
-        const float SkinMatch = 0.7f;
+        const float SkinMatch = 0.8f;
+
+        /// <summary>Rang tusi qanchalik moslashtiriladi (0 - faqat yorug'lik, 1 - tus ham to'liq).</summary>
+        const float HueMatch = 0.25f;
 
         static float[] alpha;
 
@@ -129,17 +132,25 @@ namespace CraDev.Face
             if (count == 0)
                 return Color.white;
 
+            Color headLinear = Linear(headSum / count), photoLinear = Linear(photoSum / count);
+            float headLuma = Luma(headLinear), photoLuma = Luma(photoLinear);
+            // Asosan yorug'lik moslashadi (yuz bo'yin bilan bir xil yoritilgandek); rang tusi (ton) esa o'yinchiniki
+            // bo'lib qoladi, faqat ozgina yaqinlashtiriladi. Aks holda yuz sarg'ayib yoki ko'karib ketadi.
+            float brightness = photoLuma > 0.001f ? Mathf.Clamp(headLuma / photoLuma, 0.5f, 2f) : 1f;
             Color gain = Color.white;
             for (int c = 0; c < 3; c++)
             {
-                float h = Mathf.GammaToLinearSpace(headSum[c] / count);
-                float p = Mathf.GammaToLinearSpace(photoSum[c] / count);
-                // To'liq emas: o'yinchi terisining o'z rangi ham qisman saqlanadi
-                gain[c] = Mathf.Lerp(1f, Mathf.Clamp(p > 0.001f ? h / p : 1f, 0.5f, 2f), SkinMatch);
+                float full = photoLinear[c] > 0.001f ? Mathf.Clamp(headLinear[c] / photoLinear[c], 0.5f, 2f) : 1f;
+                float target = Mathf.Lerp(brightness, full, HueMatch);
+                gain[c] = Mathf.Lerp(1f, target, SkinMatch);
             }
             Debug.Log($"[CraDev] Teri rangi: qahramon {headSum / count}, rasm {photoSum / count}, ko'paytiruvchi {gain}");
             return gain;
         }
+
+        static Color Linear(Color c) => new Color(Mathf.GammaToLinearSpace(c.r), Mathf.GammaToLinearSpace(c.g), Mathf.GammaToLinearSpace(c.b));
+
+        static float Luma(Color c) => 0.2126f * c.r + 0.7152f * c.g + 0.0722f * c.b;
 
         static Color Average(Texture2D photo, Vector2 uv)
         {

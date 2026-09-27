@@ -30,7 +30,8 @@ namespace CraDev.EditorTools
         const string CdcScene = ScenesFolder + "CDCGroup.unity";
         const string LoadingScene = ScenesFolder + "Loading.unity";
         const string CreationScene = ScenesFolder + "CharacterCreation.unity";
-        static readonly string[] AllScenes = { IntroScene, CdcScene, LoadingScene, CreationScene };
+        const string MenuScene = ScenesFolder + "MainMenu.unity";
+        static readonly string[] AllScenes = { IntroScene, CdcScene, LoadingScene, CreationScene, MenuScene };
 
         const string IntroArt = "Assets/CraDev/Intro/Art/";
         const string CdcArt = "Assets/CraDev/CDCGroup/Art/";
@@ -78,6 +79,7 @@ namespace CraDev.EditorTools
             BuildCdcGroup();
             BuildLoading();
             BuildCharacterCreation();
+            BuildMainMenu();
 
             // O'yin shu tartibda boshlanadi; boshqa sahnalar ro'yxatda ulardan keyin qoladi
             var buildScenes = EditorBuildSettings.scenes.Where(s => !AllScenes.Contains(s.path)).ToList();
@@ -157,6 +159,11 @@ namespace CraDev.EditorTools
             // Standart nom loyiha papkasining nomi bo'ladi; o'yin nomi tanlanguncha oyna sarlavhasi "CraDev"
             if (PlayerSettings.productName == new DirectoryInfo(Application.dataPath).Parent.Name)
                 PlayerSettings.productName = "CraDev";
+
+            // Unity standart versiyasi "0.1" / "1.0": o'yin versiyasi bosh menyuda ko'rinadi
+            if (PlayerSettings.bundleVersion == "0.1" || PlayerSettings.bundleVersion == "1.0")
+                PlayerSettings.bundleVersion = "0.1.0";
+            ApplyGameIcon();
 
             PlayerSettings.fullScreenMode = FullScreenMode.FullScreenWindow;
             PlayerSettings.defaultIsNativeResolution = true;
@@ -412,7 +419,8 @@ namespace CraDev.EditorTools
             var form = CreateRect("Form", leftT);
             Place(form, new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(120f, 0f), new Vector2(480f, 850f));
 
-            PlaceTopLeft(CreateLabel("Eyebrow", form, bold, "NEW PLAYER", 13, accent, TextAnchor.UpperLeft).rectTransform, 0f, 0f, 480f, 20f);
+            var eyebrow = CreateLabel("Eyebrow", form, bold, "NEW PLAYER", 13, accent, TextAnchor.UpperLeft);
+            PlaceTopLeft(eyebrow.rectTransform, 0f, 0f, 480f, 20f);
             var title = CreateLabel("Title", form, display, "Create your\ncharacter", 44, Color.white, TextAnchor.UpperLeft);
             title.lineSpacing = 0.92f;
             PlaceTopLeft(title.rectTransform, 0f, 34f, 480f, 110f);
@@ -532,6 +540,10 @@ namespace CraDev.EditorTools
             Place(errorIcon.rectTransform, new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(8f, -836f), new Vector2(16f, 16f));
             var errorText = CreateLabel("ErrorText", form, medium, "", 14, bad, TextAnchor.MiddleLeft);
             Place(errorText.rectTransform, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(24f, -836f), new Vector2(456f, 22f));
+            // Tahrirlash rejimida "Save changes" yonida (skript ko'rsatadi)
+            var editCancel = CreateSecondaryButton("CancelEdit", form, "Cancel", null, 312f, 752f, 168f, roundFill, roundStroke, semiBold, field, line);
+            ((RectTransform)editCancel.transform).sizeDelta = new Vector2(168f, 60f);
+            editCancel.gameObject.SetActive(false);
 
             // ---------- O'ng tomon: qahramon ustidagi nom va pastdagi boshqaruv ----------
             // Qahramon ekran markazidan StageOffset qadar o'ngda turadi (AvatarViewer.screenOffset)
@@ -642,6 +654,8 @@ namespace CraDev.EditorTools
             Set(faceCapture, "alertSprite", Icon("Alert"));
             Set(faceCapture, "spinnerSprite", Icon("Spinner"));
 
+            var confirmDialog = BuildConfirmDialog(root, Kit());
+            AddUiSounds();
             var fader = CreateFullscreen("Fader", root, new Color(0f, 0f, 0f, 0f));
 
             // ---------- Boshqaruvchi ----------
@@ -662,6 +676,11 @@ namespace CraDev.EditorTools
             Set(screen, "avatarInfo", avatarInfo);
             Set(screen, "viewer", viewer);
             Set(screen, "faceCapture", faceCapture);
+            Set(screen, "eyebrowText", eyebrow);
+            Set(screen, "titleText", title);
+            Set(screen, "subtitleText", sub);
+            Set(screen, "cancelButton", editCancel);
+            Set(screen, "dialog", confirmDialog);
             Set(screen, "createButton", cta);
             Set(screen, "createFill", ctaFill);
             Set(screen, "createLabel", ctaLabel);
@@ -689,7 +708,7 @@ namespace CraDev.EditorTools
         const float StageOffset = 0.17f;
 
         /// <summary>3D modeli bor avatarlarni ekranning "avatars" ro'yxatiga yozadi.</summary>
-        static void SetAvatars(CharacterCreationScreen screen, System.Collections.Generic.Dictionary<string, Sprite> cards,
+        static void SetAvatars(Object screen, System.Collections.Generic.Dictionary<string, Sprite> cards,
             System.Collections.Generic.Dictionary<string, FaceMap> faceMaps)
         {
             var so = new SerializedObject(screen);
