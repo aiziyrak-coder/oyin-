@@ -43,6 +43,67 @@ namespace CraDev
 
         static void Complete() => Debug.Log($"[WorldTest] COMPLETE: {checks} checks, {Failures} failures");
 
+        // Faqat o'qiydi: grafika sinovi harakat yo'llari va foydalanuvchi sozlamalarini o'zgartirmaydi.
+        static void CheckGraphics(WorldPlayerController player, WorldHud hud)
+        {
+            Camera camera = player.ViewCamera;
+            Check(camera.allowHDR, "graphics: main camera renders HDR lighting");
+            Check(QualitySettings.activeColorSpace == ColorSpace.Linear,
+                "graphics: physically based materials use linear color space");
+            var effects = camera.GetComponent<WorldImageEffects>();
+            Check(effects != null && effects.isActiveAndEnabled && effects.IsSupported,
+                "graphics: tone mapping and ambient occlusion shader is active and supported");
+            Check(effects != null && effects.AOEnabled && (camera.depthTextureMode & DepthTextureMode.DepthNormals) != 0,
+                "graphics: contact occlusion receives camera depth and normals");
+            Check(hud.MapCamera != null && hud.MapCamera.GetComponent<WorldImageEffects>() == null,
+                "graphics: minimap does not duplicate full-screen image effects");
+
+            Material sky = RenderSettings.skybox;
+            Check(sky != null && sky.shader != null && sky.shader.isSupported && sky.shader.name == "Skybox/Panoramic",
+                "graphics: sky uses supported panoramic HDR shader");
+            Texture skyTexture = sky != null && sky.HasProperty("_MainTex") ? sky.GetTexture("_MainTex") : null;
+            Check(skyTexture != null && skyTexture.name == "Sky" && skyTexture.width >= 4096 && skyTexture.height >= 2048,
+                "graphics: photographed HDR sky retains 4K panoramic source");
+            Check(RenderSettings.sun != null && RenderSettings.sun.isActiveAndEnabled &&
+                RenderSettings.sun.type == LightType.Directional && RenderSettings.sun.shadows != LightShadows.None,
+                "graphics: daylight casts real geometry shadows");
+
+            CheckPhotoMaterial("Ground", "Ground");
+            CheckPhotoMaterial("PracticeArea", "Concrete");
+            CheckPhotoMaterial("NaturalRocks", "Boulder", "CraDev/WorldUVPBR");
+
+            var scenery = GameObject.Find("NaturalOutskirts");
+            Check(scenery != null && scenery.activeInHierarchy,
+                "graphics: natural outskirts are present in the playable scene");
+            var hills = scenery != null ? scenery.transform.Find("RollingHills") : null;
+            var mesh = hills != null ? hills.GetComponent<MeshFilter>() : null;
+            Check(mesh != null && mesh.sharedMesh != null && mesh.sharedMesh.vertexCount >= 1000 &&
+                hills.GetComponent<MeshCollider>() != null,
+                "graphics: surrounding hills are 3D geometry with a matching collider");
+            var grass = scenery != null ? scenery.transform.Find("GrassClumps0") : null;
+            var grassMesh = grass != null ? grass.GetComponent<MeshFilter>() : null;
+            Check(grassMesh != null && grassMesh.sharedMesh != null && grassMesh.sharedMesh.vertexCount > 100,
+                "graphics: ground detail includes real grass geometry");
+        }
+
+        static void CheckPhotoMaterial(string objectName, string prefix, string shaderName = "CraDev/WorldPBR")
+        {
+            var target = GameObject.Find(objectName);
+            var renderer = target != null ? target.GetComponentInChildren<Renderer>() : null;
+            Material material = renderer != null ? renderer.sharedMaterial : null;
+            Check(renderer != null && renderer.enabled && material != null && material.shader != null &&
+                material.shader.name == shaderName && material.shader.isSupported,
+                "graphics: " + objectName + " uses the supported photographic PBR material");
+            string[] properties = { "_MainTex", "_BumpMap", "_Roughness", "_Occlusion" };
+            string[] suffixes = { "Diffuse", "Normal", "Rough", "AO" };
+            for (int i = 0; i < properties.Length; i++)
+            {
+                Texture texture = material != null && material.HasProperty(properties[i]) ? material.GetTexture(properties[i]) : null;
+                Check(texture != null && texture.name == prefix + "_" + suffixes[i] && texture.width >= 2048 && texture.height >= 2048,
+                    "graphics: " + objectName + " has its real 2K " + suffixes[i] + " map");
+            }
+        }
+
         public static IEnumerator Run()
         {
             checks = Failures = 0;
@@ -74,6 +135,8 @@ namespace CraDev
                 Check(player.Capsule != null && player.Capsule.enabled, "physical CharacterController is enabled");
                 Check(player.ViewCamera != null && player.ViewCamera.enabled, "first-person camera is active");
                 if (player.Capsule == null || player.ViewCamera == null) yield break;
+
+                CheckGraphics(player, hud);
 
                 Reset(player, Origin);
                 Check(player.IsGrounded && Mathf.Abs(player.transform.position.y) < .2f, "capsule settles on ground without sinking");

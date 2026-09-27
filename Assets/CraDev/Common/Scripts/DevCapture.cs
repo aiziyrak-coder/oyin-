@@ -64,7 +64,9 @@ namespace CraDev
             if(worldSmoke)
             {
                 yield return DevWorldSmoke.Run();
-                yield return Shot(path);
+                if(System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevWorldVisuals")>=0)
+                    yield return WorldVisuals();
+                else yield return Shot(path);
                 var hud=FindFirstObjectByType<World.WorldHud>();hud.SetSettings(true);
                 yield return Shot(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path),"world-settings.png"));
                 hud.SetSettings(false);
@@ -243,6 +245,39 @@ namespace CraDev
             }
             if (quit)
                 Application.Quit();
+        }
+
+        IEnumerator WorldVisuals()
+        {
+            var player=FindFirstObjectByType<World.WorldPlayerController>();
+            if(player==null)yield break;
+            var camera=player.ViewCamera;var effects=camera.GetComponent<World.WorldImageEffects>();
+            var position=player.transform.position;float yaw=player.Yaw;
+            bool test=player.TestMode,paused=player.Paused,ao=effects.AOEnabled,enabled=effects.enabled;
+            int msaa=QualitySettings.antiAliasing;
+            string folder=System.IO.Path.GetDirectoryName(path);
+            player.TestMode=true;player.SetPaused(false);
+            try
+            {
+                player.Teleport(new Vector3(0,.06f,0),0);camera.transform.localRotation=Quaternion.Euler(5,0,0);
+                yield return Shot(path);
+                player.Teleport(new Vector3(-25,.06f,24),308);camera.transform.localRotation=Quaternion.Euler(8,0,0);
+                yield return Shot(System.IO.Path.Combine(folder,"world-nature.png"));
+                player.Teleport(new Vector3(0,.06f,0),270);camera.transform.localRotation=Quaternion.Euler(-18,0,0);
+                yield return Shot(System.IO.Path.Combine(folder,"world-panorama-seam.png"));
+                player.Teleport(new Vector3(0,.06f,9),0);camera.transform.localRotation=Quaternion.Euler(22,0,0);
+                effects.AOEnabled=true;yield return Shot(System.IO.Path.Combine(folder,"world-contact-ao.png"));
+                effects.AOEnabled=false;yield return Shot(System.IO.Path.Combine(folder,"world-contact-no-ao.png"));
+                effects.AOEnabled=true;QualitySettings.antiAliasing=0;
+                yield return Shot(System.IO.Path.Combine(folder,"world-msaa-off.png"));
+                QualitySettings.antiAliasing=msaa;effects.enabled=false;
+                yield return Shot(System.IO.Path.Combine(folder,"world-no-postfx.png"));
+            }
+            finally
+            {
+                QualitySettings.antiAliasing=msaa;effects.AOEnabled=ao;effects.enabled=enabled;
+                player.Teleport(position,yaw);player.TestMode=test;player.SetPaused(paused);
+            }
         }
 
         IEnumerator Shot(string file)

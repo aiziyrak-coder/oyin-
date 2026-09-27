@@ -1,5 +1,15 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI — OLAM GRAFIKASI (2026-09-28)
+
+Foydalanuvchi realizmni birinchi o'ringa qo'ydi. WorldSandbox endi fotografik CC0 PBR materiallar, 4K Radiance osmon, skanerlangan Boulder 01 (faqat LOD2), 3D tepaliklar va ingichka shamolli o'tlarni ishlatadi. Asosiy harakat/collider geometriyasi saqlangan. Bu haqiqiy 3D render, lobby foniga tegilmagan; mahalliy birinchi-shaxs sinov bosqichi davom etmoqda.
+
+Kod: CraDevSceneBuilder.World.cs + WorldScenery.cs; World/Shaders/WorldPBR (world-space triplanar), WorldUVPBR (skanerlangan modelning original UV atlasi), WorldGrass, WorldImageEffects (yarim rezolyutsiyali bilateral AO + ACES). Fotomateriallar World/Art/, muallif/litsenziya/hashlar SOURCES.md fayllarida. Art/ScannedRock/Boulder.fbx to'rtta LOD saqlaydi: FAQAT LOD2 16,530 tri import qilinadi; hammasini qo'shmang. Scenery meshlar editor builder orqali World/Materials/ ga yoziladi; sahnalar qo'lda tahrirlanmaydi.
+
+Sky equirectangular chokda noto'g'ri mip/aniso oq chiziq hosil qilgan: faqat Sky.hdr uchun mipmaps OFF, bilinear, aniso1, repeatU/clampV. Yer teksturalarida mipmaps/trilinear/aniso16 qoladi. HDR osmondagi quyosh bilan directional Euler (47.8564,-55.7666,0) mos. Reflection editor'da bir marta baked. Hamma narsani yana rangsiz flat materialga almashtirmang.
+
+Yakuniy build Logs/realism-build3.log Succeeded/shader xatosiz. Logs/realism-player3.log: 89 assertions/0 failures (avvalgi 63 physics +26 graphics), return to lobby PASS. RTX3060/1920x1080 qisqa2.2sec o'lchov235.1FPS/worst8.35ms, >33ms0; uzoq benchmark emas. Logs/Realism3/ tasvirlar amalda ko'rib tekshirildi (AO/MSAA/postfx variantlari ham). Testflag: -cradevShot <png> -cradevWorldSmoke -cradevWorldVisuals -cradevQuit. Oddiy ochish: -cradevShot <png> -cradevEnterWorld. Oldingi fizik asos saqlash nuqtasi5a566d0. Design/LobbyV2 katta manbalari Gitga qo'shilmaydi.
+
 ## ENG YANGI — BIRINCHI SHAXS SINOV OLAMI (2026-09-28)
 
 Lobbydan NewWorldga kirish endi Loading orqali WorldSandbox sahnasini ochadi. Oddiy yer/osmon, tekis maydon, devor, 3 pog'ona, past shift, yumshoq/tik rampa va sakrash bloklari — harakat sifatini sinash uchun. Bu hozircha MAHALLIY birinchi-shaxs olami; olam ichida multiplayer/avatar locomotion replikatsiyasi hali qo'shilmagan. Lobbydagi do'stlar tizimi o'z holicha.

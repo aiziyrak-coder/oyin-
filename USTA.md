@@ -1,5 +1,16 @@
 # NewWorld Lobby
 
+## Olam grafikasi — fotografik materiallar (2026-09-28)
+
+- [x] Oldingi fizikasi ishlaydigan holat 5a566d0 commitda saqlandi; lobby dizayni o'zgarmadi.
+- [x] 4096x2048 Radiance HDR osmon, suratga olingan 2048x2048 albedo/normal/roughness/AO materiallari. Poly Haven CC0 manbalari va hashlar World/Art/SOURCES.md da.
+- [x] Skanerlangan Boulder 01, original UV atlas, LOD2 (16 530 uchburchak) bilan 15 tabiiy tosh. Yumshoq relyef va 52 minggacha ingichka o't; 6 scenery renderer, o'tda nozik shamol.
+- [x] HDR + filmic rang ishlovi, chetlarni saqlaydigan kontakt soyasi, bir marta baked osmon reflection, quyosh osmondagi haqiqiy yo'nalishga mos. Yaqinda tuman yo'q.
+- [x] Sinov konstruksiyalari o'lchami/colliderlari saqlandi; chiziladigan qirralarga kichik bevel qo'shildi. Material masshtabi haqiqiy metrga mos.
+- [x] Panorama chokidagi oq chiziq topildi va tuzatildi: sky no-mips/Bilinear/aniso1/RepeatU/ClampV. 270 daraja kamera kadrida tasdiqlandi.
+- [x] Logs/realism-build3.log Succeeded, shader xatosiz; realism-player3.log 89 checks/0 failures va lobbyga qaytish PASS. 1920x1080 RTX3060, 2.2 soniyalik namuna: 235.1 FPS, worst8.35ms, >33ms kadr yo'q. Bu uzoq benchmark yoki boshqa qurilmalar uchun kafolat emas.
+- [x] Haqiqiy renderlar ko'rildi: Logs/Realism3/ (umumiy, skanlangan tosh, panorama choki, AO on/off, MSAA off, postfx off, sozlamalar, lobby). Bu hali mahalliy birinchi-shaxs fizik sinov maydoni, to'liq shahar emas.
+
 ## O'yin olami — tayyor sinov asosi
 
 - [x] Lobby kirish -> Loading -> WorldSandbox, qaytish Esc menyusidan.
