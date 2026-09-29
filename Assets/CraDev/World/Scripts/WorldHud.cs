@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using CraDev.MainMenu;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -10,32 +11,47 @@ using UnityEngine.InputSystem;
 
 namespace CraDev.World
 {
-    /// <summary>Dunyoning ixcham HUD'i va lobbydan alohida boshqaruv sozlamalari.</summary>
+    /// <summary>
+    /// Dunyoning ixcham HUD'i va Esc menyusi: chapda olam boshqaruvi (<see cref="WorldPreferences"/>),
+    /// o'ngda butun o'yinga tegishli grafika va ovoz (<see cref="GameSettings"/>).
+    /// </summary>
+    // HUD o'yinchidan oldin yangilanadi: Esc bosilgan kadrda menyuni birinchi bo'lib HUD ochadi.
+    [DefaultExecutionOrder(-100)]
     public sealed class WorldHud : MonoBehaviour
     {
         [SerializeField] WorldPlayerController player;
         [SerializeField] Font font;
+        [SerializeField] Font boldFont;
         [SerializeField] Sprite rounded;
-        [SerializeField] Camera mapCamera;
 
-        static readonly Color TextColor = new Color(.93f, .96f, .94f);
-        static readonly Color Muted = new Color(.64f, .71f, .68f);
-        static readonly Color Accent = new Color(.38f, .83f, .65f);
-        static readonly Color Surface = new Color(.075f, .10f, .093f, .98f);
+        const float WindowWidth = 1180f, WindowHeight = 676f, Pad = 36f, ColumnWidth = 520f;
+        const float RowHeight = 44f, SliderRowHeight = 76f, RowGap = 8f;
+        static readonly Color TextColor = new Color(.93f, .95f, .97f);
+        static readonly Color Muted = new Color(.62f, .67f, .74f);
+        static readonly Color MapArrow = new Color(.38f, .83f, .65f);
+        // Qator fonlari: oddiy qator 5% oq; bosiladigan qator RowColors bilan 5% -> 10% (hover/tanlangan).
+        static readonly Color RowFill = new Color(1f, 1f, 1f, .05f);
+        static readonly Color InteractiveFill = new Color(1f, 1f, 1f, .10f);
+        static readonly Color SecondaryFill = new Color(1f, 1f, 1f, .16f);
+        static readonly Color SwitchOff = new Color(.25f, .28f, .32f);
+        static Color Accent => LobbyPalette.Accent;
+
         readonly List<(Text label, string key)> localized = new List<(Text, string)>();
+        readonly List<(Toggle toggle, Image track, RectTransform knob)> switches = new List<(Toggle, Image, RectTransform)>();
         GameObject settings, reticle, hints;
-        Text movementState, sensitivityValue, fovValue;
-        Slider sensitivitySlider, fovSlider;
-        Toggle invertToggle, bobToggle, crouchToggle;
+        Text movementState, sensitivityValue, fovValue, volumeValue, displayValue, qualityValue;
+        Slider sensitivitySlider, fovSlider, volumeSlider;
+        Toggle invertToggle, bobToggle, crouchToggle, vsyncToggle, aoToggle;
         Button resumeButton;
         WorldMinimap minimap;
-        bool settingsOpen, dirty, leaving;
+        bool settingsOpen, dirty, gameSettingsDirty, leaving;
         float saveAt;
+        int menuChangedFrame = -1;
         string stateKey;
 
         public bool SettingsOpen => settingsOpen;
         public RenderTexture MapTexture => minimap ? minimap.Texture : null;
-        public Camera MapCamera => minimap ? minimap.MapCamera : mapCamera;
+        public Camera MapCamera => minimap ? minimap.MapCamera : null;
 
         void Start()
         {
@@ -45,17 +61,17 @@ namespace CraDev.World
             BuildHud();
             BuildSettings();
             Loc.Changed += RefreshText;
+            WorldPreferences.Changed += RefreshPreferences;
             if (player) player.PauseChanged += OnPauseChanged;
             RefreshText();
-            RefreshPreferences();
             SetSettings(player && player.Paused);
         }
 
         void Update()
         {
             if (leaving) return;
-            if (MenuPressed()) SetSettings(!settingsOpen);
-            if (dirty && Time.unscaledTime >= saveAt) SavePending();
+            if (MenuPressed()) ToggleMenuFromInput();
+            if ((dirty || gameSettingsDirty) && Time.unscaledTime >= saveAt) SavePending();
             if (!player || !movementState) return;
             string next = !player.IsGrounded ? "world.hud.airborne" :
                 player.IsCrouching ? "world.hud.crouching" :
@@ -66,6 +82,17 @@ namespace CraDev.World
                 stateKey = next;
                 movementState.text = Loc.T(next);
             }
+        }
+
+        /// <summary>
+        /// Esc / geympad Start: menyuni ochadi yoki yopadi. Shu kadrda pauza allaqachon almashgan bo'lsa
+        /// (masalan, Editor Esc'da kursorni qo'yib yuborib o'yinchi o'zi pauza qilgan) ikkinchi marta almashtirmaydi.
+        /// </summary>
+        public bool ToggleMenuFromInput()
+        {
+            if (leaving || Time.frameCount == menuChangedFrame) return false;
+            SetSettings(!settingsOpen);
+            return true;
         }
 
         public void SetSettings(bool open)
@@ -79,6 +106,7 @@ namespace CraDev.World
 
         void ApplySettingsVisibility(bool open)
         {
+            if (settingsOpen != open) menuChangedFrame = Time.frameCount;
             settingsOpen = open;
             if (!settings) return;
             settings.SetActive(open);
@@ -117,7 +145,7 @@ namespace CraDev.World
             var arrowRect = Rect("MapPlayerHeading", viewport);
             Center(arrowRect, Vector2.zero, new Vector2(13f, 18f));
             var arrow = arrowRect.gameObject.AddComponent<WorldMapArrow>();
-            arrow.color = Accent;
+            arrow.color = MapArrow;
             arrow.raycastTarget = false;
             var north = Label("MapNorth", viewport, "world.hud.north", 13, TextColor, TextAnchor.MiddleCenter);
             TopLeft(north.rectTransform, 72f, 4f, 46f, 24f);
@@ -130,7 +158,7 @@ namespace CraDev.World
             stateShadow.effectColor = new Color(0f, 0f, 0f, .7f);
             stateShadow.effectDistance = new Vector2(0f, -1f);
             minimap = gameObject.AddComponent<WorldMinimap>();
-            if (player) minimap.Configure(player.transform, mapCamera, raw, arrowRect);
+            if (player) minimap.Configure(player.transform, raw, arrowRect);
 
             var dotRect = Panel("WorldReticle", transform, new Color(1f, 1f, 1f, .85f));
             Center(dotRect, Vector2.zero, new Vector2(3f, 3f));
@@ -147,132 +175,269 @@ namespace CraDev.World
 
         void BuildSettings()
         {
-            var veil = Panel("WorldSettingsOverlay", transform, new Color(.015f, .025f, .025f, .55f));
+            var veil = Panel("WorldSettingsOverlay", transform, new Color(.01f, .015f, .02f, .55f));
             Stretch(veil);
             veil.GetComponent<Image>().raycastTarget = true;
             settings = veil.gameObject;
-            var panel = Panel("WorldSettingsWindow", veil, Surface);
-            Center(panel, Vector2.zero, new Vector2(660f, 670f));
+            var panel = Panel("WorldSettingsWindow", veil, LobbyPalette.Surface);
+            Center(panel, Vector2.zero, new Vector2(WindowWidth, WindowHeight));
             var line = Panel("WorldSettingsAccent", panel, Accent);
-            TopLeft(line, 32f, 25f, 32f, 3f);
-            var title = Label("WorldSettingsTitle", panel, "world.settings.title", 27, TextColor, TextAnchor.MiddleLeft);
-            TopLeft(title.rectTransform, 32f, 38f, 576f, 40f);
-            title.fontStyle = FontStyle.Bold;
-            var subtitle = Label("WorldSettingsSubtitle", panel, "world.settings.subtitle", 16, Muted, TextAnchor.MiddleLeft);
-            TopLeft(subtitle.rectTransform, 32f, 81f, 596f, 30f);
-            line = Panel("WorldSettingsDivider", panel, new Color(1f, 1f, 1f, .09f));
-            TopLeft(line, 32f, 120f, 596f, 1f);
+            TopLeft(line, Pad, 28f, 32f, 3f);
+            var title = Label("WorldSettingsTitle", panel, "world.settings.title", 27, TextColor, TextAnchor.MiddleLeft, true);
+            TopLeft(title.rectTransform, Pad, 40f, WindowWidth - Pad * 2f, 40f);
+            var subtitle = Label("WorldSettingsSubtitle", panel, "world.settings.note", 16, Muted, TextAnchor.MiddleLeft);
+            TopLeft(subtitle.rectTransform, Pad, 82f, WindowWidth - Pad * 2f, 28f);
+            TopLeft(Panel("WorldSettingsDivider", panel, new Color(1f, 1f, 1f, .09f)), Pad, 122f, WindowWidth - Pad * 2f, 1f);
 
-            sensitivitySlider = SettingSlider(panel, "Sensitivity", "world.settings.sensitivity", 144f, .1f, 3f, out sensitivityValue);
+            // Chap ustun: faqat olam boshqaruvi (cradev.world.*), o'zgarishlar 0.4 s dan keyin saqlanadi.
+            var controls = Column(panel, "WorldControlsColumn", Pad, "world.settings.section.controls");
+            float y = 32f;
+            sensitivitySlider = SettingSlider(controls, "Sensitivity", "world.settings.sensitivity", y,
+                WorldPreferences.MinSensitivity, WorldPreferences.MaxSensitivity, out sensitivityValue);
             sensitivitySlider.onValueChanged.AddListener(value =>
             {
-                WorldPreferences.Sensitivity = value;
+                WorldPreferences.Sensitivity = Mathf.Round(value * 20f) / 20f;
                 RefreshValues();
                 MarkDirty();
             });
-            fovSlider = SettingSlider(panel, "FieldOfView", "world.settings.fov", 225f, 65f, 100f, out fovValue);
+            y += SliderRowHeight + RowGap;
+            fovSlider = SettingSlider(controls, "FieldOfView", "world.settings.fov", y,
+                WorldPreferences.MinFieldOfView, WorldPreferences.MaxFieldOfView, out fovValue);
             fovSlider.wholeNumbers = true;
             fovSlider.onValueChanged.AddListener(value =>
             {
                 WorldPreferences.FieldOfView = value;
-                if (player && player.ViewCamera) player.ViewCamera.fieldOfView = value;
+                if (player && player.ViewCamera) player.ViewCamera.fieldOfView = WorldPreferences.FieldOfView;
                 RefreshValues();
                 MarkDirty();
             });
-            invertToggle = SettingToggle(panel, "InvertY", "world.settings.invert", 311f, value => WorldPreferences.InvertY = value);
-            bobToggle = SettingToggle(panel, "HeadBob", "world.settings.headbob", 364f, value => WorldPreferences.HeadBob = value);
-            crouchToggle = SettingToggle(panel, "ToggleCrouch", "world.settings.crouch", 417f, value => WorldPreferences.ToggleCrouch = value);
-            var controls = Label("WorldSettingsControls", panel, "world.hud.controls", 15, Muted, TextAnchor.MiddleLeft);
-            TopLeft(controls.rectTransform, 32f, 481f, 596f, 54f);
-            controls.horizontalOverflow = HorizontalWrapMode.Wrap;
+            y += SliderRowHeight + RowGap;
+            invertToggle = SettingSwitch(controls, "InvertY", "world.settings.invert", y, value => { WorldPreferences.InvertY = value; MarkDirty(); });
+            y += RowHeight + RowGap;
+            bobToggle = SettingSwitch(controls, "HeadBob", "world.settings.headbob", y, value => { WorldPreferences.HeadBob = value; MarkDirty(); });
+            y += RowHeight + RowGap;
+            crouchToggle = SettingSwitch(controls, "ToggleCrouch", "world.settings.crouch", y, value => { WorldPreferences.ToggleCrouch = value; MarkDirty(); });
 
-            resumeButton = ActionButton(panel, "WorldResume", "world.settings.resume", 32f, 554f, 292f, 48f,
-                new Color(.19f, .42f, .33f), () => SetSettings(false));
-            ActionButton(panel, "WorldReturnLobby", "world.settings.lobby", 336f, 554f, 292f, 48f,
-                new Color(.14f, .18f, .16f), ReturnToLobby);
-            ActionButton(panel, "WorldResetSettings", "world.settings.reset", 32f, 616f, 210f, 32f,
-                new Color(.105f, .14f, .12f), () =>
-                {
-                    WorldPreferences.Reset();
-                    dirty = false;
-                    RefreshPreferences();
-                    if (player && player.ViewCamera) player.ViewCamera.fieldOfView = WorldPreferences.FieldOfView;
-                });
-            var saved = Label("WorldAutoSave", panel, "world.settings.saved", 13, Muted, TextAnchor.MiddleRight);
-            TopLeft(saved.rectTransform, 255f, 616f, 373f, 32f);
+            // O'ng ustun: butun o'yin sozlamalari, lobbydagi bilan bir xil GameSettings API.
+            var graphics = Column(panel, "WorldGraphicsColumn", WindowWidth - Pad - ColumnWidth, "world.settings.section.graphics");
+            y = 32f;
+            displayValue = SettingSelector(graphics, "DisplayMode", "world.settings.display", y,
+                _ => ChangeGameSettings(() => GameSettings.Fullscreen = !GameSettings.Fullscreen));
+            y += RowHeight + RowGap;
+            qualityValue = SettingSelector(graphics, "Quality", "world.settings.quality", y, StepQuality);
+            y += RowHeight + RowGap;
+            vsyncToggle = SettingSwitch(graphics, "VSync", "world.settings.vsync", y,
+                value => ChangeGameSettings(() => GameSettings.VSync = value));
+            y += RowHeight + RowGap;
+            aoToggle = SettingSwitch(graphics, "AmbientOcclusion", "world.settings.ao", y,
+                value => { WorldPreferences.AmbientOcclusion = value; MarkDirty(); });
+            y += RowHeight + RowGap;
+            volumeSlider = SettingSlider(graphics, "Volume", "world.settings.volume", y, 0f, 1f, out volumeValue);
+            volumeSlider.onValueChanged.AddListener(value =>
+            {
+                // Tortish paytida faqat eshitiladigan balandlik o'zgaradi; to'liq GameSettings.Apply/Save
+                // slayder 0.4 s tinch turgach (SavePending) - har kadrda ekran/sifatni qayta qo'llamaslik uchun.
+                GameSettings.Volume = Mathf.Clamp01(Mathf.Round(value * 100f) / 100f);
+                AudioListener.volume = GameSettings.Volume;
+                RefreshValues();
+                gameSettingsDirty = true;
+                saveAt = Time.unscaledTime + .4f;
+            });
+
+            TopLeft(Panel("WorldSettingsFooterDivider", panel, new Color(1f, 1f, 1f, .09f)), Pad, 504f, WindowWidth - Pad * 2f, 1f);
+            var keys = Label("WorldSettingsControls", panel, "world.hud.controls", 15, Muted, TextAnchor.MiddleLeft);
+            TopLeft(keys.rectTransform, Pad, 516f, WindowWidth - Pad * 2f, 30f);
+            keys.horizontalOverflow = HorizontalWrapMode.Wrap;
+            keys.resizeTextForBestFit = true;
+            keys.resizeTextMinSize = 11;
+            keys.resizeTextMaxSize = 15;
+
+            resumeButton = ActionButton(panel, "WorldResume", "world.settings.resume", Pad, 562f, 300f, 52f, true, () => SetSettings(false));
+            ActionButton(panel, "WorldReturnLobby", "world.settings.lobby", Pad + 312f, 562f, 300f, 52f, false, ReturnToLobby);
+            ActionButton(panel, "WorldResetSettings", "world.settings.reset_controls", WindowWidth - Pad - 240f, 568f, 240f, 40f, false, () =>
+            {
+                WorldPreferences.Reset();
+                dirty = false;
+                if (player && player.ViewCamera) player.ViewCamera.fieldOfView = WorldPreferences.FieldOfView;
+                RefreshPreferences();
+            });
+            var saved = Label("WorldAutoSave", panel, "world.settings.saved", 13, Muted, TextAnchor.MiddleLeft);
+            TopLeft(saved.rectTransform, Pad, 626f, 600f, 24f);
             settings.SetActive(false);
+        }
+
+        RectTransform Column(Transform parent, string name, float x, string headerKey)
+        {
+            var column = Rect(name, parent);
+            TopLeft(column, x, 140f, ColumnWidth, 356f);
+            var header = Label(name + "Header", column, headerKey, 13, Muted, TextAnchor.MiddleLeft, true);
+            TopLeft(header.rectTransform, 2f, 0f, ColumnWidth - 4f, 22f);
+            return column;
         }
 
         Slider SettingSlider(Transform parent, string name, string key, float y, float min, float max, out Text value)
         {
-            var label = Label(name + "Label", parent, key, 18, TextColor, TextAnchor.MiddleLeft);
-            TopLeft(label.rectTransform, 32f, y, 490f, 30f);
-            value = Label(name + "Value", parent, null, 17, Accent, TextAnchor.MiddleRight);
-            TopLeft(value.rectTransform, 526f, y, 102f, 30f);
-            var rect = Rect(name + "Slider", parent);
-            TopLeft(rect, 32f, y + 32f, 596f, 34f);
+            var row = Panel(name + "Row", parent, RowFill);
+            TopLeft(row, 0f, y, ColumnWidth, SliderRowHeight);
+            var label = Label(name + "Label", row, key, 17, TextColor, TextAnchor.MiddleLeft);
+            TopLeft(label.rectTransform, 14f, 6f, ColumnWidth - 138f, 30f);
+            value = Label(name + "Value", row, null, 17, TextColor, TextAnchor.MiddleRight);
+            TopLeft(value.rectTransform, ColumnWidth - 124f, 6f, 110f, 30f);
+            var rect = Rect(name + "Slider", row);
+            TopLeft(rect, 14f, 38f, ColumnWidth - 28f, 30f);
             var hit = rect.gameObject.AddComponent<Image>();
             hit.color = Color.clear;
             hit.raycastTarget = true;
             var slider = rect.gameObject.AddComponent<Slider>();
             slider.minValue = min;
             slider.maxValue = max;
-            var track = Panel("Track", rect, new Color(.20f, .26f, .23f));
+            var track = Panel("Track", rect, new Color(1f, 1f, 1f, .14f));
             HorizontalLine(track, 4f);
+            track.GetComponent<Image>().pixelsPerUnitMultiplier = 12f;
             var fillArea = Rect("FillArea", rect);
             HorizontalLine(fillArea, 4f);
             var fill = Panel("Fill", fillArea, Accent);
             Stretch(fill);
+            fill.GetComponent<Image>().pixelsPerUnitMultiplier = 12f;
             slider.fillRect = fill;
             var handleArea = Rect("HandleArea", rect);
             Stretch(handleArea);
+            handleArea.offsetMin = new Vector2(9f, 0f);
+            handleArea.offsetMax = new Vector2(-9f, 0f);
             var handle = Panel("Handle", handleArea, TextColor);
-            Center(handle, Vector2.zero, new Vector2(16f, 16f));
-            handle.GetComponent<Image>().raycastTarget = true;
+            Center(handle, Vector2.zero, new Vector2(18f, 18f));
+            var handleImage = handle.GetComponent<Image>();
+            handleImage.pixelsPerUnitMultiplier = 24f / 9f;
+            handleImage.raycastTarget = true;
             slider.handleRect = handle;
-            slider.targetGraphic = handle.GetComponent<Image>();
+            slider.targetGraphic = handleImage;
             return slider;
         }
 
-        Toggle SettingToggle(Transform parent, string name, string key, float y, Action<bool> apply)
+        Toggle SettingSwitch(Transform parent, string name, string key, float y, Action<bool> apply)
         {
-            var row = Rect(name + "Toggle", parent);
-            TopLeft(row, 32f, y, 596f, 43f);
-            var hit = row.gameObject.AddComponent<Image>();
-            hit.color = Color.clear;
-            hit.raycastTarget = true;
+            var row = Panel(name + "Toggle", parent, InteractiveFill);
+            TopLeft(row, 0f, y, ColumnWidth, RowHeight);
+            var image = row.GetComponent<Image>();
+            image.raycastTarget = true;
             var toggle = row.gameObject.AddComponent<Toggle>();
+            toggle.targetGraphic = image;
+            toggle.colors = RowColors();
             var label = Label(name + "Label", row, key, 17, TextColor, TextAnchor.MiddleLeft);
-            TopLeft(label.rectTransform, 0f, 0f, 530f, 43f);
+            TopLeft(label.rectTransform, 14f, 0f, ColumnWidth - 96f, RowHeight);
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
-            var box = Panel("Checkbox", row, new Color(.18f, .25f, .21f));
-            TopLeft(box, 564f, 7f, 28f, 28f);
-            var check = Panel("Checked", box, Accent);
-            TopLeft(check, 6f, 6f, 16f, 16f);
-            toggle.targetGraphic = box.GetComponent<Image>();
-            toggle.graphic = check.GetComponent<Image>();
-            toggle.onValueChanged.AddListener(value => { apply(value); MarkDirty(); });
+            var track = Panel("Switch", row, SwitchOff);
+            TopLeft(track, ColumnWidth - 66f, 8f, 52f, 28f);
+            var trackImage = track.GetComponent<Image>();
+            trackImage.pixelsPerUnitMultiplier = 24f / 14f;
+            var knob = Panel("SwitchKnob", track, new Color(.93f, .95f, .97f));
+            TopLeft(knob, 3f, 3f, 22f, 22f);
+            knob.GetComponent<Image>().pixelsPerUnitMultiplier = 24f / 11f;
+            switches.Add((toggle, trackImage, knob));
+            toggle.onValueChanged.AddListener(value => { apply(value); PaintSwitches(); });
             return toggle;
         }
 
-        Button ActionButton(Transform parent, string name, string key, float x, float y, float w, float h, Color color, Action action)
+        Text SettingSelector(Transform parent, string name, string key, float y, Action<int> step)
         {
-            var rect = Panel(name, parent, color);
+            var row = Panel(name + "Selector", parent, RowFill);
+            TopLeft(row, 0f, y, ColumnWidth, RowHeight);
+            var label = Label(name + "Label", row, key, 17, TextColor, TextAnchor.MiddleLeft);
+            TopLeft(label.rectTransform, 14f, 0f, ColumnWidth - 250f, RowHeight);
+            ArrowButton(row, name + "Previous", "‹", ColumnWidth - 222f, () => step(-1));
+            var value = Label(name + "Value", row, null, 16, TextColor, TextAnchor.MiddleCenter);
+            TopLeft(value.rectTransform, ColumnWidth - 184f, 0f, 138f, RowHeight);
+            ArrowButton(row, name + "Next", "›", ColumnWidth - 42f, () => step(1));
+            return value;
+        }
+
+        void ArrowButton(Transform parent, string name, string glyph, float x, Action action)
+        {
+            var rect = Panel(name, parent, SecondaryFill);
+            TopLeft(rect, x, 6f, 32f, 32f);
+            var image = rect.GetComponent<Image>();
+            image.raycastTarget = true;
+            var button = rect.gameObject.AddComponent<Button>();
+            button.targetGraphic = image;
+            button.colors = RowColors();
+            button.onClick.AddListener(() => action());
+            var label = Label(name + "Text", rect, null, 22, TextColor, TextAnchor.MiddleCenter);
+            label.text = glyph;
+            Stretch(label.rectTransform);
+        }
+
+        Button ActionButton(Transform parent, string name, string key, float x, float y, float w, float h, bool primary, Action action)
+        {
+            var rect = Panel(name, parent, primary ? Accent : SecondaryFill);
             TopLeft(rect, x, y, w, h);
             var image = rect.GetComponent<Image>();
             image.raycastTarget = true;
             var button = rect.gameObject.AddComponent<Button>();
             button.targetGraphic = image;
-            var colors = button.colors;
-            colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
-            colors.selectedColor = colors.highlightedColor;
-            colors.pressedColor = new Color(.80f, .88f, .84f);
-            colors.fadeDuration = .10f;
-            button.colors = colors;
+            if (primary)
+            {
+                var colors = button.colors;
+                colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f);
+                colors.selectedColor = colors.highlightedColor;
+                colors.pressedColor = new Color(.85f, .88f, .92f);
+                colors.fadeDuration = .10f;
+                button.colors = colors;
+            }
+            else button.colors = RowColors();
             button.onClick.AddListener(() => action());
-            var label = Label(name + "Text", rect, key, h < 40f ? 14 : 18, TextColor, TextAnchor.MiddleCenter);
+            var label = Label(name + "Text", rect, key, h < 44f ? 15 : 18, TextColor, TextAnchor.MiddleCenter, primary);
             Stretch(label.rectTransform);
             return button;
+        }
+
+        /// <summary>Shaffof oq fonli qator: oddiy holatda xira, sichqoncha/klaviatura tanlaganda yorqinroq.</summary>
+        static ColorBlock RowColors()
+        {
+            var colors = ColorBlock.defaultColorBlock;
+            colors.normalColor = new Color(1f, 1f, 1f, .5f);
+            colors.highlightedColor = Color.white;
+            colors.selectedColor = Color.white;
+            colors.pressedColor = new Color(1f, 1f, 1f, .8f);
+            colors.disabledColor = new Color(1f, 1f, 1f, .25f);
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = .10f;
+            return colors;
+        }
+
+        void PaintSwitches()
+        {
+            foreach (var item in switches)
+            {
+                if (!item.toggle) continue;
+                bool on = item.toggle.isOn;
+                item.track.color = on ? Accent : SwitchOff;
+                item.knob.anchoredPosition = new Vector2(on ? 27f : 3f, -3f);
+            }
+        }
+
+        void StepQuality(int direction)
+        {
+            int count = QualitySettings.names.Length;
+            if (count < 2) return;
+            ChangeGameSettings(() => GameSettings.Quality = ((GameSettings.Quality + direction) % count + count) % count);
+        }
+
+        /// <summary>Lobby sozlamalaridagi kabi: o'zgartirish, darhol qo'llash va saqlash.</summary>
+        void ChangeGameSettings(Action change)
+        {
+            change();
+            gameSettingsDirty = false;
+            GameSettings.Apply();
+            GameSettings.Save();
+            RefreshPreferences();
+        }
+
+        static string QualityName(int level)
+        {
+            string key = "quality." + level;
+            if (Loc.Has(key)) return Loc.T(key);
+            var names = QualitySettings.names;
+            return level >= 0 && level < names.Length ? names[level] : level.ToString(CultureInfo.InvariantCulture);
         }
 
         void RefreshText()
@@ -280,6 +445,7 @@ namespace CraDev.World
             foreach (var item in localized)
                 if (item.label) item.label.text = Loc.T(item.key);
             stateKey = null;
+            RefreshPreferences();
         }
 
         void RefreshPreferences()
@@ -290,6 +456,10 @@ namespace CraDev.World
             invertToggle.SetIsOnWithoutNotify(WorldPreferences.InvertY);
             bobToggle.SetIsOnWithoutNotify(WorldPreferences.HeadBob);
             crouchToggle.SetIsOnWithoutNotify(WorldPreferences.ToggleCrouch);
+            aoToggle.SetIsOnWithoutNotify(WorldPreferences.AmbientOcclusion);
+            vsyncToggle.SetIsOnWithoutNotify(GameSettings.VSync);
+            volumeSlider.SetValueWithoutNotify(GameSettings.Volume);
+            PaintSwitches();
             RefreshValues();
         }
 
@@ -297,6 +467,9 @@ namespace CraDev.World
         {
             sensitivityValue.text = WorldPreferences.Sensitivity.ToString("0.00", CultureInfo.InvariantCulture);
             fovValue.text = Mathf.RoundToInt(WorldPreferences.FieldOfView) + "°";
+            volumeValue.text = Mathf.RoundToInt(GameSettings.Volume * 100f) + "%";
+            displayValue.text = Loc.T(GameSettings.Fullscreen ? "world.settings.display.fullscreen" : "world.settings.display.windowed");
+            qualityValue.text = QualityName(GameSettings.Quality);
         }
 
         void MarkDirty()
@@ -307,9 +480,17 @@ namespace CraDev.World
 
         void SavePending()
         {
-            if (!dirty) return;
-            WorldPreferences.Save();
-            dirty = false;
+            if (dirty)
+            {
+                dirty = false;
+                WorldPreferences.Save();
+            }
+            if (gameSettingsDirty)
+            {
+                gameSettingsDirty = false;
+                GameSettings.Apply();
+                GameSettings.Save();
+            }
         }
 
         public void ReturnToLobby()
@@ -333,13 +514,15 @@ namespace CraDev.World
         {
             SavePending();
             Loc.Changed -= RefreshText;
+            WorldPreferences.Changed -= RefreshPreferences;
             if (player) player.PauseChanged -= OnPauseChanged;
         }
 
-        Text Label(string name, Transform parent, string key, int size, Color color, TextAnchor alignment)
+        Text Label(string name, Transform parent, string key, int size, Color color, TextAnchor alignment, bool bold = false)
         {
             var label = Rect(name, parent).gameObject.AddComponent<Text>();
-            label.font = font;
+            label.font = bold && boldFont ? boldFont : font;
+            if (bold && !boldFont) label.fontStyle = FontStyle.Bold;
             label.fontSize = size;
             label.color = color;
             label.alignment = alignment;
@@ -350,13 +533,14 @@ namespace CraDev.World
             return label;
         }
 
+        /// <summary>8 px radiusli tekis panel (lobby bilan bir xil).</summary>
         RectTransform Panel(string name, Transform parent, Color color)
         {
             var rect = Rect(name, parent);
             var image = rect.gameObject.AddComponent<Image>();
             image.sprite = rounded;
             image.type = rounded ? Image.Type.Sliced : Image.Type.Simple;
-            image.pixelsPerUnitMultiplier = 4f;
+            image.pixelsPerUnitMultiplier = 3f;
             image.color = color;
             image.raycastTarget = false;
             return rect;

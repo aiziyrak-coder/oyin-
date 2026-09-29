@@ -27,6 +27,18 @@ namespace CraDev.World
 
         public bool IsSupported => material != null && material.shader != null && material.shader.isSupported;
 
+        // AO o'yinchi sozlamasi (WorldPreferences) bilan boshlanadi va u o'zgarganda ergashadi;
+        // AOEnabled ni dev sinovlari vaqtincha to'g'ridan-to'g'ri ham o'zgartira oladi.
+        void Awake()
+        {
+            AOEnabled = WorldPreferences.AmbientOcclusion;
+            WorldPreferences.Changed += SyncPreference;
+        }
+
+        void OnDestroy() => WorldPreferences.Changed -= SyncPreference;
+
+        void SyncPreference() => AOEnabled = WorldPreferences.AmbientOcclusion;
+
         void OnEnable()
         {
             viewCamera = GetComponent<Camera>();

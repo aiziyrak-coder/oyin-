@@ -2,6 +2,7 @@ using System.Collections;
 using CraDev.Online;
 using CraDev.World;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CraDev
 {
@@ -86,6 +87,48 @@ namespace CraDev
                 "graphics: ground detail includes real grass geometry");
         }
 
+        static T Find<T>(Component root, string path) where T : Component
+        {
+            var target = root.transform.Find(path);
+            return target != null ? target.GetComponent<T>() : null;
+        }
+
+        // Esc menyusi: boshqaruv (WorldPreferences) va umumiy grafika/ovoz (GameSettings) qatorlari. Faqat o'qiydi,
+        // AO'ni esa xotirada almashtirib qaytaradi (diskka yozilmaydi).
+        static void CheckSettingsWindow(WorldHud hud, WorldPlayerController player)
+        {
+            const string window = "WorldSettingsOverlay/WorldSettingsWindow/";
+            const string controls = window + "WorldControlsColumn/";
+            const string graphics = window + "WorldGraphicsColumn/";
+            Check(Find<Slider>(hud, controls + "SensitivityRow/SensitivitySlider") != null &&
+                Find<Slider>(hud, controls + "FieldOfViewRow/FieldOfViewSlider") != null &&
+                Find<Toggle>(hud, controls + "InvertYToggle") != null &&
+                Find<Toggle>(hud, controls + "HeadBobToggle") != null &&
+                Find<Toggle>(hud, controls + "ToggleCrouchToggle") != null,
+                "world menu has the control rows");
+            var vsync = Find<Toggle>(hud, graphics + "VSyncToggle");
+            var ao = Find<Toggle>(hud, graphics + "AmbientOcclusionToggle");
+            var volume = Find<Slider>(hud, graphics + "VolumeRow/VolumeSlider");
+            Check(Find<Button>(hud, graphics + "DisplayModeSelector/DisplayModeNext") != null &&
+                Find<Button>(hud, graphics + "QualitySelector/QualityNext") != null &&
+                vsync != null && ao != null && volume != null,
+                "world menu has display, quality, V-Sync, AO and volume rows");
+
+            hud.SetSettings(true);
+            var display = Find<Text>(hud, graphics + "DisplayModeSelector/DisplayModeValue");
+            Check(display != null && display.text == Loc.T(GameSettings.Fullscreen ? "world.settings.display.fullscreen" : "world.settings.display.windowed"),
+                "world menu shows the saved display mode");
+            Check(vsync != null && vsync.isOn == GameSettings.VSync && volume != null && Mathf.Abs(volume.value - GameSettings.Volume) < .001f,
+                "world menu mirrors V-Sync and master volume from GameSettings");
+
+            var effects = player.ViewCamera.GetComponent<WorldImageEffects>();
+            WorldPreferences.AmbientOcclusion = false;
+            bool off = effects != null && !effects.AOEnabled && ao != null && !ao.isOn;
+            WorldPreferences.AmbientOcclusion = true;
+            Check(off && effects.AOEnabled && ao.isOn, "AO preference drives image effects and the menu switch");
+            hud.SetSettings(false);
+        }
+
         static void CheckPhotoMaterial(string objectName, string prefix, string shaderName = "CraDev/WorldPBR")
         {
             var target = GameObject.Find(objectName);
@@ -117,6 +160,7 @@ namespace CraDev
             bool originalPaused = player.Paused;
             bool originalSettingsOpen = hud.SettingsOpen;
             bool toggleCrouch = WorldPreferences.ToggleCrouch;
+            bool ambientOcclusion = WorldPreferences.AmbientOcclusion;
             float sensitivity = WorldPreferences.Sensitivity;
             float fieldOfView = WorldPreferences.FieldOfView;
             Vector3 originalPosition = player.transform.position;
@@ -126,6 +170,8 @@ namespace CraDev
             string outfit = PlayerProfile.Outfit;
             player.TestMode = true;
             WorldPreferences.ToggleCrouch = false;
+            // Grafika tekshiruvi AO yoqilgan holatni kutadi; o'yinchi uni o'chirgan bo'lsa ham faqat xotirada yoqamiz.
+            WorldPreferences.AmbientOcclusion = true;
 
             try
             {
@@ -265,6 +311,26 @@ namespace CraDev
                 player.Simulate(Vector2.zero, Vector2.zero, false, true, false, 1f / 60);
                 Simulate(player, .5f);
                 Check(!player.IsCrouching, "second crouch press exits toggle stance");
+
+                // Toggle holati pauza/davom etishda tushadi: joy bo'lsa o'yinchi tik turib qaytadi.
+                player.Simulate(Vector2.zero, Vector2.zero, false, true, false, 1f / 60);
+                Simulate(player, .5f);
+                bool latched = player.IsCrouching;
+                player.SetPaused(true);
+                player.SetPaused(false);
+                Simulate(player, .6f);
+                Check(latched && !player.IsCrouching && Mathf.Abs(player.Capsule.height - standingHeight) < .02f,
+                    "resume after pause stands up from toggled crouch when there is headroom");
+                player.Simulate(Vector2.zero, Vector2.zero, false, true, false, 1f / 60);
+                Simulate(player, .5f);
+                Check(player.IsCrouching, "toggle crouch works again after resume");
+                // Rejimni o'chirib-yoqish eski toggle holatini qaytarmaydi.
+                WorldPreferences.ToggleCrouch = false;
+                Simulate(player, .5f);
+                Check(!player.IsCrouching, "hold mode ignores the previous toggle stance");
+                WorldPreferences.ToggleCrouch = true;
+                Simulate(player, .6f);
+                Check(!player.IsCrouching, "re-enabling toggle crouch does not restore a stale crouch");
                 WorldPreferences.ToggleCrouch = false;
 
                 Reset(player, Origin, 90);
@@ -289,6 +355,16 @@ namespace CraDev
                 }
                 Check(Mathf.Abs(Mathf.DeltaAngle(mouseTurns[0], mouseTurns[1])) < .02f,
                     $"same mouse displacement gives same turn at 30/120 FPS: {mouseTurns[0]:F4}/{mouseTurns[1]:F4} degrees");
+
+                // Hujjatdagi birlik: sezgirlik 1.00 da har piksel MouseDegreesPerPixel daraja.
+                Reset(player, Origin);
+                WorldPreferences.Sensitivity = 1f;
+                float yawBefore = player.Yaw;
+                player.Simulate(Vector2.zero, new Vector2(100f, 0f), false, false, false, 1f / 60);
+                float turned = Mathf.DeltaAngle(yawBefore, player.Yaw);
+                Check(Mathf.Abs(turned - 100f * WorldPlayerController.MouseDegreesPerPixel) < .01f,
+                    $"100 px mouse move at sensitivity 1.00 turns {turned:F3} degrees");
+                WorldPreferences.Sensitivity = sensitivity;
 
                 // Faqat xotiradagi qiymatlar: diskka Save/Reset chaqirilmaydi.
                 WorldPreferences.Sensitivity = -20;
@@ -341,6 +417,17 @@ namespace CraDev
                 player.TestMode = true;
                 yield return null;
                 Check(!hud.SettingsOpen && !player.Paused, "closing world settings resumes controller");
+
+                // Esc himoyasi: o'yinchi o'zi pauza qilgan kadrda (kursor qo'yib yuborilgan) Esc menyuni qayta yopmaydi.
+                player.SetPaused(true);
+                bool toggledSameFrame = hud.ToggleMenuFromInput();
+                Check(!toggledSameFrame && hud.SettingsOpen && player.Paused, "Esc in the frame the game paused does not close the menu again");
+                yield return null;
+                bool toggledNextFrame = hud.ToggleMenuFromInput();
+                Check(toggledNextFrame && !hud.SettingsOpen && !player.Paused, "next Esc closes the menu and resumes");
+                yield return null;
+
+                CheckSettingsWindow(hud, player);
                 Check(hud.MapTexture != null && hud.MapTexture.IsCreated() && hud.MapTexture.width >= 128 && hud.MapTexture.width <= 512, "small minimap has a valid bounded render texture");
                 Check(hud.MapCamera != null && hud.MapCamera.orthographic && hud.MapCamera.targetTexture == hud.MapTexture, "minimap uses dedicated orthographic camera");
                 Check(hud.MapCamera != null && (hud.MapCamera.cullingMask & ((1 << 5) | (1 << 8))) == 0,
@@ -380,6 +467,7 @@ namespace CraDev
             finally
             {
                 WorldPreferences.ToggleCrouch = toggleCrouch;
+                WorldPreferences.AmbientOcclusion = ambientOcclusion;
                 WorldPreferences.Sensitivity = sensitivity;
                 WorldPreferences.FieldOfView = fieldOfView;
                 player.Teleport(originalPosition, originalYaw);
