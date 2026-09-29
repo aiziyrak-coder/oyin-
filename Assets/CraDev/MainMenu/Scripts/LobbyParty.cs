@@ -20,7 +20,14 @@ namespace CraDev.MainMenu
         Button leave;
         int ping=-1;
         float lastContact=-100;
-        bool busy;
+        // Barcha party so'rovlari bitta navbatda ketma-ket yuboriladi: heartbeat paytida bosilgan taklif yo'qolmaydi
+        // va eski heartbeat javobi yangiroq natijani (qabul qilish, chiqish) ustidan yozib yubormaydi.
+        readonly Queue<(string action,PartyRequest request)> queue=new Queue<(string,PartyRequest)>();
+        readonly HashSet<string> inviting=new HashSet<string>(System.StringComparer.OrdinalIgnoreCase);
+        string memberList;
+        int screenWidth,screenHeight;
+        float canvasScale;
+        Canvas canvas;
         public PartyState State {get;private set;}
         public int OccupiedCount=>occupants.Count;
         // X bo'yicha xavfsiz yo'laklar, chuqurlik va mehmonlarning o'rni lobbyga qarab aralashadi.
@@ -48,36 +55,106 @@ namespace CraDev.MainMenu
             overlay.pivot=new Vector2(.5f,.5f);
             overlay.SetSiblingIndex(1);
             leave=Rect("LeaveParty",transform,new Vector2(0,115),new Vector2(190,48)).gameObject.AddComponent<Button>();
+            // Lobby sahifasi ustida, lekin sozlamalar, toast, dialog va qorayish (fader) ostida chiziladi
+            var home=lobby.Current;
+            leave.transform.SetSiblingIndex(home!=null&&home.transform.parent==transform?home.transform.GetSiblingIndex()+1:lobby.Dialog.transform.GetSiblingIndex());
             var lr=leave.GetComponent<RectTransform>();lr.anchorMin=lr.anchorMax=lr.pivot=new Vector2(.5f,1);lr.anchoredPosition=new Vector2(0,-115);
             var fill=leave.gameObject.AddComponent<Image>();fill.color=new Color(.12f,.13f,.14f,.9f);leave.targetGraphic=fill;
             var label=Label(leave.transform,"",Vector2.zero,new Vector2(190,48),20);
             label.rectTransform.anchorMin=label.rectTransform.anchorMax=label.rectTransform.pivot=new Vector2(.5f,.5f);
             label.rectTransform.anchoredPosition=Vector2.zero;
-            leave.onClick.AddListener(()=>lobby.Dialog.Show(Loc.T("party.leave"),Loc.T("party.leave_confirm"),Loc.T("party.leave"),()=>StartCoroutine(Command("leave",new PartyRequest())),Loc.T("common.cancel")));
+            leave.onClick.AddListener(()=>{
+                if(ModalWindow.AnyOpen||lobby.SettingsOpen)return;
+                lobby.Dialog.Show(Loc.T("party.leave"),Loc.T("lobby.party.leave_confirm"),Loc.T("party.leave"),()=>Enqueue("leave",new PartyRequest()),Loc.T("common.cancel"));
+            });
+            LobbyFriendsPanel.Sounds(leave);
             Apply(new PartyState{host=true,members=new[]{new PartyMember{nickname=PlayerProfile.Nickname,avatarId=PlayerProfile.AvatarId,outfit=PlayerProfile.Outfit,seat=0,pingMs=-1}}});
+            float heartbeat=0;
             while(true)
             {
-                if(!busy)yield return Command("heartbeat",new PartyRequest{pingMs=ping});
-                yield return new WaitForSecondsRealtime(3);
+                if(queue.Count>0)
+                {
+                    var (action,request)=queue.Dequeue();
+                    yield return Command(action,request);
+                    if(action=="invite"&&inviting.Remove(request.nickname??""))lobby.FriendsPanel?.Redraw();
+                    continue;
+                }
+                if(Time.realtimeSinceStartup>=heartbeat)
+                {
+                    heartbeat=Time.realtimeSinceStartup+3;
+                    yield return Command("heartbeat",new PartyRequest{pingMs=ping});
+                    continue;
+                }
+                yield return null;
             }
         }
-        public void Invite(string nickname){if(!busy)StartCoroutine(Command("invite",new PartyRequest{nickname=nickname}));}
+        /// <summary>Do'stni lobbyga chaqirish: navbatga qo'yiladi, hozirgi heartbeat tugashi bilan yuboriladi.</summary>
+        public void Invite(string nickname)
+        {
+            if(string.IsNullOrEmpty(nickname)||!inviting.Add(nickname))return;
+            Enqueue("invite",new PartyRequest{nickname=nickname});
+            lobby.FriendsPanel?.Redraw();
+        }
+        public bool IsInviting(string nickname)=>nickname!=null&&inviting.Contains(nickname);
+        public bool InParty(string nickname)=>State?.members!=null&&System.Array.Exists(State.members,m=>string.Equals(m.nickname,nickname,System.StringComparison.OrdinalIgnoreCase));
+        void Enqueue(string action,PartyRequest request)=>queue.Enqueue((action,request));
+        // Mehmon yo'laklari (±1.68 m) ekranda nameplate'lari bilan do'stlar paneli (ochiq holatda) va o'ng ustun
+        // orasiga sig'adigan koeffitsient. 16:9 va kengroq ekranda 1 (dizayn joylashuvi), torroqda kichrayadi.
+        float LaneScale()
+        {
+            var camera=lobby.Stage!=null?lobby.Stage.Camera:null;
+            if(camera==null||Screen.width<=0||camera.transform.position.z>=0)return 1;
+            var home=lobby.Current;if(canvas==null)canvas=lobby.GetComponent<Canvas>();
+            var drawer=home!=null?home.GetComponent<LobbyFriendsDrawer>():null;
+            var rail=home!=null?home.transform.Find("LobbyRightRail") as RectTransform:null;
+            // Panellar topilmasa: 16:9 dagi ekran ulushini saqlash (kadr torayganicha siqiladi)
+            if(drawer==null||rail==null||canvas==null)return Mathf.Clamp(camera.aspect/(16f/9),.45f,1);
+            float scale=canvas.scaleFactor,plate=(110+8)*scale/Screen.width;
+            var corners=new Vector3[4];rail.GetWorldCorners(corners);
+            float left=drawer.ExpandedRight*scale/Screen.width+plate,right=corners[0].x/Screen.width-plate;
+            // z=0 tekisligida kadrning yarim kengligi (metr); ekran ulushi: .5+(x-kameraX)/(2*half)
+            float camX=camera.transform.position.x;
+            float half=-camera.transform.position.z*Mathf.Tan(camera.fieldOfView*.5f*Mathf.Deg2Rad)*camera.aspect;
+            float fitLeft=(.5f-left)*2*half/(OuterLane+camX),fitRight=(right-.5f)*2*half/(OuterLane-camX);
+            return Mathf.Clamp(Mathf.Min(1,fitLeft,fitRight),.45f,1);
+        }
+        const float OuterLane=1.68f;
+        // Oyna o'lchami yoki UI masshtabi o'zgarsa joylashuv darhol qayta hisoblanadi, heartbeat kutilmaydi.
+        void Update()
+        {
+            if(State==null||overlay==null)return;
+            if(canvas==null)canvas=lobby.GetComponent<Canvas>();
+            float scale=canvas!=null?canvas.scaleFactor:1;
+            if(Screen.width==screenWidth&&Screen.height==screenHeight&&Mathf.Approximately(scale,canvasScale))return;
+            screenWidth=Screen.width;screenHeight=Screen.height;canvasScale=scale;
+            Apply(State);
+        }
+        static string ErrorText(ApiResult<PartyState> result)
+        {
+            if(result.NetworkError)return Loc.T("party.error.network");
+            string key="party.error."+result.Data?.error;
+            if(!string.IsNullOrEmpty(result.Data?.error)&&Loc.Has(key))return Loc.T(key);
+            if(result.Status==429)return Loc.T("party.error.too_many_requests");
+            if(result.Status==401)return Loc.T("party.error.unauthorized");
+            return Loc.T(result.Status>=500?"party.error.server_error":"common.server_error");
+        }
         IEnumerator Command(string action,PartyRequest request)
         {
-            busy=true;
             float start=Time.realtimeSinceStartup;
             ApiResult<PartyState> result=default;
             yield return lobby.Api.Party(PlayerProfile.Token,action,request,r=>result=r);
-            busy=false;
             if(!result.Ok)
             {
-                if(action!="heartbeat")lobby.Toast(Loc.T("party.error."+(result.Data?.error??"network")));
+                if(action!="heartbeat")lobby.Toast(ErrorText(result));
                 yield break;
             }
             lastContact=Time.realtimeSinceStartup;
             int measured=Mathf.Clamp(Mathf.RoundToInt((lastContact-start)*1000),0,10000);
             ping=ping<0?measured:Mathf.RoundToInt(Mathf.Lerp(ping,measured,.4f));
             Apply(result.Data);
+            // Guruh tarkibi o'zgarsa do'stlar paneli "Lobbyingizda" belgisini va taklif tugmalarini yangilaydi
+            string members=string.Join("|",System.Array.ConvertAll(result.Data.members??System.Array.Empty<PartyMember>(),m=>m.nickname));
+            if(members!=memberList){memberList=members;lobby.FriendsPanel?.Redraw();}
             if(action=="invite")lobby.Toast(Loc.T("party.sent"));
             if(action=="accept")lobby.Toast(Loc.T("party.joined"));
             if(result.Data.invitations!=null&&!ModalWindow.AnyOpen&&!lobby.SettingsOpen)
@@ -85,8 +162,8 @@ namespace CraDev.MainMenu
                     if(shownInvites.Add(invite.id))
                     {
                         lobby.Dialog.Show(Loc.T("party.invite"),Loc.F("party.invite_from",invite.nickname),Loc.T("party.accept"),
-                            ()=>StartCoroutine(Command("accept",new PartyRequest{invitationId=invite.id})),Loc.T("party.decline"),
-                            ()=>StartCoroutine(Command("decline",new PartyRequest{invitationId=invite.id})));
+                            ()=>Enqueue("accept",new PartyRequest{invitationId=invite.id}),Loc.T("party.decline"),
+                            ()=>Enqueue("decline",new PartyRequest{invitationId=invite.id}));
                         break;
                     }
             // Faqat joriy takliflar saqlanadi: xotira o'sib ketmaydi.
@@ -97,6 +174,7 @@ namespace CraDev.MainMenu
         {
             State=state;var active=new HashSet<int>();
             var positions=Formation(state.roomId??PlayerProfile.Nickname);
+            float lanes=LaneScale();
             foreach(var member in state.members??System.Array.Empty<PartyMember>())
             {
                 if(member.seat<0||member.seat>=5)continue;
@@ -126,8 +204,10 @@ namespace CraDev.MainMenu
                 var root=o.viewer.ModelRoot;
                 var position=positions[member.seat];
                 var camera=lobby.Stage.Camera;
-                // Perspektiva uzoqdagi personajlarni qo'shnisining ustiga siljitmasin.
-                position.x=camera.transform.position.x+(position.x-camera.transform.position.x)*
+                // Perspektiva uzoqdagi personajlarni qo'shnisining ustiga siljitmasin. Mehmonlar yo'lagi tor ekranda
+                // (16:10, 4:3, kichik ekran) do'stlar paneli va o'ng ustun orasidagi bo'sh joyga siqiladi.
+                float squeeze=member.seat==0?1:lanes;
+                position.x=camera.transform.position.x+(position.x-camera.transform.position.x)*squeeze*
                     (position.z-camera.transform.position.z)/(-camera.transform.position.z);
                 root.position=position;
                 root.rotation=Quaternion.Euler(0,180-Mathf.Sign(position.x)*6,0);

@@ -152,8 +152,9 @@ namespace CraDev.MainMenu
                 string label=player.friendship=="incoming"?"friends.accept":player.friendship=="friends"?"friends.remove":player.friendship=="outgoing"?"common.cancel":"friends.find";
                 string nickname=player.nickname;
                 Button(Loc.T(label),365,19,210,68,()=>{
+                    string before=player.friendship;
                     Action<ApiResult<FriendshipResponse>> done=result=>{
-                        Lobby.Toast(Loc.T(result.Ok?"settings.saved":"common.server_error"));if(isActiveAndEnabled)Render();
+                        Lobby.Toast(LobbyFriendsPanel.FriendMessage(before,nickname,result));if(isActiveAndEnabled)Render();
                     };
                     if(player.friendship=="incoming") Lobby.StartCoroutine(Lobby.Api.AcceptFriend(PlayerProfile.Token,nickname,done));
                     else if(player.friendship=="friends"||player.friendship=="outgoing")

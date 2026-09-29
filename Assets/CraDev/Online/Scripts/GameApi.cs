@@ -243,7 +243,13 @@ namespace CraDev.Online
         public string endsAt;
 
         /// <summary>Boshlanish vaqti (kompyuterning mahalliy vaqtida).</summary>
-        public DateTime StartsLocal => DateTime.TryParse(startsAt, null, System.Globalization.DateTimeStyles.RoundtripKind, out var t) ? t.ToLocalTime() : DateTime.MinValue;
+        public DateTime StartsLocal => Local(startsAt);
+
+        /// <summary>Tugash vaqti (mahalliy). Server bermasa - boshlanish vaqti.</summary>
+        public DateTime EndsLocal { get { var end = Local(endsAt); return end == DateTime.MinValue ? StartsLocal : end; } }
+
+        static DateTime Local(string iso) =>
+            DateTime.TryParse(iso, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.RoundtripKind, out var t) ? t.ToLocalTime() : DateTime.MinValue;
     }
 
     [Serializable]

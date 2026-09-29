@@ -165,9 +165,9 @@ namespace CraDev.EditorTools
             var canvas = bgRoot.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceCamera; canvas.worldCamera = bgCamera; canvas.planeDistance = 10;
             var backgroundA = V2Picture(bgRoot.transform, "BackgroundA", null, 0, 0, 1920, 1080);
-            Stretch(backgroundA.rectTransform);
+            V2Envelope(backgroundA);
             var backgroundB = V2Picture(bgRoot.transform, "BackgroundB", null, 0, 0, 1920, 1080);
-            Stretch(backgroundB.rectTransform);
+            V2Envelope(backgroundB);
             backgroundA.color = Color.white;
             backgroundB.color = new Color(1,1,1,0);
             Set(screen, "backgroundA", backgroundA); Set(screen, "backgroundB", backgroundB);
@@ -238,6 +238,17 @@ namespace CraDev.EditorTools
             Set(party,"lobby",screen);Set(party,"font",v2.Medium);
             AddUiSounds();
             Save(scene, MenuScene);
+        }
+
+        // Fon ekranni to'liq qoplaydi, ortiqchasi kesiladi (16:10, 4:3, 21:9 da cho'zilmaydi). Nisbatni
+        // MainMenuScreen.Fit har rasm uchun yangilaydi; LobbyCamera ham shu kesishga mos FOV tanlaydi.
+        static void V2Envelope(RawImage image)
+        {
+            var rect = image.rectTransform;
+            Stretch(rect); rect.pivot = new Vector2(.5f, .5f);
+            var fitter = image.gameObject.AddComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fitter.aspectRatio = 16f / 9;
         }
 
         static void V2Poses(LobbyStage stage)
@@ -330,12 +341,16 @@ namespace CraDev.EditorTools
             Set(page, "stagePose", id == "home" ? 0 : id == "wardrobe" ? 1 : -1);
             Set(page, "font", v2.Medium); Set(page, "bold", v2.Bold); Set(page, "rounded", v2.RoundFill);
             Set(page, "shirt", LineIcon("Shirt")); Set(page, "shoe", LineIcon("Shoe")); Set(page, "hair", LineIcon("Hair"));
-            Set(page, "educationImage", V2Texture("education-cards")); Set(page, "friendsImage", V2Texture("hero-friends"));
+            // Katta rasmlar faqat ularni ishlatadigan sahifada: bosh sahifa ta'lim/do'stlar rasmlarini xotirada ushlamaydi
+            if (id == "education") Set(page, "educationImage", V2Texture("education-cards"));
+            if (id == "friends") Set(page, "friendsImage", V2Texture("hero-friends"));
             SetArray(page,"businessIcons",new Object[]{LineIcon("Office"),LineIcon("Coworking"),LineIcon("Rocket"),LineIcon("Coins")});
             SetArray(page,"placeIcons",new Object[]{LineIcon("Music"),LineIcon("Film"),LineIcon("Gamepad"),LineIcon("Ball"),LineIcon("Home"),LineIcon("Music")});
             string bg = id == "world" ? "map" : id;
-            Set(page, "background", V2Texture("clean-" + bg));
-            if (id == "home") { Set(page,"background",V2Texture("sunset-home")); V2GameHome(rect,page); return page; }
+            // Bosh sahifa fonini LobbyEnvironment soat/ob-havoga qarab birinchi kadrdan qo'yadi: sahnada qo'shimcha
+            // to'liq ekranli rasm (sunset-home, clean-home) xotirada turmaydi va ochilishda boshqa rasm miltillamaydi.
+            if (id != "home") Set(page, "background", V2Texture("clean-" + bg));
+            if (id == "home") { V2GameHome(rect,page); return page; }
             if(id=="settings")
             {
                 // Sahifa butun ekranga cho'zilgan: qorong'i fon har qanday ekran nisbatida hammasini qoplaydi va

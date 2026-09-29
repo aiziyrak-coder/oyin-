@@ -80,7 +80,8 @@ namespace CraDev
             var eventRect=(RectTransform)lobby.Current.transform.Find("LobbyRightRail/LobbyEvent");
             Check(profileRect.parent==entryRect.parent&&eventRect.parent==entryRect.parent&&entryRect.rect.width==650,"reference right column and compact profile");
             Check(entryRect.anchorMin==Vector2.zero&&Mathf.Abs(entryRect.anchoredPosition.y-259)<1,"compact entry stays bottom anchored");
-            Check(Vector2.Distance(lobby.GetComponent<CanvasScaler>().referenceResolution,new Vector2(1920,1080)/.65f)<1,"all interface elements scaled to 65 percent");
+            var reference=lobby.GetComponent<CanvasScaler>().referenceResolution;
+            Check(Screen.height>=1080?Vector2.Distance(reference,new Vector2(1920,1080)/.65f)<1:reference.y>=1079&&reference.y<=1662,"all interface elements scaled to 65 percent (small screens not shrunk further)");
             Check(Find("EnterNewWorld").GetComponent<ReferenceSurface>()?.Style==1,"entry uses reference emerald gold landscape surface");
             Check(Find("EnterNewWorld").transform.Find("PlayOrb")?.GetComponent<ReferenceSurface>()?.Style==2,"entry has separate illuminated play orb");
             Check(lobby.Current.transform.Find("LobbyRightRail/LobbyPromo").GetComponent<ReferenceSurface>()?.Style==3,"promo uses edge-to-edge landscape with dark text scrim");
@@ -116,7 +117,22 @@ namespace CraDev
             }
             Click("FriendTool_requests");yield return Loaded(friends);
             Check(friends.Mode=="requests"&&lobby.Current.Id=="home","requests inline");
+            Check(friends.RequestsBadge!=null&&friends.RequestsBadge.transform.parent.gameObject.activeSelf==(friends.IncomingCount>0),"requests tool shows incoming count");
+            Check(friends.BellBadge!=null&&friends.BellBadge.transform.parent.gameObject.activeSelf==(friends.IncomingCount>0&&LobbyPrefs.NotifyFriendRequests),"bell badge follows incoming requests");
+            Click("Button_requests");yield return Loaded(friends);
+            Check(friends.Mode=="requests","bell keeps requests open instead of toggling back");
             Click("FriendTool_requests");yield return Loaded(friends);
+            Check(friends.Mode=="friends","requests tool toggles back to friends");
+            Check(new[]{"FriendTool_find","FriendTool_online","FriendTool_remove","FriendTool_requests","FriendTool_refresh","LobbySettings","LobbyQuit","Button_requests"}.All(n=>Find(n)?.GetComponent<LobbyIconHint>()!=null),"icon-only controls have hints");
+            var eventCard=Find("LobbyEvent");
+            Check(eventCard!=null&&eventCard.GetComponent<LobbyCommand>()==null&&!lobby.GetComponentsInChildren<LobbyCommand>(true).Any(c=>c.action=="soon"&&string.IsNullOrEmpty(c.value)),"event card has no empty soon toast");
+            if(eventCard!=null)
+            {
+                bool hasEvent=((LobbyContent)lobby.Current).HasNextEvent;
+                Click("LobbyEvent");yield return null;
+                Check(ModalWindow.AnyOpen==hasEvent,"event card opens real event details");
+                if(ModalWindow.AnyOpen)lobby.Dialog.Close();
+            }
             Click("LobbySettings");yield return null;
             Check(lobby.SettingsOpen&&lobby.Current.Id=="home"&&lobby.Stage.Current==0,"settings overlay keeps lobby and avatar");
             Check(!lobby.Current.Group.blocksRaycasts,"modal blocks underlying lobby");
