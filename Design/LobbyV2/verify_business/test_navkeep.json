@@ -1,0 +1,1254 @@
+{
+ "page": "business",
+ "size": [
+  518,
+  285
+ ],
+ "elements": [
+  {
+   "id": "nav.bar",
+   "kind": "panel",
+   "box": [
+    0,
+    0,
+    518,
+    33.6
+   ],
+   "group": "nav",
+   "anchor": "tc",
+   "remove": false,
+   "fill": "#0A162866",
+   "notes": "Full-width translucent dark band behind the nav (no border, no radius). Hard lower edge at y=33.6 (row 33 is the anti-aliased step: L 42->56 at x150, 48->88 at x200, 73->117 at x300; almost no step at x<100 where the left scrim is already dark and at x>500). Composite colour inside the band: x0 #051222, x90 #101D2C, x190 #19273B, x290 #273850, x350 #314158, x440 #3F485E, x505 #2E425C, i.e. roughly the scene darkened by #0A1628 at ~40%. It is nav UI, so it is marked remove=true (pad 0): the whole 0..33.6 strip is inpainted, otherwise a baked hard edge would misalign with the Unity nav bar at other aspect ratios. Unity: draw the nav bar 0..33.6 (anchor top, stretch width) with #0A1628 at ~40-45% alpha (optional 4px backdrop blur); that restores the concept look and hides any inpainting softness. No nav tab is highlighted on this page (no nav.tab_selected / underline).",
+   "pad": 0
+  },
+  {
+   "id": "nav.brand_icon",
+   "kind": "icon",
+   "box": [
+    19.9,
+    10.9,
+    35.2,
+    27.1
+   ],
+   "group": "nav",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2.5,
+   "icon": "brand-c",
+   "fill": "#3F76F5FF",
+   "color": "#FFFFFF",
+   "radius": 3.5,
+   "notes": "Blue rounded-square app tile (#3F76F5, slightly lighter top) with a white concentric 'C'/spiral glyph (sampled core #D2F1FF, drawn white). Tile edges measured at half-max of B-R contrast; ~2px dark-blue soft shadow around it (pad 2.5 covers it). Same brand tile as the other pages."
+  },
+  {
+   "id": "nav.brand_text",
+   "kind": "text",
+   "box": [
+    40.5,
+    14.9,
+    78.1,
+    24.2
+   ],
+   "group": "nav",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2.5,
+   "text": "Lynxos",
+   "fontPx": 10.1,
+   "weight": "bold",
+   "color": "#FFFFFF",
+   "notes": "Box bottom = 'y' descender (row 23 full, row 24 ~20%); baseline y=22.2; 'L' cap top 14.9 -> cap height 7.3 -> fontPx 10.1. Sampled core #F9FEFF (white)."
+  },
+  {
+   "id": "nav.tab_home",
+   "kind": "text",
+   "box": [
+    98,
+    16,
+    137,
+    22.5
+   ],
+   "group": "nav",
+   "anchor": "tc",
+   "remove": true,
+   "pad": 2.5,
+   "text": "Boah sahifa",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D0DAEC",
+   "state": "normal",
+   "notes": "AI-garbled: the 3rd glyph is drawn as an 'a' (closed bowl + right stem, unlike the 's' in 'sahifa'), so the art reads 'Boah sahifa'; use 'Bosh sahifa'. Baseline 22.4 (no descenders); h/f ascenders set the top. Unselected tab colour, sampled brightest #C3CCDA..#D0DBF1 (thin anti-aliased text; ~80-85% white). Tab centres x: 117.5, 169.8, 216.5, 264.2, 318.0 (pitch ~50).",
+   "intended": "Bosh sahifa"
+  },
+  {
+   "id": "nav.tab_world",
+   "kind": "text",
+   "box": [
+    158.6,
+    16,
+    181,
+    24
+   ],
+   "group": "nav",
+   "anchor": "tc",
+   "remove": true,
+   "pad": 2.5,
+   "text": "Dunyo",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D0DAEC",
+   "state": "normal",
+   "notes": "bottom includes 'y' descender; baseline ~22.4. Unselected tab colour, sampled #CAD3E0..#D1DBF2 (anti-aliased thin text; true colour ~#D6DFEF, ~85% white). Tab centres x: 117.5, 169.8, 216.5, 264.2, 318.0 (pitch ~50)."
+  },
+  {
+   "id": "nav.tab_friends",
+   "kind": "text",
+   "box": [
+    203,
+    16,
+    230,
+    22.8
+   ],
+   "group": "nav",
+   "anchor": "tc",
+   "remove": true,
+   "pad": 2.5,
+   "text": "Do'stlar",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D0DAEC",
+   "state": "normal",
+   "notes": "baseline ~22.5; apostrophe is a straight/curly ' ; no descenders. Unselected tab colour, sampled #CAD3E0..#D1DBF2 (anti-aliased thin text; true colour ~#D6DFEF, ~85% white). Tab centres x: 117.5, 169.8, 216.5, 264.2, 318.0 (pitch ~50)."
+  },
+  {
+   "id": "nav.tab_top",
+   "kind": "text",
+   "box": [
+    251,
+    16,
+    277.4,
+    24
+   ],
+   "group": "nav",
+   "anchor": "tc",
+   "remove": true,
+   "pad": 2.5,
+   "text": "Top-lar",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D0DAEC",
+   "state": "normal",
+   "notes": "bottom includes 'p' descender; baseline ~22.4. Unselected tab colour, sampled #CAD3E0..#D1DBF2 (anti-aliased thin text; true colour ~#D6DFEF, ~85% white). Tab centres x: 117.5, 169.8, 216.5, 264.2, 318.0 (pitch ~50)."
+  },
+  {
+   "id": "nav.tab_settings",
+   "kind": "text",
+   "box": [
+    299,
+    16,
+    337,
+    22.8
+   ],
+   "group": "nav",
+   "anchor": "tc",
+   "remove": true,
+   "pad": 2.5,
+   "text": "Sozlamalar",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D0DAEC",
+   "state": "normal",
+   "notes": "baseline ~22.5; no descenders. Unselected tab colour, sampled #CAD3E0..#D1DBF2 (anti-aliased thin text; true colour ~#D6DFEF, ~85% white). Tab centres x: 117.5, 169.8, 216.5, 264.2, 318.0 (pitch ~50)."
+  },
+  {
+   "id": "nav.lang_globe",
+   "kind": "icon",
+   "box": [
+    369,
+    13.6,
+    381,
+    26
+   ],
+   "group": "nav",
+   "anchor": "tr",
+   "remove": true,
+   "pad": 2.5,
+   "icon": "globe",
+   "color": "#DEEAF7",
+   "notes": "Outline globe, ~1.3px stroke, 12x12.4."
+  },
+  {
+   "id": "nav.lang_text",
+   "kind": "text",
+   "box": [
+    385,
+    16.8,
+    394.2,
+    23
+   ],
+   "group": "nav",
+   "anchor": "tr",
+   "remove": true,
+   "pad": 2.5,
+   "text": "UZ",
+   "fontPx": 8.6,
+   "weight": "semibold",
+   "color": "#D2DDF0",
+   "notes": "Caps only; top = cap top, bottom = baseline."
+  },
+  {
+   "id": "nav.lang_chevron",
+   "kind": "icon",
+   "box": [
+    397.7,
+    18.7,
+    402,
+    21.2
+   ],
+   "group": "nav",
+   "anchor": "tr",
+   "remove": true,
+   "pad": 2,
+   "icon": "chevron-down",
+   "color": "#B8C6DD",
+   "notes": "Tiny chevron, ~1px stroke."
+  },
+  {
+   "id": "nav.bell",
+   "kind": "icon",
+   "box": [
+    414.6,
+    14,
+    425,
+    26
+   ],
+   "group": "nav",
+   "anchor": "tr",
+   "remove": true,
+   "pad": 2.5,
+   "icon": "bell",
+   "color": "#E5EEFF",
+   "notes": "Outline bell, ~1.3px stroke."
+  },
+  {
+   "id": "nav.bell_dot",
+   "kind": "dot",
+   "box": [
+    422.2,
+    14.0,
+    425.9,
+    17.2
+   ],
+   "group": "nav",
+   "anchor": "tr",
+   "remove": true,
+   "pad": 1.5,
+   "color": "#EF4460",
+   "notes": "Red notification dot on the bell's top-right shoulder, ~3.7x3.2px. Brightest sampled core #BB3F54 (tiny + blurred, so darker than drawn); intended colour a saturated red/pink #EF4460 (other pages sample #CC494F / #CF4151, same dot)."
+  },
+  {
+   "id": "nav.profile_pill",
+   "kind": "pill",
+   "box": [
+    434.3,
+    9.6,
+    503,
+    29.6
+   ],
+   "group": "nav",
+   "anchor": "tr",
+   "remove": true,
+   "pad": 2,
+   "fill": "#FFFFFF08",
+   "stroke": "#FFFFFF1F",
+   "radius": 10,
+   "notes": "Almost transparent glass pill (inside #30435C vs outside #31415B) with a thin ~1px light stroke (top stroke row y=10, bottom y=29, right arc x~502). Contains avatar, name and chevron."
+  },
+  {
+   "id": "nav.profile_avatar",
+   "kind": "avatar",
+   "box": [
+    434.5,
+    9.8,
+    452.5,
+    28.6
+   ],
+   "group": "nav",
+   "anchor": "tr",
+   "remove": true,
+   "pad": 1.5,
+   "radius": 9,
+   "stroke": "#5A6478FF",
+   "notes": "Circular photo avatar (young man, dark hair, warm skin #C58F64) with a light grey ring (~1.5px, most visible on the left, #5A6478). Inner dark photo disk ~[438.8,11.8,451.6,28.2]. The avatar ring shares the pill's left edge."
+  },
+  {
+   "id": "nav.profile_name",
+   "kind": "text",
+   "box": [
+    456,
+    17.5,
+    488,
+    23.2
+   ],
+   "group": "nav",
+   "anchor": "tr",
+   "remove": true,
+   "pad": 2,
+   "text": "Lynxos_uaer",
+   "intended": "Lynxos_user",
+   "fontPx": 6.7,
+   "weight": "medium",
+   "color": "#C4D0E2",
+   "notes": "Very small, garbled AI text. Bottom includes 'y' descender; baseline ~22.3."
+  },
+  {
+   "id": "nav.profile_chevron",
+   "kind": "icon",
+   "box": [
+    493,
+    18.6,
+    498,
+    21.4
+   ],
+   "group": "nav",
+   "anchor": "tr",
+   "remove": true,
+   "pad": 2,
+   "icon": "chevron-down",
+   "color": "#B8C6DD",
+   "notes": "Small chevron, ~1.2px stroke. Right padding to pill edge ~5px."
+  },
+  {
+   "id": "header.title",
+   "kind": "text",
+   "box": [
+    21.4,
+    44.0,
+    131.7,
+    56.6
+   ],
+   "group": "header",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 3,
+   "text": "Biznes markazi",
+   "fontPx": 16.5,
+   "weight": "bold",
+   "color": "#FFFFFF",
+   "notes": "No descenders; top = last 'i' dot (y 44.0; 'B' cap top 44.75), bottom = baseline 56.6; cap height 11.85 -> fontPx 16.5. Left = 'B' stem at 21.4 (x=20 is the dark shadow, not ink). Soft dark text shadow ~1px down/left (pad 3 covers it)."
+  },
+  {
+   "id": "header.subtitle",
+   "kind": "text",
+   "box": [
+    20.7,
+    65.0,
+    168.0,
+    73.9
+   ],
+   "group": "header",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2.5,
+   "text": "Yangi imkoniyatlar, yangi hamkorlilar",
+   "intended": "Yangi imkoniyatlar, yangi hamkorliklar",
+   "fontPx": 9.4,
+   "weight": "regular",
+   "color": "#BCC0CA",
+   "notes": "Bottom = descenders of g/y/comma (row 73 ~90%, row 74 background); baseline 72.0; 'Y' cap top 65.3 -> cap 6.7 -> fontPx 9.4; l/k ascenders set top 65.0. NOTE: the bright blob at x148-149, y74-80 is a lit plant stem in the background, not text. Behaves like white at ~72% opacity (reaches L~180 on the dark scrim, ~205 over the plant); on the dark scrim this equals #BCC0CA. Last word is garbled in the art ('hamkorlilar')."
+  },
+  {
+   "id": "side.item_0",
+   "kind": "button",
+   "box": [
+    19.8,
+    88.6,
+    126.3,
+    109.4
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "state": "selected",
+   "remove": true,
+   "pad": 4,
+   "fill": "#2264FCFF",
+   "radius": 4.5,
+   "notes": "Selected row: solid vivid blue #2264FC (flat) with a soft blue glow that is asymmetric: ~7px on the LEFT (x 12..19.8, B-R still +5..+45 above the scrim), ~3px on the right/top/bottom. Pad 4 + removePolygon 'side_item0_glow_left' cover it. A barely visible 3x3px bump (+6 L) at ~(117,98) near the right end is noise, not a chevron - no element. Row pitch ~24.1; the gap to item_1 is ~1.4px."
+  },
+  {
+   "id": "side.item_0_icon",
+   "kind": "icon",
+   "box": [
+    30.6,
+    93.7,
+    41,
+    104
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "icon": "home",
+   "color": "#FFFFFF",
+   "state": "selected",
+   "notes": "Outline line icon ~1.3px stroke, ~11x11: building with arched doorway (home/asosiy). AI-garbled glyph - use a clean equivalent."
+  },
+  {
+   "id": "side.item_0_label",
+   "kind": "text",
+   "box": [
+    52.6,
+    95.0,
+    75.6,
+    103.3
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "text": "Asosiy",
+   "fontPx": 9.0,
+   "weight": "semibold",
+   "color": "#FFFFFF",
+   "state": "selected",
+   "notes": "Smudged in the art (glyphs read roughly 'Aaoriy'), intended 'Asosiy'. Bottom = 'y' descender; baseline ~101.5. Label x starts at 53 (icon x 30.5-41). White text; samples only reach #C5EAFF because thin white strokes blend with the blue.",
+   "intended": "Asosiy"
+  },
+  {
+   "id": "side.item_1",
+   "kind": "button",
+   "box": [
+    19.8,
+    110.8,
+    126.4,
+    133.0
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "remove": true,
+   "pad": 2.5,
+   "fill": "#1C2738D9",
+   "stroke": "#FFFFFF14",
+   "radius": 4.5,
+   "notes": "Dark translucent glass row (composite interior ~#232D3B mid-row, ~#142232 at the left end where the scrim behind is darker) with a faint 1px lighter stroke (visible at x=20 and on the rounded corners). Rows are separated by a 2px GAP (y 133-135, 157-159, 181.4-183.6, 206-208, 230.6-232.8) through which the lighter background shows as a hairline. Measured row extents: tops 110.8/135/159/183.6/208/232.8, bottoms 133/157/181.4/206/230.6/257.2 (heights 22.2, 22, 22.4, 22.4, 22.6, 24.4 - AI drift); use a uniform 22px row + 2px gap in Unity. Right edge 126.4 = same as the selected row."
+  },
+  {
+   "id": "side.item_1_icon",
+   "kind": "icon",
+   "box": [
+    30.6,
+    116.6,
+    41,
+    128
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "icon": "building",
+   "color": "#E2E9F5",
+   "state": "normal",
+   "notes": "Outline line icon ~1.3px stroke, ~11x11: office building / door. AI-garbled glyph - use a clean equivalent."
+  },
+  {
+   "id": "side.item_1_label",
+   "kind": "text",
+   "box": [
+    52.8,
+    118.4,
+    76.0,
+    125.0
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "text": "Ofislar",
+   "fontPx": 9.0,
+   "weight": "medium",
+   "color": "#DCE3EE",
+   "state": "normal",
+   "notes": "baseline 125, no descenders; top = O/f/l ascenders (row 118 ~55%). Label x starts at 53 (icon x 30.5-41). Sampled brightest ~#DFE6F3."
+  },
+  {
+   "id": "side.item_2",
+   "kind": "button",
+   "box": [
+    19.8,
+    135.0,
+    126.4,
+    157.0
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "remove": true,
+   "pad": 2.5,
+   "fill": "#1C2738D9",
+   "stroke": "#FFFFFF14",
+   "radius": 4.5,
+   "notes": "Dark translucent glass row (composite interior ~#232D3B mid-row, ~#142232 at the left end where the scrim behind is darker) with a faint 1px lighter stroke (visible at x=20 and on the rounded corners). Rows are separated by a 2px GAP (y 133-135, 157-159, 181.4-183.6, 206-208, 230.6-232.8) through which the lighter background shows as a hairline. Measured row extents: tops 110.8/135/159/183.6/208/232.8, bottoms 133/157/181.4/206/230.6/257.2 (heights 22.2, 22, 22.4, 22.4, 22.6, 24.4 - AI drift); use a uniform 22px row + 2px gap in Unity. Right edge 126.4 = same as the selected row."
+  },
+  {
+   "id": "side.item_2_icon",
+   "kind": "icon",
+   "box": [
+    30,
+    140.6,
+    41,
+    151.5
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "icon": "users",
+   "color": "#E2E9F5",
+   "state": "normal",
+   "notes": "Outline line icon ~1.3px stroke, ~11x11: group of three people (coworking). AI-garbled glyph - use a clean equivalent."
+  },
+  {
+   "id": "side.item_2_label",
+   "kind": "text",
+   "box": [
+    53,
+    142.7,
+    88,
+    151
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "text": "Kovorking",
+   "fontPx": 9.0,
+   "weight": "medium",
+   "color": "#DCE3EE",
+   "state": "normal",
+   "notes": "bottom includes 'g' descender; baseline ~149.3. Label x starts at 53 (icon x 30.5-41). Sampled ~#D0D9E8..#DFE6F2."
+  },
+  {
+   "id": "side.item_3",
+   "kind": "button",
+   "box": [
+    19.8,
+    159.0,
+    126.4,
+    181.4
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "remove": true,
+   "pad": 2.5,
+   "fill": "#1C2738D9",
+   "stroke": "#FFFFFF14",
+   "radius": 4.5,
+   "notes": "Dark translucent glass row (composite interior ~#232D3B mid-row, ~#142232 at the left end where the scrim behind is darker) with a faint 1px lighter stroke (visible at x=20 and on the rounded corners). Rows are separated by a 2px GAP (y 133-135, 157-159, 181.4-183.6, 206-208, 230.6-232.8) through which the lighter background shows as a hairline. Measured row extents: tops 110.8/135/159/183.6/208/232.8, bottoms 133/157/181.4/206/230.6/257.2 (heights 22.2, 22, 22.4, 22.4, 22.6, 24.4 - AI drift); use a uniform 22px row + 2px gap in Unity. Right edge 126.4 = same as the selected row."
+  },
+  {
+   "id": "side.item_3_icon",
+   "kind": "icon",
+   "box": [
+    30.6,
+    164,
+    41,
+    176
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "icon": "lightbulb",
+   "color": "#E2E9F5",
+   "state": "normal",
+   "notes": "Outline line icon ~1.3px stroke, ~11x12: house/badge outline with a lightbulb inside (startups; 'rocket' also fits). AI-garbled glyph - use a clean equivalent."
+  },
+  {
+   "id": "side.item_3_label",
+   "kind": "text",
+   "box": [
+    52.9,
+    167.0,
+    87.3,
+    174.6
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "text": "Startaplar",
+   "fontPx": 9.0,
+   "weight": "medium",
+   "color": "#DCE3EE",
+   "state": "normal",
+   "notes": "bottom = 'p' descender (row 174 ~55%); baseline ~173.2. Label x starts at 53 (icon x 30.5-41). Sampled brightest ~#DFE6F1."
+  },
+  {
+   "id": "side.item_4",
+   "kind": "button",
+   "box": [
+    19.8,
+    183.6,
+    126.4,
+    206.0
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "remove": true,
+   "pad": 2.5,
+   "fill": "#1C2738D9",
+   "stroke": "#FFFFFF14",
+   "radius": 4.5,
+   "notes": "Dark translucent glass row (composite interior ~#232D3B mid-row, ~#142232 at the left end where the scrim behind is darker) with a faint 1px lighter stroke (visible at x=20 and on the rounded corners). Rows are separated by a 2px GAP (y 133-135, 157-159, 181.4-183.6, 206-208, 230.6-232.8) through which the lighter background shows as a hairline. Measured row extents: tops 110.8/135/159/183.6/208/232.8, bottoms 133/157/181.4/206/230.6/257.2 (heights 22.2, 22, 22.4, 22.4, 22.6, 24.4 - AI drift); use a uniform 22px row + 2px gap in Unity. Right edge 126.4 = same as the selected row."
+  },
+  {
+   "id": "side.item_4_icon",
+   "kind": "icon",
+   "box": [
+    30,
+    189.5,
+    41,
+    200
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "icon": "investor",
+   "color": "#E2E9F5",
+   "state": "normal",
+   "notes": "Outline line icon ~1.3px stroke, ~11x11: house/badge outline with coins + small chart inside (investors; e.g. 'chart-coins' / 'piggy-bank'). AI-garbled glyph - use a clean equivalent."
+  },
+  {
+   "id": "side.item_4_label",
+   "kind": "text",
+   "box": [
+    53.0,
+    191.6,
+    90.1,
+    198.0
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "text": "Investorlar",
+   "fontPx": 9.0,
+   "weight": "medium",
+   "color": "#DCE3EE",
+   "state": "normal",
+   "notes": "baseline 198, no descenders; top = 'I'/'l'/'t' (row 191 ~40%). Label x starts at 53 (icon x 30.5-41). Sampled brightest ~#D0D9E8."
+  },
+  {
+   "id": "side.item_5",
+   "kind": "button",
+   "box": [
+    19.8,
+    208.0,
+    126.4,
+    230.6
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "remove": true,
+   "pad": 2.5,
+   "fill": "#1C2738D9",
+   "stroke": "#FFFFFF14",
+   "radius": 4.5,
+   "notes": "Dark translucent glass row (composite interior ~#232D3B mid-row, ~#142232 at the left end where the scrim behind is darker) with a faint 1px lighter stroke (visible at x=20 and on the rounded corners). Rows are separated by a 2px GAP (y 133-135, 157-159, 181.4-183.6, 206-208, 230.6-232.8) through which the lighter background shows as a hairline. Measured row extents: tops 110.8/135/159/183.6/208/232.8, bottoms 133/157/181.4/206/230.6/257.2 (heights 22.2, 22, 22.4, 22.4, 22.6, 24.4 - AI drift); use a uniform 22px row + 2px gap in Unity. Right edge 126.4 = same as the selected row."
+  },
+  {
+   "id": "side.item_5_icon",
+   "kind": "icon",
+   "box": [
+    30.6,
+    213.8,
+    41,
+    225
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "icon": "calendar",
+   "color": "#E2E9F5",
+   "state": "normal",
+   "notes": "Outline line icon ~1.3px stroke, ~11x11: calendar. AI-garbled glyph - use a clean equivalent."
+  },
+  {
+   "id": "side.item_5_label",
+   "kind": "text",
+   "box": [
+    52.6,
+    216,
+    84,
+    222.3
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "text": "Tadbirlar",
+   "fontPx": 9.0,
+   "weight": "medium",
+   "color": "#DCE3EE",
+   "state": "normal",
+   "notes": "baseline 222.3, no descenders. Label x starts at 53 (icon x 30.5-41). Sampled ~#D0D9E8..#DFE6F2."
+  },
+  {
+   "id": "side.item_6",
+   "kind": "button",
+   "box": [
+    19.8,
+    232.8,
+    126.4,
+    257.2
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "remove": true,
+   "pad": 2.5,
+   "fill": "#1C2738D9",
+   "stroke": "#FFFFFF14",
+   "radius": 4.5,
+   "notes": "Dark translucent glass row (composite interior ~#232D3B mid-row, ~#142232 at the left end where the scrim behind is darker) with a faint 1px lighter stroke (visible at x=20 and on the rounded corners). Rows are separated by a 2px GAP (y 133-135, 157-159, 181.4-183.6, 206-208, 230.6-232.8) through which the lighter background shows as a hairline. Measured row extents: tops 110.8/135/159/183.6/208/232.8, bottoms 133/157/181.4/206/230.6/257.2 (heights 22.2, 22, 22.4, 22.4, 22.6, 24.4 - AI drift); use a uniform 22px row + 2px gap in Unity. Right edge 126.4 = same as the selected row."
+  },
+  {
+   "id": "side.item_6_icon",
+   "kind": "icon",
+   "box": [
+    30,
+    239,
+    42,
+    251
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "icon": "badge",
+   "color": "#E2E9F5",
+   "state": "normal",
+   "notes": "Outline line icon ~1.3px stroke, ~12x12: scalloped seal/badge (gear-like) circle with a small mark inside (services; 'gear' also fits). AI-garbled glyph - use a clean equivalent."
+  },
+  {
+   "id": "side.item_6_label",
+   "kind": "text",
+   "box": [
+    52.8,
+    241,
+    86.2,
+    248
+   ],
+   "group": "side",
+   "anchor": "tl",
+   "remove": true,
+   "pad": 2,
+   "text": "Xizmatlar",
+   "fontPx": 9.0,
+   "weight": "medium",
+   "color": "#DCE3EE",
+   "state": "normal",
+   "notes": "baseline 248, no descenders. Label x starts at 53 (icon x 30.5-41). Sampled ~#D0D9E8..#DFE6F2."
+  },
+  {
+   "id": "business.tile_0",
+   "kind": "tile",
+   "box": [
+    148.0,
+    210.0,
+    227.0,
+    263.0
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 3,
+   "fill": "#26324AC7",
+   "stroke": "#FFFFFF26",
+   "radius": 5,
+   "notes": "Glass action tile: dark navy translucent fill (composite interior #2E3A4F / #273243, lighter where the bright scene is behind, e.g. tile_2 #404350 -> backdrop blur ~4px), 1px light stroke (~#62697B; the top stroke is pixel row 210, e.g. L 96 vs 80 above / 55 below on tile_3), faint 1px dark shadow below (row 263). Icon top-left, label bottom-left; left padding ~10px. Measured x: 148-227, 233.2-313, 318-403.8, 409.2-504 (widths 79, 79.8, 85.8, 94.8; gaps 6.2, 5, 5.4) - equal widths with ~6px gaps are fine; row bottom margin ~22px."
+  },
+  {
+   "id": "business.tile_0_icon",
+   "kind": "icon",
+   "box": [
+    160,
+    221,
+    175,
+    237
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 2,
+   "icon": "office-key",
+   "color": "#F2F8FF",
+   "notes": "White outline icon ~1.5px stroke, ~15x16: shopping-bag/building outline with a keyhole-person inside (office rent; 'key' / 'building' also fit). AI-garbled - use a clean equivalent."
+  },
+  {
+   "id": "business.tile_0_label",
+   "kind": "text",
+   "box": [
+    158,
+    245,
+    193,
+    253
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 2,
+   "text": "Ofis ijarasi",
+   "fontPx": 7.9,
+   "weight": "medium",
+   "color": "#E2E8F5",
+   "notes": "bottom = 'j' descender (253.0); baseline 251.0; 'O' cap top ~245.3 -> cap 5.7 -> fontPx 7.9. Sampled brightest #D2DAE9 (thin text), true ~#E6ECF7."
+  },
+  {
+   "id": "business.tile_1",
+   "kind": "tile",
+   "box": [
+    233.2,
+    210.0,
+    313.0,
+    263.0
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 3,
+   "fill": "#26324AC7",
+   "stroke": "#FFFFFF26",
+   "radius": 5,
+   "notes": "Glass action tile: dark navy translucent fill (composite interior #2E3A4F / #273243, lighter where the bright scene is behind, e.g. tile_2 #404350 -> backdrop blur ~4px), 1px light stroke (~#62697B; the top stroke is pixel row 210, e.g. L 96 vs 80 above / 55 below on tile_3), faint 1px dark shadow below (row 263). Icon top-left, label bottom-left; left padding ~10px. Measured x: 148-227, 233.2-313, 318-403.8, 409.2-504 (widths 79, 79.8, 85.8, 94.8; gaps 6.2, 5, 5.4) - equal widths with ~6px gaps are fine; row bottom margin ~22px."
+  },
+  {
+   "id": "business.tile_1_icon",
+   "kind": "icon",
+   "box": [
+    243,
+    221,
+    260.5,
+    237
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 2,
+   "icon": "users",
+   "color": "#F2F8FF",
+   "notes": "White outline icon ~1.5px stroke, ~16x16: one person with two half-people behind (find partner). AI-garbled - use a clean equivalent."
+  },
+  {
+   "id": "business.tile_1_label",
+   "kind": "text",
+   "box": [
+    243,
+    245,
+    291,
+    253
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 2,
+   "text": "Hamkor topish",
+   "fontPx": 7.9,
+   "weight": "medium",
+   "color": "#E2E8F5",
+   "notes": "bottom = 'p' descender (~252.8); baseline 251.0; 'H' cap top 245.35 -> fontPx 7.9. Sampled brightest #DAE2F5 (thin text), true ~#E6ECF7."
+  },
+  {
+   "id": "business.tile_2",
+   "kind": "tile",
+   "box": [
+    318.0,
+    210.0,
+    403.8,
+    263.0
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 3,
+   "fill": "#26324AC7",
+   "stroke": "#FFFFFF26",
+   "radius": 5,
+   "notes": "Glass action tile: dark navy translucent fill (composite interior #2E3A4F / #273243, lighter where the bright scene is behind, e.g. tile_2 #404350 -> backdrop blur ~4px), 1px light stroke (~#62697B; the top stroke is pixel row 210, e.g. L 96 vs 80 above / 55 below on tile_3), faint 1px dark shadow below (row 263). Icon top-left, label bottom-left; left padding ~10px. Measured x: 148-227, 233.2-313, 318-403.8, 409.2-504 (widths 79, 79.8, 85.8, 94.8; gaps 6.2, 5, 5.4) - equal widths with ~6px gaps are fine; row bottom margin ~22px."
+  },
+  {
+   "id": "business.tile_2_icon",
+   "kind": "icon",
+   "box": [
+    329,
+    221,
+    345.2,
+    237
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 2,
+   "icon": "startup",
+   "color": "#F2F8FF",
+   "notes": "White outline icon ~1.5px stroke, ~16x16: open hand holding a box/coin with a small swirl on top (place a startup; 'hand-coin' / 'rocket' also fit). AI-garbled - use a clean equivalent."
+  },
+  {
+   "id": "business.tile_2_label",
+   "kind": "text",
+   "box": [
+    328.6,
+    245.0,
+    394.0,
+    252.8
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 2,
+   "text": "Startap joylashtirish",
+   "fontPx": 7.9,
+   "weight": "medium",
+   "color": "#E2E8F5",
+   "notes": "bottom = p/j/y descenders (~252.7); baseline 251.0; 'S'/'t'/'j'-dot set the top. Smudged but readable. Sampled brightest #D9DFED, true ~#E6ECF7."
+  },
+  {
+   "id": "business.tile_3",
+   "kind": "tile",
+   "box": [
+    409.2,
+    210.0,
+    504.0,
+    263.0
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 3,
+   "fill": "#26324AC7",
+   "stroke": "#FFFFFF26",
+   "radius": 5,
+   "notes": "Glass action tile: dark navy translucent fill (composite interior #2E3A4F / #273243, lighter where the bright scene is behind, e.g. tile_2 #404350 -> backdrop blur ~4px), 1px light stroke (~#62697B; the top stroke is pixel row 210, e.g. L 96 vs 80 above / 55 below on tile_3), faint 1px dark shadow below (row 263). Icon top-left, label bottom-left; left padding ~10px. Measured x: 148-227, 233.2-313, 318-403.8, 409.2-504 (widths 79, 79.8, 85.8, 94.8; gaps 6.2, 5, 5.4) - equal widths with ~6px gaps are fine; row bottom margin ~22px."
+  },
+  {
+   "id": "business.tile_3_icon",
+   "kind": "icon",
+   "box": [
+    421,
+    221,
+    436,
+    236.4
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 2,
+   "icon": "presenter",
+   "color": "#F2F8FF",
+   "notes": "White outline icon ~1.5px stroke, ~15x15: person bust inside a frame with raised arms / small chart (meet investors; 'user-tie' / 'handshake' also fit). AI-garbled - use a clean equivalent."
+  },
+  {
+   "id": "business.tile_3_label",
+   "kind": "text",
+   "box": [
+    419.3,
+    245.6,
+    496.5,
+    251.2
+   ],
+   "group": "actions",
+   "anchor": "bc",
+   "remove": true,
+   "pad": 2,
+   "text": "Investorlar bilan uchrashuv",
+   "fontPx": 7.8,
+   "weight": "medium",
+   "color": "#E2E8F5",
+   "notes": "no descenders; baseline 251.2; 'I'/'l'/'b'/'h' tops ~245.6 (cap 5.6 -> fontPx 7.8); letters condensed to fit the tile. Smudged but reads 'Investorlar bilan uchrashuv'. Sampled brightest #D5D9E7, true ~#E6ECF7."
+  },
+  {
+   "id": "business.wall_sign",
+   "kind": "image",
+   "box": [
+    340,
+    86,
+    444,
+    136
+   ],
+   "group": "background",
+   "anchor": "c",
+   "remove": false,
+   "notes": "Illuminated wall sign that belongs to the background art (keep it). Blue 3D 'S' ribbon logo + white 'Lynxos' / 'Business' wordmark + tagline 'IDEAS - PEOPLE - GROWTH' with a soft cool glow on the dark wall panel. Nothing overlaps it."
+  },
+  {
+   "id": "business.wall_sign_logo",
+   "kind": "image",
+   "box": [
+    343.0,
+    88.9,
+    365.3,
+    118.8
+   ],
+   "group": "background",
+   "anchor": "c",
+   "remove": false,
+   "color": "#315EBF",
+   "notes": "Blue glossy 'S'-ribbon logo (blue #315EBF edges, white #EFFFFF highlights, outer blue glow)."
+  },
+  {
+   "id": "business.wall_sign_title",
+   "kind": "text",
+   "box": [
+    373.0,
+    89.2,
+    428.1,
+    105.0
+   ],
+   "group": "background",
+   "anchor": "c",
+   "remove": false,
+   "text": "Lynxos",
+   "fontPx": 16.7,
+   "weight": "medium",
+   "color": "#FFFFFF",
+   "notes": "Part of background art. Bottom = 'y' descender (rows 103-104 full, row 105 background); baseline ~101.9; lit white letters with glow."
+  },
+  {
+   "id": "business.wall_sign_subtitle",
+   "kind": "text",
+   "box": [
+    373.3,
+    106.3,
+    428.6,
+    117.0
+   ],
+   "group": "background",
+   "anchor": "c",
+   "remove": false,
+   "text": "Business",
+   "fontPx": 14.4,
+   "weight": "medium",
+   "color": "#FFFFFF",
+   "notes": "Part of background art; top = 'i' dot (106.3; 'B' cap top 107.5); baseline 117.0."
+  },
+  {
+   "id": "business.wall_sign_tagline",
+   "kind": "text",
+   "box": [
+    342.4,
+    127.0,
+    441.1,
+    133.4
+   ],
+   "group": "background",
+   "anchor": "c",
+   "remove": false,
+   "text": "IDEAS · PEOPLE · GROWTH",
+   "fontPx": 9,
+   "weight": "semibold",
+   "color": "#F3F3F9",
+   "notes": "Part of background art; wide letter-spacing (~0.15em); middle dots drawn as short dashes."
+  },
+  {
+   "id": "business.left_scrim",
+   "kind": "panel",
+   "box": [
+    0,
+    0,
+    175,
+    285
+   ],
+   "group": "background",
+   "anchor": "cl",
+   "remove": false,
+   "fill": "#071422FF",
+   "notes": "Dark navy readability gradient on the left, baked into the art (NOT inpainted): solid #071422 from x=0 to ~70, fading to transparent by x~170 (x100 ~#0D1B2B/#1B2632, x140 ~#121F31 at the bottom). Keep it in the background or recreate as a UI gradient; do not double it."
+  }
+ ],
+ "removePolygons": [
+  {
+   "name": "frame_top_artifact",
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     518,
+     0
+    ],
+    [
+     518,
+     3.0
+    ],
+    [
+     0,
+     3.0
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "frame_right_artifact",
+   "points": [
+    [
+     515.5,
+     0
+    ],
+    [
+     518,
+     0
+    ],
+    [
+     518,
+     285
+    ],
+    [
+     515.5,
+     285
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "frame_corner_tl",
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     6,
+     0
+    ],
+    [
+     6,
+     3
+    ],
+    [
+     3,
+     6
+    ],
+    [
+     0,
+     6
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "frame_corner_bl",
+   "points": [
+    [
+     0,
+     279.5
+    ],
+    [
+     3,
+     282
+    ],
+    [
+     5,
+     285
+    ],
+    [
+     0,
+     285
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "frame_corner_br",
+   "points": [
+    [
+     518,
+     279.5
+    ],
+    [
+     515,
+     282
+    ],
+    [
+     512.5,
+     285
+    ],
+    [
+     518,
+     285
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "side_item0_glow_left",
+   "points": [
+    [
+     11.5,
+     84.5
+    ],
+    [
+     21,
+     84.5
+    ],
+    [
+     21,
+     113.5
+    ],
+    [
+     11.5,
+     113.5
+    ]
+   ],
+   "pad": 0
+  }
+ ],
+ "assets": [
+  {
+   "name": "business_background",
+   "box": [
+    0,
+    0,
+    518,
+    285
+   ],
+   "notes": "Office lounge (city-view windows left, sofas/table centre, lit wall sign right, plants right edge). Remove every remove=true element (nav texts/icons/pill, title, subtitle, 7 side rows, 4 action tiles). Keep the wall sign, the left dark scrim and the nav darkening band. Rows y=0-2 and columns x=515.5-518 contain the composite's frame edge (light 1px line + rounded top-left corner) - inpaint (removePolygons) or crop."
+  },
+  {
+   "name": "wall_sign",
+   "box": [
+    340,
+    86,
+    444,
+    136
+   ],
+   "notes": "Keep in background; crop if a separate glowing sprite is wanted. No overlay on it."
+  },
+  {
+   "name": "brand_icon",
+   "box": [
+    19,
+    10,
+    36,
+    28
+   ],
+   "notes": "Nav brand tile; better redrawn as a vector/sprite (shared with other pages)."
+  },
+  {
+   "name": "profile_avatar",
+   "box": [
+    434,
+    9,
+    453,
+    29
+   ],
+   "notes": "Placeholder user photo; very low-res, use a real avatar sprite."
+  }
+ ]
+}

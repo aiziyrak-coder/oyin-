@@ -1,0 +1,2361 @@
+{
+ "page": "wardrobe",
+ "size": [
+  519,
+  309
+ ],
+ "elements": [
+  {
+   "id": "nav.brand_icon",
+   "kind": "icon",
+   "box": [
+    17.3,
+    10.7,
+    32.3,
+    26.5
+   ],
+   "icon": "lynxos-logo",
+   "color": "#FFFFFF",
+   "fill": "#3F72EBFF",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Blue rounded-square app icon (fill #3F72EB, lighter #628BFE at centre, darker #2E5FD8 edges, soft blue glow) with a white stylised '@'/lynx-swirl glyph (glyph ink ~[20.1,13.7,28.3,23.2], #D6F0FF)."
+  },
+  {
+   "id": "nav.brand_text",
+   "kind": "text",
+   "box": [
+    37.3,
+    14.6,
+    74.2,
+    24.0
+   ],
+   "text": "Lynxos",
+   "fontPx": 10.3,
+   "weight": "bold",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Box = cap top of 'L' (14.6) to bottom of 'y' descender (24.0); baseline 22.0 (cap height 7.4)."
+  },
+  {
+   "id": "nav.tab_home",
+   "kind": "text",
+   "box": [
+    93.1,
+    15.8,
+    129.6,
+    21.9
+   ],
+   "text": "Bosh sahifa",
+   "fontPx": 8.3,
+   "weight": "medium",
+   "color": "#D6DAE3",
+   "anchor": "tc",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box (cap top to no descenders; baseline 21.9). Cap height ~6.0 (B/D/T/S tops 15.9-16.2, baseline 22.0). On this page NO nav tab is highlighted (Garderob is reached from the profile/home, it is not a top-nav tab): no selected pill, no underline. Glyphs are AI-blurred at 1x; sampled core ~#C5C9D2, intended light grey-white ~#D6DAE3 (white at ~85%)."
+  },
+  {
+   "id": "nav.tab_world",
+   "kind": "text",
+   "box": [
+    150.0,
+    16.0,
+    170.9,
+    23.3
+   ],
+   "text": "Dunyo",
+   "fontPx": 8.3,
+   "weight": "medium",
+   "color": "#D6DAE3",
+   "anchor": "tc",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box (cap top to includes 'y' descender; baseline ~22.0). Cap height ~6.0 (B/D/T/S tops 15.9-16.2, baseline 22.0). On this page NO nav tab is highlighted (Garderob is reached from the profile/home, it is not a top-nav tab): no selected pill, no underline. Glyphs are AI-blurred at 1x; sampled core ~#C5C9D2, intended light grey-white ~#D6DAE3 (white at ~85%)."
+  },
+  {
+   "id": "nav.tab_friends",
+   "kind": "text",
+   "box": [
+    191.2,
+    15.9,
+    215.7,
+    22.0
+   ],
+   "text": "Do'stlar",
+   "fontPx": 8.3,
+   "weight": "medium",
+   "color": "#D6DAE3",
+   "anchor": "tc",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box (cap top to no descenders; baseline 22.0). Cap height ~6.0 (B/D/T/S tops 15.9-16.2, baseline 22.0). On this page NO nav tab is highlighted (Garderob is reached from the profile/home, it is not a top-nav tab): no selected pill, no underline. Glyphs are AI-blurred at 1x; sampled core ~#C5C9D2, intended light grey-white ~#D6DAE3 (white at ~85%)."
+  },
+  {
+   "id": "nav.tab_top",
+   "kind": "text",
+   "box": [
+    235.7,
+    15.9,
+    259.2,
+    23.2
+   ],
+   "text": "Top-lar",
+   "fontPx": 8.3,
+   "weight": "medium",
+   "color": "#D6DAE3",
+   "anchor": "tc",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box (cap top to includes 'p' descender; baseline ~22.0). Cap height ~6.0 (B/D/T/S tops 15.9-16.2, baseline 22.0). On this page NO nav tab is highlighted (Garderob is reached from the profile/home, it is not a top-nav tab): no selected pill, no underline. Glyphs are AI-blurred at 1x; sampled core ~#C5C9D2, intended light grey-white ~#D6DAE3 (white at ~85%)."
+  },
+  {
+   "id": "nav.tab_settings",
+   "kind": "text",
+   "box": [
+    279.1,
+    16.0,
+    313.8,
+    22.1
+   ],
+   "text": "Sozlamalar",
+   "fontPx": 8.3,
+   "weight": "medium",
+   "color": "#D6DAE3",
+   "anchor": "tc",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box (cap top to no descenders; baseline 22.1). Cap height ~6.0 (B/D/T/S tops 15.9-16.2, baseline 22.0). On this page NO nav tab is highlighted (Garderob is reached from the profile/home, it is not a top-nav tab): no selected pill, no underline. Glyphs are AI-blurred at 1x; sampled core ~#C5C9D2, intended light grey-white ~#D6DAE3 (white at ~85%)."
+  },
+  {
+   "id": "nav.lang_globe",
+   "kind": "icon",
+   "box": [
+    371.7,
+    13.7,
+    383.0,
+    25.3
+   ],
+   "icon": "globe",
+   "color": "#E2EAF6",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline globe (meridian + 2 parallels), stroke ~1.2px."
+  },
+  {
+   "id": "nav.lang_text",
+   "kind": "text",
+   "box": [
+    387.2,
+    16.5,
+    396.0,
+    22.1
+   ],
+   "text": "UZ",
+   "fontPx": 7.6,
+   "weight": "medium",
+   "color": "#D0DAEA",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Cap top 16.6 to baseline 22.1 (cap height 5.5)."
+  },
+  {
+   "id": "nav.lang_chevron",
+   "kind": "icon",
+   "box": [
+    399.4,
+    18.0,
+    403.2,
+    21.1
+   ],
+   "icon": "chevron-down",
+   "color": "#B4C0D2",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Small thin chevron."
+  },
+  {
+   "id": "nav.bell",
+   "kind": "icon",
+   "box": [
+    414.8,
+    13.8,
+    424.6,
+    25.4
+   ],
+   "icon": "bell",
+   "color": "#E4ECF8",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline bell, stroke ~1.2px; clapper at bottom centre."
+  },
+  {
+   "id": "nav.bell_dot",
+   "kind": "dot",
+   "box": [
+    421.7,
+    13.7,
+    425.6,
+    17.5
+   ],
+   "color": "#E0435E",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Red notification dot over the bell's top-right (brightest 1x px #BF4057; intended saturated red/pink ~#E0435E)."
+  },
+  {
+   "id": "nav.profile_pill",
+   "kind": "pill",
+   "box": [
+    432.8,
+    9.6,
+    502.6,
+    29.6
+   ],
+   "fill": "#303D54E6",
+   "stroke": "#FFFFFF14",
+   "radius": 10.0,
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark glass capsule (sampled #303C53 top, #32435B bottom; background around ~#242E42). Very faint lighter rim."
+  },
+  {
+   "id": "nav.profile_avatar",
+   "kind": "avatar",
+   "box": [
+    436.5,
+    11.3,
+    453.3,
+    28.2
+   ],
+   "stroke": "#4A4E5AFF",
+   "radius": 8.4,
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1,
+   "notes": "Circular photo avatar of the same young man (black hair, white hoodie) with a ~1.5px greyish ring (#444857). Photo area ~[438.7,11.6,451.3,27.8]."
+  },
+  {
+   "id": "nav.profile_name",
+   "kind": "text",
+   "box": [
+    456.0,
+    17.4,
+    487.7,
+    22.8
+   ],
+   "text": "Lynxos_user",
+   "fontPx": 6.4,
+   "weight": "medium",
+   "color": "#C8D0DC",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "AI-garbled at 1x (reads like 'Lynxos_user'); box = cap top of 'L' (17.4) to the 'y' descender/underscore (22.8); baseline 22.0, cap height ~4.6 -> fontPx ~6.4. Sampled core #B6C0CC (blurred), intended #C8D0DC."
+  },
+  {
+   "id": "nav.profile_chevron",
+   "kind": "icon",
+   "box": [
+    492.4,
+    18.4,
+    496.9,
+    21.3
+   ],
+   "icon": "chevron-down",
+   "color": "#C3D0E8",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Small thin chevron-down, stroke ~1px."
+  },
+  {
+   "id": "header.title",
+   "kind": "text",
+   "box": [
+    18.3,
+    45.9,
+    95.0,
+    59.1
+   ],
+   "text": "Garderob",
+   "fontPx": 18.3,
+   "weight": "bold",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "header",
+   "remove": true,
+   "pad": 2,
+   "notes": "Cap top to baseline (no descenders). Cap height 13.2."
+  },
+  {
+   "id": "header.subtitle",
+   "kind": "text",
+   "box": [
+    18.0,
+    67.3,
+    144.5,
+    76.1
+   ],
+   "text": "O'zingizning uslubingizni yarating",
+   "fontPx": 9.0,
+   "weight": "regular",
+   "color": "#B4BAC6",
+   "anchor": "tl",
+   "group": "header",
+   "remove": true,
+   "pad": 2,
+   "notes": "Box includes descenders (g, y): top = 'O'/'l'/'b' tops ~67.3-67.5, baseline ~74.0 (cap height ~6.5, x-height ~5.0), descender bottom ~76.1. The last glyphs ('ng') run over the bright lit door frame at x>=140, so the right edge (~144.5) is approximate. Muted grey (sampled core #ACAFB9, intended #B4BAC6 = white ~70%)."
+  },
+  {
+   "id": "side.item_0",
+   "kind": "button",
+   "box": [
+    17.0,
+    92.1,
+    122.3,
+    113.5
+   ],
+   "fill": "#1F5CFBFF",
+   "stroke": "#3D78FFFF",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "Selected row: solid royal blue (#1F5CFB, very slightly lighter top), soft blue glow ~2px. NOTE: drawn only ~21.4 px tall (92.1-113.5) while unselected rows are 26.0 px (row tops 115.0,142.4,170.0,197.0,224.0 -> pitch ~27.2, gaps 1-2 px); builder should equalise to 26."
+  },
+  {
+   "id": "side.item_0_icon",
+   "kind": "icon",
+   "box": [
+    27.0,
+    97.8,
+    38.0,
+    107.6
+   ],
+   "icon": "shirt",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline T-shirt icon (white, stroke ~1.3px)."
+  },
+  {
+   "id": "side.item_0_label",
+   "kind": "text",
+   "box": [
+    48.3,
+    99.4,
+    75.5,
+    107.2
+   ],
+   "text": "Kiyimlar",
+   "fontPx": 8.0,
+   "weight": "semibold",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box: cap top to 'y' descender; baseline ~105.3. Cap height ~5.7-6.0 (K/P/A/S/O measured), x-height ~4.3 -> fontPx ~8.0."
+  },
+  {
+   "id": "side.item_1",
+   "kind": "button",
+   "box": [
+    17.0,
+    115.0,
+    122.0,
+    141.0
+   ],
+   "fill": "#1B2737BA",
+   "stroke": "#2C354BFF",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark translucent glass row: sampled #162131 over the dark left wall (#08121E) and #222B38 over the lighter right bg (#34333C) -> fill ~#1B2737 at alpha ~0.73. 1px lighter border (#2C354B) visible on left/top/bottom; right edge 122.0 has no visible border. Rows stack with 1-2 px gaps, pitch ~27.2."
+  },
+  {
+   "id": "side.item_1_icon",
+   "kind": "icon",
+   "box": [
+    27.0,
+    124.1,
+    38.2,
+    133.0
+   ],
+   "icon": "shoe",
+   "color": "#EEF4FF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline sneaker/boot icon (side view, sole curving right)."
+  },
+  {
+   "id": "side.item_1_label",
+   "kind": "text",
+   "box": [
+    48.6,
+    125.4,
+    87.3,
+    133.0
+   ],
+   "text": "Poyabzallar",
+   "fontPx": 8.0,
+   "weight": "medium",
+   "color": "#E2E6EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box: cap top to 'y' descender; baseline ~131.2. Cap height ~5.7-6.0 (K/P/A/S/O measured), x-height ~4.3 -> fontPx ~8.0."
+  },
+  {
+   "id": "side.item_2",
+   "kind": "button",
+   "box": [
+    17.0,
+    142.4,
+    122.0,
+    168.0
+   ],
+   "fill": "#1B2737BA",
+   "stroke": "#2C354BFF",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark translucent glass row: sampled #162131 over the dark left wall (#08121E) and #222B38 over the lighter right bg (#34333C) -> fill ~#1B2737 at alpha ~0.73. 1px lighter border (#2C354B) visible on left/top/bottom; right edge 122.0 has no visible border. Rows stack with 1-2 px gaps, pitch ~27.2."
+  },
+  {
+   "id": "side.item_2_icon",
+   "kind": "icon",
+   "box": [
+    27.1,
+    150.2,
+    38.0,
+    160.2
+   ],
+   "icon": "cap",
+   "color": "#EEF4FF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline baseball-cap / hat icon (dome with brim)."
+  },
+  {
+   "id": "side.item_2_label",
+   "kind": "text",
+   "box": [
+    48.3,
+    152.6,
+    91.6,
+    159.0
+   ],
+   "text": "Aksessuarlar",
+   "fontPx": 8.0,
+   "weight": "medium",
+   "color": "#E2E6EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box: no descenders; baseline ~158.8. Cap height ~5.7-6.0 (K/P/A/S/O measured), x-height ~4.3 -> fontPx ~8.0."
+  },
+  {
+   "id": "side.item_3",
+   "kind": "button",
+   "box": [
+    17.0,
+    170.0,
+    122.0,
+    196.0
+   ],
+   "fill": "#1B2737BA",
+   "stroke": "#2C354BFF",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark translucent glass row: sampled #162131 over the dark left wall (#08121E) and #222B38 over the lighter right bg (#34333C) -> fill ~#1B2737 at alpha ~0.73. 1px lighter border (#2C354B) visible on left/top/bottom; right edge 122.0 has no visible border. Rows stack with 1-2 px gaps, pitch ~27.2."
+  },
+  {
+   "id": "side.item_3_icon",
+   "kind": "icon",
+   "box": [
+    27.5,
+    177.1,
+    37.9,
+    188.0
+   ],
+   "icon": "hair",
+   "color": "#EEF4FF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline hairstyle icon (head with arched hair)."
+  },
+  {
+   "id": "side.item_3_label",
+   "kind": "text",
+   "box": [
+    48.5,
+    179.4,
+    92.8,
+    187.3
+   ],
+   "text": "Soch turmagi",
+   "fontPx": 8.0,
+   "weight": "medium",
+   "color": "#E2E6EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box: cap top to 'g' descender; baseline ~185.5. Cap height ~5.7-6.0 (K/P/A/S/O measured), x-height ~4.3 -> fontPx ~8.0."
+  },
+  {
+   "id": "side.item_4",
+   "kind": "button",
+   "box": [
+    17.0,
+    197.0,
+    122.0,
+    223.0
+   ],
+   "fill": "#1B2737BA",
+   "stroke": "#2C354BFF",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark translucent glass row: sampled #162131 over the dark left wall (#08121E) and #222B38 over the lighter right bg (#34333C) -> fill ~#1B2737 at alpha ~0.73. 1px lighter border (#2C354B) visible on left/top/bottom; right edge 122.0 has no visible border. Rows stack with 1-2 px gaps, pitch ~27.2."
+  },
+  {
+   "id": "side.item_4_icon",
+   "kind": "icon",
+   "box": [
+    27.3,
+    204.9,
+    37.8,
+    215.2
+   ],
+   "icon": "outfit-card",
+   "color": "#EEF4FF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline 'look/persona' icon: rounded card/mannequin with a small face/lines (obraz = look)."
+  },
+  {
+   "id": "side.item_4_label",
+   "kind": "text",
+   "box": [
+    48.3,
+    206.9,
+    76.9,
+    213.1
+   ],
+   "text": "Obrazlar",
+   "fontPx": 8.0,
+   "weight": "medium",
+   "color": "#E2E6EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box: no descenders; baseline ~213.1. Cap height ~5.7-6.0 (K/P/A/S/O measured), x-height ~4.3 -> fontPx ~8.0."
+  },
+  {
+   "id": "side.item_5",
+   "kind": "button",
+   "box": [
+    17.0,
+    224.0,
+    122.0,
+    250.5
+   ],
+   "fill": "#1B2737BA",
+   "stroke": "#2C354BFF",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark translucent glass row: sampled #162131 over the dark left wall (#08121E) and #222B38 over the lighter right bg (#34333C) -> fill ~#1B2737 at alpha ~0.73. 1px lighter border (#2C354B) visible on left/top/bottom; right edge 122.0 has no visible border. Rows stack with 1-2 px gaps, pitch ~27.2."
+  },
+  {
+   "id": "side.item_5_icon",
+   "kind": "icon",
+   "box": [
+    27.8,
+    231.7,
+    37.8,
+    243.0
+   ],
+   "icon": "bag",
+   "color": "#EEF4FF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline shopping-bag icon with handle."
+  },
+  {
+   "id": "side.item_5_label",
+   "kind": "text",
+   "box": [
+    48.7,
+    234.0,
+    92.5,
+    242.0
+   ],
+   "text": "Saqlanganlar",
+   "fontPx": 8.0,
+   "weight": "medium",
+   "color": "#E2E6EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Ink box: cap top to 'q'/'g' descenders; baseline ~240.1. Cap height ~5.7-6.0 (K/P/A/S/O measured), x-height ~4.3 -> fontPx ~8.0."
+  },
+  {
+   "id": "wardrobe.tabs_bar",
+   "kind": "panel",
+   "box": [
+    278.4,
+    55.9,
+    501.5,
+    78.0
+   ],
+   "fill": "#26324AD9",
+   "stroke": "#FFFFFF10",
+   "radius": 4.5,
+   "anchor": "tr",
+   "group": "tabs",
+   "remove": true,
+   "pad": 2,
+   "notes": "Segmented control: dark glass bar (sampled #2F4054..#314056 inside, page bg around ~#5A5E70). Segment cells: [278.4-323.3] Hammasi (selected pill), [323.3-372.5] Kostyumlar, [372.5-416.6] Sportcha, [416.6-460.0] Kundalik, [460.0-501.5] Maxsus (divider centres 372.5, 416.6, 460.0). Faint slightly lighter bottom rim (row 77)."
+  },
+  {
+   "id": "wardrobe.tab_selected",
+   "kind": "pill",
+   "box": [
+    278.4,
+    55.7,
+    323.3,
+    78.2
+   ],
+   "fill": "#438DFDFF",
+   "radius": 4.5,
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "selected",
+   "remove": true,
+   "pad": 3,
+   "notes": "Selected segment: bright azure blue (#438DFD, lighter than the side-list blue #1F5CFB), slightly lighter 1px rim, soft glow ~1.5px."
+  },
+  {
+   "id": "wardrobe.tab_0",
+   "kind": "text",
+   "box": [
+    286.0,
+    63.7,
+    316.0,
+    69.8
+   ],
+   "text": "Hammasi",
+   "fontPx": 7.6,
+   "weight": "semibold",
+   "color": "#FFFFFF",
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "Label ink box (no descenders); cap height ~5.2-5.8 (H/K/S/M), x-height ~4.3 -> fontPx ~7.6; centred in its segment cell."
+  },
+  {
+   "id": "wardrobe.tab_1",
+   "kind": "text",
+   "box": [
+    331.0,
+    63.9,
+    366.2,
+    71.1
+   ],
+   "text": "Kostyumlar",
+   "fontPx": 7.6,
+   "weight": "medium",
+   "color": "#D0D7E4",
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Label ink box (includes 'y' descender; baseline ~69.9); cap height ~5.2-5.8 (H/K/S/M), x-height ~4.3 -> fontPx ~7.6; centred in its segment cell."
+  },
+  {
+   "id": "wardrobe.tab_2",
+   "kind": "text",
+   "box": [
+    380.5,
+    64.0,
+    409.0,
+    70.9
+   ],
+   "text": "Sportcha",
+   "fontPx": 7.6,
+   "weight": "medium",
+   "color": "#D0D7E4",
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Label ink box (includes 'p' descender; baseline ~69.9); cap height ~5.2-5.8 (H/K/S/M), x-height ~4.3 -> fontPx ~7.6; centred in its segment cell."
+  },
+  {
+   "id": "wardrobe.tab_3",
+   "kind": "text",
+   "box": [
+    424.2,
+    63.9,
+    451.3,
+    69.9
+   ],
+   "text": "Kundalik",
+   "fontPx": 7.6,
+   "weight": "medium",
+   "color": "#D0D7E4",
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Label ink box (no descenders); cap height ~5.2-5.8 (H/K/S/M), x-height ~4.3 -> fontPx ~7.6; centred in its segment cell."
+  },
+  {
+   "id": "wardrobe.tab_4",
+   "kind": "text",
+   "box": [
+    468.3,
+    64.1,
+    493.0,
+    69.9
+   ],
+   "text": "Maxsus",
+   "fontPx": 7.6,
+   "weight": "medium",
+   "color": "#D0D7E4",
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Label ink box (no descenders); cap height ~5.2-5.8 (H/K/S/M), x-height ~4.3 -> fontPx ~7.6; centred in its segment cell."
+  },
+  {
+   "id": "wardrobe.tab_sep_0",
+   "kind": "line",
+   "box": [
+    372.0,
+    58.0,
+    373.1,
+    76.8
+   ],
+   "color": "#3A475C",
+   "anchor": "tr",
+   "group": "tabs",
+   "remove": true,
+   "pad": 1,
+   "notes": "~1px vertical divider between unselected segments (slightly lighter than bar, ~#3A485C); spans y 58-76.8 (not the full bar height)."
+  },
+  {
+   "id": "wardrobe.tab_sep_1",
+   "kind": "line",
+   "box": [
+    416.0,
+    58.0,
+    417.2,
+    76.8
+   ],
+   "color": "#3A475C",
+   "anchor": "tr",
+   "group": "tabs",
+   "remove": true,
+   "pad": 1,
+   "notes": "~1px vertical divider between unselected segments (slightly lighter than bar, ~#3A485C); spans y 58-76.8 (not the full bar height)."
+  },
+  {
+   "id": "wardrobe.tab_sep_2",
+   "kind": "line",
+   "box": [
+    459.4,
+    58.0,
+    460.6,
+    76.8
+   ],
+   "color": "#3A475C",
+   "anchor": "tr",
+   "group": "tabs",
+   "remove": true,
+   "pad": 1,
+   "notes": "~1px vertical divider between unselected segments (slightly lighter than bar, ~#3A485C); spans y 58-76.8 (not the full bar height)."
+  },
+  {
+   "id": "wardrobe.tile_0",
+   "kind": "tile",
+   "box": [
+    279.3,
+    89.0,
+    331.0,
+    142.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 0 col 0. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Charcoal-grey zip bomber/track jacket, bright white centre zipper stripe and white inner collar, small white chest logo."
+  },
+  {
+   "id": "wardrobe.tile_0_image",
+   "kind": "image",
+   "box": [
+    289,
+    98.5,
+    322,
+    138
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Charcoal-grey zip bomber/track jacket, bright white centre zipper stripe and white inner collar, small white chest logo."
+  },
+  {
+   "id": "wardrobe.tile_0_badge",
+   "kind": "badge",
+   "box": [
+    322.1,
+    93.7,
+    327.1,
+    98.7
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_1",
+   "kind": "tile",
+   "box": [
+    336.8,
+    89.0,
+    388.0,
+    142.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 0 col 1. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Black leather-look bomber jacket with rust-brown fur/shearling collar, light zip line, small chest logo; blue jeans visible under the hem."
+  },
+  {
+   "id": "wardrobe.tile_1_image",
+   "kind": "image",
+   "box": [
+    346,
+    97,
+    381,
+    139
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Black leather-look bomber jacket with rust-brown fur/shearling collar, light zip line, small chest logo; blue jeans visible under the hem."
+  },
+  {
+   "id": "wardrobe.tile_1_badge",
+   "kind": "badge",
+   "box": [
+    379.0,
+    93.7,
+    383.9,
+    98.7
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_2",
+   "kind": "tile",
+   "box": [
+    393.7,
+    89.0,
+    445.0,
+    142.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 0 col 2. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Black track jacket, stand collar, dark zipper, tiny chest logo (almost merges with tile)."
+  },
+  {
+   "id": "wardrobe.tile_2_image",
+   "kind": "image",
+   "box": [
+    402,
+    97,
+    436,
+    137
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Black track jacket, stand collar, dark zipper, tiny chest logo (almost merges with tile)."
+  },
+  {
+   "id": "wardrobe.tile_2_badge",
+   "kind": "badge",
+   "box": [
+    436.0,
+    94.0,
+    441.2,
+    98.9
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_3",
+   "kind": "tile",
+   "box": [
+    450.0,
+    89.0,
+    502.0,
+    142.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 0 col 3. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: White / light-grey full-zip track jacket with stand collar."
+  },
+  {
+   "id": "wardrobe.tile_3_image",
+   "kind": "image",
+   "box": [
+    459,
+    97,
+    493,
+    135
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). White / light-grey full-zip track jacket with stand collar."
+  },
+  {
+   "id": "wardrobe.tile_3_badge",
+   "kind": "badge",
+   "box": [
+    493.0,
+    93.9,
+    497.4,
+    98.5
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_4",
+   "kind": "tile",
+   "box": [
+    279.3,
+    149.0,
+    331.0,
+    202.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 1 col 0. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Taupe / warm-grey zip jacket with white zipper stripe and small cyan chest logo."
+  },
+  {
+   "id": "wardrobe.tile_4_image",
+   "kind": "image",
+   "box": [
+    289,
+    156,
+    323,
+    194
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Taupe / warm-grey zip jacket with white zipper stripe and small cyan chest logo."
+  },
+  {
+   "id": "wardrobe.tile_4_badge",
+   "kind": "badge",
+   "box": [
+    322.4,
+    153.7,
+    326.9,
+    158.1
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_5",
+   "kind": "tile",
+   "box": [
+    336.8,
+    149.0,
+    388.0,
+    202.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 1 col 1. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Camel / tan (mustard-brown) bomber jacket, white shirt collar showing, ribbed hem and cuffs, chest patch."
+  },
+  {
+   "id": "wardrobe.tile_5_image",
+   "kind": "image",
+   "box": [
+    345,
+    156,
+    381,
+    195
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Camel / tan (mustard-brown) bomber jacket, white shirt collar showing, ribbed hem and cuffs, chest patch."
+  },
+  {
+   "id": "wardrobe.tile_5_badge",
+   "kind": "badge",
+   "box": [
+    379.2,
+    153.7,
+    383.9,
+    158.0
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_6",
+   "kind": "tile",
+   "box": [
+    393.7,
+    149.0,
+    445.0,
+    202.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 1 col 2. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Black high-collar / hooded jacket, plain."
+  },
+  {
+   "id": "wardrobe.tile_6_image",
+   "kind": "image",
+   "box": [
+    403,
+    157,
+    436,
+    195
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Black high-collar / hooded jacket, plain."
+  },
+  {
+   "id": "wardrobe.tile_6_badge",
+   "kind": "badge",
+   "box": [
+    436.0,
+    153.5,
+    440.7,
+    158.1
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_7",
+   "kind": "tile",
+   "box": [
+    450.0,
+    149.0,
+    502.0,
+    202.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 1 col 3. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Black hooded zip jacket with small white chest logo."
+  },
+  {
+   "id": "wardrobe.tile_7_image",
+   "kind": "image",
+   "box": [
+    459,
+    157,
+    493,
+    196
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Black hooded zip jacket with small white chest logo."
+  },
+  {
+   "id": "wardrobe.tile_7_badge",
+   "kind": "badge",
+   "box": [
+    493.2,
+    153.7,
+    498.0,
+    158.0
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_8",
+   "kind": "tile",
+   "box": [
+    279.3,
+    208.0,
+    331.0,
+    259.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 2 col 0. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Navy-blue zip jacket with white zipper stripe and small cyan chest logo."
+  },
+  {
+   "id": "wardrobe.tile_8_image",
+   "kind": "image",
+   "box": [
+    289,
+    216,
+    323,
+    253
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Navy-blue zip jacket with white zipper stripe and small cyan chest logo."
+  },
+  {
+   "id": "wardrobe.tile_8_badge",
+   "kind": "badge",
+   "box": [
+    322.8,
+    212.9,
+    327.2,
+    217.3
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_9",
+   "kind": "tile",
+   "box": [
+    336.8,
+    208.0,
+    388.0,
+    259.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 2 col 1. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: White short-sleeve polo / zip shirt with small chest logo."
+  },
+  {
+   "id": "wardrobe.tile_9_image",
+   "kind": "image",
+   "box": [
+    346,
+    217,
+    379,
+    252
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). White short-sleeve polo / zip shirt with small chest logo."
+  },
+  {
+   "id": "wardrobe.tile_9_badge",
+   "kind": "badge",
+   "box": [
+    379.4,
+    212.9,
+    383.7,
+    217.2
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_10",
+   "kind": "tile",
+   "box": [
+    393.7,
+    208.0,
+    445.0,
+    259.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 2 col 2. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Black zip jacket with grey zipper and white chest logo."
+  },
+  {
+   "id": "wardrobe.tile_10_image",
+   "kind": "image",
+   "box": [
+    403,
+    217,
+    436,
+    253
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Black zip jacket with grey zipper and white chest logo."
+  },
+  {
+   "id": "wardrobe.tile_10_badge",
+   "kind": "badge",
+   "box": [
+    436.0,
+    212.7,
+    440.4,
+    217.4
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3)."
+  },
+  {
+   "id": "wardrobe.tile_11",
+   "kind": "tile",
+   "box": [
+    450.0,
+    208.0,
+    502.0,
+    259.0
+   ],
+   "fill": "#141F2EFF",
+   "stroke": "#5F6D82FF",
+   "radius": 4.0,
+   "anchor": "cr",
+   "group": "grid",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grid row 2 col 3. Dark navy card (#131D2B top -> #1A2638 bottom), 1-2px light slate border (#5A6678..#627085), 1px darker inner rim, radius ~4. Item: Olive / khaki-green zip jacket with light zipper and tan collar lining."
+  },
+  {
+   "id": "wardrobe.tile_11_image",
+   "kind": "image",
+   "box": [
+    459,
+    217,
+    493,
+    253
+   ],
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 0,
+   "notes": "Approx. bounds of the item render inside the tile (centred horizontally, bottom-aligned). Olive / khaki-green zip jacket with light zipper and tan collar lining."
+  },
+  {
+   "id": "wardrobe.tile_11_badge",
+   "kind": "badge",
+   "box": [
+    493.1,
+    213.1,
+    497.6,
+    217.5
+   ],
+   "icon": "diamond",
+   "color": "#E4FBFF",
+   "anchor": "cr",
+   "group": "grid",
+   "remove": true,
+   "pad": 1,
+   "notes": "Small glowing light-cyan diamond/gem badge in the tile's top-right corner (centre ~tile.x1-6.3, tile.y0+7.3). This one is drawn malformed (heart/split shape) - use the same diamond."
+  },
+  {
+   "id": "wardrobe.swatch_bar",
+   "kind": "panel",
+   "box": [
+    278.2,
+    265.5,
+    386.4,
+    293.4
+   ],
+   "fill": "#3A3B46E6",
+   "stroke": "#FFFFFF10",
+   "radius": 5.5,
+   "anchor": "br",
+   "group": "colors",
+   "remove": true,
+   "pad": 2,
+   "notes": "Neutral dark-grey glass bar (sampled #40404B, over warm floor #676067..#746566) holding 5 colour swatches; darker 1px rim at right/bottom edge."
+  },
+  {
+   "id": "wardrobe.swatch_0",
+   "kind": "swatch",
+   "box": [
+    283.2,
+    270.2,
+    297.0,
+    284.2
+   ],
+   "color": "#F09812",
+   "stroke": "#F6C27AFF",
+   "radius": 7.0,
+   "anchor": "br",
+   "group": "colors",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "orange circle, d~14 incl. a ~1px lighter ring and a thin dark outer shadow. Centres pitch ~20.5 px at y~277.1. No swatch is visibly marked selected."
+  },
+  {
+   "id": "wardrobe.swatch_1",
+   "kind": "swatch",
+   "box": [
+    303.6,
+    270.1,
+    317.2,
+    284.2
+   ],
+   "color": "#A2AC0C",
+   "stroke": "#C8CC80FF",
+   "radius": 7.0,
+   "anchor": "br",
+   "group": "colors",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "lime / yellow-green circle, d~14 incl. a ~1px lighter ring and a thin dark outer shadow. Centres pitch ~20.5 px at y~277.1. No swatch is visibly marked selected."
+  },
+  {
+   "id": "wardrobe.swatch_2",
+   "kind": "swatch",
+   "box": [
+    324.1,
+    269.9,
+    338.2,
+    284.0
+   ],
+   "color": "#0E1418",
+   "stroke": "#5C606CFF",
+   "radius": 7.0,
+   "anchor": "br",
+   "group": "colors",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "black circle, d~14 incl. a ~1px lighter ring and a thin dark outer shadow. Centres pitch ~20.5 px at y~277.1. No swatch is visibly marked selected."
+  },
+  {
+   "id": "wardrobe.swatch_3",
+   "kind": "swatch",
+   "box": [
+    344.7,
+    270.2,
+    358.2,
+    284.1
+   ],
+   "color": "#8393DF",
+   "stroke": "#B4C0E8FF",
+   "radius": 7.0,
+   "anchor": "br",
+   "group": "colors",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "periwinkle / lavender blue circle, d~14 incl. a ~1px lighter ring and a thin dark outer shadow. Centres pitch ~20.5 px at y~277.1. No swatch is visibly marked selected."
+  },
+  {
+   "id": "wardrobe.swatch_4",
+   "kind": "swatch",
+   "box": [
+    364.9,
+    270.0,
+    379.2,
+    284.2
+   ],
+   "color": "#823D77",
+   "stroke": "#B58BB6FF",
+   "radius": 7.0,
+   "anchor": "br",
+   "group": "colors",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "plum / magenta-purple circle, d~14 incl. a ~1px lighter ring and a thin dark outer shadow. Centres pitch ~20.5 px at y~277.1. No swatch is visibly marked selected."
+  },
+  {
+   "id": "wardrobe.save_button",
+   "kind": "button",
+   "box": [
+    395.9,
+    265.8,
+    501.8,
+    294.0
+   ],
+   "fill": "#2160FCFF",
+   "radius": 6.0,
+   "anchor": "br",
+   "group": "colors",
+   "remove": true,
+   "pad": 3,
+   "notes": "Solid royal-blue CTA (#215CFC..#2160FF) with a soft blue glow/shadow below."
+  },
+  {
+   "id": "wardrobe.save_label",
+   "kind": "text",
+   "box": [
+    432.6,
+    276.9,
+    463.4,
+    285.7
+   ],
+   "text": "Saqlash",
+   "fontPx": 9.2,
+   "weight": "semibold",
+   "color": "#FFFFFF",
+   "anchor": "br",
+   "group": "colors",
+   "remove": true,
+   "pad": 2,
+   "notes": "Cap top to 'q' descender; baseline ~283.5 (cap height ~6.6). Label visually centred in the button, arrow right."
+  },
+  {
+   "id": "wardrobe.save_arrow",
+   "kind": "icon",
+   "box": [
+    482.1,
+    276.5,
+    490.3,
+    284.0
+   ],
+   "icon": "arrow-right",
+   "color": "#FFFFFF",
+   "anchor": "br",
+   "group": "colors",
+   "remove": true,
+   "pad": 2,
+   "notes": "Thin right arrow, right-aligned ~11.5 px from the button's right edge."
+  }
+ ],
+ "character": {
+  "centerX": 197.0,
+  "headTopY": 46.3,
+  "feetY": 296.0,
+  "horizonY": 195.0,
+  "notes": "Young man, full body, facing camera: black hair, white hoodie under a black bomber jacket with white side stripes on the sleeves, black crossbody bag strap diagonally from right shoulder to left hip (bag at left hip), dark charcoal cargo pants with side pockets, white sneakers. Shoulders x 152-240, feet: left shoe x 158-179, right shoe x 207-231, soles at y~295.5-296.4; faint floor reflections to y~305 and a soft cast shadow between the shoes (y 285-296). centerX = body midline (head centre ~200, feet midpoint ~195). horizonY ~195 (+-15, low camera at about the avatar's hip/crotch height, crotch y~199 - same style as the home page): the plant-pot top rim (y~209) is seen almost edge-on while its base (y~235) curves as seen from above; the back-wall/floor junction is at y~232 and the 2.47x-distance estimate from pot size (0.45 m) gives (296-H)=2.47*(234-H) -> H~192. An eye-level camera (H~60) is unlikely (it would make the lit door frame only ~1.8 m tall). Ceiling light strips meet at (248,55) but that is a panel corner, not a vanishing point."
+ },
+ "removePolygons": [
+  {
+   "name": "character",
+   "points": [
+    [
+     197,
+     46.2
+    ],
+    [
+     203,
+     46.4
+    ],
+    [
+     207.5,
+     47.6
+    ],
+    [
+     210.8,
+     50.5
+    ],
+    [
+     212.8,
+     55
+    ],
+    [
+     213.2,
+     61
+    ],
+    [
+     211.8,
+     66.5
+    ],
+    [
+     210.5,
+     71.5
+    ],
+    [
+     208,
+     76
+    ],
+    [
+     211,
+     79.5
+    ],
+    [
+     215.5,
+     83.5
+    ],
+    [
+     221,
+     88.5
+    ],
+    [
+     227.5,
+     93
+    ],
+    [
+     231.5,
+     100
+    ],
+    [
+     233.5,
+     109
+    ],
+    [
+     235.5,
+     119
+    ],
+    [
+     237,
+     130
+    ],
+    [
+     238.5,
+     144
+    ],
+    [
+     239.6,
+     157
+    ],
+    [
+     240.2,
+     169
+    ],
+    [
+     238.8,
+     178
+    ],
+    [
+     236.8,
+     186
+    ],
+    [
+     233.5,
+     192.5
+    ],
+    [
+     229,
+     192.5
+    ],
+    [
+     228.5,
+     197
+    ],
+    [
+     229.5,
+     205
+    ],
+    [
+     229.8,
+     215
+    ],
+    [
+     228.8,
+     223
+    ],
+    [
+     227.3,
+     233
+    ],
+    [
+     226.3,
+     245
+    ],
+    [
+     226.6,
+     258
+    ],
+    [
+     227.2,
+     268
+    ],
+    [
+     226.5,
+     274
+    ],
+    [
+     228.5,
+     282
+    ],
+    [
+     230.6,
+     289
+    ],
+    [
+     231.2,
+     295
+    ],
+    [
+     231,
+     300
+    ],
+    [
+     229,
+     305.5
+    ],
+    [
+     208.5,
+     305.5
+    ],
+    [
+     207,
+     300
+    ],
+    [
+     209.5,
+     293
+    ],
+    [
+     208.5,
+     283.5
+    ],
+    [
+     207.4,
+     281
+    ],
+    [
+     206.3,
+     280
+    ],
+    [
+     205.2,
+     278.5
+    ],
+    [
+     204.5,
+     277
+    ],
+    [
+     203.8,
+     275
+    ],
+    [
+     203.0,
+     273
+    ],
+    [
+     202.1,
+     271.5
+    ],
+    [
+     202.2,
+     269
+    ],
+    [
+     203.6,
+     266.8
+    ],
+    [
+     204.4,
+     265.3
+    ],
+    [
+     203.4,
+     264
+    ],
+    [
+     202.6,
+     262.5
+    ],
+    [
+     202.2,
+     261
+    ],
+    [
+     201.8,
+     258
+    ],
+    [
+     201.3,
+     245
+    ],
+    [
+     200.3,
+     232
+    ],
+    [
+     199.3,
+     218
+    ],
+    [
+     197.8,
+     206
+    ],
+    [
+     195.3,
+     199.5
+    ],
+    [
+     192.8,
+     205
+    ],
+    [
+     191.2,
+     218
+    ],
+    [
+     189.3,
+     232
+    ],
+    [
+     188.6,
+     245
+    ],
+    [
+     188.0,
+     258
+    ],
+    [
+     186.6,
+     262
+    ],
+    [
+     185.5,
+     265
+    ],
+    [
+     184.6,
+     268
+    ],
+    [
+     185.5,
+     270
+    ],
+    [
+     186.2,
+     272
+    ],
+    [
+     185.6,
+     273
+    ],
+    [
+     184.7,
+     274
+    ],
+    [
+     183.1,
+     276
+    ],
+    [
+     182.6,
+     278
+    ],
+    [
+     181.1,
+     280
+    ],
+    [
+     180.3,
+     282
+    ],
+    [
+     179.5,
+     285
+    ],
+    [
+     177.8,
+     292
+    ],
+    [
+     179.5,
+     300
+    ],
+    [
+     178.5,
+     305.5
+    ],
+    [
+     157,
+     305.5
+    ],
+    [
+     156.8,
+     298
+    ],
+    [
+     158,
+     290
+    ],
+    [
+     160.5,
+     283
+    ],
+    [
+     162.8,
+     277
+    ],
+    [
+     161.8,
+     268
+    ],
+    [
+     161.5,
+     255
+    ],
+    [
+     162.5,
+     240
+    ],
+    [
+     163.5,
+     225
+    ],
+    [
+     164.5,
+     210
+    ],
+    [
+     165.3,
+     198
+    ],
+    [
+     165.5,
+     193
+    ],
+    [
+     161,
+     192.8
+    ],
+    [
+     157,
+     188.5
+    ],
+    [
+     155.3,
+     181
+    ],
+    [
+     153,
+     173
+    ],
+    [
+     152,
+     165
+    ],
+    [
+     152.8,
+     150
+    ],
+    [
+     154.8,
+     135
+    ],
+    [
+     156.8,
+     121
+    ],
+    [
+     159.3,
+     109
+    ],
+    [
+     161.8,
+     99.5
+    ],
+    [
+     166,
+     93.5
+    ],
+    [
+     172,
+     89.5
+    ],
+    [
+     179.5,
+     85
+    ],
+    [
+     182,
+     81
+    ],
+    [
+     187.5,
+     77.5
+    ],
+    [
+     184.5,
+     71
+    ],
+    [
+     181.8,
+     64
+    ],
+    [
+     181.8,
+     57
+    ],
+    [
+     184.5,
+     51.5
+    ],
+    [
+     188.8,
+     47.8
+    ],
+    [
+     193,
+     46.4
+    ]
+   ],
+   "pad": 2
+  },
+  {
+   "name": "hanging_bag_strap",
+   "points": [
+    [
+     221.5,
+     220
+    ],
+    [
+     226.5,
+     220
+    ],
+    [
+     226.5,
+     229
+    ],
+    [
+     230,
+     233.5
+    ],
+    [
+     245,
+     235.5
+    ],
+    [
+     258,
+     236.5
+    ],
+    [
+     263,
+     238.5
+    ],
+    [
+     263,
+     244
+    ],
+    [
+     250,
+     243
+    ],
+    [
+     238,
+     241.8
+    ],
+    [
+     229,
+     239.8
+    ],
+    [
+     223.5,
+     234.5
+    ],
+    [
+     221.5,
+     227
+    ]
+   ],
+   "pad": 2
+  },
+  {
+   "name": "floor_shadow_between_shoes",
+   "points": [
+    [
+     177,
+     287
+    ],
+    [
+     196,
+     285.5
+    ],
+    [
+     212,
+     285
+    ],
+    [
+     213,
+     293
+    ],
+    [
+     205,
+     295.5
+    ],
+    [
+     185,
+     296
+    ],
+    [
+     177,
+     296.5
+    ]
+   ],
+   "pad": 2
+  }
+ ],
+ "assets": [
+  {
+   "name": "wardrobe_bg",
+   "box": [
+    0,
+    0,
+    519,
+    308
+   ],
+   "notes": "Full-bleed room interior (modern boutique/dressing room: lit vertical LED door frame at x~140-150, glass partition, potted palm at x~245-280, glossy grey tile floor). Remove every element with remove=true plus the three removePolygons (character, dangling bag strap on the floor, shadow between shoes). Keep the dark wall region at x<83 (it has a vertical edge at x~83 from y~30 to ~260; looks like architecture, not UI - verify after inpaint). Row y=308 and column x=518 are the black composite border - crop/extend them."
+  },
+  {
+   "name": "character_cutout",
+   "box": [
+    150,
+    44,
+    242,
+    307
+   ],
+   "notes": "The standing avatar (reference for the 3D character's pose/scale): head top 46.3, soles 296. Nothing overlaps it except the floor behind; the dangling strap to the right (x 222-263, y 220-244) belongs to it."
+  },
+  {
+   "name": "avatar_photo",
+   "box": [
+    436.5,
+    11.3,
+    453.3,
+    28.2
+   ],
+   "notes": "Profile avatar image in the nav pill (circle)."
+  },
+  {
+   "name": "tile_0_item",
+   "box": [
+    289,
+    98.5,
+    322,
+    138
+   ],
+   "notes": "Charcoal-grey zip bomber/track jacket, bright white centre zipper stripe and white inner collar, small white chest logo. Crop from the tile; mask out the diamond badge (wardrobe.tile_0_badge) if it overlaps."
+  },
+  {
+   "name": "tile_1_item",
+   "box": [
+    346,
+    97,
+    381,
+    139
+   ],
+   "notes": "Black leather-look bomber jacket with rust-brown fur/shearling collar, light zip line, small chest logo; blue jeans visible under the hem. Crop from the tile; mask out the diamond badge (wardrobe.tile_1_badge) if it overlaps."
+  },
+  {
+   "name": "tile_2_item",
+   "box": [
+    402,
+    97,
+    436,
+    137
+   ],
+   "notes": "Black track jacket, stand collar, dark zipper, tiny chest logo (almost merges with tile). Crop from the tile; mask out the diamond badge (wardrobe.tile_2_badge) if it overlaps."
+  },
+  {
+   "name": "tile_3_item",
+   "box": [
+    459,
+    97,
+    493,
+    135
+   ],
+   "notes": "White / light-grey full-zip track jacket with stand collar. Crop from the tile; mask out the diamond badge (wardrobe.tile_3_badge) if it overlaps."
+  },
+  {
+   "name": "tile_4_item",
+   "box": [
+    289,
+    156,
+    323,
+    194
+   ],
+   "notes": "Taupe / warm-grey zip jacket with white zipper stripe and small cyan chest logo. Crop from the tile; mask out the diamond badge (wardrobe.tile_4_badge) if it overlaps."
+  },
+  {
+   "name": "tile_5_item",
+   "box": [
+    345,
+    156,
+    381,
+    195
+   ],
+   "notes": "Camel / tan (mustard-brown) bomber jacket, white shirt collar showing, ribbed hem and cuffs, chest patch. Crop from the tile; mask out the diamond badge (wardrobe.tile_5_badge) if it overlaps."
+  },
+  {
+   "name": "tile_6_item",
+   "box": [
+    403,
+    157,
+    436,
+    195
+   ],
+   "notes": "Black high-collar / hooded jacket, plain. Crop from the tile; mask out the diamond badge (wardrobe.tile_6_badge) if it overlaps."
+  },
+  {
+   "name": "tile_7_item",
+   "box": [
+    459,
+    157,
+    493,
+    196
+   ],
+   "notes": "Black hooded zip jacket with small white chest logo. Crop from the tile; mask out the diamond badge (wardrobe.tile_7_badge) if it overlaps."
+  },
+  {
+   "name": "tile_8_item",
+   "box": [
+    289,
+    216,
+    323,
+    253
+   ],
+   "notes": "Navy-blue zip jacket with white zipper stripe and small cyan chest logo. Crop from the tile; mask out the diamond badge (wardrobe.tile_8_badge) if it overlaps."
+  },
+  {
+   "name": "tile_9_item",
+   "box": [
+    346,
+    217,
+    379,
+    252
+   ],
+   "notes": "White short-sleeve polo / zip shirt with small chest logo. Crop from the tile; mask out the diamond badge (wardrobe.tile_9_badge) if it overlaps."
+  },
+  {
+   "name": "tile_10_item",
+   "box": [
+    403,
+    217,
+    436,
+    253
+   ],
+   "notes": "Black zip jacket with grey zipper and white chest logo. Crop from the tile; mask out the diamond badge (wardrobe.tile_10_badge) if it overlaps."
+  },
+  {
+   "name": "tile_11_item",
+   "box": [
+    459,
+    217,
+    493,
+    253
+   ],
+   "notes": "Olive / khaki-green zip jacket with light zipper and tan collar lining. Crop from the tile; mask out the diamond badge (wardrobe.tile_11_badge) if it overlaps."
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+nav.brand_icon box [19.4,15.6,38.6,36.2] -> [18.9,15.3,39.1,36.3] (square measured 20.2 x 21.0 at 50% edge; old box was 0.5 px narrow on both sides)
+nav.bell top 16.8 -> 17.9 (the pixel at y16 is dark shadow; the knob ink starts at y~17.9)
+nav.profile_pill box -> [605.3,11.0,729.8,42.0] (right edge 729.6 -> 729.8 and top/bottom +0.2; the right column edge is x=730 for pill, search, zoom and card)
+colours: text/icon colours re-sampled as the median of the brightest 8% of pixels in each box (old values sat on anti-aliased edges and were 3-10 levels dark). Stem colours are now sampled from the stem pixels; the old values were copied from the bubble stroke. Changed: pin_0_stem #B07080->#DC7A70, pin_2_stem #5CA1E1->#63C1F8, pin_3_stem #7792C0->#88A7EA, pin_4_stem #CDA477->#E1B278
+side.item_1..7 boxes: shifted +0.5 px down (the old edges were half a pixel early). Pitch is 33 px, with a 1 px dark gap: rows y 147.4-180, 181-213, 214-246, 247-279, 280-312, 313-346, 347-379. Old values were 147.3-179.5, 180.5-212.5, ... 346.5-378.6
+side.item_0..7 right edge 152.8 -> 153.0 (the row border is the pixel column x=152)
+side.panel right edge 152.8 -> 153.8 and pad 0 -> 1. The panel hairline is the pixel column x=153, 1 px right of the row borders, so the old box left the hairline and its anti-aliasing unmasked
+side.item_0_chevron box refined to [139.0,129.0,141.8,133.6] (ink pixels x 139-141, y 129-133)
+map.zoom_panel [703.4,126.4,730.0,173.9] -> [703.9,126.4,730.0,174.6]. The left edge was 0.5 px too far out and the bottom was 0.7 px short. zoom_in/zoom_out halves recomputed and split at y=150.5
+map.zoom_divider [705.0,149.6,728.5,150.6] -> [704.5,150.0,721.5,151.0] (the line is the pixel row y=150 and is only visible up to x~721)
+map.search [531.8,58.9,729.6,90.0] -> [532.0,59.0,730.0,90.0]. Pixel 729 is still frosted fill; 730 is map. Pixel 531 is a darker drop shadow, not the fill
+map.card right edge 729.5 -> 730.0 and left 533.2 -> 533.0 (pixel 729 is card fill; 730 is map)
+map.card_image top 362.8 -> 363.2 (pixel 362 is the dark rim; the photo starts partway into 363)
+map.card_subtitle: the drawn text reads "Hocir onlayn: 1,248" (z drawn as c). Set text to the drawn form and intended "Hozir onlayn: 1,248"
+map.pin_3_circle [519.3,184.8,559.3,224.8] (40 px) -> [519.4,185.3,557.8,223.8] (38.4 px), radius 20.0 -> 19.2. Measured: outer stroke top at y 185.3 (x 536-540), bottom 222.0-222.3 at x 530/546 (so about 223.8 at centre), left 519.4, disk centre x 538.5
+Pin points: for pins 1, 5 and 6 the note said "bubble bottom centre", but the stored values were the x-centre of the whole pin box. I kept the values and made the note match. Their y moved onto the measured bubble bottom: pin_1 144.0 -> 144.1, pin_5 318.2 -> 318.4, pin_6 332.8 -> 333.0. Stem tips were refined: pin_3 point [578.7,227.0] -> [578.6,227.5] (stem box bottom 227.3 -> 227.6), pin_2 [359.0,126.0] -> [358.8,125.8]
+circleTip refined from the tip pixels: pin_0 [253.3,188.4]->[253.1,188.6], pin_2 [318.6,128.3]->[318.8,129.3], pin_4 [254.5,274.5]->[253.8,275.3], pin_5 [402.4,321.3]->[402.2,324.4]. Pin 5 does have a 3 px teardrop below the circle, down to y 324.5
+Added map.pin_N_bubble (7 elements) with the measured bubble boxes. The old notes had pin_0 bubble top 150.3 (measured 151.0) and pin_5 bubble top 283.6 (measured 283.0); the others were within 0.4 px
+Added map.pin_N_tip for the teardrop pointers under the icon circles of pins 0, 2, 3, 4 and 5. They are now explicit elements with remove:true, so the mask covers them even though the pin_3 circle was shrunk
+map.pin_4_icon top 246.0 -> 245.4 (the roof apex at x=254 reaches 56% ink at pixel 245)

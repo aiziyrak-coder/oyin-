@@ -1,0 +1,7 @@
+# Reference-gradient lobby
+
+Generation mode: built-in image generation. Environment asset: `Assets/CraDev/MainMenu/Pages/sunset-home.png`. Original generated image: `C:/Users/alocomputers/.codex/generated_images/01a0e3fa-1e99-7e33-88df-44020ffa8999/exec-201deb56-4913-47f1-9f09-305fcf2e21fa.png`.
+
+Prompt: Generate a clean background asset for a Unity game lobby, 16:9 landscape, highest available resolution. Input image is a visual composition/style reference ONLY: use its warm sunset penthouse overlooking a futuristic waterfront city. Recreate the environment very closely: left dark architectural column, warm hanging greenery, glass walls, lounge sofas at left rear, slate tiled reflective floor, right open terrace overlooking water and elegant city skyline, orange peach sunset clouds and warm lamps. Camera at human eye height. IMPORTANT remove ALL UI, logos, text, cards, buttons, gradients, overlays, portraits, people, the standing man. Empty clear floor in center for a real 3D avatar to be added by game engine. Preserve reference architecture/perspective and sunset mood. No people anywhere, no text, no watermark. This is an environment plate, NOT a UI mockup.
+
+UI uses native Unity controls and vertex gradients, not a flattened mockup. The existing player avatar and live account/social data are retained. Source resolution is preserved by the importer; this asset is not claimed to be native 4K. Previous night images and all ten page implementations remain preserved.

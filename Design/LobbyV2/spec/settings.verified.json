@@ -1,0 +1,1303 @@
+{
+ "page": "settings",
+ "size": [
+  499,
+  285
+ ],
+ "notes": "Settings page. Page background is a dark blurred navy gradient (left ~#071525, center ~#152230, right ~#20324C, slight bokeh light blotches behind the panel); no art to clean, recreate procedurally. No nav bar background. The bright 1px line along y~1 and the rounded outer corners are the concept screen frame, not UI. Anchors of content-panel children describe their alignment inside settings.panel (tl = left column, tr = right-aligned). Content rows (no visible row backgrounds): 5 rows between dividers at pitch 28.0 px; row centres y~133.7, 161.6, 189.6, 217.5, 245.5; label column x=201, value column x=269, chevrons right-aligned at x~466. All UI elements carry remove:true (page bg is plain blurred navy, so a cleaned bg can be produced with mask+inpaint if wanted). Verified by an independent pass (50% ink crossings + pixel profiles).",
+ "elements": [
+  {
+   "id": "nav.brand_icon",
+   "kind": "icon",
+   "box": [
+    13.9,
+    11.3,
+    29.1,
+    27.0
+   ],
+   "icon": "brand-swirl",
+   "color": "#D9FEFF",
+   "fill": "#3D78EAFF",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "nav",
+   "notes": "Blue rounded-square app icon. Fill gradient top-left #4D88F8 -> bottom-right #2A6EEF. White/cyan swirl glyph (like '@'/'e' spiral), glyph ink box ~[17.1,14.2,25.5,24.6].",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "nav.brand_text",
+   "kind": "text",
+   "box": [
+    34.6,
+    15.2,
+    71.4,
+    24.8
+   ],
+   "text": "Lynxos",
+   "fontPx": 10.8,
+   "weight": "bold",
+   "color": "#FBFFFF",
+   "anchor": "tl",
+   "group": "nav",
+   "notes": "Box includes 'y' descender (to 24.8). Cap top 15.2, baseline 23.0.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.tab_home",
+   "kind": "tab",
+   "box": [
+    89.5,
+    16.7,
+    125.3,
+    23.0
+   ],
+   "text": "Bosh sahifa",
+   "fontPx": 8.75,
+   "weight": "medium",
+   "color": "#C8D2E3",
+   "anchor": "tl",
+   "group": "nav",
+   "notes": "cap top to baseline (no descenders). Sampled core #BAC3D2; all tabs share one color (~#C8D2E3, ~80% white).",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.tab_world",
+   "kind": "tab",
+   "box": [
+    144.1,
+    16.7,
+    165.2,
+    24.2
+   ],
+   "text": "Dunyo",
+   "fontPx": 8.75,
+   "weight": "medium",
+   "color": "#C8D2E3",
+   "anchor": "tl",
+   "group": "nav",
+   "notes": "includes 'y' descender; baseline 23.0. Sampled core #C2CBDB; all tabs share one color (~#C8D2E3, ~80% white).",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.tab_friends",
+   "kind": "tab",
+   "box": [
+    184.6,
+    16.7,
+    209.2,
+    23.0
+   ],
+   "text": "Do'stlar",
+   "fontPx": 8.75,
+   "weight": "medium",
+   "color": "#C8D2E3",
+   "anchor": "tl",
+   "group": "nav",
+   "notes": "cap top to baseline (no descenders). Sampled core #D1DDED; all tabs share one color (~#C8D2E3, ~80% white).",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.tab_top",
+   "kind": "tab",
+   "box": [
+    228.4,
+    16.8,
+    251.6,
+    24.2
+   ],
+   "text": "Top-lar",
+   "fontPx": 8.75,
+   "weight": "medium",
+   "color": "#C8D2E3",
+   "anchor": "tl",
+   "group": "nav",
+   "notes": "includes 'p' descender; baseline 23.0. Sampled core #CEDBF1; all tabs share one color (~#C8D2E3, ~80% white).",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.tab_settings",
+   "kind": "tab",
+   "box": [
+    270.0,
+    17.0,
+    305.3,
+    23.0
+   ],
+   "text": "Sozlamalar",
+   "fontPx": 8.75,
+   "weight": "medium",
+   "color": "#C8D2E3",
+   "anchor": "tl",
+   "group": "nav",
+   "notes": "cap top to baseline (no descenders). Sampled core #CAD7EA; all tabs share one color (~#C8D2E3, ~80% white). Current page, BUT the concept draws NO highlight pill and NO underline here - tab looks identical to the others.",
+   "state": "selected",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.lang_globe",
+   "kind": "icon",
+   "box": [
+    335.1,
+    14.3,
+    347.2,
+    26.9
+   ],
+   "icon": "globe",
+   "color": "#E4ECF8",
+   "anchor": "tr",
+   "group": "nav",
+   "notes": "Outline globe (meridian + 2 parallels), ~1.3px stroke.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.lang_text",
+   "kind": "text",
+   "box": [
+    352.9,
+    17.6,
+    362.0,
+    23.4
+   ],
+   "text": "UZ",
+   "fontPx": 8.1,
+   "weight": "semibold",
+   "color": "#DEE9FF",
+   "anchor": "tr",
+   "group": "nav",
+   "notes": "Cap top to baseline. Z right edge measured at x=362.0 (column 361 is full ink).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.lang_chevron",
+   "kind": "icon",
+   "box": [
+    366.5,
+    19.3,
+    370.9,
+    22.3
+   ],
+   "icon": "chevron-down",
+   "color": "#C0CFE0",
+   "anchor": "tr",
+   "group": "nav",
+   "notes": "Small thin chevron.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.bell",
+   "kind": "icon",
+   "box": [
+    386.2,
+    14.2,
+    397.0,
+    26.9
+   ],
+   "icon": "bell",
+   "color": "#E4F0FC",
+   "anchor": "tr",
+   "group": "nav",
+   "notes": "Outline bell ~1.3px stroke, clapper at bottom. Bell knob top at y=14.2; the red dot overlaps its top-right shoulder.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.bell_dot",
+   "kind": "dot",
+   "box": [
+    394.3,
+    14.4,
+    398.1,
+    18.0
+   ],
+   "color": "#E0475C",
+   "anchor": "tr",
+   "group": "nav",
+   "notes": "Red notification dot at bell top-right, ~3.7px diameter. Brightest sampled pixel #CF4151 (tiny + blurred), true color brighter red. Centre ~(396.2,16.2), d~3.7 (50% crossings of the R-G channel).",
+   "remove": true,
+   "pad": 1.0
+  },
+  {
+   "id": "nav.profile_pill",
+   "kind": "pill",
+   "box": [
+    407.0,
+    10.4,
+    482.0,
+    30.8
+   ],
+   "fill": "#A0B4D233",
+   "radius": 10.2,
+   "anchor": "tr",
+   "group": "nav",
+   "notes": "Translucent glass pill; composite color over bg ~#2F415D (bg #14263C). No visible stroke.",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "nav.profile_avatar",
+   "kind": "avatar",
+   "box": [
+    407.0,
+    11.0,
+    426.0,
+    29.8
+   ],
+   "stroke": "#9AA6B8FF",
+   "anchor": "tr",
+   "group": "nav",
+   "notes": "Circular avatar photo (same young man as settings.avatar), ~18.5px diameter, thin light grey rim (brighter on the left side). Sits at the left end of the pill. Measured: the avatar's left rim is flush with the pill's left edge (x=407.0); diameter ~19, centre ~(416.5,20.4).",
+   "remove": true,
+   "pad": 1.0
+  },
+  {
+   "id": "nav.profile_name",
+   "kind": "text",
+   "box": [
+    431.0,
+    18.3,
+    464.8,
+    24.2
+   ],
+   "text": "Lyrxos_user",
+   "intended": "Lynxos_user",
+   "fontPx": 6.5,
+   "weight": "medium",
+   "color": "#BCC9DE",
+   "anchor": "tr",
+   "group": "nav",
+   "notes": "Tiny text; box includes 'y' descender/underscore; cap top 18.3, baseline 23.0.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.profile_chevron",
+   "kind": "icon",
+   "box": [
+    470.2,
+    19.0,
+    474.9,
+    22.3
+   ],
+   "icon": "chevron-down",
+   "color": "#CEE1FD",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "header.title",
+   "kind": "text",
+   "box": [
+    14.7,
+    44.8,
+    95.6,
+    56.8
+   ],
+   "text": "Sozlamalar",
+   "fontPx": 16.6,
+   "weight": "bold",
+   "color": "#FBFFFF",
+   "anchor": "tl",
+   "group": "header",
+   "notes": "Cap top 44.8 to baseline 56.9, no descenders.",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "header.subtitle",
+   "kind": "text",
+   "box": [
+    14.2,
+    64.5,
+    155.2,
+    73.2
+   ],
+   "text": "Hisobingiz va tajnbangizmi boshqaring",
+   "intended": "Hisobingiz va tajribangizni boshqaring",
+   "fontPx": 9.0,
+   "weight": "regular",
+   "color": "#9AA4B8",
+   "anchor": "tl",
+   "group": "header",
+   "notes": "Garbled AI text. Box includes descenders (g, j, q); cap top 64.5, baseline 71.0. Muted grey-blue (~60% white).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_0",
+   "kind": "button",
+   "box": [
+    13.0,
+    85.4,
+    125.2,
+    105.7
+   ],
+   "fill": "#1F60FBFF",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "notes": "Selected row: solid bright blue (#1F5EFD centre, sampled), slightly lighter 1px top/bottom rim; soft blue OUTER GLOW (#2060FF, ~5px to the left, ~4px below, ~3px right, weak above) - covered by pad 6. Height only ~20.3 px (thinner than the grey tiles). A 2px +7-lum speck at (114,94) inside it is a JPEG artifact, not an icon.",
+   "remove": true,
+   "pad": 6.0
+  },
+  {
+   "id": "side.item_0_icon",
+   "kind": "icon",
+   "box": [
+    24.1,
+    90.1,
+    33.9,
+    100.6
+   ],
+   "icon": "user",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "notes": "User icon: head drawn as an OUTLINE ring, shoulders/body FILLED, white. Icon centre x~29.0.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_0_label",
+   "kind": "text",
+   "box": [
+    46.0,
+    91.8,
+    63.4,
+    98.4
+   ],
+   "text": "Profil",
+   "fontPx": 8.9,
+   "weight": "semibold",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "notes": "cap top to baseline. Sampled #CCF4FF (white text blurred over blue)",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_1",
+   "kind": "button",
+   "box": [
+    13.0,
+    107.0,
+    125.3,
+    128.3
+   ],
+   "fill": "#1C2A3CE6",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "stroke": "#FFFFFF1A",
+   "notes": "Dark near-opaque glass tile: observed composite #1A2839..#1D2B3C, fill modelled as #1C2A3C @ 90% (fit over the page bg left/right of the list); 1px lighter inner border (~#FFFFFF1A, reads as L~41-48). Tiles are separated by a ~1px dark gap; measured heights 21.0-22.3 px, pitch ~22.7; item_7 bottom (265.1) aligns with the content panel bottom (265.0).",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "side.item_1_icon",
+   "kind": "icon",
+   "box": [
+    24.3,
+    111.6,
+    33.9,
+    123.0
+   ],
+   "icon": "shield-clock",
+   "color": "#E8F0FA",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "Outline shield with a clock/timer inside (security). Stroke ~1.3px, icon center x~29.1.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_1_label",
+   "kind": "text",
+   "box": [
+    46.0,
+    114.1,
+    77.4,
+    120.3
+   ],
+   "text": "Xavfaizlik",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D8E0EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "cap top to baseline. Sampled core ~#D4DCEC. Garbled AI text.",
+   "intended": "Xavfsizlik",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_2",
+   "kind": "button",
+   "box": [
+    13.0,
+    129.3,
+    125.3,
+    150.9
+   ],
+   "fill": "#1C2A3CE6",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "stroke": "#FFFFFF1A",
+   "notes": "Dark near-opaque glass tile: observed composite #1A2839..#1D2B3C, fill modelled as #1C2A3C @ 90% (fit over the page bg left/right of the list); 1px lighter inner border (~#FFFFFF1A, reads as L~41-48). Tiles are separated by a ~1px dark gap; measured heights 21.0-22.3 px, pitch ~22.7; item_7 bottom (265.1) aligns with the content panel bottom (265.0).",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "side.item_2_icon",
+   "kind": "icon",
+   "box": [
+    24.3,
+    134.0,
+    33.9,
+    145.4
+   ],
+   "icon": "bell",
+   "color": "#E8F0FA",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "Outline bell (notifications). Stroke ~1.3px, icon center x~29.1.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_2_label",
+   "kind": "text",
+   "box": [
+    46.0,
+    136.1,
+    100.5,
+    142.5
+   ],
+   "text": "Bildirishnomalar",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D8E0EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "cap top to baseline. Sampled core ~#D4DCEC.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_3",
+   "kind": "button",
+   "box": [
+    13.0,
+    151.9,
+    125.3,
+    172.7
+   ],
+   "fill": "#1C2A3CE6",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "stroke": "#FFFFFF1A",
+   "notes": "Dark near-opaque glass tile: observed composite #1A2839..#1D2B3C, fill modelled as #1C2A3C @ 90% (fit over the page bg left/right of the list); 1px lighter inner border (~#FFFFFF1A, reads as L~41-48). Tiles are separated by a ~1px dark gap; measured heights 21.0-22.3 px, pitch ~22.7; item_7 bottom (265.1) aligns with the content panel bottom (265.0).",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "side.item_3_icon",
+   "kind": "icon",
+   "box": [
+    23.8,
+    157.4,
+    34.7,
+    166.5
+   ],
+   "icon": "volume",
+   "color": "#E8F0FA",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "Outline speaker with sound waves (sound & graphics). Stroke ~1.3px, icon center x~29.1.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_3_label",
+   "kind": "text",
+   "box": [
+    45.7,
+    158.6,
+    98.6,
+    166.5
+   ],
+   "text": "Ovoz va grafika",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D8E0EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "includes 'g' descender; baseline 165.0. Sampled core ~#D4DCEC.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_4",
+   "kind": "button",
+   "box": [
+    13.0,
+    173.7,
+    125.3,
+    196.0
+   ],
+   "fill": "#1C2A3CE6",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "stroke": "#FFFFFF1A",
+   "notes": "Dark near-opaque glass tile: observed composite #1A2839..#1D2B3C, fill modelled as #1C2A3C @ 90% (fit over the page bg left/right of the list); 1px lighter inner border (~#FFFFFF1A, reads as L~41-48). Tiles are separated by a ~1px dark gap; measured heights 21.0-22.3 px, pitch ~22.7; item_7 bottom (265.1) aligns with the content panel bottom (265.0).",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "side.item_4_icon",
+   "kind": "icon",
+   "box": [
+    24.0,
+    179.4,
+    34.6,
+    190.0
+   ],
+   "icon": "gamepad",
+   "color": "#E8F0FA",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "Outline game controller / joystick-like blob icon (controls); AI-drawn shape is unclear, use a gamepad icon. Stroke ~1.3px, icon center x~29.1.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_4_label",
+   "kind": "text",
+   "box": [
+    46.0,
+    181.2,
+    82.6,
+    189.2
+   ],
+   "text": "Boshqaruv",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D8E0EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "includes 'q' descender; baseline 188.0. Sampled core ~#D4DCEC.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_5",
+   "kind": "button",
+   "box": [
+    13.0,
+    197.0,
+    125.3,
+    218.7
+   ],
+   "fill": "#1C2A3CE6",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "stroke": "#FFFFFF1A",
+   "notes": "Dark near-opaque glass tile: observed composite #1A2839..#1D2B3C, fill modelled as #1C2A3C @ 90% (fit over the page bg left/right of the list); 1px lighter inner border (~#FFFFFF1A, reads as L~41-48). Tiles are separated by a ~1px dark gap; measured heights 21.0-22.3 px, pitch ~22.7; item_7 bottom (265.1) aligns with the content panel bottom (265.0).",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "side.item_5_icon",
+   "kind": "icon",
+   "box": [
+    24.1,
+    201.7,
+    34.0,
+    213.5
+   ],
+   "icon": "lock",
+   "color": "#E8F0FA",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "Outline padlock (privacy). Stroke ~1.3px, icon center x~29.1.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_5_label",
+   "kind": "text",
+   "box": [
+    46.0,
+    204.2,
+    75.4,
+    211.9
+   ],
+   "text": "Marfiylik",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D8E0EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "includes 'y' descender; baseline 210.6. Sampled core ~#D4DCEC. Garbled AI text.",
+   "intended": "Maxfiylik",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_6",
+   "kind": "button",
+   "box": [
+    13.0,
+    219.7,
+    125.3,
+    242.0
+   ],
+   "fill": "#1C2A3CE6",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "stroke": "#FFFFFF1A",
+   "notes": "Dark near-opaque glass tile: observed composite #1A2839..#1D2B3C, fill modelled as #1C2A3C @ 90% (fit over the page bg left/right of the list); 1px lighter inner border (~#FFFFFF1A, reads as L~41-48). Tiles are separated by a ~1px dark gap; measured heights 21.0-22.3 px, pitch ~22.7; item_7 bottom (265.1) aligns with the content panel bottom (265.0).",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "side.item_6_icon",
+   "kind": "icon",
+   "box": [
+    23.6,
+    225.3,
+    34.5,
+    236.0
+   ],
+   "icon": "globe",
+   "color": "#E8F0FA",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "Outline globe (language). Stroke ~1.3px, icon center x~29.1.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_6_label",
+   "kind": "text",
+   "box": [
+    46.0,
+    227.4,
+    53.6,
+    233.4
+   ],
+   "text": "Til",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D8E0EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "cap top to baseline. Sampled core ~#D4DCEC.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_7",
+   "kind": "button",
+   "box": [
+    13.0,
+    243.0,
+    125.3,
+    265.1
+   ],
+   "fill": "#1C2A3CE6",
+   "radius": 4.0,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "stroke": "#FFFFFF1A",
+   "notes": "Dark near-opaque glass tile: observed composite #1A2839..#1D2B3C, fill modelled as #1C2A3C @ 90% (fit over the page bg left/right of the list); 1px lighter inner border (~#FFFFFF1A, reads as L~41-48). Tiles are separated by a ~1px dark gap; measured heights 21.0-22.3 px, pitch ~22.7; item_7 bottom (265.1) aligns with the content panel bottom (265.0).",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "side.item_7_icon",
+   "kind": "icon",
+   "box": [
+    23.7,
+    248.4,
+    34.3,
+    259.3
+   ],
+   "icon": "help-circle",
+   "color": "#E8F0FA",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "Circle with '?' (help). Stroke ~1.3px, icon center x~29.1.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "side.item_7_label",
+   "kind": "text",
+   "box": [
+    46.0,
+    250.5,
+    71.5,
+    256.8
+   ],
+   "text": "Yordam",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#D8E0EE",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "notes": "cap top to baseline. Sampled core ~#D4DCEC.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.panel",
+   "kind": "panel",
+   "box": [
+    183.5,
+    53.0,
+    484.0,
+    265.0
+   ],
+   "fill": "#36425A68",
+   "stroke": "#FFFFFF1F",
+   "radius": 6.0,
+   "anchor": "tr",
+   "group": "content",
+   "notes": "Large glass card with backdrop blur. Observed composite #25334A..#26354A on the left, #1D314A..#344055 on the right (it follows the page gradient), i.e. only +8..+20 per channel over the bg; least-squares fit of 8 inside/outside pairs gives tint #36425A @ ~41% (0x68). 1px lighter border (~#FFFFFF1F) drawn as the outermost pixel row/column (x=184, x=482-483, y=53, y=264). Radius ~6. Bottom edge y=265.0 aligns with the side list bottom.",
+   "remove": true,
+   "pad": 3.0
+  },
+  {
+   "id": "settings.avatar",
+   "kind": "avatar",
+   "box": [
+    197.5,
+    64.2,
+    244.3,
+    111.1
+   ],
+   "stroke": "#8892A8FF",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "Circular portrait photo (young man, dark hair, dark suit, white shirt, light grey studio bg), diameter ~46.8, centre (220.9, 87.65); ~1.5px light steel ring at r~22-23 (median #828C9D, brightest ~#8892A8).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.name",
+   "kind": "text",
+   "box": [
+    254.1,
+    77.2,
+    315.7,
+    87.3
+   ],
+   "text": "Lynxos_user",
+   "fontPx": 10.8,
+   "weight": "semibold",
+   "color": "#F7FDFF",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "Box includes 'y' descender and underscore; cap top 77.2, baseline 85.0.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.id",
+   "kind": "text",
+   "box": [
+    254.1,
+    93.0,
+    294.0,
+    99.0
+   ],
+   "text": "ID: ø842193",
+   "fontPx": 8.3,
+   "weight": "regular",
+   "color": "#98A7C0",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "Cap top to baseline. The '#' is drawn as a blurry slashed-o glyph; intended '#'. Muted grey-blue.",
+   "intended": "ID: #842193",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.edit_button",
+   "kind": "button",
+   "box": [
+    420.3,
+    78.4,
+    470.8,
+    98.1
+   ],
+   "fill": "#95ADEF40",
+   "stroke": "#FFFFFF14",
+   "radius": 4.0,
+   "anchor": "tr",
+   "group": "content",
+   "notes": "Secondary glass button. Observed composite #3B4D6A (panel around it #1D2D3F..#1D3048); fill #95ADEF @ 25% reproduces it. Faint 1px lighter top rim. Label is centred (label centre 445.6/88.0 vs button centre 445.55/88.25).",
+   "remove": true,
+   "pad": 2.0
+  },
+  {
+   "id": "settings.edit_button_label",
+   "kind": "text",
+   "box": [
+    429.3,
+    85.1,
+    461.9,
+    90.9
+   ],
+   "text": "Tahrirlash",
+   "fontPx": 8.1,
+   "weight": "medium",
+   "color": "#D6DFFA",
+   "anchor": "tr",
+   "group": "content",
+   "notes": "Centered in the button. Cap top to baseline.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.sep_0",
+   "kind": "line",
+   "box": [
+    200.0,
+    119.2,
+    470.0,
+    120.2
+   ],
+   "color": "#FFFFFF14",
+   "fill": "#FFFFFF14",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "1px hairline divider (~8% white over the panel, peak +8..+13 L). Horizontal alpha ramp: 10% at x~209, 50% at x~219, full from ~x235 to ~440, 50% at x~457, ~20% under the chevrons, 0 at x=470. Dividers are 28.0 px apart (centres 119.7, 147.7, 175.5, 203.7, 231.7). This first divider separates the profile header from the rows.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.sep_1",
+   "kind": "line",
+   "box": [
+    200.0,
+    147.2,
+    470.0,
+    148.2
+   ],
+   "color": "#FFFFFF14",
+   "fill": "#FFFFFF14",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "1px hairline divider (~8% white over the panel, peak +8..+13 L). Horizontal alpha ramp: 10% at x~209, 50% at x~219, full from ~x235 to ~440, 50% at x~457, ~20% under the chevrons, 0 at x=470. Dividers are 28.0 px apart (centres 119.7, 147.7, 175.5, 203.7, 231.7).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.sep_2",
+   "kind": "line",
+   "box": [
+    200.0,
+    175.0,
+    470.0,
+    176.0
+   ],
+   "color": "#FFFFFF14",
+   "fill": "#FFFFFF14",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "1px hairline divider (~8% white over the panel, peak +8..+13 L). Horizontal alpha ramp: 10% at x~209, 50% at x~219, full from ~x235 to ~440, 50% at x~457, ~20% under the chevrons, 0 at x=470. Dividers are 28.0 px apart (centres 119.7, 147.7, 175.5, 203.7, 231.7).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.sep_3",
+   "kind": "line",
+   "box": [
+    200.0,
+    203.2,
+    470.0,
+    204.2
+   ],
+   "color": "#FFFFFF14",
+   "fill": "#FFFFFF14",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "1px hairline divider (~8% white over the panel, peak +8..+13 L). Horizontal alpha ramp: 10% at x~209, 50% at x~219, full from ~x235 to ~440, 50% at x~457, ~20% under the chevrons, 0 at x=470. Dividers are 28.0 px apart (centres 119.7, 147.7, 175.5, 203.7, 231.7).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.sep_4",
+   "kind": "line",
+   "box": [
+    200.0,
+    231.2,
+    470.0,
+    232.2
+   ],
+   "color": "#FFFFFF14",
+   "fill": "#FFFFFF14",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "1px hairline divider (~8% white over the panel, peak +8..+13 L). Horizontal alpha ramp: 10% at x~209, 50% at x~219, full from ~x235 to ~440, 50% at x~457, ~20% under the chevrons, 0 at x=470. Dividers are 28.0 px apart (centres 119.7, 147.7, 175.5, 203.7, 231.7).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_0_label",
+   "kind": "text",
+   "box": [
+    201.0,
+    130.4,
+    213.8,
+    136.8
+   ],
+   "text": "Ism",
+   "fontPx": 9.2,
+   "weight": "medium",
+   "color": "#E2EAF8",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "cap top to baseline. Left column x=201.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_0_value",
+   "kind": "text",
+   "box": [
+    269.0,
+    130.4,
+    315.5,
+    138.5
+   ],
+   "text": "Lynxos_user",
+   "fontPx": 9.2,
+   "weight": "regular",
+   "color": "#D6DFF0",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "includes 'y' descender + underscore; baseline 137.0. Value column x=269 (slightly dimmer than label).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_0_chevron",
+   "kind": "icon",
+   "box": [
+    462.3,
+    130.5,
+    466.0,
+    136.7
+   ],
+   "icon": "chevron-right",
+   "color": "#DCE8FC",
+   "anchor": "tr",
+   "group": "content",
+   "notes": "Right chevron, ~1.2px stroke, ink box ~3.7x6.1 (50% crossings), right edge x~466.0 (18 px from the panel's right edge); vertically centred on the row label.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_1_label",
+   "kind": "text",
+   "box": [
+    201.0,
+    158.1,
+    220.9,
+    164.9
+   ],
+   "text": "Email",
+   "fontPx": 9.2,
+   "weight": "medium",
+   "color": "#E2EAF8",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "cap top to baseline. Left column x=201.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_1_value",
+   "kind": "text",
+   "box": [
+    269.0,
+    158.5,
+    325.0,
+    166.8
+   ],
+   "text": "user@lynxos.uz",
+   "fontPx": 9.2,
+   "weight": "regular",
+   "color": "#D6DFF0",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "includes 'y' descender and '@'; baseline 165.0. Value column x=269 (slightly dimmer than label).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_1_chevron",
+   "kind": "icon",
+   "box": [
+    462.3,
+    158.7,
+    466.1,
+    164.7
+   ],
+   "icon": "chevron-right",
+   "color": "#DCE8FC",
+   "anchor": "tr",
+   "group": "content",
+   "notes": "Right chevron, ~1.2px stroke, ink box ~3.7x6.1 (50% crossings), right edge x~466.0 (18 px from the panel's right edge); vertically centred on the row label.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_2_label",
+   "kind": "text",
+   "box": [
+    201.0,
+    186.3,
+    237.6,
+    192.9
+   ],
+   "text": "Mamlakat",
+   "fontPx": 9.2,
+   "weight": "medium",
+   "color": "#E2EAF8",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "cap top to baseline. Left column x=201.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_2_value",
+   "kind": "text",
+   "box": [
+    268.7,
+    186.3,
+    310.5,
+    193.0
+   ],
+   "text": "O'zbekistón",
+   "fontPx": 9.2,
+   "weight": "regular",
+   "color": "#D6DFF0",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "Cap top to baseline (no descenders). Value column x=269. The 'o' of '-ston' carries a stray AI accent; intended plain O'zbekiston.",
+   "intended": "O'zbekiston",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_2_chevron",
+   "kind": "icon",
+   "box": [
+    462.2,
+    186.4,
+    466.0,
+    192.8
+   ],
+   "icon": "chevron-right",
+   "color": "#DCE8FC",
+   "anchor": "tr",
+   "group": "content",
+   "notes": "Right chevron, ~1.2px stroke, ink box ~3.7x6.1 (50% crossings), right edge x~466.0 (18 px from the panel's right edge); vertically centred on the row label.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_3_label",
+   "kind": "text",
+   "box": [
+    200.7,
+    214.0,
+    209.0,
+    220.6
+   ],
+   "text": "Til",
+   "fontPx": 9.2,
+   "weight": "medium",
+   "color": "#E2EAF8",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "cap top to baseline. Left column x=201.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_3_value",
+   "kind": "text",
+   "box": [
+    269.0,
+    214.2,
+    306.0,
+    220.9
+   ],
+   "text": "O'zbekcha",
+   "fontPx": 9.2,
+   "weight": "regular",
+   "color": "#D6DFF0",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "cap top to baseline (no descenders). Value column x=269 (slightly dimmer than label).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_3_chevron",
+   "kind": "icon",
+   "box": [
+    462.4,
+    214.5,
+    466.1,
+    220.6
+   ],
+   "icon": "chevron-right",
+   "color": "#DCE8FC",
+   "anchor": "tr",
+   "group": "content",
+   "notes": "Right chevron, ~1.2px stroke, ink box ~3.7x6.1 (50% crossings), right edge x~466.0 (18 px from the panel's right edge); vertically centred on the row label.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_4_label",
+   "kind": "text",
+   "box": [
+    201.0,
+    242.3,
+    222.0,
+    248.9
+   ],
+   "text": "Uslub",
+   "fontPx": 9.2,
+   "weight": "medium",
+   "color": "#E2EAF8",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "cap top to baseline. Left column x=201.",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_4_value",
+   "kind": "text",
+   "box": [
+    269.0,
+    242.4,
+    298.9,
+    249.0
+   ],
+   "text": "Kundalik",
+   "fontPx": 9.2,
+   "weight": "regular",
+   "color": "#D6DFF0",
+   "anchor": "tl",
+   "group": "content",
+   "notes": "cap top to baseline (no descenders). Value column x=269 (slightly dimmer than label).",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "settings.row_4_chevron",
+   "kind": "icon",
+   "box": [
+    462.4,
+    242.5,
+    466.1,
+    248.6
+   ],
+   "icon": "chevron-right",
+   "color": "#DCE8FC",
+   "anchor": "tr",
+   "group": "content",
+   "notes": "Right chevron, ~1.2px stroke, ink box ~3.7x6.1 (50% crossings), right edge x~466.0 (18 px from the panel's right edge); vertically centred on the row label.",
+   "remove": true,
+   "pad": 1.5
+  }
+ ],
+ "removePolygons": [],
+ "assets": [
+  {
+   "name": "settings.avatar_photo",
+   "box": [
+    197.5,
+    64.2,
+    244.3,
+    111.1
+   ],
+   "notes": "Circular portrait photo of the player (young man, dark hair, suit). Crop and apply a circular mask (centre 220.9,87.65, r~22.2 inside the ring); the ~1.5px light ring (#8892A8) is UI and should be drawn separately."
+  },
+  {
+   "name": "nav.profile_avatar_photo",
+   "box": [
+    407.0,
+    11.0,
+    426.0,
+    29.8
+   ],
+   "notes": "Same portrait at tiny size - prefer reusing settings.avatar_photo scaled down."
+  },
+  {
+   "name": "nav.brand_icon",
+   "box": [
+    13.9,
+    11.3,
+    29.1,
+    27.0
+   ],
+   "notes": "Lynxos app icon (blue rounded square + white swirl); shared across all pages."
+  }
+ ]
+}

@@ -1,0 +1,1331 @@
+{
+ "page": "friends",
+ "size": [
+  492,
+  285
+ ],
+ "notes": "Friends page (Do'stlar va muloqot). Background: dark blurred navy, vertical/diagonal gradient - top-left #061422, around header #1F3A5A, right side #263D59..#2C4563, bottom #122032; warm reddish haze at far right mid (#3A3C46). No distinct nav bar. Layout: left column = side.panel (x 12.0-175.5), right content column x 185.9-479.2 (gutter ~10.5, right margin ~13). Nav highlight drawn on 'Dunyo' by mistake - in game Do'stlar is selected. All UI except friends.hero_image is marked remove; hero_image is a separate asset whose overlay (title + CTA) is removed. The crop edges carry 1-2 px of the concept sheet's window frame (dark row 0 + light row 1 on top, dark col 0 on the left, light col 490 + dark col 491 on the right) - see removePolygons.",
+ "elements": [
+  {
+   "id": "nav.brand_icon",
+   "kind": "icon",
+   "box": [
+    13.4,
+    11.4,
+    28.8,
+    26.8
+   ],
+   "icon": "logo",
+   "color": "#D8FCFF",
+   "fill": "#3676FCFF",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "nav",
+   "remove": true,
+   "pad": 2.5,
+   "notes": "Rounded-square app logo: blue fill #3676FC (slightly lighter top-left), white/ice-blue swirl 'C'/@-like glyph (#D8FCFF). ~15 px square. Soft blue glow (#00175A) ~2 px outside the tile on the right/bottom and a dark 1 px shadow on the left - pad 2.5."
+  },
+  {
+   "id": "nav.brand_text",
+   "kind": "text",
+   "box": [
+    34.0,
+    15.1,
+    71.5,
+    24.7
+   ],
+   "text": "Lynxos",
+   "fontPx": 10.6,
+   "weight": "bold",
+   "color": "#FAFFFF",
+   "anchor": "tl",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Box = cap top (L) to descender of y. Cap height 7.6 px (15.1-22.7), baseline y=22.7."
+  },
+  {
+   "id": "nav.tab_home",
+   "kind": "text",
+   "box": [
+    93.8,
+    16.1,
+    131.0,
+    22.7
+   ],
+   "text": "Bosh sahifa",
+   "fontPx": 9.2,
+   "weight": "medium",
+   "color": "#CBD4E3",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Cap top to baseline (no descenders). Baseline y=22.7."
+  },
+  {
+   "id": "nav.tab_selected",
+   "kind": "panel",
+   "box": [
+    141.5,
+    12.5,
+    183.3,
+    31.5
+   ],
+   "fill": "#1448A9E6",
+   "radius": 2,
+   "anchor": "tl",
+   "group": "nav",
+   "state": "selected",
+   "remove": true,
+   "pad": 3,
+   "notes": "DRAWN ON 'Dunyo' BY MISTAKE - in game this highlight goes behind the active tab (Do'stlar). Not a solid pill: a vertical gradient glow that is fully transparent at the top (fades in from y~13; nothing visible at y<12.5) -> #152D5E (y~20) -> #1448A9 (y~29) right above the underline. Side edges x 141.5 / 183.3 (soft ~1 px). Soft blue glow spills ~2 px left/right and ~4 px below the underline (to y~35)."
+  },
+  {
+   "id": "nav.tab_underline",
+   "kind": "line",
+   "box": [
+    142.1,
+    30.0,
+    182.9,
+    31.4
+   ],
+   "color": "#90C4FF",
+   "radius": 0.8,
+   "anchor": "tl",
+   "group": "nav",
+   "state": "selected",
+   "remove": true,
+   "pad": 4,
+   "notes": "Bright glowing underline (core #96C9FF, ~1.4 px thick: row 30 full, row 31 ~40%) spanning the width of nav.tab_selected (inset ~0.5 px); blue glow (#0B317F..#112C56) below it down to y~35.5 - pad 4 covers it."
+  },
+  {
+   "id": "nav.tab_world",
+   "kind": "text",
+   "box": [
+    151.5,
+    16.1,
+    173.5,
+    24.2
+   ],
+   "text": "Dunyo",
+   "fontPx": 9.3,
+   "weight": "semibold",
+   "color": "#DBF1FF",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "Drawn as the selected tab (mistake; on this page Do'stlar should be selected). Box to y descender; baseline y=22.8."
+  },
+  {
+   "id": "nav.tab_friends",
+   "kind": "text",
+   "box": [
+    194.9,
+    16.2,
+    220.2,
+    22.8
+   ],
+   "text": "Do'stlar",
+   "fontPx": 9.2,
+   "weight": "medium",
+   "color": "#D7E3F5",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "In game this is the SELECTED tab on this page (use selected styling: #DBF1FF semibold + nav.tab_selected + nav.tab_underline)."
+  },
+  {
+   "id": "nav.tab_top",
+   "kind": "text",
+   "box": [
+    241.4,
+    16.3,
+    265.6,
+    24.0
+   ],
+   "text": "Top-lar",
+   "fontPx": 9.2,
+   "weight": "medium",
+   "color": "#D2DDF3",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Box to p descender; baseline y~22.4. Same style as the other nav tabs (measured T cap 6.0 is blur-reduced)."
+  },
+  {
+   "id": "nav.tab_settings",
+   "kind": "text",
+   "box": [
+    285.6,
+    16.5,
+    321.9,
+    23.1
+   ],
+   "text": "Sozlamalar",
+   "fontPx": 9.2,
+   "weight": "medium",
+   "color": "#C9D2E3",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Cap top to baseline."
+  },
+  {
+   "id": "nav.lang_globe",
+   "kind": "icon",
+   "box": [
+    346.1,
+    14.4,
+    358.0,
+    26.1
+   ],
+   "icon": "globe",
+   "color": "#DCE6F2",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline globe (meridian + 2 latitude lines), ~1.3 px stroke."
+  },
+  {
+   "id": "nav.lang_text",
+   "kind": "text",
+   "box": [
+    361.4,
+    18.0,
+    369.3,
+    23.1
+   ],
+   "text": "UZ",
+   "fontPx": 7.1,
+   "weight": "medium",
+   "color": "#B4C0D6",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2
+  },
+  {
+   "id": "nav.lang_chevron",
+   "kind": "icon",
+   "box": [
+    372.6,
+    19.3,
+    376.4,
+    22.1
+   ],
+   "icon": "chevron-down",
+   "color": "#A6B7CF",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2
+  },
+  {
+   "id": "nav.bell",
+   "kind": "icon",
+   "box": [
+    388.0,
+    14.1,
+    399.1,
+    26.8
+   ],
+   "icon": "bell",
+   "color": "#DADFEC",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline bell, ~1.3 px stroke."
+  },
+  {
+   "id": "nav.bell_dot",
+   "kind": "dot",
+   "box": [
+    396.0,
+    14.4,
+    400.0,
+    17.5
+   ],
+   "color": "#BA4652",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Red notification dot on the bell's top-right, ~4.1 x 3 px, centre ~(397.8,16.0). Colour = sampled brightest core (#BA4652, blurred); intended a saturated red ~#E5484D."
+  },
+  {
+   "id": "nav.profile_pill",
+   "kind": "pill",
+   "box": [
+    406.5,
+    10.5,
+    479.0,
+    31.0
+   ],
+   "fill": "#283A54E6",
+   "stroke": "#3A4A62B0",
+   "radius": 10.25,
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Fully rounded glass capsule; fill observed #283B53 (interior) vs bg #1D2C40 right of it; faint lighter 1 px rim (top row y=11 #2D3C56, bottom row y=30 #2F405A, right column x=478). The avatar circle (nav.profile_avatar) sits flush in its left cap; a 1 px darker line at x=406 separates it from the page bg."
+  },
+  {
+   "id": "nav.profile_avatar",
+   "kind": "avatar",
+   "box": [
+    407.0,
+    11.0,
+    425.4,
+    29.3
+   ],
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Full avatar circle, diameter ~18.4, centre ~(416.2,20.2): portrait photo (young man, dark hair, face at x~416-421) whose left third is a light grey ring/backdrop (#4E586C..#5E697E); faint light rim on the right edge. Same player portrait as the other pages; better replaced by the real avatar sprite.",
+   "radius": 9.2
+  },
+  {
+   "id": "nav.profile_name",
+   "kind": "text",
+   "box": [
+    430.1,
+    18.4,
+    462.8,
+    24.0
+   ],
+   "text": "Lynxos_user",
+   "fontPx": 6.7,
+   "weight": "medium",
+   "color": "#C3CDDE",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Drawn blurry/garbled but reads 'Lynxos_user'. Box includes underscore/descender; baseline ~23.2."
+  },
+  {
+   "id": "nav.profile_chevron",
+   "kind": "icon",
+   "box": [
+    467.9,
+    19.0,
+    472.6,
+    22.1
+   ],
+   "icon": "chevron-down",
+   "color": "#B0C2DA",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2
+  },
+  {
+   "id": "header.title",
+   "kind": "text",
+   "box": [
+    14.4,
+    45.0,
+    138.9,
+    58.6
+   ],
+   "text": "Do'stlar va muloqot",
+   "fontPx": 15.1,
+   "weight": "bold",
+   "color": "#FDFFFF",
+   "anchor": "tl",
+   "group": "header",
+   "remove": true,
+   "pad": 3,
+   "notes": "Box = cap top (D) to q descender; baseline y=55.9, cap height 10.9."
+  },
+  {
+   "id": "header.subtitle",
+   "kind": "text",
+   "box": [
+    14.0,
+    64.4,
+    134.4,
+    73.3
+   ],
+   "text": "Yangi odamlar bilan tanishing",
+   "fontPx": 9.4,
+   "weight": "regular",
+   "color": "#A2B0C4",
+   "anchor": "tl",
+   "group": "header",
+   "remove": true,
+   "pad": 3,
+   "notes": "Box = cap/ascender top to g descender; baseline ~71.4. Muted blue-grey; colour = median of the brightest 2% (anti-aliased average #8694A8)."
+  },
+  {
+   "id": "friends.tabs_bar",
+   "kind": "panel",
+   "box": [
+    230.3,
+    48.0,
+    478.0,
+    70.5
+   ],
+   "fill": "#1F344FF0",
+   "stroke": "#2E435E99",
+   "radius": 4.5,
+   "anchor": "tr",
+   "group": "tabs",
+   "remove": true,
+   "pad": 2,
+   "notes": "Segmented control container: darker navy glass (#20344F interior) than the surrounding bg (#2C4563); 1 px lighter top rim on row y=48 (#30445F, +10 lum), bottom edge soft at y~70.5. Left end is hidden under friends.tab_selected (same left edge 230.3). 4 segments of ~61-64 px separated by faint dividers at x~357 and x~418."
+  },
+  {
+   "id": "friends.tab_selected",
+   "kind": "button",
+   "box": [
+    230.3,
+    48.5,
+    294.85,
+    70.9
+   ],
+   "fill": "#3880FAFF",
+   "radius": 5,
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "selected",
+   "remove": true,
+   "pad": 5,
+   "notes": "Selected segment fill: bright blue, slight left->right gradient #3A7FFB (left) -> #3575FA (right), 1 px lighter left rim (#3F84FF). Soft blue outer glow ~4-5 px (visible above y 43-47 and left x 224-229) - pad 5 covers it. Occupies segment 0 (Do'stlar)."
+  },
+  {
+   "id": "friends.tab_0",
+   "kind": "tab",
+   "box": [
+    230.3,
+    48.0,
+    294.85,
+    70.5
+   ],
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "selected",
+   "remove": true,
+   "pad": 1,
+   "notes": "Segment 0 hit area (Do'stlar)."
+  },
+  {
+   "id": "friends.tab_0_label",
+   "kind": "text",
+   "box": [
+    248.8,
+    56.7,
+    276.4,
+    63.1
+   ],
+   "text": "Do'stlar",
+   "fontPx": 8.8,
+   "weight": "semibold",
+   "color": "#FFFFFF",
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "White on blue (sampled #D9F8FF, blurred). Cap top to baseline."
+  },
+  {
+   "id": "friends.tab_1",
+   "kind": "tab",
+   "box": [
+    294.85,
+    48.0,
+    357.0,
+    70.5
+   ],
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 1,
+   "notes": "Segment 1 (Guruhlar)."
+  },
+  {
+   "id": "friends.tab_1_label",
+   "kind": "text",
+   "box": [
+    310.8,
+    56.5,
+    341.1,
+    63.1
+   ],
+   "text": "Grunhlar",
+   "intended": "Guruhlar",
+   "fontPx": 9.0,
+   "weight": "medium",
+   "color": "#C6D5EB",
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "AI-garbled spelling 'Grunhlar' -> 'Guruhlar' (Groups)."
+  },
+  {
+   "id": "friends.tab_sep_0",
+   "kind": "line",
+   "box": [
+    356.0,
+    50.5,
+    358.0,
+    69.0
+   ],
+   "color": "#263953",
+   "anchor": "tr",
+   "group": "tabs",
+   "remove": true,
+   "pad": 1,
+   "notes": "Very faint vertical divider between segments 1 and 2 (cols 356-357 +5 lum over the fill, col 354-355 1-2 lum darker)."
+  },
+  {
+   "id": "friends.tab_2",
+   "kind": "tab",
+   "box": [
+    357.0,
+    48.0,
+    418.0,
+    70.5
+   ],
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 1,
+   "notes": "Segment 2 (Tadbirlar)."
+  },
+  {
+   "id": "friends.tab_2_label",
+   "kind": "text",
+   "box": [
+    372.9,
+    56.5,
+    403.2,
+    63.1
+   ],
+   "text": "Tadbirlar",
+   "fontPx": 9.0,
+   "weight": "medium",
+   "color": "#C6D3EA",
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Events."
+  },
+  {
+   "id": "friends.tab_sep_1",
+   "kind": "line",
+   "box": [
+    417.0,
+    50.5,
+    419.0,
+    69.0
+   ],
+   "color": "#253A55",
+   "anchor": "tr",
+   "group": "tabs",
+   "remove": true,
+   "pad": 1,
+   "notes": "Very faint vertical divider between segments 2 and 3 (cols 417-418 +5 lum)."
+  },
+  {
+   "id": "friends.tab_3",
+   "kind": "tab",
+   "box": [
+    418.0,
+    48.0,
+    478.0,
+    70.5
+   ],
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 1,
+   "notes": "Segment 3 (Chat)."
+  },
+  {
+   "id": "friends.tab_3_label",
+   "kind": "text",
+   "box": [
+    440.2,
+    56.5,
+    456.6,
+    63.0
+   ],
+   "text": "Chat",
+   "fontPx": 9.0,
+   "weight": "medium",
+   "color": "#C6D2E8",
+   "anchor": "tr",
+   "group": "tabs",
+   "state": "normal",
+   "remove": true,
+   "pad": 2
+  },
+  {
+   "id": "friends.search",
+   "kind": "input",
+   "box": [
+    185.9,
+    79.0,
+    479.2,
+    103.0
+   ],
+   "fill": "#334968E6",
+   "stroke": "#4D6385B0",
+   "radius": 5,
+   "anchor": "tr",
+   "group": "search",
+   "remove": true,
+   "pad": 2,
+   "notes": "Glass search field spanning the right content column. Fill observed #334968 (top) -> #304766 (bottom) over bg #2A4464; 1 px lighter rim (#4D6385 top, #405673 left). A tiny faint speck at ~(467,90) inside is an artifact - ignore."
+  },
+  {
+   "id": "friends.search_icon",
+   "kind": "icon",
+   "box": [
+    194.9,
+    85.9,
+    205.0,
+    95.9
+   ],
+   "icon": "search",
+   "color": "#C6D8F0",
+   "anchor": "tr",
+   "group": "search",
+   "remove": true,
+   "pad": 2,
+   "notes": "Magnifier, ~1.5 px stroke, handle to bottom-right."
+  },
+  {
+   "id": "friends.search_placeholder",
+   "kind": "text",
+   "box": [
+    212.1,
+    87.6,
+    291.8,
+    94.9
+   ],
+   "text": "Foydalanuvchini qidirish...",
+   "fontPx": 7.5,
+   "weight": "regular",
+   "color": "#8194B1",
+   "anchor": "tr",
+   "group": "search",
+   "remove": true,
+   "pad": 2,
+   "notes": "Placeholder, drawn blurry but legible as 'Foydalanuvchini qidirish...' (Search user...). Box to y/q descenders; baseline ~93.1."
+  },
+  {
+   "id": "friends.hero_image",
+   "kind": "image",
+   "box": [
+    186.0,
+    108.7,
+    479.0,
+    268.0
+   ],
+   "radius": 6,
+   "stroke": "#8C96B080",
+   "anchor": "tr",
+   "group": "hero",
+   "notes": "Photo-style picture: group of young people sitting on a terrace, seen from behind, looking at a futuristic skyline at sunset (tree top-right). Thin light rim (~1 px, #8C96B0; left col 186, top row 109, right col 478) and a dark drop shadow row below (y 268). Corner radius ~5.5-6. remove=false (same convention as education.hero_image) so the inpainted page keeps the picture for the asset crop; the overlay title/button below are removed.",
+   "remove": false
+  },
+  {
+   "id": "friends.hero_title",
+   "kind": "text",
+   "box": [
+    203.7,
+    128.8,
+    347.2,
+    140.5
+   ],
+   "text": "Birga dunyoni kashf eting",
+   "fontPx": 12.4,
+   "weight": "bold",
+   "color": "#F5FFFF",
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 3,
+   "notes": "Inside the hero: offset from hero_image top-left (+17.7, +20.1). White with a soft dark-blue text shadow (~1-2 px). Box = cap top to g descender; cap height 8.9 (B 128.8-137.7), baseline ~137.7."
+  },
+  {
+   "id": "friends.hero_button",
+   "kind": "button",
+   "box": [
+    269.7,
+    229.6,
+    393.8,
+    257.0
+   ],
+   "fill": "#1D58FBFF",
+   "radius": 5,
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 3,
+   "notes": "Primary CTA inside the hero: horizontally centred on the hero (hero centre x=332.5, button centre x=331.75), bottom 11.0 px above the hero bottom. Fill #1D5AFA (top #1854F8 -> bottom #225CFE), 1 px lighter top/left rim, dark navy outline/shadow (#000C3D..#0C1E45, 1-2 px) around it - pad 3 covers it."
+  },
+  {
+   "id": "friends.hero_button_label",
+   "kind": "text",
+   "box": [
+    303.7,
+    239.9,
+    348.9,
+    248.0
+   ],
+   "text": "Do'st topish",
+   "fontPx": 9.6,
+   "weight": "semibold",
+   "color": "#FFFFFF",
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 2,
+   "notes": "White (sampled #D0F3FF, blurred). Box to p descender; baseline ~246.9."
+  },
+  {
+   "id": "friends.hero_button_arrow",
+   "kind": "icon",
+   "box": [
+    374.1,
+    239.8,
+    382.0,
+    247.2
+   ],
+   "icon": "arrow-right",
+   "color": "#FFFFFF",
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 2,
+   "notes": "Thin right arrow, ~1.3 px stroke, right-aligned inside the button (11.6 px from its right edge)."
+  },
+  {
+   "id": "side.panel",
+   "kind": "panel",
+   "box": [
+    12.0,
+    85.6,
+    175.5,
+    260.3
+   ],
+   "fill": "#253650E0",
+   "stroke": "#34465E80",
+   "radius": 5,
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 3,
+   "notes": "Glass card: fill #24344C in header area -> #273850 in list area -> #25334C bottom; faint lighter rim (top row #273850 over bg). Dark soft shadow outside (#021020 at x=11)."
+  },
+  {
+   "id": "side.title",
+   "kind": "text",
+   "box": [
+    19.9,
+    94.7,
+    61.4,
+    103.8
+   ],
+   "text": "Tavsiyalar",
+   "fontPx": 9.4,
+   "weight": "semibold",
+   "color": "#F1FAFF",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 2,
+   "notes": "Panel heading 'Recommendations'. Box to y descender; baseline ~101.6."
+  },
+  {
+   "id": "side.title_dot",
+   "kind": "dot",
+   "box": [
+    164.9,
+    97.0,
+    166.4,
+    98.9
+   ],
+   "color": "#415169",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Tiny faint dot at the right of the heading row - probably an AI artifact (or a hint of a 'more' menu). Optional."
+  },
+  {
+   "id": "side.item_0",
+   "kind": "tile",
+   "box": [
+    12.5,
+    110.2,
+    175.0,
+    145.3
+   ],
+   "fill": "#304565FF",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 1,
+   "notes": "Highlighted (selected/hover) row: lighter navy (median #304565; left ~#283E60, right ~#364866), flush with the panel's inner sides, top edge y~110.2 (row 110 ~80%), bottom 145.3. Row pitch 36 px."
+  },
+  {
+   "id": "side.item_0_icon",
+   "kind": "avatar",
+   "box": [
+    19.3,
+    115.3,
+    44.8,
+    140.2
+   ],
+   "stroke": "#9397A9",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Round avatar photo (diameter ~25.2, centre ~(32.0,127.8)) with a ~1.5 px light ring (#9397A9) and a 1 px dark outer line. Portrait: young man, brown hair."
+  },
+  {
+   "id": "side.item_0_label",
+   "kind": "text",
+   "box": [
+    51.1,
+    119.9,
+    82.0,
+    126.9
+   ],
+   "text": "Anvar_uz",
+   "fontPx": 8.5,
+   "weight": "semibold",
+   "color": "#E1EEFF",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 2,
+   "notes": "User name. All four names share one style (~8.5 px font, cap ~6.1). Box includes underscore where present."
+  },
+  {
+   "id": "side.item_0_status",
+   "kind": "text",
+   "box": [
+    50.6,
+    130.6,
+    74.1,
+    137.9
+   ],
+   "text": "Onlayn",
+   "fontPx": 7.8,
+   "weight": "medium",
+   "color": "#398B76",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 2,
+   "notes": "Green 'online' status (sampled muted #398B76 on the highlighted row; rows 1 uses brighter #45A06F - suggest one online green ~#3DBE7A)."
+  },
+  {
+   "id": "side.item_0_action",
+   "kind": "button",
+   "box": [
+    152.9,
+    121.6,
+    165.9,
+    135.0
+   ],
+   "icon": "user-plus",
+   "color": "#B7C5DC",
+   "radius": 6.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "Circular outline action button (~12-13 px, 1.3 px white ring) with a small garbled glyph in the centre; intended most likely 'add friend' (user-plus) or 'message'. Centred vertically on the row, centre x~159.3. Ring dimmer (#B7C5DC) on the highlighted row."
+  },
+  {
+   "id": "side.item_1",
+   "kind": "tile",
+   "box": [
+    12.5,
+    145.3,
+    174.9,
+    181.0
+   ],
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 0,
+   "notes": "Unhighlighted row (no own fill; panel fill shows through). Row pitch ~36 px."
+  },
+  {
+   "id": "side.item_1_icon",
+   "kind": "avatar",
+   "box": [
+    19.3,
+    151.9,
+    44.3,
+    176.0
+   ],
+   "stroke": "#D7D5D3",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Round avatar photo (diameter ~24.6, centre x~31.9) with a ~1.5 px light ring (#D7D5D3). Portraits: smiling woman, long brown hair."
+  },
+  {
+   "id": "side.item_1_label",
+   "kind": "text",
+   "box": [
+    50.9,
+    155.0,
+    80.1,
+    163.0
+   ],
+   "text": "Sofia_9S",
+   "fontPx": 8.5,
+   "weight": "semibold",
+   "color": "#D4DDE8",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 2,
+   "notes": "User name. All four names share one style (~8.5 px font, cap ~6.1). Box includes underscore where present. Last glyph drawn ambiguous (S or 5).",
+   "intended": "Sofia_95"
+  },
+  {
+   "id": "side.item_1_status",
+   "kind": "text",
+   "box": [
+    50.7,
+    166.1,
+    75.3,
+    173.2
+   ],
+   "text": "Onlayn",
+   "fontPx": 7.8,
+   "weight": "medium",
+   "color": "#45A06F",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 2,
+   "notes": "Green 'online' status; drawn heavily garbled (blob with an extra leading glyph) - intended 'Onlayn', same style as side.item_0_status (all four statuses share one style, ~7.8 px medium).",
+   "intended": "Onlayn"
+  },
+  {
+   "id": "side.item_1_action",
+   "kind": "button",
+   "box": [
+    153.5,
+    158.2,
+    165.0,
+    169.8
+   ],
+   "icon": "user-plus",
+   "color": "#EEFCFF",
+   "radius": 6.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Circular outline action button (~12-13 px, 1.3 px white ring) with a small garbled glyph in the centre; intended most likely 'add friend' (user-plus) or 'message'. Centred vertically on the row, centre x~159.3."
+  },
+  {
+   "id": "side.item_2",
+   "kind": "tile",
+   "box": [
+    12.5,
+    181.0,
+    174.9,
+    217.0
+   ],
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 0,
+   "notes": "Unhighlighted row (no own fill; panel fill shows through). Row pitch ~36 px."
+  },
+  {
+   "id": "side.item_2_icon",
+   "kind": "avatar",
+   "box": [
+    19.2,
+    187.4,
+    44.6,
+    212.1
+   ],
+   "stroke": "#848F9E",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Round avatar photo (diameter ~24.6, centre x~31.9) with a ~1.5 px light ring (#848F9E). Portraits: man with dark hair, beard shadow."
+  },
+  {
+   "id": "side.item_2_label",
+   "kind": "text",
+   "box": [
+    51.3,
+    191.0,
+    82.0,
+    197.1
+   ],
+   "text": "TechMan",
+   "fontPx": 8.5,
+   "weight": "semibold",
+   "color": "#E3ECFB",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 2,
+   "notes": "User name. All four names share one style (~8.5 px font, cap ~6.1). Box includes underscore where present."
+  },
+  {
+   "id": "side.item_2_status",
+   "kind": "text",
+   "box": [
+    50.7,
+    202.3,
+    74.2,
+    209.2
+   ],
+   "text": "O'ynda",
+   "fontPx": 7.8,
+   "weight": "medium",
+   "color": "#833D38",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 2,
+   "notes": "Red/coral 'in game' status (sampled dark #833D38 because of blur; suggest ~#E0605A). Garbled 'O'ynda' -> 'O'yinda'. Box to y descender.",
+   "intended": "O'yinda"
+  },
+  {
+   "id": "side.item_2_action",
+   "kind": "button",
+   "box": [
+    153.5,
+    194.0,
+    165.1,
+    205.6
+   ],
+   "icon": "user-plus",
+   "color": "#F1FDFF",
+   "radius": 6.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Circular outline action button (~12-13 px, 1.3 px white ring) with a small garbled glyph in the centre; intended most likely 'add friend' (user-plus) or 'message'. Centred vertically on the row, centre x~159.3."
+  },
+  {
+   "id": "side.item_3",
+   "kind": "tile",
+   "box": [
+    12.5,
+    217.0,
+    174.9,
+    253.0
+   ],
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 0,
+   "notes": "Unhighlighted row (no own fill; panel fill shows through). Row pitch ~36 px."
+  },
+  {
+   "id": "side.item_3_icon",
+   "kind": "avatar",
+   "box": [
+    19.15,
+    223.8,
+    44.85,
+    248.6
+   ],
+   "stroke": "#7A7D8B",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Round avatar photo (diameter ~24.6, centre x~31.9) with a ~1.5 px light ring (#7A7D8B). Portraits: woman with dark curly hair."
+  },
+  {
+   "id": "side.item_3_label",
+   "kind": "text",
+   "box": [
+    51.0,
+    227.3,
+    75.7,
+    233.4
+   ],
+   "text": "Madina",
+   "fontPx": 8.5,
+   "weight": "semibold",
+   "color": "#D4DFF0",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 2,
+   "notes": "User name. All four names share one style (~8.5 px font, cap ~6.1). Box includes underscore where present."
+  },
+  {
+   "id": "side.item_3_status",
+   "kind": "text",
+   "box": [
+    50.9,
+    238.8,
+    71.9,
+    244.8
+   ],
+   "text": "Offline",
+   "fontPx": 7.8,
+   "weight": "medium",
+   "color": "#9AAABD",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 2,
+   "notes": "Grey 'offline' status. Uzbek UI would read 'Oflayn' (pairs with 'Onlayn'); the drawing says 'Offline'."
+  },
+  {
+   "id": "side.item_3_action",
+   "kind": "button",
+   "box": [
+    153.0,
+    229.9,
+    165.1,
+    242.1
+   ],
+   "icon": "user-plus",
+   "color": "#F4FFFF",
+   "radius": 6.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Circular outline action button (~12-13 px, 1.3 px white ring) with a small garbled glyph in the centre; intended most likely 'add friend' (user-plus) or 'message'. Centred vertically on the row, centre x~159.3."
+  },
+  {
+   "id": "side.divider_0",
+   "kind": "line",
+   "box": [
+    46.0,
+    181.0,
+    173.5,
+    182.0
+   ],
+   "color": "#2B3B53",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1,
+   "notes": "Very faint 1 px row separator between item_1 and item_2 (row y=181 +3 lum, row 182 +1), inset from the left (starts under the name column)."
+  },
+  {
+   "id": "side.divider_1",
+   "kind": "line",
+   "box": [
+    46.0,
+    217.0,
+    173.5,
+    218.0
+   ],
+   "color": "#283951",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1,
+   "notes": "Very faint 1 px row separator between item_2 and item_3 (row y=217 +3 lum, visible mostly from x~60)."
+  },
+  {
+   "id": "side.divider_2",
+   "kind": "line",
+   "box": [
+    38.0,
+    253.0,
+    173.5,
+    254.0
+   ],
+   "color": "#34445D",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1,
+   "notes": "Lighter 1 px line under the last row (row y=253, +4 at x 38-53, +9..+15 from x 54 to 157, fading to +6 toward the right end). Below it a slightly lighter 6 px footer strip (y 254-259) and the panel's bottom rim (y 259)."
+  }
+ ],
+ "removePolygons": [
+  {
+   "name": "frame_top",
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     492,
+     0
+    ],
+    [
+     492,
+     2.2
+    ],
+    [
+     0,
+     2.2
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "frame_left",
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     1.2,
+     0
+    ],
+    [
+     1.2,
+     285
+    ],
+    [
+     0,
+     285
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "frame_right",
+   "points": [
+    [
+     489.8,
+     0
+    ],
+    [
+     492,
+     0
+    ],
+    [
+     492,
+     285
+    ],
+    [
+     489.8,
+     285
+    ]
+   ],
+   "pad": 0
+  }
+ ],
+ "assets": [
+  {
+   "name": "friends.hero_image",
+   "box": [
+    186.0,
+    108.7,
+    479.0,
+    268.0
+   ],
+   "notes": "Big picture: people sitting on a terrace seen from behind, looking at a futuristic city skyline at sunset. Remove the overlay text 'Birga dunyoni kashf eting' (friends.hero_title [203.7,128.8,347.2,140.5] + its dark shadow) and the 'Do'st topish' button (friends.hero_button [269.7,229.6,393.8,257.0] + label + arrow, incl. its 1-2 px dark outline) before use. Corners rounded ~6 px; crop 1 px inside to drop the light rim. The button covers people's backs/legs and the bench/cushions at y 226-259 - inpaint needs to rebuild them."
+  },
+  {
+   "name": "friends_background",
+   "box": [
+    0,
+    0,
+    492,
+    285
+   ],
+   "notes": "Page backdrop: featureless dark blurred navy gradient (see page notes). Inpainting every remove=true element and the frame polygons still leaves the hero picture in place (hero_image is remove=false); for a clean backdrop also inpaint the hero rect, or simply draw the gradient procedurally (recommended)."
+  },
+  {
+   "name": "nav.profile_avatar_photo",
+   "box": [
+    407.0,
+    11.0,
+    425.4,
+    29.3
+   ],
+   "notes": "Player portrait (tiny, blurry); circular crop. Prefer the shared player avatar sprite."
+  },
+  {
+   "name": "side.item_0_avatar_photo",
+   "box": [
+    19.3,
+    115.3,
+    44.8,
+    140.2
+   ],
+   "notes": "Recommended-friend portrait (young man, brown hair); circular crop, the ~1.5 px light ring is UI and should be drawn separately."
+  },
+  {
+   "name": "side.item_1_avatar_photo",
+   "box": [
+    19.3,
+    151.9,
+    44.3,
+    176.0
+   ],
+   "notes": "Recommended-friend portrait (smiling woman, long brown hair); circular crop, the ~1.5 px light ring is UI and should be drawn separately."
+  },
+  {
+   "name": "side.item_2_avatar_photo",
+   "box": [
+    19.2,
+    187.4,
+    44.6,
+    212.1
+   ],
+   "notes": "Recommended-friend portrait (man with dark hair, beard shadow); circular crop, the ~1.5 px light ring is UI and should be drawn separately."
+  },
+  {
+   "name": "side.item_3_avatar_photo",
+   "box": [
+    19.15,
+    223.8,
+    44.85,
+    248.6
+   ],
+   "notes": "Recommended-friend portrait (woman with dark curly hair); circular crop, the ~1.5 px light ring is UI and should be drawn separately."
+  }
+ ]
+}

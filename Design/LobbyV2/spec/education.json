@@ -1,0 +1,1295 @@
+{
+ "page": "education",
+ "size": [
+  509,
+  309
+ ],
+ "background": {
+  "notes": "Dark blurred navy page background (blurred city/interior bokeh), horizontal gradient: left #0A1727 -> centre #18293B -> right #202F42; lower right slightly bluer #1B3048. Top-left corner darkest #061422. Thin light frame line at y=1 and y=307 is the page-crop border, not UI."
+ },
+ "elements": [
+  {
+   "id": "nav.brand_icon",
+   "kind": "icon",
+   "box": [
+    12.7,
+    11.5,
+    28.3,
+    27.3
+   ],
+   "icon": "lynxos-logo",
+   "fill": "#3A74E3FF",
+   "radius": 4,
+   "color": "#D7F6FF",
+   "anchor": "tl",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Rounded-square app logo, blue vertical gradient #457DE6 (top-left) -> #306BD7 (bottom-right), white concentric 'C'/swirl glyph (Lynxos mark) centered. No visible nav.bar: nav sits directly on the blurred page background."
+  },
+  {
+   "id": "nav.brand_text",
+   "kind": "text",
+   "box": [
+    33.0,
+    14.9,
+    70.3,
+    24.3
+   ],
+   "text": "Lynxos",
+   "fontPx": 10.3,
+   "weight": "bold",
+   "color": "#F8FDFF",
+   "anchor": "tl",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Box = cap top to descender of 'y'; baseline y=22.3, cap height 7.4."
+  },
+  {
+   "id": "nav.tab_home",
+   "kind": "tab",
+   "box": [
+    89.6,
+    16.0,
+    126.1,
+    22.4
+   ],
+   "text": "Bosh sahifa",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#BCC6D8",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Tab label ink box (bottom = baseline); cap height 6.4. No tab is selected on this page (education is not a nav tab): no pill/underline drawn. Same light grey-blue for all tabs (~#C6D2E6)."
+  },
+  {
+   "id": "nav.tab_world",
+   "kind": "tab",
+   "box": [
+    145.9,
+    15.9,
+    167.5,
+    24.1
+   ],
+   "text": "Dunyo",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#C9D1DF",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Tab label ink box (bottom = descender 'y', baseline 22.4); cap height 6.4. No tab is selected on this page (education is not a nav tab): no pill/underline drawn. Same light grey-blue for all tabs (~#C6D2E6)."
+  },
+  {
+   "id": "nav.tab_friends",
+   "kind": "tab",
+   "box": [
+    187.9,
+    15.9,
+    213.1,
+    22.4
+   ],
+   "text": "Do'stlar",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#C7D4E9",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Tab label ink box (bottom = baseline); cap height 6.4. No tab is selected on this page (education is not a nav tab): no pill/underline drawn. Same light grey-blue for all tabs (~#C6D2E6)."
+  },
+  {
+   "id": "nav.tab_top",
+   "kind": "tab",
+   "box": [
+    232.9,
+    16.0,
+    258.1,
+    24.1
+   ],
+   "text": "Top-lar",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#C6D3E6",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Tab label ink box (bottom = descender 'p', baseline 22.4); cap height 6.4. No tab is selected on this page (education is not a nav tab): no pill/underline drawn. Same light grey-blue for all tabs (~#C6D2E6)."
+  },
+  {
+   "id": "nav.tab_settings",
+   "kind": "tab",
+   "box": [
+    277.8,
+    16.0,
+    313.1,
+    22.5
+   ],
+   "text": "Sozlamalar",
+   "fontPx": 8.9,
+   "weight": "medium",
+   "color": "#C8D7F2",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Tab label ink box (bottom = baseline); cap height 6.4. No tab is selected on this page (education is not a nav tab): no pill/underline drawn. Same light grey-blue for all tabs (~#C6D2E6)."
+  },
+  {
+   "id": "nav.lang_globe",
+   "kind": "icon",
+   "box": [
+    347.9,
+    13.8,
+    360.0,
+    26.1
+   ],
+   "icon": "globe",
+   "color": "#DBE1EE",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline globe, ~1.3px stroke."
+  },
+  {
+   "id": "nav.lang_text",
+   "kind": "text",
+   "box": [
+    365.0,
+    17.0,
+    374.5,
+    23.1
+   ],
+   "text": "UZ",
+   "fontPx": 8.3,
+   "weight": "semibold",
+   "color": "#CED5E2",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Cap top to baseline."
+  },
+  {
+   "id": "nav.lang_chevron",
+   "kind": "icon",
+   "box": [
+    378.5,
+    18.8,
+    383.1,
+    21.4
+   ],
+   "icon": "chevron-down",
+   "color": "#D1D8E8",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "nav.bell",
+   "kind": "icon",
+   "box": [
+    398.7,
+    13.7,
+    409.4,
+    26.0
+   ],
+   "icon": "bell",
+   "color": "#D6DCEC",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline bell, ~1.3px stroke; the red dot overlaps its top-right."
+  },
+  {
+   "id": "nav.bell_dot",
+   "kind": "dot",
+   "box": [
+    406.2,
+    13.7,
+    410.3,
+    17.8
+   ],
+   "color": "#CC494F",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1,
+   "notes": "Notification dot, diameter ~4. Sampled core #CC494F (anti-aliased); intended probably a brighter red ~#E5484D."
+  },
+  {
+   "id": "nav.profile_pill",
+   "kind": "pill",
+   "box": [
+    419.5,
+    10.0,
+    492.8,
+    30.0
+   ],
+   "fill": "#32405BFF",
+   "stroke": "#FFFFFF1A",
+   "radius": 10,
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Glassy slate pill (composite #32405B over bg #1C2B3F; ~ #3A4A68 @ 85%). Subtle lighter 1px edge."
+  },
+  {
+   "id": "nav.profile_avatar",
+   "kind": "avatar",
+   "box": [
+    420.8,
+    10.8,
+    439.6,
+    29.2
+   ],
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1,
+   "notes": "Circular avatar (~18.5px) at the pill's left end: portrait of a young man (dark hair, white shirt) on dark bg, with a light grey ring (#6A7080) on the left side."
+  },
+  {
+   "id": "nav.profile_name",
+   "kind": "text",
+   "box": [
+    443.6,
+    17.9,
+    476.2,
+    23.4
+   ],
+   "text": "Lynxos_user",
+   "fontPx": 7.0,
+   "weight": "medium",
+   "color": "#C7D2E6",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Drawn garbled ('Lyrxos_user'); box bottom = underscore (baseline ~22.5). Small, cap ~4.7."
+  },
+  {
+   "id": "nav.profile_chevron",
+   "kind": "icon",
+   "box": [
+    481.0,
+    18.8,
+    486.2,
+    22.0
+   ],
+   "icon": "chevron-down",
+   "color": "#B1BDD7",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "header.title",
+   "kind": "text",
+   "box": [
+    14.0,
+    45.6,
+    140.5,
+    62.3
+   ],
+   "text": "O'quv markazlari",
+   "fontPx": 17.5,
+   "weight": "bold",
+   "color": "#F9FEFF",
+   "anchor": "tl",
+   "group": "header",
+   "remove": true,
+   "pad": 2,
+   "notes": "Box bottom = descender of 'q'; baseline y=58.4, cap height ~12.6. The trailing 'ri' (x 133-140.5) overlaps the hero image's top-left corner -> must be removed from the hero art too. Uses the Uzbek o-tutuq (O‘) glyph."
+  },
+  {
+   "id": "header.subtitle",
+   "kind": "text",
+   "box": [
+    14.0,
+    66.6,
+    96.4,
+    75.4
+   ],
+   "text": "Bilim — kelajak kalti",
+   "intended": "Bilim — kelajak kaliti",
+   "fontPx": 10.1,
+   "weight": "regular",
+   "color": "#97A5BC",
+   "anchor": "tl",
+   "group": "header",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Box bottom = descender of 'j'; baseline ~74.0, cap ~7.3. Muted blue-grey."
+  },
+  {
+   "id": "side.item_0",
+   "kind": "button",
+   "box": [
+    12.7,
+    88.5,
+    116.4,
+    108.7
+   ],
+   "fill": "#2264FCFF",
+   "stroke": "#3B7BFF80",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "Selected row: solid bright blue #2264FC with soft blue glow below (~2px, #1E4FD0 55%). Shorter than other rows (20.2 vs ~23.8)."
+  },
+  {
+   "id": "side.item_0_icon",
+   "kind": "icon",
+   "box": [
+    22.9,
+    92.9,
+    34.1,
+    103.5
+   ],
+   "icon": "grid",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline icon, ~1.3px rounded stroke; drawn as a rounded box/house with a grid inside ('all categories'); on blue row (sampled #D9F5FF due to AA)"
+  },
+  {
+   "id": "side.item_0_label",
+   "kind": "text",
+   "box": [
+    44.0,
+    95.0,
+    72.0,
+    101.3
+   ],
+   "text": "Barchasi",
+   "fontPx": 8.8,
+   "weight": "medium",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Label ink box, bottom = baseline; cap ~6.3. White on blue (sampled #B5DEFF because of AA)."
+  },
+  {
+   "id": "side.item_1",
+   "kind": "button",
+   "box": [
+    12.7,
+    109.5,
+    116.4,
+    133.2
+   ],
+   "fill": "#1F3046E6",
+   "stroke": "#2A3B52FF",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark glass row (composite colour shown; ~#2A3E58 @ 55% over bg #0A1727), 1px lighter border. Rows are separate rounded cards, ~0.8-1px gap, pitch ~24.9. No enclosing side.panel."
+  },
+  {
+   "id": "side.item_1_icon",
+   "kind": "icon",
+   "box": [
+    23.0,
+    116.0,
+    34.1,
+    127.0
+   ],
+   "icon": "medical",
+   "color": "#EAF2FC",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline icon, ~1.3px rounded stroke; drawn as a T-shirt/medical gown outline"
+  },
+  {
+   "id": "side.item_1_label",
+   "kind": "text",
+   "box": [
+    44.0,
+    118.7,
+    71.2,
+    126.2
+   ],
+   "text": "Tibbiyot",
+   "fontPx": 8.8,
+   "weight": "medium",
+   "color": "#C4CDDA",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Label ink box, bottom = descender 'y'; baseline ~125.0; cap ~6.3."
+  },
+  {
+   "id": "side.item_2",
+   "kind": "button",
+   "box": [
+    12.7,
+    134.1,
+    116.4,
+    157.8
+   ],
+   "fill": "#1E2F42E6",
+   "stroke": "#2A3B52FF",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark glass row (composite colour shown; ~#2A3E58 @ 55% over bg #0A1727), 1px lighter border. Rows are separate rounded cards, ~0.8-1px gap, pitch ~24.9. No enclosing side.panel."
+  },
+  {
+   "id": "side.item_2_icon",
+   "kind": "icon",
+   "box": [
+    22.9,
+    141.0,
+    34.1,
+    151.5
+   ],
+   "icon": "atom",
+   "color": "#E1E9F4",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline icon, ~1.3px rounded stroke; drawn as a looped knot (like the ⌘ symbol) = technology/atom"
+  },
+  {
+   "id": "side.item_2_label",
+   "kind": "text",
+   "box": [
+    44.0,
+    142.9,
+    84.3,
+    151.0
+   ],
+   "text": "Teznologiya",
+   "fontPx": 8.8,
+   "weight": "medium",
+   "color": "#C9D2E0",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Label ink box, bottom = descenders 'g','y'; baseline ~149.3; cap ~6.3.",
+   "intended": "Texnologiya"
+  },
+  {
+   "id": "side.item_3",
+   "kind": "button",
+   "box": [
+    12.7,
+    158.7,
+    116.4,
+    182.5
+   ],
+   "fill": "#1C2D40E6",
+   "stroke": "#2A3B52FF",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark glass row (composite colour shown; ~#2A3E58 @ 55% over bg #0A1727), 1px lighter border. Rows are separate rounded cards, ~0.8-1px gap, pitch ~24.9. No enclosing side.panel."
+  },
+  {
+   "id": "side.item_3_icon",
+   "kind": "icon",
+   "box": [
+    23.0,
+    166.0,
+    34.0,
+    176.0
+   ],
+   "icon": "chat",
+   "color": "#E2E8F4",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline icon, ~1.3px rounded stroke; two overlapping speech bubbles (language)"
+  },
+  {
+   "id": "side.item_3_label",
+   "kind": "text",
+   "box": [
+    43.9,
+    167.7,
+    78.4,
+    174.0
+   ],
+   "text": "Til kurslari",
+   "fontPx": 8.8,
+   "weight": "medium",
+   "color": "#BBC5D2",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Label ink box, bottom = baseline; cap ~6.3."
+  },
+  {
+   "id": "side.item_4",
+   "kind": "button",
+   "box": [
+    12.7,
+    183.5,
+    116.4,
+    207.4
+   ],
+   "fill": "#1D2C3FE6",
+   "stroke": "#2A3B52FF",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark glass row (composite colour shown; ~#2A3E58 @ 55% over bg #0A1727), 1px lighter border. Rows are separate rounded cards, ~0.8-1px gap, pitch ~24.9. No enclosing side.panel."
+  },
+  {
+   "id": "side.item_4_icon",
+   "kind": "icon",
+   "box": [
+    23.0,
+    190.9,
+    34.1,
+    201.0
+   ],
+   "icon": "laptop",
+   "color": "#DCE7F2",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline icon, ~1.3px rounded stroke; rounded window/laptop with code mark"
+  },
+  {
+   "id": "side.item_4_label",
+   "kind": "text",
+   "box": [
+    43.9,
+    191.9,
+    95.1,
+    199.0
+   ],
+   "text": "IT & Dasturlash",
+   "fontPx": 8.8,
+   "weight": "medium",
+   "color": "#CCD4E3",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Label ink box, bottom = baseline; cap ~6.3."
+  },
+  {
+   "id": "side.item_5",
+   "kind": "button",
+   "box": [
+    12.7,
+    208.5,
+    116.4,
+    232.1
+   ],
+   "fill": "#1A293DE6",
+   "stroke": "#2A3B52FF",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark glass row (composite colour shown; ~#2A3E58 @ 55% over bg #0A1727), 1px lighter border. Rows are separate rounded cards, ~0.8-1px gap, pitch ~24.9. No enclosing side.panel."
+  },
+  {
+   "id": "side.item_5_icon",
+   "kind": "icon",
+   "box": [
+    23.0,
+    214.9,
+    34.0,
+    226.0
+   ],
+   "icon": "briefcase",
+   "color": "#E9EFF6",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline icon, ~1.3px rounded stroke; rounded briefcase/bag with handle"
+  },
+  {
+   "id": "side.item_5_label",
+   "kind": "text",
+   "box": [
+    44.0,
+    217.0,
+    66.0,
+    223.4
+   ],
+   "text": "Bimes",
+   "fontPx": 8.8,
+   "weight": "medium",
+   "color": "#D3DCE8",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Label ink box, bottom = baseline; cap ~6.3.",
+   "intended": "Biznes"
+  },
+  {
+   "id": "side.item_6",
+   "kind": "button",
+   "box": [
+    12.7,
+    233.3,
+    116.4,
+    257.3
+   ],
+   "fill": "#182839E6",
+   "stroke": "#2A3B52FF",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark glass row (composite colour shown; ~#2A3E58 @ 55% over bg #0A1727), 1px lighter border. Rows are separate rounded cards, ~0.8-1px gap, pitch ~24.9. No enclosing side.panel."
+  },
+  {
+   "id": "side.item_6_icon",
+   "kind": "icon",
+   "box": [
+    23.0,
+    240.0,
+    33.5,
+    251.0
+   ],
+   "icon": "brush",
+   "color": "#F5FBFF",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline icon, ~1.3px rounded stroke; rounded square with a diagonal brush/arrow stroke"
+  },
+  {
+   "id": "side.item_6_label",
+   "kind": "text",
+   "box": [
+    44.5,
+    242.0,
+    65.4,
+    249.1
+   ],
+   "text": "San'at",
+   "fontPx": 8.8,
+   "weight": "medium",
+   "color": "#D5DEEC",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Label ink box, bottom = baseline; cap ~6.3."
+  },
+  {
+   "id": "side.item_7",
+   "kind": "button",
+   "box": [
+    12.7,
+    258.4,
+    116.4,
+    282.6
+   ],
+   "fill": "#182839E6",
+   "stroke": "#2A3B52FF",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Dark glass row (composite colour shown; ~#2A3E58 @ 55% over bg #0A1727), 1px lighter border. Rows are separate rounded cards, ~0.8-1px gap, pitch ~24.9. No enclosing side.panel."
+  },
+  {
+   "id": "side.item_7_icon",
+   "kind": "icon",
+   "box": [
+    23.0,
+    264.9,
+    33.5,
+    276.0
+   ],
+   "icon": "more",
+   "color": "#E6F0FA",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Outline icon, ~1.3px rounded stroke; rounded square/tag with a chevron-down inside"
+  },
+  {
+   "id": "side.item_7_label",
+   "kind": "text",
+   "box": [
+    44.0,
+    267.0,
+    69.3,
+    275.1
+   ],
+   "text": "Boshqa",
+   "fontPx": 8.8,
+   "weight": "medium",
+   "color": "#D2D7E3",
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Label ink box, bottom = descender 'q'; baseline ~273.4; cap ~6.3."
+  },
+  {
+   "id": "side.item_0_chevron",
+   "kind": "icon",
+   "box": [
+    107.8,
+    96.5,
+    110.2,
+    99.2
+   ],
+   "icon": "chevron-right",
+   "color": "#3A7BFF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Very faint tiny chevron at the right end of the selected row (lighter blue on blue). Optional."
+  },
+  {
+   "id": "education.hero_image",
+   "kind": "image",
+   "box": [
+    133.5,
+    42.9,
+    492.6,
+    179.2
+   ],
+   "radius": 5,
+   "stroke": "#3F557499",
+   "anchor": "tr",
+   "group": "hero",
+   "notes": "ART ASSET (not removed from page). Futuristic education campus atrium: curved glass balconies, palm trees, warm interior lights, blue sky oval at top. Thin light-blue 1px border. Stretches between side list and right margin (right margin ~16.4 like nav)."
+  },
+  {
+   "id": "education.hero_card",
+   "kind": "panel",
+   "box": [
+    336.6,
+    50.8,
+    492.5,
+    167.5
+   ],
+   "fill": "#1C3049EB",
+   "stroke": "#FFFFFF1F",
+   "radius": 6,
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 3,
+   "notes": "Dark navy glass card overlaying the right part of the hero (right edge flush with hero right edge, 8px inset top/bottom). Composite fill #1D314A (top) .. #27303F (bottom, image showing through). Soft shadow; 1px lighter top border."
+  },
+  {
+   "id": "education.hero_card_title",
+   "kind": "text",
+   "box": [
+    351.7,
+    72.9,
+    452.4,
+    85.2
+   ],
+   "text": "Lynxos Education",
+   "fontPx": 13.2,
+   "weight": "semibold",
+   "color": "#F5FEFF",
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Box bottom = descender 'y'; baseline ~82.4, cap 9.5."
+  },
+  {
+   "id": "education.hero_card_subtitle",
+   "kind": "text",
+   "box": [
+    351.5,
+    91.8,
+    444.2,
+    101.1
+   ],
+   "text": "Zamonaviy bilm markazi",
+   "intended": "Zamonaviy bilim markazi",
+   "fontPx": 9.4,
+   "weight": "regular",
+   "color": "#A4B4CE",
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Box bottom = descender 'y'; baseline ~98.6, cap 6.8."
+  },
+  {
+   "id": "education.hero_card_button",
+   "kind": "button",
+   "box": [
+    350.3,
+    119.8,
+    478.6,
+    149.8
+   ],
+   "fill": "#2159FCFF",
+   "radius": 6,
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 3,
+   "notes": "Primary CTA, saturated royal blue #2159FC (nearly flat, very slight lighter top-left #215DFD), outer blue glow ~2px (#2159FC 45%)."
+  },
+  {
+   "id": "education.hero_card_button_label",
+   "kind": "text",
+   "box": [
+    370.7,
+    131.0,
+    434.0,
+    140.1
+   ],
+   "text": "Tashrif buyurish",
+   "fontPx": 9.6,
+   "weight": "semibold",
+   "color": "#EAF6FF",
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "White text (sampled #CEEFFF due to AA on blue). Box bottom = descender 'y'; baseline ~137.9, cap 6.9. Left-centred: label starts 20px from button left."
+  },
+  {
+   "id": "education.hero_card_button_arrow",
+   "kind": "icon",
+   "box": [
+    456.6,
+    130.9,
+    465.4,
+    138.4
+   ],
+   "icon": "arrow-right",
+   "color": "#EAF6FF",
+   "anchor": "tr",
+   "group": "hero",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Thin arrow '->' right-aligned inside button (13px from right edge)."
+  },
+  {
+   "id": "education.rec_title",
+   "kind": "text",
+   "box": [
+    133.8,
+    193.7,
+    204.2,
+    204.0
+   ],
+   "text": "Tavsiya etilgan",
+   "fontPx": 10.7,
+   "weight": "semibold",
+   "color": "#EFF8FF",
+   "anchor": "tl",
+   "group": "cards",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Section heading; box bottom = descenders 'y','g'; baseline ~201.4, cap 7.7. Left-aligned with the hero."
+  },
+  {
+   "id": "education.rec_all",
+   "kind": "text",
+   "box": [
+    449.6,
+    194.8,
+    478.0,
+    201.1
+   ],
+   "text": "Barchasi",
+   "fontPx": 8.8,
+   "weight": "medium",
+   "color": "#8FB2E6",
+   "anchor": "tr",
+   "group": "cards",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "'See all' link, light blue (sampled #97B7E7 brightest; reads as ~#6F9BEA blue link). Cap top to baseline."
+  },
+  {
+   "id": "education.rec_all_arrow",
+   "kind": "icon",
+   "box": [
+    484.8,
+    194.9,
+    491.0,
+    201.1
+   ],
+   "icon": "arrow-right",
+   "color": "#7C9DCE",
+   "anchor": "tr",
+   "group": "cards",
+   "remove": true,
+   "pad": 1.5
+  },
+  {
+   "id": "education.rec_0",
+   "kind": "tile",
+   "box": [
+    132.7,
+    213.5,
+    218.8,
+    292.0
+   ],
+   "stroke": "#394A5BFF",
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "notes": "Recommended centre card: picture on top (rounded top corners) + dark caption bar; 1px light border #394A5B. Width ~86, gap ~5. Not removed as a whole (picture is art) - its caption bar is removed via education.rec_0_caption."
+  },
+  {
+   "id": "education.rec_0_image",
+   "kind": "image",
+   "box": [
+    133.1,
+    213.8,
+    218.4,
+    269.3
+   ],
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "notes": "ART ASSET, picture part only (top corners rounded r~5, bottom edge straight). IT Academy interior: dark modern hall, long white desks, monitors, blue screens"
+  },
+  {
+   "id": "education.rec_0_caption",
+   "kind": "panel",
+   "box": [
+    132.7,
+    269.3,
+    218.8,
+    292.0
+   ],
+   "fill": "#172638F2",
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "remove": true,
+   "pad": 1,
+   "notes": "Caption bar of the card (bottom corners rounded, top straight), dark navy glass."
+  },
+  {
+   "id": "education.rec_0_title",
+   "kind": "text",
+   "box": [
+    138.9,
+    276.9,
+    176.4,
+    284.4
+   ],
+   "text": "IT Academy",
+   "fontPx": 8.5,
+   "weight": "semibold",
+   "color": "#D5DFEB",
+   "anchor": "tc",
+   "group": "cards",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Caption, left inset ~6px; box bottom = descender 'y'; baseline ~283.0, cap 6.1."
+  },
+  {
+   "id": "education.rec_1",
+   "kind": "tile",
+   "box": [
+    223.8,
+    213.5,
+    309.8,
+    292.0
+   ],
+   "stroke": "#394A5BFF",
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "notes": "Recommended centre card: picture on top (rounded top corners) + dark caption bar; 1px light border #394A5B. Width ~86, gap ~5. Not removed as a whole (picture is art) - its caption bar is removed via education.rec_1_caption."
+  },
+  {
+   "id": "education.rec_1_image",
+   "kind": "image",
+   "box": [
+    224.2,
+    213.8,
+    309.4,
+    269.3
+   ],
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "notes": "ART ASSET, picture part only (top corners rounded r~5, bottom edge straight). Medical Center: symmetric white modern buildings flanking a walkway, blue sky, green lawns"
+  },
+  {
+   "id": "education.rec_1_caption",
+   "kind": "panel",
+   "box": [
+    223.8,
+    269.3,
+    309.8,
+    292.0
+   ],
+   "fill": "#132333F2",
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "remove": true,
+   "pad": 1,
+   "notes": "Caption bar of the card (bottom corners rounded, top straight), dark navy glass."
+  },
+  {
+   "id": "education.rec_1_title",
+   "kind": "text",
+   "box": [
+    230.7,
+    276.9,
+    278.5,
+    283.2
+   ],
+   "text": "Medical Center",
+   "fontPx": 8.5,
+   "weight": "semibold",
+   "color": "#D6DFEB",
+   "anchor": "tc",
+   "group": "cards",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Caption, left inset ~6px; box bottom = baseline; baseline ~283.0, cap 6.1."
+  },
+  {
+   "id": "education.rec_2",
+   "kind": "tile",
+   "box": [
+    314.8,
+    213.5,
+    400.8,
+    292.0
+   ],
+   "stroke": "#394A5BFF",
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "notes": "Recommended centre card: picture on top (rounded top corners) + dark caption bar; 1px light border #394A5B. Width ~86, gap ~5. Not removed as a whole (picture is art) - its caption bar is removed via education.rec_2_caption."
+  },
+  {
+   "id": "education.rec_2_image",
+   "kind": "image",
+   "box": [
+    315.2,
+    213.8,
+    400.4,
+    269.3
+   ],
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "notes": "ART ASSET, picture part only (top corners rounded r~5, bottom edge straight). Language Hub: bright white lobby with columns, plants, lounge seating"
+  },
+  {
+   "id": "education.rec_2_caption",
+   "kind": "panel",
+   "box": [
+    314.8,
+    269.3,
+    400.8,
+    292.0
+   ],
+   "fill": "#102033F2",
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "remove": true,
+   "pad": 1,
+   "notes": "Caption bar of the card (bottom corners rounded, top straight), dark navy glass."
+  },
+  {
+   "id": "education.rec_2_title",
+   "kind": "text",
+   "box": [
+    321.5,
+    276.9,
+    368.1,
+    285.0
+   ],
+   "text": "Language Hob",
+   "intended": "Language Hub",
+   "fontPx": 8.5,
+   "weight": "semibold",
+   "color": "#D1DAE6",
+   "anchor": "tc",
+   "group": "cards",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Caption, left inset ~6px; box bottom = descenders 'g'; baseline ~283.0, cap 6.1."
+  },
+  {
+   "id": "education.rec_3",
+   "kind": "tile",
+   "box": [
+    406.4,
+    213.5,
+    491.8,
+    292.0
+   ],
+   "stroke": "#394A5BFF",
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "notes": "Recommended centre card: picture on top (rounded top corners) + dark caption bar; 1px light border #394A5B. Width ~86, gap ~5. Not removed as a whole (picture is art) - its caption bar is removed via education.rec_3_caption."
+  },
+  {
+   "id": "education.rec_3_image",
+   "kind": "image",
+   "box": [
+    406.8,
+    213.8,
+    491.4,
+    269.3
+   ],
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "notes": "ART ASSET, picture part only (top corners rounded r~5, bottom edge straight). Business School: modern towers along a canal with trees, blue sky"
+  },
+  {
+   "id": "education.rec_3_caption",
+   "kind": "panel",
+   "box": [
+    406.4,
+    269.3,
+    491.8,
+    292.0
+   ],
+   "fill": "#1A2839F2",
+   "radius": 5,
+   "anchor": "tc",
+   "group": "cards",
+   "remove": true,
+   "pad": 1,
+   "notes": "Caption bar of the card (bottom corners rounded, top straight), dark navy glass."
+  },
+  {
+   "id": "education.rec_3_title",
+   "kind": "text",
+   "box": [
+    412.8,
+    276.9,
+    464.0,
+    283.1
+   ],
+   "text": "Business School",
+   "fontPx": 8.5,
+   "weight": "semibold",
+   "color": "#D3DAEA",
+   "anchor": "tc",
+   "group": "cards",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Caption, left inset ~6px; box bottom = baseline; baseline ~283.0, cap 6.1."
+  }
+ ],
+ "removePolygons": [],
+ "assets": [
+  {
+   "name": "education.hero_image",
+   "box": [
+    133.5,
+    42.9,
+    492.6,
+    179.2
+   ],
+   "notes": "Hero picture (futuristic campus atrium). Remove the 'Lynxos Education' overlay card [336.6,50.8,492.5,167.5] incl. its title/subtitle/'Tashrif buyurish' button, and the header title's trailing 'ri' letters overlapping the top-left corner (x 133-140.5, y 45.6-59). The card covers ~43% of the width (right side) -> needs large inpaint of the right third (sky, glass balconies, palm, lobby floor continue there). Keep rounded corners r~5."
+  },
+  {
+   "name": "education.rec_0_image",
+   "box": [
+    133.1,
+    213.8,
+    218.4,
+    269.3
+   ],
+   "notes": "IT Academy interior: dark modern hall, long white desks, monitors, blue screens. Picture part only (caption bar excluded); no overlay on it; top corners rounded r~5 + 1px border to trim."
+  },
+  {
+   "name": "education.rec_1_image",
+   "box": [
+    224.20000000000002,
+    213.8,
+    309.40000000000003,
+    269.3
+   ],
+   "notes": "Medical Center: symmetric white modern buildings flanking a walkway, blue sky, green lawns. Picture part only (caption bar excluded); no overlay on it; top corners rounded r~5 + 1px border to trim."
+  },
+  {
+   "name": "education.rec_2_image",
+   "box": [
+    315.2,
+    213.8,
+    400.40000000000003,
+    269.3
+   ],
+   "notes": "Language Hub: bright white lobby with columns, plants, lounge seating. Picture part only (caption bar excluded); no overlay on it; top corners rounded r~5 + 1px border to trim."
+  },
+  {
+   "name": "education.rec_3_image",
+   "box": [
+    406.79999999999995,
+    213.8,
+    491.40000000000003,
+    269.3
+   ],
+   "notes": "Business School: modern towers along a canal with trees, blue sky. Picture part only (caption bar excluded); no overlay on it; top corners rounded r~5 + 1px border to trim."
+  }
+ ]
+}

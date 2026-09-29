@@ -1,0 +1,1383 @@
+{
+ "page": "shops",
+ "size": [
+  483,
+  309
+ ],
+ "elements": [
+  {
+   "id": "nav.brand_icon",
+   "kind": "icon",
+   "box": [
+    13.0,
+    11.3,
+    28.6,
+    27.3
+   ],
+   "icon": "lynxos-logo",
+   "fill": "#3674ECFF",
+   "color": "#D6F8FF",
+   "radius": 4,
+   "anchor": "tl",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Blue rounded-square app icon (fill ~#3674EC, slight top-light gradient) with a white/ice-blue swirl 'C'/spiral glyph; glyph ink box ~[15.6,13.6,26.3,25.5]."
+  },
+  {
+   "id": "nav.brand_text",
+   "kind": "text",
+   "box": [
+    33.8,
+    15.1,
+    71.0,
+    24.3
+   ],
+   "text": "Lynxos",
+   "fontPx": 10.0,
+   "weight": "bold",
+   "color": "#F9FFFF",
+   "anchor": "tl",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Box includes 'y' descender (cap top 15.1, baseline ~22.3, descender 24.3). Pure white wordmark, rounded geometric sans."
+  },
+  {
+   "id": "nav.tab_home",
+   "kind": "tab",
+   "box": [
+    92.9,
+    16.3,
+    129.8,
+    22.5
+   ],
+   "text": "Bosh sahifa",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#C8D4EA",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "no descenders; baseline 22.5. No tab is highlighted on this page (Magazinlar is not a nav tab); light grey-blue text (~85% white), no pill/underline."
+  },
+  {
+   "id": "nav.tab_world",
+   "kind": "tab",
+   "box": [
+    150.4,
+    16.5,
+    171.9,
+    23.9
+   ],
+   "text": "Dunyo",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#D0DCF3",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "box includes 'y' descender; baseline ~22.4. No tab is highlighted on this page (Magazinlar is not a nav tab); light grey-blue text (~85% white), no pill/underline."
+  },
+  {
+   "id": "nav.tab_friends",
+   "kind": "tab",
+   "box": [
+    192.8,
+    16.5,
+    217.3,
+    22.4
+   ],
+   "text": "Do'stlar",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#CEDCF3",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "no descenders; baseline 22.4. No tab is highlighted on this page (Magazinlar is not a nav tab); light grey-blue text (~85% white), no pill/underline."
+  },
+  {
+   "id": "nav.tab_top",
+   "kind": "tab",
+   "box": [
+    238.4,
+    16.4,
+    262.1,
+    23.4
+   ],
+   "text": "Top-lar",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#C8D4EA",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "box includes 'p' descender; baseline ~22.4. No tab is highlighted on this page (Magazinlar is not a nav tab); light grey-blue text (~85% white), no pill/underline."
+  },
+  {
+   "id": "nav.tab_settings",
+   "kind": "tab",
+   "box": [
+    281.9,
+    16.2,
+    316.8,
+    22.6
+   ],
+   "text": "Sozlamalar",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#C9D3E8",
+   "anchor": "tl",
+   "group": "nav",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "no descenders; baseline 22.6. No tab is highlighted on this page (Magazinlar is not a nav tab); light grey-blue text (~85% white), no pill/underline."
+  },
+  {
+   "id": "nav.lang_globe",
+   "kind": "icon",
+   "box": [
+    335.3,
+    14.1,
+    346.8,
+    26.0
+   ],
+   "icon": "globe",
+   "color": "#DFE0EB",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline globe (meridian/parallel lines), ~1.3px stroke."
+  },
+  {
+   "id": "nav.lang_text",
+   "kind": "text",
+   "box": [
+    350.0,
+    17.3,
+    358.0,
+    22.7
+   ],
+   "text": "UZ",
+   "fontPx": 7.5,
+   "weight": "medium",
+   "color": "#C8CAD4",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Caps, no descenders."
+  },
+  {
+   "id": "nav.lang_chevron",
+   "kind": "icon",
+   "box": [
+    361.0,
+    19.0,
+    365.1,
+    21.1
+   ],
+   "icon": "chevron-down",
+   "color": "#B8B8C0",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Tiny thin chevron."
+  },
+  {
+   "id": "nav.bell",
+   "kind": "icon",
+   "box": [
+    375.8,
+    14.1,
+    385.9,
+    25.7
+   ],
+   "icon": "bell",
+   "color": "#EBE4E9",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline bell, ~1.3px stroke, white."
+  },
+  {
+   "id": "nav.bell_dot",
+   "kind": "dot",
+   "box": [
+    383.6,
+    13.6,
+    387.0,
+    17.4
+   ],
+   "color": "#E5484D",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Red notification dot on the bell's top-right (sampled blurred peak #C24E4F; intended saturated red ~#E5484D/#FF3B4A). Diameter ~3.5."
+  },
+  {
+   "id": "nav.profile_pill",
+   "kind": "pill",
+   "box": [
+    396.3,
+    9.7,
+    465.6,
+    29.5
+   ],
+   "fill": "#3A4560E6",
+   "stroke": "#FFFFFF14",
+   "radius": 9.8,
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Fully rounded dark slate-blue glass pill (measured fill #3C4660 over warm bg), avatar sits flush in its left end."
+  },
+  {
+   "id": "nav.profile_avatar",
+   "kind": "avatar",
+   "box": [
+    396.3,
+    9.8,
+    413.8,
+    28.4
+   ],
+   "stroke": "#7A8AA0FF",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Circular photo avatar (young man, dark hair, white shirt) with a ~1.2px light blue-grey ring (#647686..#7A8AA0). Diameter ~18."
+  },
+  {
+   "id": "nav.profile_name",
+   "kind": "text",
+   "box": [
+    417.3,
+    18.4,
+    450.0,
+    23.1
+   ],
+   "text": "Lynxos_user",
+   "fontPx": 5.2,
+   "weight": "medium",
+   "color": "#C8CFE3",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2,
+   "notes": "Very small; box includes 'y'/'_' descenders (cap top 18.4, baseline ~21.8). Glyphs are AI-blurred but read 'Lynxos_user'."
+  },
+  {
+   "id": "nav.profile_chevron",
+   "kind": "icon",
+   "box": [
+    455.1,
+    19.0,
+    460.0,
+    21.9
+   ],
+   "icon": "chevron-down",
+   "color": "#AAB4CA",
+   "anchor": "tr",
+   "group": "nav",
+   "remove": true,
+   "pad": 2
+  },
+  {
+   "id": "header.title",
+   "kind": "text",
+   "box": [
+    14.6,
+    45.7,
+    100.2,
+    61.8
+   ],
+   "text": "Magazinlar",
+   "fontPx": 17.1,
+   "weight": "bold",
+   "color": "#FCFFFF",
+   "anchor": "tl",
+   "group": "header",
+   "remove": true,
+   "pad": 2,
+   "notes": "Box includes 'g' descender (cap top 45.9, baseline 58.2 -> cap height 12.3). White, bold rounded sans."
+  },
+  {
+   "id": "header.subtitle",
+   "kind": "text",
+   "box": [
+    14.0,
+    66.9,
+    112.2,
+    74.0
+   ],
+   "text": "Yuzlab brendlar siz uchun",
+   "fontPx": 9.4,
+   "weight": "regular",
+   "color": "#A4AEC2",
+   "anchor": "tl",
+   "group": "header",
+   "remove": true,
+   "pad": 2,
+   "notes": "No descenders (baseline 74.0). Muted grey-blue. Last letters ('un') overhang the side panel's right edge (x~110)."
+  },
+  {
+   "id": "side.panel",
+   "kind": "panel",
+   "box": [
+    0.0,
+    0.0,
+    109.8,
+    309.0
+   ],
+   "fill": "#0B1828E0",
+   "radius": 0,
+   "anchor": "tl",
+   "group": "side",
+   "remove": true,
+   "pad": 1,
+   "notes": "Frosted dark-navy glass sidebar spanning the full page height behind brand, header and category list. Horizontal gradient: ~#0B1828 at x=0 (near opaque) to ~#2A3548 at x~105 (more transparent, background blur visible). Hard right edge at x~109.8 is visible only for y~50-280; above it blends into the dark top of the art, below into the dark floor. No visible border. Inpainting this whole strip is optional if the game draws an equally dark panel here."
+  },
+  {
+   "id": "side.item_0",
+   "kind": "button",
+   "box": [
+    12.3,
+    88.2,
+    102.1,
+    109.0
+   ],
+   "fill": "#2F66FCFF",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 3,
+   "notes": "Selected row: saturated blue, horizontal gradient #1A58FC (left) -> #416EFC (right), soft blue glow ~3px (#2F6BFF80) around it, no border. Shorter (h 20.8) than the other rows (h ~23.8); row pitch 24.75."
+  },
+  {
+   "id": "side.item_0_icon",
+   "kind": "icon",
+   "box": [
+    22.1,
+    93.2,
+    32.9,
+    103.8
+   ],
+   "icon": "grid",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline icon, ~1.3px white stroke with a soft dark halo: all-categories (garbled cluster of 4 blobs; intended 'grid'/'apps'). Sampled core #F2FAFF."
+  },
+  {
+   "id": "side.item_0_label",
+   "kind": "text",
+   "box": [
+    43.0,
+    95.1,
+    70.0,
+    101.4
+   ],
+   "text": "Barchasi",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#FFFFFF",
+   "anchor": "tl",
+   "group": "side",
+   "state": "selected",
+   "remove": true,
+   "pad": 2,
+   "notes": "no descenders (baseline ~100.8). Sampled core #BDE8FF (white text on blue)."
+  },
+  {
+   "id": "side.item_1",
+   "kind": "button",
+   "box": [
+    12.5,
+    109.8,
+    102.5,
+    133.5
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Dark translucent row (~5% white over the navy panel: #172233 at left, #353C47 at right) with a 1px faint light rim (~12% white); rows touch with ~1px gap. Row pitch 24.75 px."
+  },
+  {
+   "id": "side.item_1_icon",
+   "kind": "icon",
+   "box": [
+    22.2,
+    117.0,
+    33.0,
+    127.0
+   ],
+   "icon": "shirt",
+   "color": "#E6EDF6",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline icon, ~1.3px white stroke with a soft dark halo: t-shirt outline. Sampled core #E6EDF6."
+  },
+  {
+   "id": "side.item_1_label",
+   "kind": "text",
+   "box": [
+    43.0,
+    119.0,
+    68.8,
+    126.2
+   ],
+   "text": "Kiyimlar",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#E4EAF2",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "box includes 'y' descender (baseline ~124.6). Near-white (sampled core ~#D0DAE6, blurred)."
+  },
+  {
+   "id": "side.item_2",
+   "kind": "button",
+   "box": [
+    12.5,
+    134.5,
+    102.5,
+    157.8
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Dark translucent row (~5% white over the navy panel: #172233 at left, #353C47 at right) with a 1px faint light rim (~12% white); rows touch with ~1px gap. Row pitch 24.75 px."
+  },
+  {
+   "id": "side.item_2_icon",
+   "kind": "icon",
+   "box": [
+    22.2,
+    141.8,
+    32.7,
+    151.9
+   ],
+   "icon": "headphones",
+   "color": "#E6EDF6",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline icon, ~1.3px white stroke with a soft dark halo: rounded rect with two circles at the bottom (AI-garbled; reads like headphones/device). Sampled core #E2EAF4."
+  },
+  {
+   "id": "side.item_2_label",
+   "kind": "text",
+   "box": [
+    43.0,
+    143.3,
+    79.3,
+    149.5
+   ],
+   "text": "Elektronika",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#E4EAF2",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "no descenders. Near-white (sampled core ~#D0DAE6, blurred)."
+  },
+  {
+   "id": "side.item_3",
+   "kind": "button",
+   "box": [
+    12.5,
+    158.8,
+    102.5,
+    182.6
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Dark translucent row (~5% white over the navy panel: #172233 at left, #353C47 at right) with a 1px faint light rim (~12% white); rows touch with ~1px gap. Row pitch 24.75 px."
+  },
+  {
+   "id": "side.item_3_icon",
+   "kind": "icon",
+   "box": [
+    22.4,
+    166.3,
+    32.9,
+    175.0
+   ],
+   "icon": "handbag",
+   "color": "#E6EDF6",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline icon, ~1.3px white stroke with a soft dark halo: arch/'A' shape like a bag handle. Sampled core #E8EFFA."
+  },
+  {
+   "id": "side.item_3_label",
+   "kind": "text",
+   "box": [
+    42.8,
+    168.1,
+    85.0,
+    174.0
+   ],
+   "text": "Aksessuarlar",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#E4EAF2",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "no descenders. Near-white (sampled core ~#D0DAE6, blurred)."
+  },
+  {
+   "id": "side.item_4",
+   "kind": "button",
+   "box": [
+    12.5,
+    183.5,
+    102.5,
+    207.7
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Dark translucent row (~5% white over the navy panel: #172233 at left, #353C47 at right) with a 1px faint light rim (~12% white); rows touch with ~1px gap. Row pitch 24.75 px."
+  },
+  {
+   "id": "side.item_4_icon",
+   "kind": "icon",
+   "box": [
+    22.5,
+    191.0,
+    32.6,
+    200.9
+   ],
+   "icon": "sofa",
+   "color": "#E6EDF6",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline icon, ~1.3px white stroke with a soft dark halo: garbled blob cluster; intended home-appliance/sofa icon. Sampled core #EDF2FE."
+  },
+  {
+   "id": "side.item_4_label",
+   "kind": "text",
+   "box": [
+    43.0,
+    192.9,
+    79.2,
+    200.1
+   ],
+   "text": "Uy jihozlari",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#E4EAF2",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "box includes 'y'/'j' descenders (baseline ~198.6). Near-white (sampled core ~#D0DAE6, blurred)."
+  },
+  {
+   "id": "side.item_5",
+   "kind": "button",
+   "box": [
+    12.5,
+    208.7,
+    102.5,
+    232.4
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Dark translucent row (~5% white over the navy panel: #172233 at left, #353C47 at right) with a 1px faint light rim (~12% white); rows touch with ~1px gap. Row pitch 24.75 px."
+  },
+  {
+   "id": "side.item_5_icon",
+   "kind": "icon",
+   "box": [
+    23.0,
+    215.7,
+    32.3,
+    225.8
+   ],
+   "icon": "sparkles",
+   "color": "#E6EDF6",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline icon, ~1.3px white stroke with a soft dark halo: garbled flower/lipstick glyph; intended beauty icon (lipstick/sparkles). Sampled core #EFF6FF."
+  },
+  {
+   "id": "side.item_5_label",
+   "kind": "text",
+   "box": [
+    43.0,
+    217.6,
+    70.1,
+    223.8
+   ],
+   "text": "Go'zallik",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#E4EAF2",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "no descenders. Near-white (sampled core ~#D0DAE6, blurred)."
+  },
+  {
+   "id": "side.item_6",
+   "kind": "button",
+   "box": [
+    12.5,
+    233.4,
+    102.5,
+    257.2
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Dark translucent row (~5% white over the navy panel: #172233 at left, #353C47 at right) with a 1px faint light rim (~12% white); rows touch with ~1px gap. Row pitch 24.75 px."
+  },
+  {
+   "id": "side.item_6_icon",
+   "kind": "icon",
+   "box": [
+    22.6,
+    240.9,
+    32.7,
+    250.4
+   ],
+   "icon": "dumbbell",
+   "color": "#E6EDF6",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline icon, ~1.3px white stroke with a soft dark halo: garbled figure; intended sport icon (dumbbell/ball/runner). Sampled core #F2FAFF."
+  },
+  {
+   "id": "side.item_6_label",
+   "kind": "text",
+   "box": [
+    43.0,
+    242.2,
+    60.9,
+    249.4
+   ],
+   "text": "Sport",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#E4EAF2",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "box includes 'p' descender (baseline ~247.8). Near-white (sampled core ~#D0DAE6, blurred)."
+  },
+  {
+   "id": "side.item_7",
+   "kind": "button",
+   "box": [
+    12.5,
+    258.2,
+    102.5,
+    282.4
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 3.5,
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 1.5,
+   "notes": "Dark translucent row (~5% white over the navy panel: #172233 at left, #353C47 at right) with a 1px faint light rim (~12% white); rows touch with ~1px gap. Row pitch 24.75 px."
+  },
+  {
+   "id": "side.item_7_icon",
+   "kind": "icon",
+   "box": [
+    22.6,
+    265.2,
+    32.6,
+    276.0
+   ],
+   "icon": "box",
+   "color": "#E6EDF6",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "Outline icon, ~1.3px white stroke with a soft dark halo: rounded square with a small heart/dot inside (intended 'other'/box). Sampled core #ECF3FE."
+  },
+  {
+   "id": "side.item_7_label",
+   "kind": "text",
+   "box": [
+    43.0,
+    267.8,
+    67.6,
+    274.8
+   ],
+   "text": "Boshqa",
+   "fontPx": 8.5,
+   "weight": "medium",
+   "color": "#E4EAF2",
+   "anchor": "tl",
+   "group": "side",
+   "state": "normal",
+   "remove": true,
+   "pad": 2,
+   "notes": "box includes 'q' descender (baseline ~273.4). Near-white (sampled core ~#D0DAE6, blurred)."
+  },
+  {
+   "id": "shops.search",
+   "kind": "input",
+   "box": [
+    164.6,
+    42.7,
+    368.6,
+    66.5
+   ],
+   "fill": "#FFFFFF38",
+   "stroke": "#FFFFFF26",
+   "radius": 4.5,
+   "anchor": "tc",
+   "group": "content",
+   "remove": true,
+   "pad": 2,
+   "notes": "Light frosted-glass search field (~22% white + background blur; reads #5A6783 over sky, #767180 over warm areas), faint lighter top rim and a thin dark shadow line just above/below. Stretches horizontally between the side panel and the filter button."
+  },
+  {
+   "id": "shops.search_icon",
+   "kind": "icon",
+   "box": [
+    173.1,
+    50.3,
+    182.5,
+    59.8
+   ],
+   "icon": "search",
+   "color": "#C8D4ED",
+   "anchor": "tc",
+   "group": "content",
+   "remove": true,
+   "pad": 2,
+   "notes": "Magnifier outline, ~1.3px stroke."
+  },
+  {
+   "id": "shops.search_placeholder",
+   "kind": "text",
+   "box": [
+    190.0,
+    52.3,
+    285.6,
+    59.0
+   ],
+   "text": "Mahsulot yoki brend qidirish...",
+   "fontPx": 7.4,
+   "weight": "regular",
+   "color": "#A9B7D0",
+   "anchor": "tc",
+   "group": "content",
+   "remove": true,
+   "pad": 2,
+   "notes": "Placeholder, box includes 'y'/'q' descenders (cap top 52.3, baseline ~57.5). Glyphs AI-blurred; ends with an ellipsis. = 'Search product or brand...'"
+  },
+  {
+   "id": "shops.filter",
+   "kind": "button",
+   "box": [
+    375.4,
+    43.1,
+    465.6,
+    65.7
+   ],
+   "fill": "#3A3D4AD9",
+   "stroke": "#FFFFFF1A",
+   "radius": 4.5,
+   "anchor": "tr",
+   "group": "content",
+   "remove": true,
+   "pad": 2,
+   "notes": "Category filter dropdown: darker slate glass (#3B3D4A..#42434C) than the search field, faint light rim. Top/bottom nearly aligned with the search field (search 42.7-66.5)."
+  },
+  {
+   "id": "shops.filter_icon",
+   "kind": "icon",
+   "box": [
+    382.8,
+    50.3,
+    392.0,
+    59.9
+   ],
+   "icon": "shirt",
+   "color": "#EFF1F7",
+   "anchor": "tr",
+   "group": "content",
+   "remove": true,
+   "pad": 2,
+   "notes": "T-shirt/hanger-like outline icon, white."
+  },
+  {
+   "id": "shops.filter_label",
+   "kind": "text",
+   "box": [
+    398.0,
+    52.1,
+    425.7,
+    58.0
+   ],
+   "text": "Barchasi",
+   "fontPx": 8.2,
+   "weight": "medium",
+   "color": "#DBDCE4",
+   "anchor": "tr",
+   "group": "content",
+   "remove": true,
+   "pad": 2,
+   "notes": "No descenders; baseline 58.0. = 'All'."
+  },
+  {
+   "id": "shops.filter_caret",
+   "kind": "icon",
+   "box": [
+    441.9,
+    54.0,
+    444.5,
+    56.1
+   ],
+   "icon": "caret-down",
+   "color": "#BDBBC3",
+   "anchor": "tr",
+   "group": "content",
+   "remove": true,
+   "pad": 2,
+   "notes": "Tiny faint duplicate caret (AI artefact next to the real chevron); the game can drop it."
+  },
+  {
+   "id": "shops.filter_chevron",
+   "kind": "icon",
+   "box": [
+    453.2,
+    53.2,
+    458.3,
+    56.3
+   ],
+   "icon": "chevron-down",
+   "color": "#DCDCEA",
+   "anchor": "tr",
+   "group": "content",
+   "remove": true,
+   "pad": 2
+  },
+  {
+   "id": "shops.mall_sign",
+   "kind": "text",
+   "box": [
+    234.3,
+    117.3,
+    316.8,
+    131.7
+   ],
+   "text": "Lynxos Mall",
+   "fontPx": 15.3,
+   "weight": "bold",
+   "color": "#F9FFFF",
+   "anchor": "c",
+   "group": "background",
+   "remove": false,
+   "notes": "PART OF THE BACKGROUND ART - keep, do not inpaint. White bold sans on the mall's entrance fascia; box includes 'y' descender (cap top 117.3, baseline ~128.3)."
+  },
+  {
+   "id": "shops.brand_0",
+   "kind": "tile",
+   "box": [
+    118.8,
+    187.6,
+    197.0,
+    226.9
+   ],
+   "fill": "#F9F9FBFF",
+   "radius": 3.5,
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 3,
+   "notes": "White brand tile, grid row 0, col 0 (4x2 grid, col gaps ~5, row gap 4.6). Very subtle top-to-bottom tint (#F3F4F7 -> #FBFBFD) and a thin dark contact shadow ~1px outside the edge. Measure geometry only: the game shows fictional brands here."
+  },
+  {
+   "id": "shops.brand_0_logo",
+   "kind": "image",
+   "box": [
+    141.9,
+    200.8,
+    174.8,
+    214.2
+   ],
+   "color": "#050507",
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 2,
+   "notes": "Logo ink box, black serif wordmark (real trademark ZARA) - DO NOT reproduce; replace with a fictional brand logo centred in the tile."
+  },
+  {
+   "id": "shops.brand_1",
+   "kind": "tile",
+   "box": [
+    202.5,
+    187.6,
+    280.7,
+    226.9
+   ],
+   "fill": "#F9F9FBFF",
+   "radius": 3.5,
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 3,
+   "notes": "White brand tile, grid row 0, col 1 (4x2 grid, col gaps ~5, row gap 4.6). Very subtle top-to-bottom tint (#F3F4F7 -> #FBFBFD) and a thin dark contact shadow ~1px outside the edge. Measure geometry only: the game shows fictional brands here."
+  },
+  {
+   "id": "shops.brand_1_logo",
+   "kind": "image",
+   "box": [
+    222.1,
+    198.6,
+    260.8,
+    218.1
+   ],
+   "color": "#000000",
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 2,
+   "notes": "Logo ink box, black wordmark + swoosh (real trademark NIKE) - DO NOT reproduce; replace with a fictional brand logo centred in the tile."
+  },
+  {
+   "id": "shops.brand_2",
+   "kind": "tile",
+   "box": [
+    285.6,
+    187.6,
+    364.0,
+    226.9
+   ],
+   "fill": "#F9F9FBFF",
+   "radius": 3.5,
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 3,
+   "notes": "White brand tile, grid row 0, col 2 (4x2 grid, col gaps ~5, row gap 4.6). Very subtle top-to-bottom tint (#F3F4F7 -> #FBFBFD) and a thin dark contact shadow ~1px outside the edge. Measure geometry only: the game shows fictional brands here."
+  },
+  {
+   "id": "shops.brand_2_logo",
+   "kind": "image",
+   "box": [
+    308.9,
+    197.0,
+    341.0,
+    218.6
+   ],
+   "color": "#030303",
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 2,
+   "notes": "Logo ink box, black three-stripe mountain + wordmark (real trademark adidas) - DO NOT reproduce; replace with a fictional brand logo centred in the tile."
+  },
+  {
+   "id": "shops.brand_3",
+   "kind": "tile",
+   "box": [
+    368.6,
+    187.6,
+    447.6,
+    226.9
+   ],
+   "fill": "#F9F9FBFF",
+   "radius": 3.5,
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 3,
+   "notes": "White brand tile, grid row 0, col 3 (4x2 grid, col gaps ~5, row gap 4.6). Very subtle top-to-bottom tint (#F3F4F7 -> #FBFBFD) and a thin dark contact shadow ~1px outside the edge. Measure geometry only: the game shows fictional brands here."
+  },
+  {
+   "id": "shops.brand_3_logo",
+   "kind": "image",
+   "box": [
+    383.4,
+    203.7,
+    433.8,
+    211.3
+   ],
+   "color": "#1428A0",
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 2,
+   "notes": "Logo ink box, dark-blue bold wordmark (real trademark SAMSUNG; sampled #0E1E69) - DO NOT reproduce; replace with a fictional brand logo centred in the tile."
+  },
+  {
+   "id": "shops.brand_4",
+   "kind": "tile",
+   "box": [
+    118.8,
+    231.5,
+    197.0,
+    270.3
+   ],
+   "fill": "#F9F9FBFF",
+   "radius": 3.5,
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 3,
+   "notes": "White brand tile, grid row 1, col 0 (4x2 grid, col gaps ~5, row gap 4.6). Very subtle top-to-bottom tint (#F3F4F7 -> #FBFBFD) and a thin dark contact shadow ~1px outside the edge. Measure geometry only: the game shows fictional brands here."
+  },
+  {
+   "id": "shops.brand_4_logo",
+   "kind": "image",
+   "box": [
+    148.8,
+    239.2,
+    167.0,
+    262.1
+   ],
+   "color": "#000001",
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 2,
+   "notes": "Logo ink box, black apple glyph (real trademark Apple) - DO NOT reproduce; replace with a fictional brand logo centred in the tile."
+  },
+  {
+   "id": "shops.brand_5",
+   "kind": "tile",
+   "box": [
+    202.5,
+    231.5,
+    280.7,
+    270.3
+   ],
+   "fill": "#F9F9FBFF",
+   "radius": 3.5,
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 3,
+   "notes": "White brand tile, grid row 1, col 1 (4x2 grid, col gaps ~5, row gap 4.6). Very subtle top-to-bottom tint (#F3F4F7 -> #FBFBFD) and a thin dark contact shadow ~1px outside the edge. Measure geometry only: the game shows fictional brands here."
+  },
+  {
+   "id": "shops.brand_5_logo",
+   "kind": "image",
+   "box": [
+    225.0,
+    241.0,
+    256.9,
+    262.0
+   ],
+   "color": "#D7141A",
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 2,
+   "notes": "Logo ink box, red script wordmark (real trademark H&M; sampled #BC0F13) - DO NOT reproduce; replace with a fictional brand logo centred in the tile."
+  },
+  {
+   "id": "shops.brand_6",
+   "kind": "tile",
+   "box": [
+    285.6,
+    231.5,
+    364.0,
+    270.3
+   ],
+   "fill": "#F9F9FBFF",
+   "radius": 3.5,
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 3,
+   "notes": "White brand tile, grid row 1, col 2 (4x2 grid, col gaps ~5, row gap 4.6). Very subtle top-to-bottom tint (#F3F4F7 -> #FBFBFD) and a thin dark contact shadow ~1px outside the edge. Measure geometry only: the game shows fictional brands here."
+  },
+  {
+   "id": "shops.brand_6_logo",
+   "kind": "image",
+   "box": [
+    299.9,
+    246.5,
+    350.0,
+    255.9
+   ],
+   "color": "#1B1B1B",
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 2,
+   "notes": "Logo ink box, black spaced serif wordmark (real trademark GUCCI) - DO NOT reproduce; replace with a fictional brand logo centred in the tile."
+  },
+  {
+   "id": "shops.brand_7",
+   "kind": "tile",
+   "box": [
+    368.6,
+    231.5,
+    447.6,
+    270.3
+   ],
+   "fill": "#F9F9FBFF",
+   "radius": 3.5,
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 3,
+   "notes": "White brand tile, grid row 1, col 3 (4x2 grid, col gaps ~5, row gap 4.6). Very subtle top-to-bottom tint (#F3F4F7 -> #FBFBFD) and a thin dark contact shadow ~1px outside the edge. Measure geometry only: the game shows fictional brands here."
+  },
+  {
+   "id": "shops.brand_7_logo",
+   "kind": "image",
+   "box": [
+    395.1,
+    238.0,
+    422.0,
+    264.9
+   ],
+   "color": "#0F5AAA",
+   "anchor": "bc",
+   "group": "cards",
+   "remove": true,
+   "pad": 2,
+   "notes": "Logo ink box, blue circle with white letters (real trademark hp) - DO NOT reproduce; replace with a fictional brand logo centred in the tile."
+  },
+  {
+   "id": "shops.view_all_label",
+   "kind": "text",
+   "box": [
+    370.6,
+    285.8,
+    433.3,
+    292.0
+   ],
+   "text": "Barchasini ko'rish",
+   "fontPx": 8.6,
+   "weight": "semibold",
+   "color": "#B4CEFF",
+   "anchor": "br",
+   "group": "content",
+   "remove": true,
+   "pad": 2,
+   "notes": "Link text, light periwinkle blue (sampled core #BED6FF..#CAE0FF, blurred). No descenders; baseline 292.0. = 'View all'."
+  },
+  {
+   "id": "shops.view_all_arrow",
+   "kind": "icon",
+   "box": [
+    440.2,
+    286.0,
+    446.9,
+    291.9
+   ],
+   "icon": "arrow-right",
+   "color": "#6FA0F0",
+   "anchor": "br",
+   "group": "content",
+   "remove": true,
+   "pad": 2,
+   "notes": "Thin right arrow, more saturated blue than the label (sampled blurred #4C78AF..#6E96D1). Right edge aligns with the tile grid's right edge (447.6)."
+  }
+ ],
+ "removePolygons": [
+  {
+   "name": "page_frame_top",
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     483,
+     0
+    ],
+    [
+     483,
+     2.2
+    ],
+    [
+     0,
+     2.2
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "page_frame_bottom",
+   "points": [
+    [
+     0,
+     306.6
+    ],
+    [
+     483,
+     306.6
+    ],
+    [
+     483,
+     309
+    ],
+    [
+     0,
+     309
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "page_frame_right",
+   "points": [
+    [
+     479.6,
+     0
+    ],
+    [
+     483,
+     0
+    ],
+    [
+     483,
+     309
+    ],
+    [
+     479.6,
+     309
+    ]
+   ],
+   "pad": 0
+  },
+  {
+   "name": "page_frame_left",
+   "points": [
+    [
+     0,
+     0
+    ],
+    [
+     1.0,
+     0
+    ],
+    [
+     1.0,
+     309
+    ],
+    [
+     0,
+     309
+    ]
+   ],
+   "pad": 0
+  }
+ ],
+ "assets": [
+  {
+   "name": "shops_background",
+   "box": [
+    0,
+    0,
+    483,
+    309
+   ],
+   "notes": "Full-bleed mall-interior background (two-storey atrium, glass shopfronts, plants, glossy floor, dusk sky at the top). Remove every element with remove=true (nav, header, side panel + list, search, filter, 8 brand tiles and their logos, view-all link). KEEP the 'Lynxos Mall' fascia sign (shops.mall_sign). The top ~40 px are naturally dark (dusk sky/ceiling + soft top darkening) - there is no hard nav bar to remove. The 1-2 px composite page frame (bevel lines at y<=1, y>=307, x>=480) is listed in removePolygons; cropping to [2,2,480,307] and rescaling is an alternative. Tiles cover the plaza floor: expect inpainting of floor reflections there. A small background figure (shopper) at ~x440-456, y145-192 is part of the art."
+  },
+  {
+   "name": "mall_sign_region",
+   "box": [
+    226,
+    110,
+    325,
+    136
+   ],
+   "notes": "'Lynxos Mall' sign text on the entrance fascia - background art, must survive inpainting untouched (no UI overlaps it)."
+  }
+ ]
+}

@@ -1,0 +1,1789 @@
+{
+ "page": "map",
+ "size": [
+  759,
+  415
+ ],
+ "elements": [
+  {
+   "id": "nav.brand_icon",
+   "kind": "icon",
+   "box": [
+    19.4,
+    15.6,
+    38.6,
+    36.2
+   ],
+   "icon": "lynxos-logo",
+   "fill": "#2E66F5FF",
+   "color": "#D5F9FF",
+   "radius": 5,
+   "group": "nav",
+   "anchor": "tl",
+   "pad": 3,
+   "notes": "Rounded-square app icon, solid blue (#3166F4 top-right .. #2B5CF5 bottom), soft blue glow. White glyph = two concentric open 'C' rings (swirl/@ style) with ink box [23.0,19.2,34.4,33.3].",
+   "remove": true
+  },
+  {
+   "id": "nav.brand_text",
+   "kind": "text",
+   "box": [
+    46.3,
+    20.5,
+    96.6,
+    33.0
+   ],
+   "text": "Lynxos",
+   "fontPx": 13.6,
+   "weight": "extrabold",
+   "color": "#F4FAFF",
+   "group": "nav",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "Box = cap top of 'L' to descender of 'y'; baseline y=30.3 (cap height 9.8). Rounded geometric sans (Nunito/Poppins-like).",
+   "remove": true
+  },
+  {
+   "id": "nav.tab_home",
+   "kind": "text",
+   "box": [
+    131.6,
+    21.1,
+    177.7,
+    28.8
+   ],
+   "text": "Bosh sahifa",
+   "fontPx": 10.3,
+   "weight": "medium",
+   "color": "#C4D0DE",
+   "group": "nav",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "No descenders; box bottom = baseline 28.8 (cap 7.4).",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "nav.tab_world",
+   "kind": "text",
+   "box": [
+    204.0,
+    21.2,
+    230.9,
+    30.5
+   ],
+   "text": "Dunyo",
+   "fontPx": 10.3,
+   "weight": "semibold",
+   "color": "#D0E6FF",
+   "group": "nav",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "Selected tab. Box bottom = 'y' descender; baseline ~28.8. Text is near-white (#E6F2FF core).",
+   "state": "selected",
+   "remove": true
+  },
+  {
+   "id": "nav.tab_friends",
+   "kind": "text",
+   "box": [
+    257.2,
+    21.3,
+    287.7,
+    28.7
+   ],
+   "text": "Do'stlar",
+   "fontPx": 10.3,
+   "weight": "medium",
+   "color": "#CEDBF0",
+   "group": "nav",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "No descenders; baseline 28.7.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "nav.tab_top",
+   "kind": "text",
+   "box": [
+    314.5,
+    21.3,
+    344.3,
+    30.2
+   ],
+   "text": "Top-lar",
+   "fontPx": 10.3,
+   "weight": "medium",
+   "color": "#C9D8EB",
+   "group": "nav",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "Box bottom = 'p' descender; baseline ~28.8.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "nav.tab_settings",
+   "kind": "text",
+   "box": [
+    370.3,
+    21.3,
+    414.7,
+    28.8
+   ],
+   "text": "Sozlamalar",
+   "fontPx": 10.3,
+   "weight": "medium",
+   "color": "#CDDCF2",
+   "group": "nav",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "No descenders; baseline 28.8. Tab gaps: text-to-text spacing ~26-29 px.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "nav.tab_selected",
+   "kind": "tab",
+   "box": [
+    190.6,
+    12.0,
+    243.4,
+    40.5
+   ],
+   "fill": "#1C54C5D9",
+   "radius": 3,
+   "group": "nav",
+   "anchor": "tl",
+   "state": "selected",
+   "pad": 3,
+   "notes": "Highlight behind 'Dunyo': vertical gradient, fully transparent at top (y~12) -> #13408C at y~30 -> #1C54C5 at y 36-37 (strongest), then the underline; faint blue glow fades below to y~43. Sides fairly hard (x 190.6 / 243.4).",
+   "remove": true
+  },
+  {
+   "id": "nav.tab_underline",
+   "kind": "line",
+   "box": [
+    192.2,
+    37.9,
+    241.7,
+    39.6
+   ],
+   "color": "#9BC6FF",
+   "radius": 1,
+   "group": "nav",
+   "anchor": "tl",
+   "state": "selected",
+   "pad": 3,
+   "notes": "Bright 1.7px bar with rounded ends and blue glow (#3D7BFF) just under the selected tab.",
+   "remove": true
+  },
+  {
+   "id": "nav.lang_globe",
+   "kind": "icon",
+   "box": [
+    506.2,
+    18.6,
+    521.6,
+    34.5
+   ],
+   "icon": "globe",
+   "color": "#DEECFF",
+   "group": "nav",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Outline globe (meridians + parallels), ~1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "nav.lang_text",
+   "kind": "text",
+   "box": [
+    528.0,
+    23.2,
+    538.0,
+    29.9
+   ],
+   "text": "UZ",
+   "fontPx": 9.3,
+   "weight": "medium",
+   "color": "#C1D4F4",
+   "group": "nav",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Caps only; box bottom = baseline (cap 6.7).",
+   "remove": true
+  },
+  {
+   "id": "nav.lang_chevron",
+   "kind": "icon",
+   "box": [
+    543.7,
+    25.3,
+    548.7,
+    28.0
+   ],
+   "icon": "chevron-down",
+   "color": "#C0D5F7",
+   "group": "nav",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Small thin chevron.",
+   "remove": true
+  },
+  {
+   "id": "nav.bell",
+   "kind": "icon",
+   "box": [
+    571.5,
+    16.8,
+    586.3,
+    34.8
+   ],
+   "icon": "bell",
+   "color": "#E8F6FF",
+   "group": "nav",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Outline bell with clapper; ~1.6px stroke.",
+   "remove": true
+  },
+  {
+   "id": "nav.bell_dot",
+   "kind": "dot",
+   "box": [
+    582.8,
+    18.0,
+    587.6,
+    22.8
+   ],
+   "color": "#D62B4A",
+   "group": "nav",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Red notification dot (~4.8px) overlapping the bell's top-right; core ~#E8344F, soft red glow.",
+   "remove": true
+  },
+  {
+   "id": "nav.profile_pill",
+   "kind": "pill",
+   "box": [
+    605.3,
+    10.8,
+    729.6,
+    41.8
+   ],
+   "fill": "#2E4262CC",
+   "stroke": "#1E2E4480",
+   "radius": 15.5,
+   "group": "nav",
+   "anchor": "tr",
+   "pad": 3,
+   "notes": "Dark glass capsule (composite over map #3C506E). Slightly darker rim on the left around the avatar.",
+   "remove": true
+  },
+  {
+   "id": "nav.profile_avatar",
+   "kind": "avatar",
+   "box": [
+    610.3,
+    13.5,
+    635.3,
+    38.8
+   ],
+   "radius": 12.6,
+   "fill": "#767F8EFF",
+   "group": "nav",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Circular portrait of the default 3D avatar (brown hair, light shirt) on grey #767F8E background.",
+   "remove": true
+  },
+  {
+   "id": "nav.profile_name",
+   "kind": "text",
+   "box": [
+    642.0,
+    23.3,
+    698.7,
+    32.7
+   ],
+   "text": "Lynxos_user",
+   "fontPx": 10.8,
+   "weight": "medium",
+   "color": "#D9E6FF",
+   "group": "nav",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Box bottom = underscore/'y' descender; baseline 31.0 (cap 7.8).",
+   "remove": true
+  },
+  {
+   "id": "nav.profile_chevron",
+   "kind": "icon",
+   "box": [
+    710.6,
+    25.0,
+    718.5,
+    29.4
+   ],
+   "icon": "chevron-down",
+   "color": "#D6E5FE",
+   "group": "nav",
+   "anchor": "tr",
+   "pad": 2,
+   "remove": true
+  },
+  {
+   "id": "header.title",
+   "kind": "text",
+   "box": [
+    20.7,
+    63.0,
+    154.2,
+    82.9
+   ],
+   "text": "Dunyo xaritasi",
+   "fontPx": 21.7,
+   "weight": "bold",
+   "color": "#F5FBFF",
+   "group": "header",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "Box bottom = 'y' descender; baseline 78.9 (cap 15.6). Slight dark text shadow.",
+   "remove": true
+  },
+  {
+   "id": "header.subtitle",
+   "kind": "text",
+   "box": [
+    20.0,
+    89.3,
+    126.7,
+    100.4
+   ],
+   "text": "Istalgan joyga boring",
+   "fontPx": 11.5,
+   "weight": "regular",
+   "color": "#9DA9BE",
+   "group": "header",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "Box bottom = descenders (j,y,g); baseline 97.9 (cap 8.3).",
+   "remove": true
+  },
+  {
+   "id": "side.panel",
+   "kind": "panel",
+   "box": [
+    0.0,
+    46.0,
+    152.8,
+    415.0
+   ],
+   "fill": "#06142680",
+   "stroke": "#FFFFFF14",
+   "group": "side",
+   "anchor": "tl",
+   "pad": 0,
+   "notes": "Full-height dark glass column behind header + category list; no visible top edge (fades into the dark top-left vignette), right edge = 1px faint hairline at x~152.8. Horizontal gradient: ~#001020 (alpha ~0.9) at x=0 -> ~#0A2139 (alpha ~0.5) at the right edge. Extends to the bottom of the screen.",
+   "remove": true
+  },
+  {
+   "id": "side.item_0",
+   "kind": "button",
+   "box": [
+    18.6,
+    115.8,
+    152.8,
+    145.5
+   ],
+   "fill": "#215BFDFF",
+   "radius": 4.5,
+   "group": "side",
+   "anchor": "tl",
+   "state": "selected",
+   "pad": 4,
+   "notes": "Selected row: solid bright blue #215BFD (slightly lighter top #1D5CF8), 1px lighter top rim, blue outer glow (~#1E5BFF 45%, ~3px) especially below.",
+   "remove": true
+  },
+  {
+   "id": "side.item_0_icon",
+   "kind": "icon",
+   "box": [
+    30.8,
+    123.6,
+    45.0,
+    137.0
+   ],
+   "icon": "apps",
+   "color": "#D2F5FF",
+   "group": "side",
+   "anchor": "tl",
+   "state": "selected",
+   "pad": 2,
+   "notes": "AI drew a house/shirt hybrid; intended 'all categories' icon (e.g. grid/apps or map). Outline style ~1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "side.item_0_label",
+   "kind": "text",
+   "box": [
+    58.4,
+    126.6,
+    93.4,
+    134.5
+   ],
+   "text": "Barchasi",
+   "fontPx": 10.2,
+   "weight": "semibold",
+   "color": "#C8EDFF",
+   "group": "side",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "No descenders; baseline 134.4 (cap 7.8). Sampled core on blue; design intent is probably pure white. Label x starts at 58.6 for all rows.",
+   "state": "selected",
+   "remove": true
+  },
+  {
+   "id": "side.item_1",
+   "kind": "button",
+   "box": [
+    18.6,
+    147.3,
+    152.8,
+    179.5
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 4,
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Dark glass row (composite ~#192C42 at right, ~#0E1D2F at left because the panel gradient is darker there); 1px light border. Rows are ~32-33px tall with a ~1px gap (pitch ~33.1).",
+   "remove": true
+  },
+  {
+   "id": "side.item_1_icon",
+   "kind": "icon",
+   "box": [
+    31.0,
+    156.3,
+    44.7,
+    171.0
+   ],
+   "icon": "bag",
+   "color": "#E6EBF7",
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Shopping bag outline. Outline style ~1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "side.item_1_label",
+   "kind": "text",
+   "box": [
+    58.6,
+    160.0,
+    103.9,
+    169.6
+   ],
+   "text": "Magazinlar",
+   "fontPx": 10.2,
+   "weight": "medium",
+   "color": "#D6E2EE",
+   "group": "side",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "Box bottom = 'g' descender; baseline 167.2. Label x starts at 58.6 for all rows.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "side.item_2",
+   "kind": "button",
+   "box": [
+    18.6,
+    180.5,
+    152.8,
+    212.5
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 4,
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Dark glass row (composite ~#192C42 at right, ~#0E1D2F at left because the panel gradient is darker there); 1px light border. Rows are ~32-33px tall with a ~1px gap (pitch ~33.1).",
+   "remove": true
+  },
+  {
+   "id": "side.item_2_icon",
+   "kind": "icon",
+   "box": [
+    30.3,
+    190.5,
+    45.6,
+    203.8
+   ],
+   "icon": "graduation-cap",
+   "color": "#EEF6FE",
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Mortarboard outline. Outline style ~1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "side.item_2_label",
+   "kind": "text",
+   "box": [
+    58.6,
+    193.0,
+    129.0,
+    202.2
+   ],
+   "text": "O'quv markazlari",
+   "fontPx": 10.2,
+   "weight": "medium",
+   "color": "#DCE5F4",
+   "group": "side",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "Box bottom = 'q' descender; baseline ~200.3. Label x starts at 58.6 for all rows.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "side.item_3",
+   "kind": "button",
+   "box": [
+    18.6,
+    213.5,
+    152.8,
+    245.5
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 4,
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Dark glass row (composite ~#192C42 at right, ~#0E1D2F at left because the panel gradient is darker there); 1px light border. Rows are ~32-33px tall with a ~1px gap (pitch ~33.1).",
+   "remove": true
+  },
+  {
+   "id": "side.item_3_icon",
+   "kind": "icon",
+   "box": [
+    30.6,
+    223.0,
+    45.0,
+    235.8
+   ],
+   "icon": "briefcase",
+   "color": "#EEF5FE",
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Garbled 'A'-like glyph; intended a business icon (briefcase / office building). Outline style ~1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "side.item_3_label",
+   "kind": "text",
+   "box": [
+    58.7,
+    226.0,
+    120.3,
+    233.7
+   ],
+   "text": "Biznes markazi",
+   "fontPx": 10.2,
+   "weight": "medium",
+   "color": "#D8E0ED",
+   "group": "side",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "No descenders; baseline 233.7. Label x starts at 58.6 for all rows.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "side.item_4",
+   "kind": "button",
+   "box": [
+    18.6,
+    246.5,
+    152.8,
+    278.5
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 4,
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Dark glass row (composite ~#192C42 at right, ~#0E1D2F at left because the panel gradient is darker there); 1px light border. Rows are ~32-33px tall with a ~1px gap (pitch ~33.1).",
+   "remove": true
+  },
+  {
+   "id": "side.item_4_icon",
+   "kind": "icon",
+   "box": [
+    30.0,
+    256.4,
+    45.9,
+    269.0
+   ],
+   "icon": "gamepad",
+   "color": "#EDF3FF",
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Game controller outline. Outline style ~1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "side.item_4_label",
+   "kind": "text",
+   "box": [
+    59.0,
+    258.8,
+    133.6,
+    268.2
+   ],
+   "text": "Ko'ngilochar zona",
+   "fontPx": 10.2,
+   "weight": "medium",
+   "color": "#DBE2F1",
+   "group": "side",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "Box bottom = 'g' descender; baseline ~266.4. Label x starts at 58.6 for all rows.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "side.item_5",
+   "kind": "button",
+   "box": [
+    18.6,
+    279.5,
+    152.8,
+    311.5
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 4,
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Dark glass row (composite ~#192C42 at right, ~#0E1D2F at left because the panel gradient is darker there); 1px light border. Rows are ~32-33px tall with a ~1px gap (pitch ~33.1).",
+   "remove": true
+  },
+  {
+   "id": "side.item_5_icon",
+   "kind": "icon",
+   "box": [
+    31.0,
+    288.6,
+    44.9,
+    303.4
+   ],
+   "icon": "home",
+   "color": "#EAF3FE",
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Drawn as a bag with a pin inside; intended housing icon (home). Outline style ~1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "side.item_5_label",
+   "kind": "text",
+   "box": [
+    58.6,
+    292.0,
+    106.9,
+    301.5
+   ],
+   "text": "Turar joylar",
+   "fontPx": 10.2,
+   "weight": "medium",
+   "color": "#D3DCEB",
+   "group": "side",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "Box bottom = 'j','y' descenders; baseline ~299.6. Label x starts at 58.6 for all rows.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "side.item_6",
+   "kind": "button",
+   "box": [
+    18.6,
+    312.5,
+    152.8,
+    345.5
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 4,
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Dark glass row (composite ~#192C42 at right, ~#0E1D2F at left because the panel gradient is darker there); 1px light border. Rows are ~32-33px tall with a ~1px gap (pitch ~33.1).",
+   "remove": true
+  },
+  {
+   "id": "side.item_6_icon",
+   "kind": "icon",
+   "box": [
+    31.0,
+    322.2,
+    45.0,
+    337.0
+   ],
+   "icon": "calendar",
+   "color": "#E4EDF8",
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Calendar outline with a dot. Outline style ~1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "side.item_6_label",
+   "kind": "text",
+   "box": [
+    58.7,
+    325.8,
+    96.8,
+    333.5
+   ],
+   "text": "Tadbirlar",
+   "fontPx": 10.2,
+   "weight": "medium",
+   "color": "#D4DDEC",
+   "group": "side",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "No descenders; baseline 333.5. Label x starts at 58.6 for all rows.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "side.item_7",
+   "kind": "button",
+   "box": [
+    18.6,
+    346.5,
+    152.8,
+    378.6
+   ],
+   "fill": "#FFFFFF0D",
+   "stroke": "#FFFFFF1F",
+   "radius": 4,
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Dark glass row (composite ~#192C42 at right, ~#0E1D2F at left because the panel gradient is darker there); 1px light border. Rows are ~32-33px tall with a ~1px gap (pitch ~33.1).",
+   "remove": true
+  },
+  {
+   "id": "side.item_7_icon",
+   "kind": "icon",
+   "box": [
+    30.0,
+    355.7,
+    45.4,
+    371.2
+   ],
+   "icon": "gear",
+   "color": "#EEF6FF",
+   "group": "side",
+   "anchor": "tl",
+   "state": "normal",
+   "pad": 2,
+   "notes": "Gear/cog outline. Outline style ~1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "side.item_7_label",
+   "kind": "text",
+   "box": [
+    58.8,
+    359.5,
+    98.3,
+    367.2
+   ],
+   "text": "Xizmatlar",
+   "fontPx": 10.2,
+   "weight": "medium",
+   "color": "#D8E0EE",
+   "group": "side",
+   "anchor": "tl",
+   "pad": 2,
+   "notes": "No descenders; baseline 367.2. Label x starts at 58.6 for all rows.",
+   "state": "normal",
+   "remove": true
+  },
+  {
+   "id": "side.item_0_chevron",
+   "kind": "icon",
+   "box": [
+    139.2,
+    129.4,
+    141.7,
+    133.4
+   ],
+   "icon": "chevron-right",
+   "color": "#3874FF",
+   "group": "side",
+   "anchor": "tl",
+   "state": "selected",
+   "pad": 2,
+   "notes": "Barely visible lighter mark at the right of the selected row (maybe a tiny chevron); optional.",
+   "remove": true
+  },
+  {
+   "id": "map.search",
+   "kind": "input",
+   "box": [
+    531.8,
+    58.9,
+    729.6,
+    90.0
+   ],
+   "fill": "#C8DCFF40",
+   "stroke": "#FFFFFF26",
+   "radius": 6,
+   "group": "content",
+   "anchor": "tr",
+   "pad": 3,
+   "notes": "Light frosted-glass search field (composite #748DB1 over the map). Brighter 1px top rim; faint darker shadow at the left edge.",
+   "remove": true
+  },
+  {
+   "id": "map.search_icon",
+   "kind": "icon",
+   "box": [
+    542.8,
+    68.1,
+    555.4,
+    80.7
+   ],
+   "icon": "search",
+   "color": "#D7EAFF",
+   "group": "content",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Magnifier outline, ~1.6px stroke.",
+   "remove": true
+  },
+  {
+   "id": "map.search_placeholder",
+   "kind": "text",
+   "box": [
+    565.8,
+    70.9,
+    659.3,
+    80.2
+   ],
+   "text": "Joylashuvni qidirish...",
+   "fontPx": 9.9,
+   "weight": "regular",
+   "color": "#AEC4E3",
+   "group": "content",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Placeholder text. Box bottom = 'y','q' descenders; baseline 78.3 (cap 7.1).",
+   "remove": true
+  },
+  {
+   "id": "map.zoom_panel",
+   "kind": "panel",
+   "box": [
+    703.4,
+    126.4,
+    730.0,
+    173.9
+   ],
+   "fill": "#1E3352E6",
+   "stroke": "#0A152433",
+   "radius": 5,
+   "group": "content",
+   "anchor": "tr",
+   "pad": 3,
+   "notes": "Vertical dark-glass capsule holding +/- (composite #263B57). Split into two 26x23.7 buttons at y=150.1.",
+   "remove": true
+  },
+  {
+   "id": "map.zoom_in",
+   "kind": "button",
+   "box": [
+    703.4,
+    126.4,
+    730.0,
+    150.1
+   ],
+   "group": "content",
+   "anchor": "tr",
+   "pad": 1,
+   "notes": "Upper half of zoom panel (hit area).",
+   "remove": true
+  },
+  {
+   "id": "map.zoom_in_icon",
+   "kind": "icon",
+   "box": [
+    712.5,
+    134.5,
+    721.3,
+    143.7
+   ],
+   "icon": "plus",
+   "color": "#E4EEFF",
+   "group": "content",
+   "anchor": "tr",
+   "pad": 2,
+   "notes": "Plus, ~1.8px stroke; sampled #D1D8EF.",
+   "remove": true
+  },
+  {
+   "id": "map.zoom_divider",
+   "kind": "line",
+   "box": [
+    705.0,
+    149.6,
+    728.5,
+    150.6
+   ],
+   "color": "#FFFFFF14",
+   "group": "content",
+   "anchor": "tr",
+   "pad": 1,
+   "notes": "Very faint 1px separator between + and -.",
+   "remove": true
+  },
+  {
+   "id": "map.zoom_out",
+   "kind": "button",
+   "box": [
+    703.4,
+    150.1,
+    730.0,
+    173.9
+   ],
+   "group": "content",
+   "anchor": "tr",
+   "pad": 1,
+   "notes": "Lower half of zoom panel (hit area).",
+   "remove": true
+  },
+  {
+   "id": "map.zoom_out_icon",
+   "kind": "icon",
+   "box": [
+    712.6,
+    162.0,
+    721.0,
+    163.4
+   ],
+   "icon": "minus",
+   "color": "#DCEAFD",
+   "group": "content",
+   "anchor": "tr",
+   "pad": 2,
+   "remove": true
+  },
+  {
+   "id": "map.card",
+   "kind": "panel",
+   "box": [
+    533.2,
+    355.4,
+    729.5,
+    405.0
+   ],
+   "fill": "#0C1C30E6",
+   "stroke": "#FFFFFF14",
+   "radius": 6,
+   "group": "cards",
+   "anchor": "br",
+   "pad": 3,
+   "notes": "'Shahar markazi' location card: dark navy glass, slightly lighter at top-right (#213042) than bottom-left (#0D2035); soft shadow.",
+   "remove": true
+  },
+  {
+   "id": "map.card_image",
+   "kind": "image",
+   "box": [
+    540.8,
+    362.8,
+    580.0,
+    397.6
+   ],
+   "radius": 4,
+   "group": "cards",
+   "anchor": "br",
+   "pad": 1,
+   "notes": "Thumbnail of the city centre (spire tower + avenue). See assets.map_card_thumb.",
+   "remove": true
+  },
+  {
+   "id": "map.card_title",
+   "kind": "text",
+   "box": [
+    590.0,
+    370.8,
+    653.0,
+    378.3
+   ],
+   "text": "Shahar markazi",
+   "fontPx": 10.0,
+   "weight": "bold",
+   "color": "#DFE9F7",
+   "group": "cards",
+   "anchor": "br",
+   "pad": 2,
+   "notes": "No descenders; box bottom = baseline 378.2 (cap 7.2).",
+   "remove": true
+  },
+  {
+   "id": "map.card_subtitle",
+   "kind": "text",
+   "box": [
+    590.0,
+    385.3,
+    655.7,
+    393.3
+   ],
+   "text": "Hozir onlayn: 1,248",
+   "fontPx": 8.3,
+   "weight": "regular",
+   "color": "#99A9BA",
+   "group": "cards",
+   "anchor": "br",
+   "pad": 2,
+   "notes": "Box bottom = 'y' descender; baseline 391.4 (cap 6.0). Number is dynamic (online count).",
+   "remove": true
+  },
+  {
+   "id": "map.card_arrow_btn",
+   "kind": "button",
+   "box": [
+    699.8,
+    369.6,
+    721.6,
+    392.0
+   ],
+   "fill": "#2D3D58FF",
+   "stroke": "#FFFFFF1A",
+   "radius": 11,
+   "group": "cards",
+   "anchor": "br",
+   "pad": 2,
+   "notes": "Circular button (d~22) with faint light rim.",
+   "remove": true
+  },
+  {
+   "id": "map.card_arrow",
+   "kind": "icon",
+   "box": [
+    706.7,
+    376.5,
+    714.3,
+    385.2
+   ],
+   "icon": "arrow-right",
+   "color": "#CADBF3",
+   "group": "cards",
+   "anchor": "br",
+   "pad": 1,
+   "remove": true
+  },
+  {
+   "id": "map.pin_0",
+   "kind": "pin",
+   "box": [
+    234.0,
+    148.6,
+    336.0,
+    187.4
+   ],
+   "text": "Magazinlar",
+   "point": [
+    289.3,
+    188.0
+   ],
+   "circleTip": [
+    253.3,
+    188.4
+   ],
+   "fill": "#4B454CF0",
+   "stroke": "#B07080FF",
+   "radius": 7,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 4,
+   "notes": "Map pin for category 'Magazinlar' (side.item_1). Anchored in MAP space (moves with pan/zoom). Shape = icon circle on the left + rounded label bubble (radius ~7, 1.5px stroke) whose left end starts at the circle centre; bubble box [253.4, 150.3, 336.0, 184.5]. 'point' = tip of the bubble's bottom stem (or bubble bottom centre when no stem is drawn); 'circleTip' = small teardrop tip under the icon circle (alternative anchor). Label box bottom = 'g' descender; baseline 171.4 (cap 8.2). Bubble: dark warm-grey glass with rose/salmon 1.5px stroke.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_0_circle",
+   "kind": "badge",
+   "box": [
+    234.0,
+    148.6,
+    272.8,
+    187.4
+   ],
+   "fill": "#B03252FF",
+   "stroke": "#B07080FF",
+   "radius": 19.4,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 3,
+   "notes": "Icon disk: outer #B07080 stroke (~1.5px), then dark ring #3F1B33 (~2.5px), then solid disk #B03252. Slightly taller than the bubble (overhangs ~1-3px top/bottom).",
+   "remove": true
+  },
+  {
+   "id": "map.pin_0_icon",
+   "kind": "icon",
+   "box": [
+    246.1,
+    159.5,
+    260.7,
+    176.9
+   ],
+   "icon": "bag",
+   "color": "#FFF9F8",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Solid white glyph centred in the disk.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_0_label",
+   "kind": "text",
+   "box": [
+    275.0,
+    163.2,
+    325.7,
+    173.6
+   ],
+   "text": "Magazinlar",
+   "fontPx": 11.4,
+   "weight": "semibold",
+   "color": "#F3F2FC",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Label box bottom = 'g' descender; baseline 171.4 (cap 8.2). Pin labels vary 10.0-11.6px in the drawing; ~10.8px uniform is fine.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_0_stem",
+   "kind": "line",
+   "box": [
+    286.5,
+    183.5,
+    292.0,
+    188.2
+   ],
+   "color": "#B07080",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 2,
+   "notes": "Short pointer stem/tail under the bubble; its bottom = 'point' of map.pin_0.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_1",
+   "kind": "pin",
+   "box": [
+    462.5,
+    109.5,
+    582.6,
+    147.0
+   ],
+   "text": "O'quv markazlari",
+   "point": [
+    522.6,
+    144.0
+   ],
+   "circleTip": [
+    481.3,
+    147.0
+   ],
+   "fill": "#36585AF0",
+   "stroke": "#6CA6A0FF",
+   "radius": 7,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 4,
+   "notes": "Map pin for category 'O'quv markazlari' (side.item_2). Anchored in MAP space (moves with pan/zoom). Shape = icon circle on the left + rounded label bubble (radius ~7, 1.5px stroke) whose left end starts at the circle centre; bubble box [481.3, 111.5, 582.6, 144.0]. 'point' = tip of the bubble's bottom stem (or bubble bottom centre when no stem is drawn); 'circleTip' = small teardrop tip under the icon circle (alternative anchor). Label box bottom = 'q' descender; baseline ~131 (cap ~7.6). Bubble: dark teal-green glass, green stroke. No stem drawn: point = bubble bottom centre.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_1_circle",
+   "kind": "badge",
+   "box": [
+    462.5,
+    109.5,
+    500.0,
+    147.0
+   ],
+   "fill": "#3F9667FF",
+   "stroke": "#6CA6A0FF",
+   "radius": 18.8,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 3,
+   "notes": "Icon disk: outer #6CA6A0 stroke (~1.5px), then dark ring #235844 (~2.5px), then solid disk #3F9667. Slightly taller than the bubble (overhangs ~1-3px top/bottom).",
+   "remove": true
+  },
+  {
+   "id": "map.pin_1_icon",
+   "kind": "icon",
+   "box": [
+    472.4,
+    121.5,
+    489.4,
+    136.3
+   ],
+   "icon": "graduation-cap",
+   "color": "#F3FFF7",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Solid white glyph centred in the disk.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_1_label",
+   "kind": "text",
+   "box": [
+    502.0,
+    123.1,
+    572.9,
+    132.5
+   ],
+   "text": "O'quv markazlari",
+   "fontPx": 10.6,
+   "weight": "semibold",
+   "color": "#E5F3FA",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Label box bottom = 'q' descender; baseline ~131 (cap ~7.6). Pin labels vary 10.0-11.6px in the drawing; ~10.8px uniform is fine.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_2",
+   "kind": "pin",
+   "box": [
+    300.8,
+    88.8,
+    411.3,
+    125.5
+   ],
+   "text": "Biznes markazi",
+   "point": [
+    359.0,
+    126.0
+   ],
+   "circleTip": [
+    318.6,
+    128.3
+   ],
+   "fill": "#1C4A7FF0",
+   "stroke": "#5CA1E1FF",
+   "radius": 7,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 4,
+   "notes": "Map pin for category 'Biznes markazi' (side.item_3). Anchored in MAP space (moves with pan/zoom). Shape = icon circle on the left + rounded label bubble (radius ~7, 1.5px stroke) whose left end starts at the circle centre; bubble box [318.6, 89.5, 411.3, 122.3]. 'point' = tip of the bubble's bottom stem (or bubble bottom centre when no stem is drawn); 'circleTip' = small teardrop tip under the icon circle (alternative anchor). Label has no descenders; box bottom = baseline 109.1 (cap 7.2). Bubble: royal-blue glass with light-blue stroke + soft blue glow.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_2_circle",
+   "kind": "badge",
+   "box": [
+    300.8,
+    88.8,
+    337.5,
+    125.5
+   ],
+   "fill": "#2464C0FF",
+   "stroke": "#5CA1E1FF",
+   "radius": 18.3,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 3,
+   "notes": "Icon disk: outer #5CA1E1 stroke (~1.5px), then dark ring #0D3F7E (~2.5px), then solid disk #2464C0. Slightly taller than the bubble (overhangs ~1-3px top/bottom).",
+   "remove": true
+  },
+  {
+   "id": "map.pin_2_icon",
+   "kind": "icon",
+   "box": [
+    312.1,
+    98.2,
+    326.7,
+    114.7
+   ],
+   "icon": "building",
+   "color": "#E8F8FF",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Solid white glyph centred in the disk.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_2_label",
+   "kind": "text",
+   "box": [
+    340.1,
+    101.4,
+    402.0,
+    109.2
+   ],
+   "text": "Biznes markazi",
+   "fontPx": 10.0,
+   "weight": "semibold",
+   "color": "#DCF2FF",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Label has no descenders; box bottom = baseline 109.1 (cap 7.2). Pin labels vary 10.0-11.6px in the drawing; ~10.8px uniform is fine.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_2_stem",
+   "kind": "line",
+   "box": [
+    356.5,
+    121.8,
+    361.5,
+    126.0
+   ],
+   "color": "#5CA1E1",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 2,
+   "notes": "Short pointer stem/tail under the bubble; its bottom = 'point' of map.pin_2.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_3",
+   "kind": "pin",
+   "box": [
+    519.3,
+    184.8,
+    646.5,
+    224.8
+   ],
+   "text": "Ko'ngilochar zona",
+   "point": [
+    578.7,
+    227.0
+   ],
+   "circleTip": [
+    537.5,
+    227.8
+   ],
+   "fill": "#2A4878F0",
+   "stroke": "#7792C0FF",
+   "radius": 7,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 4,
+   "notes": "Map pin for category 'Ko'ngilochar zona' (side.item_4). Anchored in MAP space (moves with pan/zoom). Shape = icon circle on the left + rounded label bubble (radius ~7, 1.5px stroke) whose left end starts at the circle centre; bubble box [539.3, 187.6, 646.5, 221.5]. 'point' = tip of the bubble's bottom stem (or bubble bottom centre when no stem is drawn); 'circleTip' = small teardrop tip under the icon circle (alternative anchor). Label box bottom = 'g' descender; baseline 207.4 (cap 7.3). Bubble: indigo-blue glass, periwinkle stroke; purple icon disk.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_3_circle",
+   "kind": "badge",
+   "box": [
+    519.3,
+    184.8,
+    559.3,
+    224.8
+   ],
+   "fill": "#6B3CA7FF",
+   "stroke": "#7792C0FF",
+   "radius": 20.0,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 3,
+   "notes": "Icon disk: outer #7792C0 stroke (~1.5px), then dark ring #1B1E5D (~2.5px), then solid disk #6B3CA7. Slightly taller than the bubble (overhangs ~1-3px top/bottom).",
+   "remove": true
+  },
+  {
+   "id": "map.pin_3_icon",
+   "kind": "icon",
+   "box": [
+    529.2,
+    198.6,
+    547.0,
+    212.1
+   ],
+   "icon": "gamepad",
+   "color": "#FEF5FF",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Solid white glyph centred in the disk.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_3_label",
+   "kind": "text",
+   "box": [
+    560.0,
+    199.4,
+    636.5,
+    209.4
+   ],
+   "text": "Ko'ngilochar zona",
+   "fontPx": 10.1,
+   "weight": "semibold",
+   "color": "#E4F5FF",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Label box bottom = 'g' descender; baseline 207.4 (cap 7.3). Pin labels vary 10.0-11.6px in the drawing; ~10.8px uniform is fine.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_3_stem",
+   "kind": "line",
+   "box": [
+    575.5,
+    221.0,
+    581.5,
+    227.3
+   ],
+   "color": "#7792C0",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 2,
+   "notes": "Short pointer stem/tail under the bubble; its bottom = 'point' of map.pin_3.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_4",
+   "kind": "pin",
+   "box": [
+    234.3,
+    233.6,
+    338.4,
+    274.0
+   ],
+   "text": "Turar joylar",
+   "point": [
+    294.4,
+    276.5
+   ],
+   "circleTip": [
+    254.5,
+    274.5
+   ],
+   "fill": "#494340F0",
+   "stroke": "#CDA477FF",
+   "radius": 7,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 4,
+   "notes": "Map pin for category 'Turar joylar' (side.item_5). Anchored in MAP space (moves with pan/zoom). Shape = icon circle on the left + rounded label bubble (radius ~7, 1.5px stroke) whose left end starts at the circle centre; bubble box [254.5, 236.5, 338.4, 270.3]. 'point' = tip of the bubble's bottom stem (or bubble bottom centre when no stem is drawn); 'circleTip' = small teardrop tip under the icon circle (alternative anchor). Label box bottom = 'j','y' descenders; baseline 257 (cap 8.0). Bubble: dark warm-grey glass with gold stroke; orange disk; gold stem.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_4_circle",
+   "kind": "badge",
+   "box": [
+    234.3,
+    233.6,
+    274.7,
+    274.0
+   ],
+   "fill": "#C0703AFF",
+   "stroke": "#CDA477FF",
+   "radius": 20.2,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 3,
+   "notes": "Icon disk: outer #CDA477 stroke (~1.5px), then dark ring #3D2B1A (~2.5px), then solid disk #C0703A. Slightly taller than the bubble (overhangs ~1-3px top/bottom).",
+   "remove": true
+  },
+  {
+   "id": "map.pin_4_icon",
+   "kind": "icon",
+   "box": [
+    246.2,
+    246.0,
+    262.8,
+    262.0
+   ],
+   "icon": "home",
+   "color": "#FFF8ED",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Solid white glyph centred in the disk.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_4_label",
+   "kind": "text",
+   "box": [
+    275.5,
+    249.0,
+    328.5,
+    259.5
+   ],
+   "text": "Turar joylar",
+   "fontPx": 11.1,
+   "weight": "semibold",
+   "color": "#F4EFF2",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Label box bottom = 'j','y' descenders; baseline 257 (cap 8.0). Pin labels vary 10.0-11.6px in the drawing; ~10.8px uniform is fine.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_4_stem",
+   "kind": "line",
+   "box": [
+    292.8,
+    269.8,
+    296.2,
+    276.5
+   ],
+   "color": "#CDA477",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 2,
+   "notes": "Short pointer stem/tail under the bubble; its bottom = 'point' of map.pin_4.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_5",
+   "kind": "pin",
+   "box": [
+    382.4,
+    281.3,
+    480.3,
+    321.3
+   ],
+   "text": "Tadbirlar",
+   "point": [
+    431.4,
+    318.2
+   ],
+   "circleTip": [
+    402.4,
+    321.3
+   ],
+   "fill": "#3F285FF0",
+   "stroke": "#A168B9FF",
+   "radius": 7,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 4,
+   "notes": "Map pin for category 'Tadbirlar' (side.item_6). Anchored in MAP space (moves with pan/zoom). Shape = icon circle on the left + rounded label bubble (radius ~7, 1.5px stroke) whose left end starts at the circle centre; bubble box [402.4, 283.6, 480.3, 318.2]. 'point' = tip of the bubble's bottom stem (or bubble bottom centre when no stem is drawn); 'circleTip' = small teardrop tip under the icon circle (alternative anchor). Label has no descenders; box bottom = baseline 304.8 (cap 8.4). Bubble: deep purple glass, violet stroke, magenta glow spilling ~3px below. The magenta-lit plaza just below (x~428-440, y~319-327) looks like map art, not UI -> kept; point = bubble bottom centre.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_5_circle",
+   "kind": "badge",
+   "box": [
+    382.4,
+    281.3,
+    422.4,
+    321.3
+   ],
+   "fill": "#663189FF",
+   "stroke": "#A168B9FF",
+   "radius": 20.0,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 3,
+   "notes": "Icon disk: outer #A168B9 stroke (~1.5px), then dark ring #351454 (~2.5px), then solid disk #663189. Slightly taller than the bubble (overhangs ~1-3px top/bottom).",
+   "remove": true
+  },
+  {
+   "id": "map.pin_5_icon",
+   "kind": "icon",
+   "box": [
+    395.0,
+    293.0,
+    411.0,
+    310.0
+   ],
+   "icon": "calendar",
+   "color": "#FFF5FF",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Solid white glyph centred in the disk.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_5_label",
+   "kind": "text",
+   "box": [
+    425.2,
+    296.4,
+    468.0,
+    305.0
+   ],
+   "text": "Tadbirlar",
+   "fontPx": 11.6,
+   "weight": "semibold",
+   "color": "#FBF3FF",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Label has no descenders; box bottom = baseline 304.8 (cap 8.4). Pin labels vary 10.0-11.6px in the drawing; ~10.8px uniform is fine.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_6",
+   "kind": "pin",
+   "box": [
+    546.6,
+    296.8,
+    644.8,
+    335.0
+   ],
+   "text": "Xizmatlar",
+   "point": [
+    595.7,
+    332.8
+   ],
+   "circleTip": [
+    565.7,
+    335.0
+   ],
+   "fill": "#1B4774F0",
+   "stroke": "#4E8ABAFF",
+   "radius": 7,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 4,
+   "notes": "Map pin for category 'Xizmatlar' (side.item_7). Anchored in MAP space (moves with pan/zoom). Shape = icon circle on the left + rounded label bubble (radius ~7, 1.5px stroke) whose left end starts at the circle centre; bubble box [565.7, 298.6, 644.8, 332.8]. 'point' = tip of the bubble's bottom stem (or bubble bottom centre when no stem is drawn); 'circleTip' = small teardrop tip under the icon circle (alternative anchor). Label has no descenders; box bottom = baseline 319.5 (cap 8.2). Bubble: navy-blue glass with blue stroke; sits over sea. No stem drawn: point = bubble bottom centre.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_6_circle",
+   "kind": "badge",
+   "box": [
+    546.6,
+    296.8,
+    584.8,
+    335.0
+   ],
+   "fill": "#2E66B5FF",
+   "stroke": "#4E8ABAFF",
+   "radius": 19.1,
+   "group": "pins",
+   "anchor": "c",
+   "pad": 3,
+   "notes": "Icon disk: outer #4E8ABA stroke (~1.5px), then dark ring #1D3F6D (~2.5px), then solid disk #2E66B5. Slightly taller than the bubble (overhangs ~1-3px top/bottom).",
+   "remove": true
+  },
+  {
+   "id": "map.pin_6_icon",
+   "kind": "icon",
+   "box": [
+    558.0,
+    307.1,
+    575.9,
+    325.6
+   ],
+   "icon": "gear",
+   "color": "#F3FDFF",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Solid white glyph centred in the disk.",
+   "remove": true
+  },
+  {
+   "id": "map.pin_6_label",
+   "kind": "text",
+   "box": [
+    589.2,
+    311.2,
+    633.9,
+    319.6
+   ],
+   "text": "Xizmatlar",
+   "fontPx": 11.4,
+   "weight": "semibold",
+   "color": "#EBFAFF",
+   "group": "pins",
+   "anchor": "c",
+   "pad": 1,
+   "notes": "Label has no descenders; box bottom = baseline 319.5 (cap 8.2). Pin labels vary 10.0-11.6px in the drawing; ~10.8px uniform is fine.",
+   "remove": true
+  }
+ ],
+ "removePolygons": [],
+ "assets": [
+  {
+   "name": "map_background",
+   "box": [
+    0,
+    0,
+    759,
+    415
+   ],
+   "notes": "Full-bleed isometric island-city map at dusk (central spire tower, districts, sea). Remove every element above with remove=true (nav, header, side panel + list, search, zoom, all 7 pins incl. stems/glow, bottom-right card). Top-left is naturally dark (vignette/sea) - keep that."
+  },
+  {
+   "name": "map_card_thumb",
+   "box": [
+    540.8,
+    362.8,
+    580.0,
+    397.6
+   ],
+   "notes": "Thumbnail inside the 'Shahar markazi' card (city centre spire + avenue, daylight). Rounded corners r~4 (crop square, mask in Unity). No overlay to remove."
+  },
+  {
+   "name": "profile_avatar",
+   "box": [
+    610.3,
+    13.5,
+    635.3,
+    38.8
+   ],
+   "notes": "Circular avatar portrait from the nav profile pill (circle mask). Optional; likely shared with other pages."
+  }
+ ],
+ "notes": "Right-side column right edge is consistently x~729.6 (29px margin); left content margin x~18.6-20.7. No distinct nav bar background (nav sits directly on the dark top of the art)."
+}
