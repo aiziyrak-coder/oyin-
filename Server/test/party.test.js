@@ -45,3 +45,39 @@ test('Lobby: taklif, rozilik, 5 o‘rin, xavfsizlik, ping va uzilish', async () 
     assert.equal((await hb(host)).data.members.length,1);
   } finally {server.closeAllConnections();await new Promise(r=>server.close(r));db.close();}
 });
+
+test('Lobby: a\'zolarga faqat to\'g\'ri kiyim yuboriladi (bazadagi eski noto\'g\'ri kiyim bo\'sh)', async () => {
+  const db = openDatabase(':memory:');
+  const server = createServer(createApp(db, { rateLimits: { create: 100, party: 1000 } }));
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const call = async (path, player, body = {}) => {
+    const res = await fetch(`http://127.0.0.1:${server.address().port}/api/${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(player ? { Authorization: `Bearer ${player.token}` } : {}) },
+      body: JSON.stringify(body),
+    });
+    return { status: res.status, data: await res.json() };
+  };
+  try {
+    const host = (await call('players', null, { nickname: 'OutfitHost', gender: 'male', avatarId: 'M1' })).data;
+    const guest = (await call('players', null, { nickname: 'OutfitGuest', gender: 'female', avatarId: 'F1' })).data;
+    await call('friends/request', host, { nickname: guest.nickname });
+    await call('friends/accept', guest, { nickname: host.nickname });
+    // Tekshiruvdan oldingi versiya yozib qo'ygan kiyimlar (API endi ularni qabul qilmaydi)
+    const valid = '{"top":"top_denim","topColor":"3E5F8F"}';
+    db.updatePlayer(host.id, { outfit: valid });
+    db.updatePlayer(guest.id, { outfit: `{"evil":[1,2,3],"top":"${'x'.repeat(900)}"}` });
+
+    await call('party/heartbeat', host, { pingMs: 10 });
+    assert.equal((await call('party/invite', host, { nickname: guest.nickname })).status, 200);
+    const invitation = (await call('party/heartbeat', guest, { pingMs: 10 })).data.invitations[0].id;
+    assert.equal((await call('party/accept', guest, { invitationId: invitation })).status, 200);
+
+    const members = (await call('party/heartbeat', host, { pingMs: 10 })).data.members;
+    assert.deepEqual(Object.fromEntries(members.map(m => [m.nickname, m.outfit])), { OutfitHost: valid, OutfitGuest: '' });
+  } finally {
+    server.closeAllConnections();
+    await new Promise(resolve => server.close(resolve));
+    db.close();
+  }
+});

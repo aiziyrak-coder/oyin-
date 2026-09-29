@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { nicknameKey } from './nickname.js';
+import { publicOutfit } from './outfit.js';
 
 // Lobby vaqtinchalik: profil va do'stlik bazasiga yozmaydi.
 export function createParties(db) {
@@ -30,7 +31,7 @@ export function createParties(db) {
     const room = own(id, time);
     return { roomId: room.id, host: room.host === id, members: [...room.members].map(([key, m]) => {
       const p = db.getPlayer(key);
-      return { nickname: p.nickname, avatarId: p.avatarId, gender: p.gender, outfit: p.outfit,
+      return { nickname: p.nickname, avatarId: p.avatarId, gender: p.gender, outfit: publicOutfit(p.outfit),
         seat: m.seat, online: time - m.seen < 12000, pingMs: m.ping };
     }), invitations: [...invites.values()].filter(i => i.target === id).map(i => ({
       id: i.id, nickname: db.getPlayer(i.host).nickname,

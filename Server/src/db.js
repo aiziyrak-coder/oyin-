@@ -57,8 +57,10 @@ const VISIBLE_LAST_SEEN = '(CASE WHEN show_online = 1 THEN last_seen END)';
  * O'yinchilar bazasi (SQLite). nickname_key ustunidagi UNIQUE cheklov bir xil nickname'ni
  * ikki marta olishning oldini oladi, hatto so'rovlar bir vaqtda kelsa ham.
  * Vaqtlar ISO UTC satr ko'rinishida saqlanadi: ularni matn sifatida taqqoslash vaqt tartibini beradi.
+ * @param {string} path - fayl yo'li yoki ':memory:'. Standart joy yo'q: u config.js resolveDbPath() da aniqlanadi
+ *                        (ilgari joriy papkaga nisbatan edi va har bir build papkasi o'z bazasini ochardi).
  */
-export function openDatabase(path = 'data/cradev.db') {
+export function openDatabase(path) {
   const db = new DatabaseSync(path);
   db.exec(`
     PRAGMA journal_mode = WAL;

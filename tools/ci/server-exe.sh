@@ -4,6 +4,9 @@
 #
 # Ishlatish: tools/ci/server-exe.sh <natija papkasi>
 # Natija: CraDevServer.exe (Windows x64) va cradev-server (Linux x64, CI'da tekshirish uchun).
+# Exe qaysi papkadan ishga tushirilmasin, bitta bazani ochadi: %LOCALAPPDATA%\CraDev\server\cradev.db
+# (DB_PATH bilan o'zgartiriladi; eski versiyaning o'yin yonidagi data\cradev.db fayli birinchi safar ko'chiriladi).
+# Standart holatda faqat shu kompyuterdan ulanish mumkin; umumiy server uchun HOST=0.0.0.0 (Server/src/config.js).
 # Kerak: Node.js 22.13+ va internet (esbuild, postject va Windows uchun node.exe yuklanadi).
 
 set -euo pipefail
