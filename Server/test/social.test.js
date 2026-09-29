@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { connect } from 'node:net';
@@ -23,9 +23,9 @@ const SUMMARY_KEYS = ['nickname', 'avatarId', 'gender', 'online', 'friendship'];
  * Xotiradagi (yoki berilgan) baza ustida server. Vaqt `clock` orqali boshqariladi.
  * call(metod, yo'l, { token, body, raw }) -> { status, headers, body }
  */
-async function startApi({ db = openDatabase(':memory:'), rateLimits = HIGH_LIMITS } = {}) {
+async function startApi({ db = openDatabase(':memory:'), rateLimits = HIGH_LIMITS, trustProxy = 0 } = {}) {
   const clock = { ms: START };
-  const server = createServer(createApp(db, { rateLimits, now: () => new Date(clock.ms) }));
+  const server = createServer(createApp(db, { rateLimits, trustProxy, now: () => new Date(clock.ms) }));
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
 
@@ -127,7 +127,7 @@ describe('o\'yinchi profili: yangi maydonlar', () => {
 
   test('PATCH istalgan maydonni alohida yoki birga o\'zgartiradi', async () => {
     const { token } = await api.register('Patcher', 'female');
-    const outfit = JSON.stringify({ top: 'jacket_blue', shoes: 'sneakers' });
+    const outfit = JSON.stringify({ top: 'top_denim', topColor: '3E5F8F', shoes: 'shoes_white', shoesColor: 'EDEDEA' });
 
     let res = await api.patch(token, { outfit });
     assert.equal(res.status, 200);
@@ -163,7 +163,18 @@ describe('o\'yinchi profili: yangi maydonlar', () => {
       [{ outfit: '{broken' }, 'invalid_outfit'],
       [{ outfit: { hat: 1 } }, 'invalid_outfit'],
       [{ outfit: null }, 'invalid_outfit'],
-      [{ outfit: `{"x":"${'a'.repeat(1017)}"}` }, 'invalid_outfit'], // 1025 belgi
+      [{ outfit: `{"top":"top_denim"${' '.repeat(494)}}` }, 'invalid_outfit'], // 513 belgi
+      [{ outfit: '{"hat":"red"}' }, 'invalid_outfit'], // noma'lum kalit
+      [{ outfit: '{"top":"top_denim","evil":[1,2,3]}' }, 'invalid_outfit'],
+      [{ outfit: '{"__proto__":"x"}' }, 'invalid_outfit'],
+      [{ outfit: '{"top":1}' }, 'invalid_outfit'], // satr emas
+      [{ outfit: '{"top":{"id":"top_denim"}}' }, 'invalid_outfit'],
+      [{ outfit: '{"top":null}' }, 'invalid_outfit'],
+      [{ outfit: '{"top":"Top Denim"}' }, 'invalid_outfit'], // buyum id'si emas
+      [{ outfit: `{"top":"t${'o'.repeat(32)}"}` }, 'invalid_outfit'], // 33 belgi
+      [{ outfit: '{"topColor":"blue"}' }, 'invalid_outfit'], // rang RRGGBB emas
+      [{ outfit: '{"topColor":"#3E5F8F"}' }, 'invalid_outfit'],
+      [{ outfit: '{"hairColor":"12345"}' }, 'invalid_outfit'],
       [{ country: 'uz' }, 'invalid_country'],
       [{ country: 'UZB' }, 'invalid_country'],
       [{ country: 'U1' }, 'invalid_country'],
@@ -183,17 +194,42 @@ describe('o\'yinchi profili: yangi maydonlar', () => {
       { avatarId: 'M1', outfit: '', country: 'UZ', showOnline: true, allowRequests: true });
   });
 
-  test('outfit: 1024 belgigacha JSON obyekt yoki bo\'sh satr', async () => {
+  test('outfit: Unity Outfit JSON\'i (ko\'pi bilan 512 belgi) yoki bo\'sh satr', async () => {
     const { token } = await api.register('Tailor');
-    const longest = `{"x":"${'a'.repeat(1016)}"}`;
-    assert.equal(longest.length, 1024);
-    let res = await api.patch(token, { outfit: longest });
+    // JsonUtility.ToJson(Outfit): hamma 8 maydon, tanlanmagan qism bo'sh satr
+    const full = JSON.stringify({ top: 'top_leather_black', topColor: '18181B', bottom: 'bottom_jeans_black',
+      bottomColor: '25282e', shoes: '', shoesColor: '', hair: 'hair_platinum', hairColor: 'DCD2BE' });
+    let res = await api.patch(token, { outfit: full });
+    assert.equal(res.status, 200);
+    assert.equal(res.body.outfit, full);
+
+    const longest = `{"top":"top_denim"${' '.repeat(493)}}`;
+    assert.equal(longest.length, 512);
+    res = await api.patch(token, { outfit: longest });
     assert.equal(res.status, 200);
     assert.equal(res.body.outfit, longest);
+    res = await api.patch(token, { outfit: `{"top":"t${'o'.repeat(31)}","hairColor":""}` }); // 32 belgilik id
+    assert.equal(res.status, 200);
     res = await api.patch(token, { outfit: '{}' });
     assert.equal(res.body.outfit, '{}');
     res = await api.patch(token, { outfit: '' });
     assert.equal(res.body.outfit, '');
+  });
+
+  test('maxfiylik: faqat yuborilgan bayroq o\'zgaradi, ketma-ket so\'rovlar bir-birini bekor qilmaydi', async () => {
+    const { token } = await api.register('Private');
+    let res = await api.patch(token, { showOnline: false });
+    assert.deepEqual([res.status, res.body.showOnline, res.body.allowRequests], [200, false, true]);
+    res = await api.patch(token, { allowRequests: false });
+    assert.deepEqual([res.body.showOnline, res.body.allowRequests], [false, false]);
+
+    // Ikki kalit deyarli bir vaqtda bosildi: har biri faqat o'zini yuboradi, ikkalasi ham saqlanadi
+    await Promise.all([api.patch(token, { showOnline: true }), api.patch(token, { allowRequests: true })]);
+    assert.deepEqual(pick((await api.me(token)).body, ['showOnline', 'allowRequests']), { showOnline: true, allowRequests: true });
+
+    // Eski mijozlar ikkalasini birga yuboradi: bu ham ishlaydi
+    res = await api.patch(token, { showOnline: false, allowRequests: true });
+    assert.deepEqual([res.status, res.body.showOnline, res.body.allowRequests], [200, false, true]);
   });
 
   test('noma\'lum maydonlar e\'tiborsiz, ma\'lum maydon bo\'lmasa nothing_to_update', async () => {
@@ -375,15 +411,19 @@ describe('qidiruv va tavsiyalar', () => {
     assert.deepEqual((await api.search(seeker.token, 'a%i')).body, []);
   });
 
-  test('so\'rov 1..24 belgi bo\'lishi kerak', async () => {
-    for (const q of ['', '   ', 'a'.repeat(25)]) {
+  test('so\'rov 1..64 belgi; nickname\'dan uzuni xato emas, bo\'sh natija', async () => {
+    for (const q of ['', '   ', 'a'.repeat(65)]) {
       const res = await api.search(seeker.token, q);
       assert.deepEqual([res.status, res.body], [400, { error: 'invalid_query' }], JSON.stringify(q));
     }
     const missing = await api.call('GET', '/api/players/search', { token: seeker.token });
     assert.deepEqual([missing.status, missing.body], [400, { error: 'invalid_query' }]);
-    assert.equal((await api.search(seeker.token, 'a'.repeat(24))).status, 200);
-    assert.equal((await api.search(seeker.token, ` ${'a'.repeat(24)} `)).status, 200);
+    // O'yindagi qidiruv maydoni 40 belgigacha yozadi: 17..64 belgi "Server xatosi" emas, shunchaki hech kim
+    for (const q of ['a'.repeat(24), 'kali_ali_and_more_', 'x'.repeat(40), ` ${'a'.repeat(64)} `]) {
+      const res = await api.search(seeker.token, q);
+      assert.deepEqual([res.status, res.body], [200, []], JSON.stringify(q));
+    }
+    assert.deepEqual(names((await api.search(seeker.token, 'Kali_Ali')).body), ['Kali_Ali']); // 8 belgi
   });
 
   test('ko\'pi bilan 20 ta natija', async () => {
@@ -979,6 +1019,46 @@ describe('so\'rovlar cheklovi va CORS', () => {
     }
   });
 
+  test('TRUST_PROXY: cheklov X-Forwarded-For\'dagi o\'yinchi manzili bo\'yicha, aks holda sarlavha e\'tiborsiz', async () => {
+    const check = (api, forwarded) => fetch(`http://127.0.0.1:${api.port}/api/nicknames/availability?name=Proxied`,
+      { headers: forwarded === undefined ? {} : { 'X-Forwarded-For': forwarded } }).then(res => res.status);
+
+    const proxied = await startApi({ rateLimits: { ...HIGH_LIMITS, check: 2 }, trustProxy: 1 });
+    try {
+      // Proksi ortidagi har bir o'yinchi o'z cheklovida (proksi manzili hammaga umumiy emas)
+      const first = [];
+      for (let i = 0; i < 3; i++) first.push(await check(proxied, '203.0.113.5'));
+      assert.deepEqual(first, [200, 200, 429]);
+      assert.equal(await check(proxied, '198.51.100.7'), 200);
+      // Chapdagi yozuvlarni mijozning o'zi yozishi mumkin: proksi qo'shgan o'ngdagisi hisoblanadi
+      assert.equal(await check(proxied, 'spoofed-1, 203.0.113.5'), 429);
+      assert.equal(await check(proxied, ' spoofed-2 ,203.0.113.5 '), 429);
+      // Sarlavha yo'q: ulanish manzili
+      assert.equal(await check(proxied), 200);
+    } finally {
+      await proxied.close();
+    }
+
+    const twoProxies = await startApi({ rateLimits: { ...HIGH_LIMITS, check: 1 }, trustProxy: 2 });
+    try {
+      assert.equal(await check(twoProxies, 'fake, 203.0.113.9, 10.0.0.2'), 200);
+      assert.equal(await check(twoProxies, 'other, 203.0.113.9, 10.0.0.3'), 429); // o'sha o'yinchi, boshqa ichki proksi
+      assert.equal(await check(twoProxies, '203.0.113.10'), 200); // yozuv kam: eng chapdagisi
+    } finally {
+      await twoProxies.close();
+    }
+
+    // Proksiga ishonilmasa sarlavha orqali cheklovni aylanib o'tib bo'lmaydi
+    const direct = await startApi({ rateLimits: { ...HIGH_LIMITS, check: 2 } });
+    try {
+      const statuses = [];
+      for (const forwarded of ['1.1.1.1', '2.2.2.2', '3.3.3.3']) statuses.push(await check(direct, forwarded));
+      assert.deepEqual(statuses, [200, 200, 429]);
+    } finally {
+      await direct.close();
+    }
+  });
+
   test('buzilgan so\'rov manzili 400 qaytaradi va serverni to\'xtatmaydi', async () => {
     const api = await startApi();
     try {
@@ -1009,6 +1089,100 @@ describe('so\'rovlar cheklovi va CORS', () => {
       assert.deepEqual((await api.call('GET', '/api/nope')).body, { error: 'not_found' });
     } finally {
       await api.close();
+    }
+  });
+});
+
+describe('profilni tiklash (POST /api/players/restore)', () => {
+  let api;
+  before(async () => { api = await startApi(); });
+  after(() => api.close());
+
+  const restore = (body, target = api) => target.call('POST', '/api/players/restore', { body });
+  /** O'yin PlayerPrefs'da saqlagan profil (server bazasi yangidan boshlangan). */
+  const saved = (overrides = {}) => ({
+    id: randomUUID(), token: randomBytes(32).toString('hex'), nickname: 'Returner', gender: 'female', avatarId: 'F3',
+    ...overrides,
+  });
+
+  test('mijozdagi profil qayta yaratiladi, token ishlaydi, takror so\'rov o\'sha profilni qaytaradi', async () => {
+    const profile = saved({
+      nickname: 'Comeback', outfit: '{"hair":"hair_pink","hairColor":"D96C9C"}', country: 'KZ', showOnline: false,
+      allowRequests: true,
+    });
+    const res = await restore(profile);
+    assert.equal(res.status, 201);
+    assert.deepEqual(Object.keys(res.body), PROFILE_KEYS);
+    assert.equal(res.body.token, undefined);
+    assert.deepEqual(pick(res.body, ['id', 'nickname', 'gender', ...SETTINGS]), {
+      id: profile.id, nickname: 'Comeback', gender: 'female', avatarId: 'F3', outfit: profile.outfit, country: 'KZ',
+      showOnline: false, allowRequests: true,
+    });
+    assert.ok(res.body.publicId >= 100000 && res.body.publicId <= 999999);
+
+    const me = await api.me(profile.token);
+    assert.deepEqual([me.status, me.body.id, me.body.nickname], [200, profile.id, 'Comeback']);
+    assert.equal((await api.patch(profile.token, { avatarId: 'F5' })).status, 200);
+
+    // Javob yetib kelmay qayta yuborilgan so'rov
+    const again = await restore({ ...profile, token: profile.token.toUpperCase() });
+    assert.deepEqual([again.status, again.body.id, again.body.avatarId], [200, profile.id, 'F5']);
+    assert.equal((await api.call('GET', '/api/nicknames/availability?name=COMEBACK')).body.reason, 'taken');
+  });
+
+  test('band nickname, id yoki token: 409 va hech narsa yozilmaydi', async () => {
+    const owner = await api.register('Taken_Name');
+    let res = await restore(saved({ nickname: 'TAKEN_NAME' }));
+    assert.deepEqual([res.status, res.body.error], [409, 'nickname_taken']);
+    res = await restore(saved({ id: owner.id, nickname: 'Other_Name' })); // boshqa o'yinchining id'si
+    assert.deepEqual([res.status, res.body], [409, { error: 'conflict' }]);
+    res = await restore(saved({ token: owner.token, nickname: 'Third_Name' })); // boshqa o'yinchining tokeni
+    assert.deepEqual([res.status, res.body], [409, { error: 'conflict' }]);
+
+    const me = (await api.me(owner.token)).body;
+    assert.deepEqual([me.id, me.nickname, me.gender], [owner.id, 'Taken_Name', 'male']);
+    for (const name of ['Other_Name', 'Third_Name']) {
+      assert.equal((await api.call('GET', `/api/nicknames/availability?name=${name}`)).body.available, true, name);
+    }
+  });
+
+  test('noto\'g\'ri ma\'lumot 400; avatar va sozlamalar yumshoq tekshiriladi', async () => {
+    const cases = [
+      [{ token: 'abc' }, 'invalid_token'],
+      [{ token: undefined }, 'invalid_token'],
+      [{ token: 'g'.repeat(64) }, 'invalid_token'],
+      [{ id: 'old-0' }, 'invalid_id'],
+      [{ id: 42 }, 'invalid_id'],
+      [{ nickname: 'ab' }, 'invalid_nickname'],
+      [{ nickname: 'admin' }, 'invalid_nickname'],
+      [{ nickname: undefined }, 'invalid_nickname'],
+      [{ gender: 'other' }, 'invalid_gender'],
+    ];
+    for (const [override, error] of cases) {
+      const res = await restore(saved({ nickname: 'Valid_Restore', ...override }));
+      assert.deepEqual([res.status, res.body.error], [400, error], JSON.stringify(override));
+    }
+    const broken = await api.call('POST', '/api/players/restore', { raw: '{oops' });
+    assert.deepEqual([broken.status, broken.body], [400, { error: 'bad_json' }]);
+
+    // Avatar bo'sh (eng eski profil) yoki jinsga mos emas: jinsning birinchi avatari; noto'g'ri sozlamalar e'tiborsiz
+    const res = await restore(saved({
+      nickname: 'Valid_Restore', gender: 'male', avatarId: '', outfit: '{"hat":1}', country: 'uzb', showOnline: 'no',
+    }));
+    assert.equal(res.status, 201);
+    assert.deepEqual(pick(res.body, SETTINGS),
+      { avatarId: 'M1', outfit: '', country: 'UZ', showOnline: true, allowRequests: true });
+    assert.equal((await restore(saved({ nickname: 'Cross_Gender', gender: 'female', avatarId: 'M2' }))).body.avatarId, 'F1');
+  });
+
+  test('tiklash yaratish cheklovidan foydalanadi', async () => {
+    const limited = await startApi({ rateLimits: { ...HIGH_LIMITS, create: 2 } });
+    try {
+      assert.equal((await restore(saved({ nickname: 'Limit_One' }), limited)).status, 201);
+      await limited.register('Limit_Two');
+      assert.deepEqual((await restore(saved({ nickname: 'Limit_Three' }), limited)).body, { error: 'too_many_requests' });
+    } finally {
+      await limited.close();
     }
   });
 });
@@ -1080,7 +1254,7 @@ describe('eski bazani ko\'chirish', () => {
       assert.equal((await api.me(tokens.OldTimer)).body.avatarId, 'F2');
 
       // Yangi funksiyalar eski o'yinchilar bilan ishlaydi
-      assert.equal((await api.patch(tokens.Pioneer, { country: 'KG', outfit: '{"hat":"red"}' })).status, 200);
+      assert.equal((await api.patch(tokens.Pioneer, { country: 'KG', outfit: '{"hair":"hair_blond","hairColor":"C9A46A"}' })).status, 200);
       assert.equal((await api.heartbeat(tokens.Pioneer)).status, 200);
       assert.deepEqual((await api.friend('request', tokens.Veteran, 'oldtimer')).body, { friendship: 'outgoing' });
       assert.deepEqual((await api.friend('accept', tokens.OldTimer, 'Veteran')).body, { friendship: 'friends' });
@@ -1113,7 +1287,7 @@ describe('eski bazani ko\'chirish', () => {
       assert.deepEqual(again, publicIds);
       const pioneer = (await reopened.me(tokens.Pioneer)).body;
       assert.equal(pioneer.country, 'KG');
-      assert.equal(pioneer.outfit, '{"hat":"red"}');
+      assert.equal(pioneer.outfit, '{"hair":"hair_blond","hairColor":"C9A46A"}');
       assert.deepEqual(names((await reopened.friends(tokens.Veteran)).body.friends), ['OldTimer']);
     } finally {
       await reopened.close();

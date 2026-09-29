@@ -2,17 +2,20 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { MAX_PENDING_REQUESTS } from './db.js';
 import { createParties } from './party.js';
 import { upcomingEvents } from './events.js';
-import { GENDERS, isValidAvatar, nicknameKey, validateNickname } from './nickname.js';
+import { AVATARS, GENDERS, isValidAvatar, MAX_LENGTH, nicknameKey, validateNickname } from './nickname.js';
+import { isValidOutfit } from './outfit.js';
 
 const MAX_BODY_BYTES = 4 * 1024;
-const MAX_OUTFIT_LENGTH = 1024;
-const MAX_QUERY_LENGTH = 24;
+// Qidiruv maydoni o'yinda 40 belgigacha yozadi: undan uzunlari ham xato emas, nickname'dan (16) uzun so'rov
+// shunchaki hech kimni topmaydi
+const MAX_QUERY_LENGTH = 64;
 const LEADERBOARD_DEFAULT = 20;
 const LEADERBOARD_MAX = 50;
 
 // Daqiqasiga (windowMs) ruxsat etilgan so'rovlar. social: do'stlar va tavsiyalar uchun umumiy.
 // Odatda bir IP uchun; profil (me) va heartbeat (presence) esa har bir o'yinchi uchun alohida hisoblanadi,
 // chunki bitta IP ortida (kompyuter klubi, NAT, proksi) ko'p o'yinchi bo'lishi mumkin.
+// Server teskari proksi ortida bo'lsa trustProxy (TRUST_PROXY) beriladi: IP X-Forwarded-For'dan olinadi.
 export const DEFAULT_RATE_LIMITS = { check: 60, create: 10, social: 120, search: 60, presence: 120 };
 
 /**
@@ -25,6 +28,10 @@ export const DEFAULT_RATE_LIMITS = { check: 60, create: 10, social: 120, search:
  * POST  /api/players { nickname, gender, avatarId }
  *                          -> 201 { id, publicId, nickname, gender, avatarId, token, createdAt }
  *                             409 { error: 'nickname_taken' }
+ * POST  /api/players/restore { id, token, nickname, gender, avatarId, outfit?, country?, showOnline?, allowRequests? }
+ *                          -> 201 profil (mijozdagi profil shu serverda qayta yaratildi) | 200 (allaqachon bor)
+ *                             409 nickname_taken | conflict (id yoki token boshqa o'yinchida)
+ *                             400 bad_json | invalid_token | invalid_id | invalid_nickname | invalid_gender
  * GET   /api/players/me (A) -> { id, publicId, nickname, gender, avatarId, outfit, country, showOnline, allowRequests,
  *                                createdAt, onlineSeconds }
  * PATCH /api/players/me (A) { avatarId?, outfit?, country?, showOnline?, allowRequests? } -> yangilangan o'yinchi
@@ -32,7 +39,7 @@ export const DEFAULT_RATE_LIMITS = { check: 60, create: 10, social: 120, search:
  *                                 invalid_allowRequests | nothing_to_update
  * POST  /api/presence (A)   -> { online, players }  (mijoz har 30 soniyada yuboradigan heartbeat)
  * GET   /api/stats          -> { online, players }
- * GET   /api/players/search?q=<matn> (A) -> [summary] (ko'pi bilan 20) | 400 invalid_query
+ * GET   /api/players/search?q=<matn> (A) -> [summary] (ko'pi bilan 20) | 400 invalid_query (1..64 belgi)
  * GET   /api/players/suggested (A)       -> [summary] (ko'pi bilan 10)
  * GET   /api/friends (A)                 -> { friends: [summary], incoming: [summary], outgoing: [summary] }
  *                                           (incoming va outgoing ko'pi bilan MAX_PENDING_REQUESTS ta)
@@ -46,10 +53,13 @@ export const DEFAULT_RATE_LIMITS = { check: 60, create: 10, social: 120, search:
  * GET   /api/events              -> [{ id, zone, title: { uz, en }, place: { uz, en }, startsAt, endsAt }]
  *
  * summary = { nickname, avatarId, gender, online, friendship: 'none' | 'friends' | 'outgoing' | 'incoming' }
+ * outfit  = "" yoki Unity Outfit JSON'i: { top, topColor, bottom, bottomColor, shoes, shoesColor, hair, hairColor }
+ *           (hammasi ixtiyoriy satr: buyum - garderob id'si, rang - RRGGBB yoki ""; ko'pi bilan 512 belgi): outfit.js
  *
  * `now` - joriy vaqt manbai (testlar uchun almashtiriladi).
+ * `trustProxy` - ishonchli teskari proksilar soni (0: X-Forwarded-For e'tiborsiz, so'rov manzili ishlatiladi).
  */
-export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => new Date() } = {}) {
+export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => new Date(), trustProxy = 0 } = {}) {
   const limits = { ...DEFAULT_RATE_LIMITS, ...rateLimits };
   const limiter = createRateLimiter(windowMs);
   const party = createParties(db);
@@ -62,6 +72,7 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
     'GET /health': { run: () => [200, { ok: true }] },
     'GET /api/nicknames/availability': { limit: 'check', run: checkAvailability },
     'POST /api/players': { limit: 'create', run: createPlayer },
+    'POST /api/players/restore': { limit: 'create', run: restorePlayer },
     'GET /api/players/me': {
       limit: 'check', bucket: 'me', auth: true, perPlayer: true, run: ({ player }) => [200, player],
     },
@@ -123,7 +134,51 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
     }];
   }
 
-  /** Faqat yuborilgan ma'lum maydonlar o'zgaradi; bittasi noto'g'ri bo'lsa hech narsa yozilmaydi. */
+  /**
+   * Mijozda (PlayerPrefs) saqlangan profilni shu serverda qayta yaratadi: baza yangidan boshlangan yoki o'yin boshqa
+   * serverga ulangan bo'lsa, o'yinchi qahramonini yo'qotmaydi (do'stlar esa har bir serverda o'zi). Token mijozda,
+   * bazaga faqat uning xeshi yoziladi. id, token yoki nickname boshqa o'yinchida bo'lsa - 409.
+   * Ixtiyoriy sozlamalardan noto'g'rilari e'tiborsiz qoldiriladi (tiklash ular sabab to'xtamaydi).
+   */
+  async function restorePlayer({ req, now }) {
+    const body = await readJson(req);
+    if (body === null) return [400, { error: 'bad_json' }];
+    if (typeof body.token !== 'string' || !TOKEN_PATTERN.test(body.token)) return [400, { error: 'invalid_token' }];
+    if (typeof body.id !== 'string' || !UUID_PATTERN.test(body.id)) return [400, { error: 'invalid_id' }];
+
+    const tokenHash = sha256(body.token.toLowerCase());
+    const existing = db.findPlayerByTokenHash(tokenHash);
+    if (existing) return existing.id === body.id ? [200, existing] : [409, { error: 'conflict' }];
+    if (db.getPlayer(body.id)) return [409, { error: 'conflict' }];
+
+    const check = validateNickname(body.nickname);
+    if (!check.ok) return [400, { error: 'invalid_nickname', reason: check.reason, message: check.message }];
+    if (!GENDERS.includes(body.gender)) return [400, { error: 'invalid_gender' }];
+    const player = {
+      id: body.id,
+      nickname: check.nickname,
+      nicknameKey: nicknameKey(check.nickname),
+      gender: body.gender,
+      // Eng eski profillarda avatar yo'q: jinsning birinchi avatari
+      avatarId: isValidAvatar(body.avatarId, body.gender) ? body.avatarId : AVATARS[body.gender][0],
+      tokenHash,
+      createdAt: now.toISOString(),
+    };
+    if (db.insertPlayer(player) === null) return [409, { error: 'nickname_taken', message: 'This nickname is already taken.' }];
+
+    const settings = {};
+    for (const [field, rule] of Object.entries(PROFILE_FIELDS)) {
+      if (field !== 'avatarId' && Object.hasOwn(body, field) && rule.valid(body[field], player)) settings[field] = body[field];
+    }
+    if (Object.keys(settings).length > 0) db.updatePlayer(player.id, settings);
+    return [201, db.getPlayer(player.id)];
+  }
+
+  /**
+   * Faqat yuborilgan ma'lum maydonlar o'zgaradi (masalan faqat { showOnline }: allowRequests o'z holicha qoladi,
+   * shuning uchun ikki maxfiylik sozlamasi alohida so'rovlarda bir-birini bekor qilmaydi); bittasi noto'g'ri bo'lsa
+   * hech narsa yozilmaydi.
+   */
   async function updateMe({ req, player }) {
     const body = await readJson(req);
     if (body === null) return [400, { error: 'bad_json' }];
@@ -149,6 +204,7 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   function searchPlayers({ url, player, now }) {
     const query = (url.searchParams.get('q') ?? '').trim();
     if (query.length < 1 || query.length > MAX_QUERY_LENGTH) return [400, { error: 'invalid_query' }];
+    if (query.length > MAX_LENGTH) return [200, []]; // hech bir nickname bunchalik uzun emas
     return [200, db.searchPlayers(player.id, nicknameKey(query), now)];
   }
 
@@ -206,6 +262,18 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
     return [200, db.leaderboard(limit)];
   }
 
+  /**
+   * So'rov kelgan manzil. Proksiga ishonilsa - X-Forwarded-For'ning o'ngdan trustProxy-chi yozuvi: uni oxirgi ishonchli
+   * proksi qo'shgan (chapdagilarini mijozning o'zi yozib yuborishi mumkin). Sarlavha bo'lmasa - ulanish manzili.
+   */
+  function clientAddress(req) {
+    if (trustProxy > 0) {
+      const hops = String(req.headers['x-forwarded-for'] ?? '').split(',').map(hop => hop.trim()).filter(Boolean);
+      if (hops.length > 0) return hops[Math.max(0, hops.length - trustProxy)].slice(0, 64);
+    }
+    return req.socket.remoteAddress ?? 'unknown';
+  }
+
   /** Bitta so'rovni bajaradi va [status, body] qaytaradi. */
   async function dispatch(req) {
     let url;
@@ -221,8 +289,7 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
 
     const bucket = route.bucket ?? route.limit;
     // IP bo'yicha cheklov token tekshirilishidan oldin, o'yinchi bo'yicha cheklov esa undan keyin
-    if (route.limit && !route.perPlayer
-      && !limiter.allow(`${bucket}:${req.socket.remoteAddress ?? 'unknown'}`, limits[route.limit])) {
+    if (route.limit && !route.perPlayer && !limiter.allow(`${bucket}:${clientAddress(req)}`, limits[route.limit])) {
       return [429, { error: 'too_many_requests' }];
     }
 
@@ -263,17 +330,8 @@ const PROFILE_FIELDS = {
   allowRequests: { error: 'invalid_allowRequests', valid: value => typeof value === 'boolean' },
 };
 
-/** Kiyim sozlamalari: JSON obyekt matni (ko'pi bilan 1024 belgi) yoki "" (standartga qaytarish). */
-function isValidOutfit(value) {
-  if (typeof value !== 'string' || value.length > MAX_OUTFIT_LENGTH) return false;
-  if (value === '') return true;
-  try {
-    const parsed = JSON.parse(value);
-    return parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed);
-  } catch {
-    return false;
-  }
-}
+const TOKEN_PATTERN = /^[0-9a-f]{64}$/i;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function sha256(text) {
   return createHash('sha256').update(text).digest('hex');

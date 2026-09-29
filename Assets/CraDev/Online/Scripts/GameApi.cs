@@ -12,24 +12,89 @@ namespace CraDev.Online
     /// </summary>
     public class GameApi
     {
-        /// <summary>O'yin serveri (Server/ papkasi). Haqiqiy serverga o'tganda shu yerda o'zgartiriladi.</summary>
+        /// <summary>
+        /// Sahnalardagi standart manzil: o'yin yonidagi server (Server/ papkasi). Umumiy serverga o'yinni qayta yig'masdan
+        /// ulanish mumkin: buyruq qatori, CRADEV_SERVER yoki server.txt (<see cref="ServerAddress"/>).
+        /// </summary>
         public const string DefaultServerUrl = "http://localhost:8080";
+
+        /// <summary>Reyting: server ko'pi bilan shuncha qator qaytaradi (Server/src/app.js LEADERBOARD_MAX).</summary>
+        public const int LeaderboardMax = 50;
 
         const int TimeoutSeconds = 8;
         readonly string baseUrl;
 
-        public GameApi(string baseUrl) => this.baseUrl = baseUrl.TrimEnd('/');
+        /// <param name="configuredUrl">Sahnadagi manzil (builder yozadi); tashqi sozlama bo'lsa u ishlatiladi.</param>
+        public GameApi(string configuredUrl) => baseUrl = ServerAddress.Resolve(configuredUrl);
 
-        /// <summary>Nickname bo'shmi? Tarmoq xatosida result.NetworkError = true.</summary>
+        /// <summary>Haqiqatda ishlatilayotgan server manzili.</summary>
+        public string BaseUrl => baseUrl;
+
+        /// <summary>
+        /// Nickname bo'shmi? Javob tanasi faqat 200 da o'qiladi: 429 (so'rovlar juda ko'p) yoki 5xx da result.Data = null,
+        /// result.Status esa saqlanadi. Shunda ular "band" yoki "noto'g'ri" deb emas, qayta urinish kerak bo'lgan holat
+        /// sifatida ko'rinadi (<see cref="RegistrationSession.Classify"/>). Tarmoq xatosida result.NetworkError = true.
+        /// </summary>
         public IEnumerator CheckNickname(string nickname, Action<ApiResult<AvailabilityResponse>> done) =>
-            Send("GET", "/api/nicknames/availability?name=" + UnityWebRequest.EscapeURL(nickname), null, null, done);
+            Send<AvailabilityResponse>("GET", "/api/nicknames/availability?name=" + UnityWebRequest.EscapeURL(nickname), null, null, result =>
+            {
+                if (result.Status != 200)
+                    result.Data = null;
+                done(result);
+            });
 
         /// <summary>O'yinchini yaratadi va nickname'ni band qiladi. 409 = nickname allaqachon olingan.</summary>
         public IEnumerator CreatePlayer(string nickname, string gender, string avatarId, Action<ApiResult<PlayerResponse>> done) =>
             Send("POST", "/api/players", null, JsonUtility.ToJson(new CreatePlayerRequest { nickname = nickname, gender = gender, avatarId = avatarId }), done);
 
-        /// <summary>Saqlangan token bo'yicha o'yinchi profili. 401 = serverda bunday o'yinchi yo'q.</summary>
-        public IEnumerator GetMe(string token, Action<ApiResult<PlayerResponse>> done) => Send("GET", "/api/players/me", token, null, done);
+        /// <summary>
+        /// Saqlangan token bo'yicha o'yinchi profili. Server bu o'yinchini tanimasa (baza yangidan boshlangan, boshqa
+        /// server), shu kompyuterdagi profil serverda qayta yaratiladi (POST /api/players/restore) va profil qaytadi:
+        /// o'yinchi qahramonini yo'qotmaydi. 401 faqat tiklab bo'lmaganda (masalan nickname bu serverda boshqa o'yinchida).
+        /// Tiklash paytida tarmoq xatosi, 429 yoki 5xx bo'lsa o'sha natija qaytadi: chaqiruvchi keyinroq qayta urinadi,
+        /// profil o'chirilmaydi.
+        /// </summary>
+        public IEnumerator GetMe(string token, Action<ApiResult<PlayerResponse>> done)
+        {
+            ApiResult<PlayerResponse> result = default;
+            yield return Send<PlayerResponse>("GET", "/api/players/me", token, null, r => result = r);
+            string restore = !result.NetworkError && result.Status == 401 ? RestoreJson(token) : null;
+            if (restore != null)
+            {
+                ApiResult<PlayerResponse> restored = default;
+                yield return Send<PlayerResponse>("POST", "/api/players/restore", null, restore, r => restored = r);
+                if (!restored.NetworkError && (restored.Status == 200 || restored.Status == 201))
+                {
+                    Debug.Log("[CraDev] Profil serverda yo'q edi: shu kompyuterdagi nusxadan tiklandi (" + baseUrl + ")");
+                    yield return Send<PlayerResponse>("GET", "/api/players/me", token, null, r => result = r);
+                }
+                else if (restored.NetworkError || restored.Status == 429 || restored.Status >= 500)
+                    result = restored;
+                else
+                    Debug.LogWarning($"[CraDev] Profilni serverda tiklab bo'lmadi: {restored.Status} {restored.Data?.error}");
+            }
+            done(result);
+        }
+
+        /// <summary>Tiklash so'rovi: faqat token shu kompyuterdagi profilniki va profil to'liq bo'lsa (aks holda null).</summary>
+        static string RestoreJson(string token)
+        {
+            if (string.IsNullOrEmpty(token) || token != PlayerProfile.Token || !PlayerProfile.Exists
+                || string.IsNullOrEmpty(PlayerProfile.Nickname) || string.IsNullOrEmpty(PlayerProfile.Gender))
+                return null;
+            return JsonUtility.ToJson(new RestorePlayerRequest
+            {
+                id = PlayerProfile.Id,
+                token = token,
+                nickname = PlayerProfile.Nickname,
+                gender = PlayerProfile.Gender,
+                avatarId = PlayerProfile.AvatarId,
+                outfit = PlayerProfile.Outfit,
+                country = PlayerProfile.Country,
+                showOnline = PlayerProfile.ShowOnline,
+                allowRequests = PlayerProfile.AllowRequests,
+            });
+        }
 
         /// <summary>O'yinchi avatarini o'zgartiradi (jins o'zgarmaydi).</summary>
         public IEnumerator UpdateAvatar(string token, string avatarId, Action<ApiResult<PlayerResponse>> done) =>
@@ -43,9 +108,23 @@ namespace CraDev.Online
         public IEnumerator UpdateCountry(string token, string country, Action<ApiResult<PlayerResponse>> done) =>
             Send("PATCH", "/api/players/me", token, JsonUtility.ToJson(new UpdateCountryRequest { country = country }), done);
 
-        /// <summary>Maxfiylik: onlayn holatini ko'rsatish va do'stlik so'rovlarini qabul qilish.</summary>
+        /// <summary>
+        /// Maxfiylik: ikkala bayroq birga. Bittasi o'zgarganda <see cref="UpdateShowOnline"/> yoki
+        /// <see cref="UpdateAllowRequests"/> ishlating: ikki kalit ketma-ket bosilsa, eski qiymat ikkinchisini bekor qilmaydi.
+        /// </summary>
         public IEnumerator UpdatePrivacy(string token, bool showOnline, bool allowRequests, Action<ApiResult<PlayerResponse>> done) =>
             Send("PATCH", "/api/players/me", token, JsonUtility.ToJson(new UpdatePrivacyRequest { showOnline = showOnline, allowRequests = allowRequests }), done);
+
+        /// <summary>Faqat "onlayn holatimni ko'rsatish" (allowRequests serverda o'zgarmaydi).</summary>
+        public IEnumerator UpdateShowOnline(string token, bool showOnline, Action<ApiResult<PlayerResponse>> done) =>
+            Send("PATCH", "/api/players/me", token, BoolJson("showOnline", showOnline), done);
+
+        /// <summary>Faqat "do'stlik so'rovlarini qabul qilish" (showOnline serverda o'zgarmaydi).</summary>
+        public IEnumerator UpdateAllowRequests(string token, bool allowRequests, Action<ApiResult<PlayerResponse>> done) =>
+            Send("PATCH", "/api/players/me", token, BoolJson("allowRequests", allowRequests), done);
+
+        // JsonUtility bool maydonni tashlab keta olmaydi: bitta maydonli tana qo'lda yoziladi
+        static string BoolJson(string field, bool value) => "{\"" + field + "\":" + (value ? "true" : "false") + "}";
 
         /// <summary>"Men o'yindaman" (har 30 soniyada): onlayn vaqt hisoblanadi, javobda hozir onlayn o'yinchilar soni.</summary>
         public IEnumerator Presence(string token, Action<ApiResult<StatsResponse>> done) => Send("POST", "/api/presence", token, "{}", done);
@@ -69,7 +148,8 @@ namespace CraDev.Online
         public IEnumerator RemoveFriend(string token, string nickname, Action<ApiResult<FriendshipResponse>> done) =>
             Send("POST", "/api/friends/remove", token, JsonUtility.ToJson(new NicknameRequest { nickname = nickname }), done);
 
-        public IEnumerator Leaderboard(int limit, Action<ApiResult<LeaderboardList>> done) => SendList("/api/leaderboard?limit=" + limit, null, done);
+        public IEnumerator Leaderboard(int limit, Action<ApiResult<LeaderboardList>> done) =>
+            SendList("/api/leaderboard?limit=" + Mathf.Clamp(limit, 1, LeaderboardMax), null, done);
 
         public IEnumerator Events(Action<ApiResult<EventList>> done) => SendList("/api/events", null, done);
 
@@ -281,6 +361,13 @@ namespace CraDev.Online
     {
         public bool showOnline;
         public bool allowRequests;
+    }
+
+    [Serializable]
+    class RestorePlayerRequest
+    {
+        public string id, token, nickname, gender, avatarId, outfit, country;
+        public bool showOnline, allowRequests;
     }
 
     [Serializable]
