@@ -66,9 +66,9 @@ namespace CraDev
             }
             Loc.Current=language;
             lobby.Show("settings");yield return new WaitForSecondsRealtime(.5f);
-            ((LobbyContent)lobby.Current).Choose("2");yield return null;
+            ((LobbyContent)lobby.Current).Choose("4");yield return null;
             var switches=lobby.Current.GetComponentsInChildren<Image>().Where(g=>g.name=="Switch").ToArray();
-            Check(switches.Length==3&&switches.All(g=>g.material.shader.name=="UI/Default"),"flat notification switches");
+            Check(switches.Length==2&&switches.All(g=>g.material.shader.name=="UI/Default"),"flat notification switches");
             var images=lobby.GetComponentsInChildren<Image>(true);
             Check(!images.Any(g=>g.GetComponent<GlassSurface>()!=null || g.material.shader.name=="CraDev/UI/LobbyGlass"),"no glass or grab-pass surfaces");
             Check(lobby.GetComponentsInChildren<Text>(true).Count(t=>t.text=="NewWorld")==2,"NewWorld platform branding");

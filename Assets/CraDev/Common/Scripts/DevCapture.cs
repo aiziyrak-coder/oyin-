@@ -124,13 +124,14 @@ namespace CraDev
                     yield return new WaitForSecondsRealtime(2);yield return new WaitForEndOfFrame();var movingB=SkyPixels();
                     int movingDiff=PixelDifference(movingA,movingB);if(Application.isFocused&&movingDiff==0)failures++;
                     Debug.Log($"[EnvironmentTest] Sky pixel differences: motion off={stillDiff}, motion on={movingDiff}, focused={Application.isFocused}");
-                    lobby.Show("settings");lobby.ChooseSection("3");
+                    lobby.Show("settings");lobby.ChooseSection("4");
                     for(int n=0;n<4;n++)
                     {
-                        var selector=FindButton("LobbyWeatherSelector");
+                        int target=(savedWeather+n+1)%4;
+                        var selector=FindButton("LobbyWeather_"+target);
                         if(selector==null){failures++;break;}
                         selector.onClick.Invoke();yield return null;
-                        if(MainMenu.LobbyEnvironment.Weather!=(savedWeather+n+1)%4)failures++;
+                        if(MainMenu.LobbyEnvironment.Weather!=target)failures++;
                     }
                     yield return Shot(System.IO.Path.Combine(folder,"weather-settings.png"));lobby.SetSettings(false);
                 }
@@ -158,7 +159,9 @@ namespace CraDev
                 yield return Shot(path);
                 string folder=System.IO.Path.GetDirectoryName(path)??"";
                 lobby.Show("settings");lobby.ChooseSection("0");yield return Shot(System.IO.Path.Combine(folder,"settings.png"));
-                lobby.ChooseSection("2");yield return Shot(System.IO.Path.Combine(folder,"notifications.png"));
+                lobby.ChooseSection("4");yield return Shot(System.IO.Path.Combine(folder,"notifications.png"));
+                lobby.ChooseSection("1");yield return Shot(System.IO.Path.Combine(folder,"settings-display.png"));
+                lobby.ChooseSection("3");yield return Shot(System.IO.Path.Combine(folder,"settings-controls.png"));
                 lobby.SetSettings(false);
                 lobby.FriendsPanel.Choose("find");yield return Shot(System.IO.Path.Combine(folder,"friends-search.png"));
                 lobby.FriendsPanel.Choose("find");
@@ -215,7 +218,7 @@ namespace CraDev
             {
                 string folder=System.IO.Path.GetDirectoryName(path)??"";
                 lobby.Show("settings");yield return new WaitForSecondsRealtime(.5f);
-                ((MainMenu.LobbyContent)lobby.Current).Choose("2");
+                lobby.ChooseSection("4");
                 yield return Shot(System.IO.Path.Combine(folder,"settings-switches.png"));
                 lobby.Dialog.Show(Loc.T("wardrobe.unsaved_title"),Loc.T("wardrobe.unsaved_message"),Loc.T("wardrobe.discard"),()=>{},Loc.T("common.cancel"));
                 yield return Shot(System.IO.Path.Combine(folder,"dialog.png"));
