@@ -91,7 +91,10 @@ namespace CraDev.Online
             PlayerPrefs.Save();
         }
 
-        /// <summary>Bitta maxfiylik bayrog'i (ikkinchisiga tegmaydi): kalit darhol almashadi, xatoda eski qiymat qaytariladi.</summary>
+        /// <summary>
+        /// Bitta maxfiylik bayrog'i (ikkinchisiga tegmaydi). Sozlamalar kaliti uni so'rov yuborilishi bilan yozadi (kalit
+        /// darhol almashadi), server rad etsa eski qiymatni qaytaradi: <see cref="GameApi.UpdateShowOnline"/>.
+        /// </summary>
         public static void SetShowOnline(bool value)
         {
             PlayerPrefs.SetInt(ShowOnlineKey, value ? 1 : 0);
