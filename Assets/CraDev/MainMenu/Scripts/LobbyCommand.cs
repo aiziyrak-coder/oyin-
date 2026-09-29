@@ -17,6 +17,7 @@ namespace CraDev.MainMenu
             if (action == "page") lobby.Show(value);
             else if (action == "soon") lobby.Soon(Loc.T(value));
             else if (action == "customize") lobby.Customize();
+            else if (action == "avatar") lobby.SetAvatarStudio(true);
             else if (action == "choose") lobby.ChooseSection(value);
             else if (action == "close-settings") lobby.SetSettings(false);
             else if (action == "enter-world") lobby.EnterWorld();

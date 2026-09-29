@@ -251,31 +251,44 @@ namespace CraDev.Face
         [Serializable]
         class Points { public float[] xy; }
 
+        /// <summary>Yuzni saqlaydi. Xato bo'lsa istisno (chaqiruvchi o'yinchiga aytadi); eski yuz buzilmaydi.</summary>
         public static void Save(FaceData face)
         {
             Directory.CreateDirectory(Folder);
-            File.WriteAllBytes(PhotoPath, face.Photo.EncodeToJPG(92));
             var xy = new float[face.Landmarks.Length * 2];
             for (int i = 0; i < face.Landmarks.Length; i++)
             {
                 xy[i * 2] = face.Landmarks[i].x;
                 xy[i * 2 + 1] = face.Landmarks[i].y;
             }
-            File.WriteAllText(PointsPath, JsonUtility.ToJson(new Points { xy = xy }));
+            // Avval vaqtinchalik fayllarga, keyin almashtiriladi: yozish yarmida uzilsa ham eski yuz buzilmaydi
+            WriteAtomic(PhotoPath, face.Photo.EncodeToJPG(92));
+            WriteAtomic(PointsPath, System.Text.Encoding.UTF8.GetBytes(JsonUtility.ToJson(new Points { xy = xy })));
+        }
+
+        static void WriteAtomic(string path, byte[] data)
+        {
+            string temp = path + ".tmp";
+            File.WriteAllBytes(temp, data);
+            if (File.Exists(path))
+                File.Delete(path);
+            File.Move(temp, path);
         }
 
         public static FaceData Load()
         {
+            Texture2D photo = null;
             try
             {
                 if (!File.Exists(PhotoPath) || !File.Exists(PointsPath))
                     return null;
-                var photo = new Texture2D(2, 2, TextureFormat.RGBA32, false);
-                if (!photo.LoadImage(File.ReadAllBytes(PhotoPath)))
-                    return null;
+                photo = new Texture2D(2, 2, TextureFormat.RGBA32, false);
                 var points = JsonUtility.FromJson<Points>(File.ReadAllText(PointsPath));
-                if (points?.xy == null || points.xy.Length != FaceTracker.LandmarkCount * 2)
+                if (!photo.LoadImage(File.ReadAllBytes(PhotoPath)) || points?.xy == null || points.xy.Length != FaceTracker.LandmarkCount * 2)
+                {
+                    Discard(photo);
                     return null;
+                }
                 var landmarks = new Vector2[FaceTracker.LandmarkCount];
                 for (int i = 0; i < landmarks.Length; i++)
                     landmarks[i] = new Vector2(points.xy[i * 2], points.xy[i * 2 + 1]);
@@ -284,8 +297,16 @@ namespace CraDev.Face
             catch (Exception e)
             {
                 Debug.LogWarning("[CraDev] Saqlangan yuzni o'qib bo'lmadi: " + e.Message);
+                if (photo != null)
+                    Discard(photo);
                 return null;
             }
+        }
+
+        static void Discard(UnityEngine.Object o)
+        {
+            if (Application.isPlaying) UnityEngine.Object.Destroy(o);
+            else UnityEngine.Object.DestroyImmediate(o);
         }
 
         public static void Delete()

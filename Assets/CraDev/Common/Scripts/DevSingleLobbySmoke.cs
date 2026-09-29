@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using CraDev.Face;
 using CraDev.MainMenu;
 using CraDev.Online;
 using UnityEngine;
@@ -28,6 +29,42 @@ namespace CraDev
             float until=Time.realtimeSinceStartup+8;
             while(panel.Loading&&Time.realtimeSinceStartup<until)yield return null;
             Check(!panel.Loading,"friend request completed");
+        }
+        // Avatar studiyasi: lobbydan chiqmaydi, qoralama party signalida saqlanadi, Esc avval skanerni yopadi,
+        // bekor qilish saqlangan avatar va yuzni qaytaradi. Profil va yuz fayliga hech narsa yozilmaydi.
+        static IEnumerator AvatarStudio(MainMenuScreen lobby,string avatar)
+        {
+            var viewer=lobby.Viewer;var savedFace=viewer.Face;
+            Click("LobbyAvatar");yield return new WaitForSecondsRealtime(.5f);
+            var studio=lobby.AvatarStudio;
+            Check(studio!=null&&lobby.AvatarStudioOpen&&lobby.Current.Id=="home"&&!lobby.Current.Group.blocksRaycasts,"avatar studio opens inside the lobby");
+            if(studio==null||!lobby.AvatarStudioOpen)yield break;
+            Check(lobby.Stage.StudioActive&&!viewer.LockRotation,"studio frames the avatar and allows rotation");
+            Check(studio.Choices.Count>0&&studio.Choices.All(a=>a.gender==viewer.CurrentOption.gender),"studio lists avatars of the player's gender");
+            var other=studio.Choices.FirstOrDefault(a=>a.id!=avatar);
+            if(other!=null)
+            {
+                Click("StudioAvatar_"+studio.Choices.ToList().IndexOf(other));yield return null;
+                Check(viewer.CurrentOption==other&&studio.Dirty,"draft avatar previewed on the lobby character");
+                lobby.GetComponent<LobbyParty>()?.Refresh();yield return null;
+                Check(viewer.CurrentOption==other,"party heartbeat keeps the draft avatar");
+            }
+            if(savedFace!=null){Click("StudioRemoveFace");yield return null;Check(viewer.Face==null&&studio.Dirty,"face removal previewed");}
+            Click("StudioScan");yield return new WaitForSecondsRealtime(.5f);
+            Check(studio.ScanOpen,"live scanner opens inside the studio");
+            var camera=studio.Scanner.CameraState;
+            if(camera==FaceScanner.CameraState.NoDevice||camera==FaceScanner.CameraState.Failed)Check(studio.Scanner.FailureShown,"camera problem explained with retry");
+            lobby.Back();yield return null;
+            Check(!studio.ScanOpen&&lobby.AvatarStudioOpen,"Esc closes the scanner first");
+            lobby.Back();yield return null;
+            if(studio.Dirty)
+            {
+                Check(ModalWindow.AnyOpen,"unsaved studio asks before discarding");
+                var buttons=lobby.Dialog.GetComponentsInChildren<Button>();buttons[buttons.Length-1].onClick.Invoke();yield return null;
+            }
+            Check(!lobby.AvatarStudioOpen&&viewer.CurrentOption.id==avatar&&viewer.Face==savedFace,"cancel restores the saved avatar and face");
+            yield return new WaitForSecondsRealtime(.6f);
+            Check(lobby.Current.Group.blocksRaycasts&&!lobby.Stage.StudioActive&&viewer.LockRotation,"lobby controls and camera restored");
         }
         public static IEnumerator Run(MainMenuScreen lobby)
         {
@@ -68,6 +105,9 @@ namespace CraDev
             Check(friends.Mode=="find"&&friends.VisibleCount==0&&lobby.Current.Id=="home","search empty result inline");
             friends.Search.text="Lynxos";yield return new WaitForSecondsRealtime(.4f);yield return Loaded(friends);
             Check(lobby.Current.Id=="home","search never changes page");
+            friends.Search.Select();friends.Search.ActivateInputField();yield return null;
+            lobby.Back();yield return null;
+            Check(!ModalWindow.AnyOpen&&EventSystem.current.currentSelectedGameObject==null,"Esc in search only leaves the field");
             Click("FriendTool_remove");yield return Loaded(friends);
             var remove=Find("Remove");
             if(remove!=null)
@@ -84,6 +124,7 @@ namespace CraDev
             Check(pages.First(p=>p.Id=="settings").GetComponentsInChildren<Image>().Count(i=>i.name=="Switch")==3,"settings sections still work");
             Click("SettingsClose");yield return null;
             Check(!lobby.SettingsOpen&&lobby.Current.Group.blocksRaycasts,"settings close restores controls");
+            yield return AvatarStudio(lobby,avatar);
             Click("EnterNewWorld");yield return null;
             Check(lobby.Current.Id=="home","unconnected world does not open archived map");
             Loc.Current=language==Language.Uz?Language.En:Language.Uz;yield return null;

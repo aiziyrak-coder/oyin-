@@ -1,5 +1,6 @@
 using System.Collections;
 using CraDev.Online;
+using CraDev.Wardrobe;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -126,9 +127,12 @@ namespace CraDev.CharacterCreation
             }
             nicknameInput.onValueChanged.AddListener(OnNicknameChanged);
             createButton.onClick.AddListener(Submit);
-            cancelButton.onClick.AddListener(BackToMenu);
+            cancelButton.onClick.AddListener(CancelEdit);
             cancelButton.gameObject.SetActive(editing);
 
+            // Tahrirlashda qahramon lobbydagidek kiyimda ko'rinadi (kiyim avatar almashsa ham saqlanadi)
+            if (editing)
+                viewer.SetOutfit(WardrobeCatalog.Sanitize(Outfit.FromJson(PlayerProfile.Outfit)));
             SetupGenderAndAvatars();
             SetError(null);
             if (editing)
@@ -192,6 +196,16 @@ namespace CraDev.CharacterCreation
             StartCoroutine(GoNext(0f));
         }
 
+        /// <summary>Tahrirlashda "Bekor qilish" / Esc: yuzdagi saqlanmagan o'zgarish qaytariladi, keyin menyuga.</summary>
+        void CancelEdit()
+        {
+            if (submitting || done)
+                return;
+            if (faceCapture != null)
+                faceCapture.Revert();
+            BackToMenu();
+        }
+
         void AskQuit()
         {
             dialog.Show(Loc.T("menu.quit_title"), Loc.T("create.quit_message"), Loc.T("common.quit"), ConfirmDialog.QuitGame, Loc.T("common.cancel"));
@@ -220,7 +234,9 @@ namespace CraDev.CharacterCreation
             if (submitting)
                 createIcon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -time * 450f);
 
-            if (Anim.SubmitPressed() && !ModalWindow.AnyOpen)
+            // Skaner oynasi ochiq (yoki shu kadrda yopilgan): Enter uniki (Suratga olish / Ishlatish), forma yuborilmaydi
+            bool camera = faceCapture != null && faceCapture.BlocksKeys;
+            if (Anim.SubmitPressed() && !camera && !ModalWindow.AnyOpen)
                 Submit();
 
             // Esc: ochiq oyna o'zi yopiladi; aks holda tahrirlashda menyuga qaytish, yangi o'yinchida chiqish so'rovi
@@ -228,8 +244,12 @@ namespace CraDev.CharacterCreation
             {
                 if (faceCapture != null && faceCapture.CameraOpen)
                     faceCapture.CloseCamera();
+                else if (camera)
+                {
+                    // skaner shu kadrda yopildi: bu Esc unga tegishli
+                }
                 else if (editing)
-                    BackToMenu();
+                    CancelEdit();
                 else
                     AskQuit();
             }
@@ -424,6 +444,9 @@ namespace CraDev.CharacterCreation
         {
             if (!CanSubmit)
                 return;
+            // Skaner ochiq yoki yuz aniqlanayotgan paytda forma yuborilmaydi
+            if (faceCapture != null && (faceCapture.CameraOpen || faceCapture.Busy))
+                return;
             if (editing)
             {
                 SaveChanges();
@@ -445,6 +468,9 @@ namespace CraDev.CharacterCreation
             {
                 done = true;
                 PlayerProfile.Save(result.Data);
+                // Yuz qoralamasi endi shu kompyuterga yoziladi (profil yaratildi); yozilmasa ogohlantirish logda
+                if (faceCapture != null)
+                    faceCapture.Commit();
                 nicknameInput.interactable = false;
                 foreach (var card in avatarCards)
                     card.Button.interactable = false;
@@ -479,7 +505,21 @@ namespace CraDev.CharacterCreation
             // Yuz shu kompyuterda saqlanadi (FaceCapture); serverga faqat avatar yuboriladi
             if (selected.id == PlayerProfile.AvatarId)
             {
-                BackToMenu();
+                if (faceCapture == null || !faceCapture.Dirty)
+                {
+                    BackToMenu();
+                    return;
+                }
+                // Faqat yuz o'zgargan: server kerak emas
+                if (!faceCapture.Commit())
+                {
+                    SetError(Loc.T("face.save_failed"));
+                    return;
+                }
+                done = true;
+                createButton.interactable = false;
+                SetButton(Loc.T("create.saved"), checkSprite, Ok);
+                StartCoroutine(GoNext(0.6f));
                 return;
             }
             submitting = true;
@@ -495,8 +535,16 @@ namespace CraDev.CharacterCreation
             createIcon.rectTransform.localRotation = Quaternion.identity;
             if (!result.NetworkError && result.Status == 200)
             {
-                done = true;
                 PlayerProfile.SetAvatar(selected.id);
+                // Avatar saqlandi; yuz ham faqat endi yoziladi (avatar saqlanmasa yuzga tegilmaydi)
+                if (faceCapture != null && !faceCapture.Commit())
+                {
+                    SetButton(Loc.T("create.save"), checkSprite, Accent);
+                    SetError(Loc.T("face.save_failed"));
+                    UpdateCreateButton();
+                    return;
+                }
+                done = true;
                 SetButton(Loc.T("create.saved"), checkSprite, Ok);
                 StartCoroutine(GoNext(0.6f));
                 return;
@@ -506,6 +554,10 @@ namespace CraDev.CharacterCreation
                 SetError(Loc.T("create.error_network"));
             else if (result.Status == 401)
                 SetError(Loc.T("create.error_profile"));
+            else if (result.Status == 400 && result.Data != null && result.Data.error == "invalid_avatar")
+                SetError(Loc.T("create.error_avatar"));
+            else if (result.Status == 429)
+                SetError(Loc.T("create.error_limit"));
             else
                 SetError(Loc.T("create.error_server"));
             UpdateCreateButton();

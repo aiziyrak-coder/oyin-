@@ -28,9 +28,12 @@ namespace CraDev
             }
             var toast=lobby.transform.Find("Toast").GetComponent<RectTransform>();
             if(toast.anchorMin!=new Vector2(.5f,1)||toast.anchoredPosition.y>0||toast.anchoredPosition.y < -100)failures++;
+            party.Apply(new PartyState{host=true,members=new[]{new PartyMember{nickname=PlayerProfile.Nickname,avatarId=PlayerProfile.AvatarId,seat=0,pingMs=30,online=true}}});
             foreach(string id in new[]{"M1","M2","M3","M5","F1","F2","F3","F4","F5"})
             {
-                party.Apply(new PartyState{host=true,members=new[]{new PartyMember{nickname=PlayerProfile.Nickname,avatarId=id,seat=0,pingMs=30,online=true}}});
+                // O'z qahramonimiz avatari mahalliy profildan olinadi (party emas): shuning uchun to'g'ridan-to'g'ri qo'yiladi
+                var option=lobby.FindAvatar(id);if(option==null){failures++;continue;}
+                lobby.Viewer.SetAvatar(option);
                 yield return new WaitForSecondsRealtime(.1f);
                 var idle=lobby.Viewer.CurrentModel.GetComponent<Animator>();
                 if(idle==null||!idle.enabled||idle.runtimeAnimatorController==null){failures++;continue;}
@@ -68,7 +71,16 @@ namespace CraDev
             System.IO.Directory.CreateDirectory(folder);ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(folder,"five-standing.png"));
             yield return new WaitForSecondsRealtime(2);
             yield return new WaitForEndOfFrame();ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(folder,"five-standing-idle.png"));
-            Debug.Log($"[PartyTest] 9 standing avatars, 5 members, no furniture, top toast: failures={failures}");
+            // Avatar studiyasi: boshqa a'zolar va nom yorliqlari yashiriladi, yopilganda qaytadi (profilga yozilmaydi)
+            lobby.SetAvatarStudio(true);
+            yield return new WaitForSecondsRealtime(.8f);
+            if(!lobby.AvatarStudioOpen||GameObject.Find("StandingParty")!=null)failures++;
+            if(lobby.GetComponentsInChildren<RectTransform>().Any(r=>r.name.StartsWith("Nameplate_")))failures++;
+            yield return new WaitForEndOfFrame();ScreenCapture.CaptureScreenshot(System.IO.Path.Combine(folder,"avatar-studio.png"));
+            lobby.SetAvatarStudio(false);
+            yield return new WaitForSecondsRealtime(.8f);
+            if(lobby.AvatarStudioOpen||GameObject.Find("StandingParty")==null||party.OccupiedCount!=5)failures++;
+            Debug.Log($"[PartyTest] 9 standing avatars, 5 members, no furniture, top toast, studio hides party: failures={failures}");
             party.Apply(new PartyState{host=true,members=new[]{new PartyMember{nickname=PlayerProfile.Nickname,avatarId=PlayerProfile.AvatarId,outfit=PlayerProfile.Outfit,seat=0,pingMs=-1}}});
             yield return new WaitForSecondsRealtime(.5f);
         }

@@ -1,22 +1,23 @@
-using System.Collections;
 using CraDev.Face;
-using Unity.InferenceEngine;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace CraDev.CharacterCreation
 {
     /// <summary>
-    /// Formadagi "FACE" bo'limi: o'yinchi kamera bilan suratga tushadi yoki kompyuterdan rasm yuklaydi.
-    /// Rasmdagi yuz topiladi (FaceTracker) va 3D qahramon yuziga qo'yiladi (AvatarViewer.SetFace).
-    /// Yuz shu kompyuterda saqlanadi (FaceStore) va keyingi safar o'zi qo'yiladi.
+    /// Formadagi "FACE" bo'limi: o'yinchi jonli skaner (kamera) bilan suratga tushadi yoki kompyuterdan rasm
+    /// yuklaydi. Skaner oynasi - <see cref="FaceScanView"/> (lobby studiyasi bilan umumiy): u yuzni topib,
+    /// natijani qahramonda ko'rsatadi, o'yinchi "Ishlatish"ni bossa yuz shu yerga qoralama bo'lib keladi.
+    ///
+    /// Qoralama darhol saqlanmaydi: yangi o'yinchida "Yaratish", tahrirlashda "Saqlash" bosilganda
+    /// <see cref="Commit"/> uni shu kompyuterga yozadi (FaceStore). "Bekor qilish" <see cref="Revert"/> bilan
+    /// saqlangan yuzni qaytaradi.
     /// </summary>
     public class FaceCapture : MonoBehaviour
     {
-        [Header("Modellar (Assets/CraDev/Face/Models)")]
-        [SerializeField] ModelAsset detectorModel;
-        [SerializeField] ModelAsset landmarkModel;
         [SerializeField] AvatarViewer viewer;
+        [SerializeField] FaceScanView scanner;
 
         [Header("Forma")]
         [SerializeField] Button takeButton;
@@ -27,230 +28,193 @@ namespace CraDev.CharacterCreation
         [SerializeField] Image statusIcon;
         [SerializeField] Text statusText;
 
-        [Header("Kamera oynasi")]
-        [SerializeField] GameObject modal;
-        [SerializeField] RawImage preview;
-        [SerializeField] AspectRatioFitter previewFitter;
-        [SerializeField] Button captureButton;
-        [SerializeField] Button cancelButton;
-        [SerializeField] Text modalStatus;
-
         [Header("Ikonkalar")]
         [SerializeField] Sprite checkSprite;
         [SerializeField] Sprite alertSprite;
-        [SerializeField] Sprite spinnerSprite;
-
-        static string HintDefault => Loc.T("face.hint");
 
         static readonly Color Ok = new Color32(34, 197, 94, 255);
         static readonly Color Bad = new Color32(240, 82, 82, 255);
         static readonly Color Muted = new Color32(142, 147, 154, 255);
 
-        FaceTracker tracker;
-        WebCamTexture webcam;
-        FaceData face;
-        bool busy;
+        FaceData saved;  // FaceStore'dagi yuz
+        FaceData draft;  // hozir qahramonda (saqlanmagan bo'lishi mumkin)
         bool locked;
+        string error;
 
         void Start()
         {
+            if (scanner == null)
+            {
+                // Eski sahna (builder yangi skaner oynasini hali qurmagan): yuz tugmalari o'chiriladi
+                Debug.LogWarning("[CraDev] FaceCapture: skaner oynasi yo'q. Sahnalarni qayta yarating (CraDev > Sahnalarni yaratish).");
+                takeButton.gameObject.SetActive(false);
+                uploadButton.gameObject.SetActive(false);
+                removeButton.gameObject.SetActive(false);
+                enabled = false;
+                return;
+            }
             takeButton.onClick.AddListener(OpenCamera);
             uploadButton.onClick.AddListener(Upload);
             removeButton.onClick.AddListener(Remove);
-            captureButton.onClick.AddListener(Capture);
-            cancelButton.onClick.AddListener(CloseCamera);
             uploadButton.gameObject.SetActive(FacePhoto.CanPickFile);
-            modal.SetActive(false);
+            scanner.Preview += face =>
+            {
+                viewer.SetFace(face ?? draft);
+                if (face != null)
+                    viewer.FocusFace();
+            };
+            scanner.Used += SetDraft;
+            scanner.Closed += () => { UpdateButtons(); ShowStatus(); };
 
-            var saved = FaceStore.Load();
-            if (saved != null)
-                SetFace(saved, focus: false, save: false);
-            else
-                ShowFace(null);
-            SetStatus(saved != null ? Loc.T("face.on_avatar") : HintDefault, saved != null ? Ok : Muted, saved != null ? checkSprite : null);
+            saved = draft = FaceStore.Load();
+            viewer.SetFace(draft);
+            ShowFace(draft);
+            ShowStatus();
+            UpdateButtons();
         }
 
-        void Update()
-        {
-            if (busy && statusIcon.enabled && statusIcon.sprite == spinnerSprite)
-                statusIcon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -Time.unscaledTime * 450f);
+        void OnEnable() => Loc.Changed += ShowStatus;
 
-            // Kamera kadri kelguncha o'lchami noma'lum: kelgach oynani unga moslaymiz
-            if (webcam != null && webcam.width > 16 && previewFitter != null)
-                previewFitter.aspectRatio = (float)webcam.width / webcam.height;
-        }
-
-        void OnEnable() => Loc.Changed += OnLanguageChanged;
-
-        void OnDisable() => Loc.Changed -= OnLanguageChanged;
-
-        void OnLanguageChanged()
-        {
-            if (busy)
-                return;
-            SetStatus(face != null ? Loc.T("face.on_avatar") : HintDefault, face != null ? Ok : Muted, face != null ? checkSprite : null);
-        }
+        void OnDisable() => Loc.Changed -= ShowStatus;
 
         void OnDestroy()
         {
-            StopCamera();
-            tracker?.Dispose();
+            // Saqlanmagan qoralama rasmi bo'shatiladi
+            if (draft != null && draft != saved && draft.Photo != null)
+                Destroy(draft.Photo);
         }
 
         /// <summary>Profil yaratilgach yuzni o'zgartirib bo'lmaydi.</summary>
         public void SetLocked(bool value)
         {
             locked = value;
+            if (locked && CameraOpen)
+                scanner.Close();
             UpdateButtons();
         }
 
-        public bool HasFace => face != null;
+        public bool HasFace => draft != null;
 
-        public bool CameraOpen => modal != null && modal.activeSelf;
+        /// <summary>Qoralama yuz saqlangan yuzdan farq qiladimi (yangi, boshqa yoki olib tashlangan).</summary>
+        public bool Dirty => draft != saved;
 
-        // ------------------------------------------------------------------ Kamera
+        public bool CameraOpen => scanner != null && scanner.IsOpen;
+
+        /// <summary>Skaner yuzni aniqlayapti.</summary>
+        public bool Busy => scanner != null && scanner.Busy;
+
+        /// <summary>Skaner ochiq yoki hozirgina yopildi: Enter/Esc orqadagi formaga o'tmasin.</summary>
+        public bool BlocksKeys => scanner != null && scanner.BlocksKeys;
+
+        public void CloseCamera() { if (scanner != null) scanner.Close(); }
+
+        // ------------------------------------------------------------------ Qoralama
+
+        /// <summary>Qoralamani shu kompyuterga yozadi. Xato bo'lsa false (qoralama saqlanmay qoladi).</summary>
+        public bool Commit()
+        {
+            if (!Dirty)
+                return true;
+            try
+            {
+                if (draft != null)
+                    FaceStore.Save(draft);
+                else
+                    FaceStore.Delete();
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogWarning("[CraDev] Yuzni saqlab bo'lmadi: " + e.Message);
+                error = Loc.T("face.save_failed");
+                ShowStatus();
+                return false;
+            }
+            if (saved != null && saved != draft && saved.Photo != null)
+                Destroy(saved.Photo);
+            saved = draft;
+            error = null;
+            ShowStatus();
+            return true;
+        }
+
+        /// <summary>Bekor qilish: saqlangan yuz qahramonga qaytadi, qoralama rasmi bo'shatiladi.</summary>
+        public void Revert()
+        {
+            if (CameraOpen)
+                scanner.Close();
+            if (!Dirty)
+                return;
+            var previous = draft;
+            draft = saved;
+            viewer.SetFace(draft);
+            if (previous != null && previous.Photo != null)
+                Destroy(previous.Photo);
+            ShowFace(draft);
+            ShowStatus();
+            UpdateButtons();
+        }
+
+        void SetDraft(FaceData face)
+        {
+            var previous = draft;
+            draft = face;
+            error = null;
+            viewer.SetFace(draft);
+            if (draft != null)
+                viewer.FocusFace();
+            if (previous != null && previous != face && previous != saved && previous.Photo != null)
+                Destroy(previous.Photo);
+            ShowFace(draft);
+            ShowStatus();
+            UpdateButtons();
+        }
+
+        // ------------------------------------------------------------------ Tugmalar
 
         void OpenCamera()
         {
-            if (busy || locked)
+            Deselect();
+            if (locked || CameraOpen)
                 return;
-            if (WebCamTexture.devices.Length == 0)
-            {
-                SetStatus(Loc.T("face.no_camera"), Bad, alertSprite);
-                return;
-            }
-            // Old kamera bo'lsa o'sha (noutbuklarda odatda bitta)
-            string device = WebCamTexture.devices[0].name;
-            foreach (var d in WebCamTexture.devices)
-                if (d.isFrontFacing) { device = d.name; break; }
-
-            webcam = new WebCamTexture(device, 1280, 720, 30);
-            webcam.Play();
-            preview.texture = webcam;
-            preview.uvRect = new Rect(1f, 0f, -1f, 1f); // ko'zgudagidek: o'yinchi o'zini tabiiy ko'radi
-            modalStatus.text = Loc.T("face.modal_hint");
-            modalStatus.color = Muted;
-            captureButton.interactable = true;
-            modal.SetActive(true);
+            error = null;
+            scanner.OpenCamera();
+            UpdateButtons();
         }
-
-        void Capture()
-        {
-            if (webcam == null || !webcam.isPlaying || webcam.width <= 16)
-            {
-                modalStatus.text = Loc.T("face.camera_starting");
-                return;
-            }
-            var photo = FacePhoto.Capture(webcam);
-            CloseCamera();
-            StartCoroutine(Process(photo));
-        }
-
-        public void CloseCamera()
-        {
-            StopCamera();
-            modal.SetActive(false);
-        }
-
-        void StopCamera()
-        {
-            if (webcam == null)
-                return;
-            webcam.Stop();
-            Destroy(webcam);
-            webcam = null;
-            if (preview != null)
-                preview.texture = null;
-        }
-
-        // ------------------------------------------------------------------ Rasm yuklash
 
         void Upload()
         {
-            if (busy || locked)
+            Deselect();
+            if (locked || CameraOpen)
                 return;
             string path = FacePhoto.PickFile();
             if (string.IsNullOrEmpty(path))
                 return;
             Texture2D photo = null;
-            try
-            {
-                photo = FacePhoto.Load(path);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogWarning("[CraDev] Rasmni o'qib bo'lmadi: " + e.Message);
-            }
+            try { photo = FacePhoto.Load(path); }
+            catch (System.Exception e) { Debug.LogWarning("[CraDev] Rasmni o'qib bo'lmadi: " + e.Message); }
             if (photo == null)
             {
-                SetStatus(Loc.T("face.bad_file"), Bad, alertSprite);
+                error = Loc.T("face.bad_file");
+                ShowStatus();
                 return;
             }
-            StartCoroutine(Process(photo));
-        }
-
-        // ------------------------------------------------------------------ Yuzni topish va qo'yish
-
-        IEnumerator Process(Texture2D photo)
-        {
-            busy = true;
-            UpdateButtons();
-            SetStatus(Loc.T("face.finding"), Muted, spinnerSprite);
-            yield return null; // yozuv ekranga chiqib olsin
-
-            bool found = false;
-            Vector2[] landmarks = null;
-            string error = null;
-            try
-            {
-                tracker ??= new FaceTracker(detectorModel, landmarkModel);
-                found = tracker.Track(photo.GetPixels32(), photo.width, photo.height, out landmarks, out error);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError("[CraDev] Yuzni aniqlashda xato: " + e);
-                error = Loc.T("face.error");
-            }
-
-            busy = false;
-            statusIcon.rectTransform.localRotation = Quaternion.identity;
-            if (!found)
-            {
-                Destroy(photo);
-                SetStatus(error, Bad, alertSprite);
-                UpdateButtons();
-                yield break;
-            }
-
-            SetFace(new FaceData { Photo = photo, Landmarks = landmarks }, focus: true, save: true);
-            SetStatus(Loc.T("face.added"), Ok, checkSprite);
-            Debug.Log("[CraDev] Yuz topildi va avatarga qo'yildi.");
-        }
-
-        void SetFace(FaceData data, bool focus, bool save)
-        {
-            if (face != null && face != data && face.Photo != null)
-                Destroy(face.Photo);
-            face = data;
-            viewer.SetFace(face);
-            if (focus)
-                viewer.FocusFace();
-            if (save)
-            {
-                try { FaceStore.Save(face); }
-                catch (System.Exception e) { Debug.LogWarning("[CraDev] Yuzni saqlab bo'lmadi: " + e.Message); }
-            }
-            ShowFace(face);
+            error = null;
+            scanner.OpenPhoto(photo);
             UpdateButtons();
         }
 
         void Remove()
         {
-            if (busy || locked || face == null)
+            Deselect();
+            if (locked || CameraOpen || draft == null)
                 return;
-            SetFace(null, focus: false, save: false);
-            FaceStore.Delete();
-            SetStatus(HintDefault, Muted, null);
+            SetDraft(null);
+        }
+
+        static void Deselect()
+        {
+            if (EventSystem.current != null)
+                EventSystem.current.SetSelectedGameObject(null);
         }
 
         // ------------------------------------------------------------------ Ko'rinish
@@ -258,7 +222,7 @@ namespace CraDev.CharacterCreation
         /// <summary>Kichik rasm: yuz joylashgan kvadrat qismi.</summary>
         void ShowFace(FaceData data)
         {
-            bool has = data != null;
+            bool has = data != null && data.Photo != null;
             thumb.enabled = has;
             thumbIcon.enabled = !has;
             removeButton.gameObject.SetActive(has);
@@ -280,9 +244,21 @@ namespace CraDev.CharacterCreation
             thumb.uvRect = new Rect(center.x - side / 2f / w, center.y - side / 2f / h, side / w, side / h);
         }
 
+        void ShowStatus()
+        {
+            if (error != null)
+                SetStatus(error, Bad, alertSprite);
+            else if (draft == null)
+                SetStatus(Loc.T(saved != null ? "studio.face_removed" : "face.hint"), Muted, null);
+            else if (Dirty)
+                SetStatus(Loc.T("face.draft"), Ok, checkSprite);
+            else
+                SetStatus(Loc.T("face.on_avatar"), Ok, checkSprite);
+        }
+
         void UpdateButtons()
         {
-            bool enabled = !busy && !locked;
+            bool enabled = !locked && !CameraOpen;
             takeButton.interactable = enabled;
             uploadButton.interactable = enabled;
             removeButton.interactable = enabled;
@@ -298,6 +274,7 @@ namespace CraDev.CharacterCreation
                 statusIcon.sprite = icon;
                 statusIcon.color = color;
             }
+            statusIcon.rectTransform.localRotation = Quaternion.identity;
             var rect = statusText.rectTransform;
             rect.anchoredPosition = new Vector2(icon != null ? 24f : 0f, rect.anchoredPosition.y);
         }

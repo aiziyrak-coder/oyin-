@@ -115,7 +115,13 @@ namespace CraDev.MainMenu
                     occupants.Add(member.seat,o);
                 }
                 o.member=member;
-                if(o.viewer.CurrentOption.id!=member.avatarId)o.viewer.SetAvatar(lobby.FindAvatar(member.avatarId));
+                // O'zimiz: avatar mahalliy profildan (saqlangandan keyin eski heartbeat javobi qaytarib yubormaydi);
+                // avatar studiyasi ochiq bo'lsa qoralama avatarga tegilmaydi va qahramonni aylantirish mumkin.
+                bool self=o.viewer==lobby.Viewer,studio=self&&lobby.AvatarStudioOpen;
+                string avatarId=self?PlayerProfile.AvatarId:member.avatarId;
+                var wanted=lobby.FindAvatar(avatarId);
+                if(!studio&&wanted!=null&&o.viewer.CurrentOption?.id!=avatarId)o.viewer.SetAvatar(wanted);
+                if(self)o.viewer.LockRotation=!studio;
                 if(member.nickname!=PlayerProfile.Nickname)o.viewer.SetOutfit(Outfit.FromJson(member.outfit));
                 var root=o.viewer.ModelRoot;
                 var position=positions[member.seat];
@@ -131,10 +137,18 @@ namespace CraDev.MainMenu
             foreach(int key in remove)occupants.Remove(key);
             leave.gameObject.SetActive(occupants.Count>1||!state.host);
         }
+        /// <summary>Oxirgi holatni qayta qo'llaydi (avatar studiyasi yopilganda: joy, burilish, avatar).</summary>
+        public void Refresh(){if(State!=null&&partyRoot!=null)Apply(State);}
+        // Replika yo'q qilinganda AvatarViewer.OnDestroy material nusxalari va teksturalarini o'zi bo'shatadi.
         void Remove(Occupant o){if(o.viewer!=lobby.Viewer)Destroy(o.viewer.gameObject);Destroy(o.label.gameObject);}
         void LateUpdate()
         {
             if(overlay==null)return;
+            // Avatar studiyasida faqat o'yinchining o'z qahramoni ko'rinadi (party signali davom etadi)
+            bool studio=lobby.AvatarStudioOpen;
+            if(partyRoot.gameObject.activeSelf==studio)partyRoot.gameObject.SetActive(!studio);
+            if(overlay.gameObject.activeSelf==studio)overlay.gameObject.SetActive(!studio);
+            if(studio){if(leave.gameObject.activeSelf)leave.gameObject.SetActive(false);return;}
             foreach(var pair in occupants)
             {
                 var o=pair.Value;
