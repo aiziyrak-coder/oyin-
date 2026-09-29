@@ -1,5 +1,6 @@
 import { randomInt } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
+import { createGroupStore } from './groups.js';
 
 /** Oxirgi heartbeat'dan keyin o'yinchi shuncha vaqt onlayn hisoblanadi. */
 export const ONLINE_WINDOW_MS = 90_000;
@@ -34,7 +35,7 @@ const PROFILE_COLUMNS = `
 
 // Boshqa o'yinchining ommaviy ko'rinishi. Onlayn: :cutoff dan keyin ko'ringan va buni yashirmagan.
 const SUMMARY_COLUMNS = `
-  p.nickname, p.avatar_id AS avatarId, p.gender,
+  p.nickname, p.public_id AS publicId, p.avatar_id AS avatarId, p.gender,
   COALESCE(p.show_online = 1 AND p.last_seen >= :cutoff, 0) AS online`;
 
 // Ommaviy ko'rinish va chaqiruvchiga (:me) nisbatan do'stlik holati.
@@ -157,14 +158,8 @@ export function openDatabase(path) {
     ORDER BY nickname_key
     LIMIT :limit`);
   const summaryByKey = db.prepare(`${SUMMARY_SELECT} WHERE p.nickname_key = :key AND p.id <> :me`);
-  // Chaqiruvchi bilan hech qanday munosabati yo'qlar: players_visible_last_seen indeksi bo'ylab yuradi
-  const suggested = db.prepare(`
-    SELECT ${SUMMARY_COLUMNS}, 'none' AS friendship FROM players p
-    WHERE p.id <> :me
-      AND NOT EXISTS (SELECT 1 FROM friendships WHERE requester_id = :me AND addressee_id = p.id)
-      AND NOT EXISTS (SELECT 1 FROM friendships WHERE requester_id = p.id AND addressee_id = :me)
-    ORDER BY ${VISIBLE_LAST_SEEN} DESC, created_at DESC
-    LIMIT :limit`);
+  // Ommaviy raqamli ID bo'yicha aniq qidiruv (chaqiruvchining o'zi chiqmaydi)
+  const summaryByPublicId = db.prepare(`${SUMMARY_SELECT} WHERE p.public_id = :publicId AND p.id <> :me`);
   const friendsOf = db.prepare(`${SUMMARY_SELECT}
     WHERE f.status = 'accepted'
     ORDER BY online DESC, p.nickname_key`);
@@ -205,7 +200,11 @@ export function openDatabase(path) {
   const cutoff = now => new Date(now.getTime() - ONLINE_WINDOW_MS).toISOString();
   const summaries = (statement, params) => statement.all(params).map(toSummary);
 
+  const groups = createGroupStore(db, cutoff);
+
   return {
+    /** Guruhlar jadvallari va so'rovlari (groups.js). */
+    groups,
     /** Token xeshi bo'yicha o'yinchi profili (topilmasa undefined). */
     findPlayerByTokenHash(tokenHash) {
       return toProfile(findByToken.get(tokenHash));
@@ -283,12 +282,10 @@ export function openDatabase(path) {
         .slice(0, limit)
         .map(toSummary);
     },
-    /**
-     * Chaqiruvchi bilan hech qanday aloqasi yo'q o'yinchilar: yaqinda ko'ringanlari birinchi, keyin yangilari.
-     * Onlayn holatini yashirganlar oxirgi marta qachon ko'ringanidan qat'i nazar "hech ko'rinmagan" qatorida.
-     */
-    suggestedPlayers(me, now, limit = 10) {
-      return summaries(suggested, { me, cutoff: cutoff(now), limit });
+    /** Ommaviy ID (6 xonali) bo'yicha: [summary] yoki [] (tavsiya etilganlar ro'yxati olib tashlangan). */
+    findByPublicId(me, publicId, now) {
+      const row = summaryByPublicId.get({ me, publicId, cutoff: cutoff(now) });
+      return row ? [toSummary(row)] : [];
     },
     /**
      * { friends, incoming, outgoing }: har biri avval onlaynlar, keyin nickname bo'yicha.
@@ -371,6 +368,7 @@ function toProfile(row) {
 function toSummary(row) {
   return {
     nickname: row.nickname,
+    publicId: row.publicId,
     avatarId: row.avatarId,
     gender: row.gender,
     online: row.online === 1,

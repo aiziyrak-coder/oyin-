@@ -89,6 +89,7 @@ namespace CraDev.MainMenu
             });
             Apply(new PartyState{host=true,members=new[]{new PartyMember{nickname=PlayerProfile.Nickname,avatarId=PlayerProfile.AvatarId,outfit=PlayerProfile.Outfit,seat=0,pingMs=-1}}});
             heartbeat=0;
+            StartCoroutine(PingLoop());
             while(true)
             {
                 if(queue.Count>0)
@@ -107,6 +108,35 @@ namespace CraDev.MainMenu
                 yield return null;
             }
         }
+        // Ping ilgari party heartbeat'ining vaqti edi: u navbatdagi boshqa so'rovlar, bazadagi ish, JSON va
+        // ovoz so'rovlari bilan birga o'lchanardi va sakrab turardi. Endi alohida, bazaga tegmaydigan GET /api/ping
+        // har 2 soniyada o'lchanadi; birinchi natija (TLS ulanish ochilishi) tashlanadi, ko'rsatiladigani oxirgi
+        // 7 ta o'lchovning medianasi (bitta sekin javob raqamni buzmaydi).
+        const int PingWindow=7;
+        readonly List<int> pingSamples=new List<int>();
+        IEnumerator PingLoop()
+        {
+            bool warm=false;
+            var wait=new WaitForSecondsRealtime(2);
+            while(true)
+            {
+                bool ok=false;int ms=0;
+                yield return lobby.Api.Ping((success,elapsed)=>{ok=success;ms=elapsed;});
+                if(ok)
+                {
+                    if(warm)
+                    {
+                        pingSamples.Add(ms);if(pingSamples.Count>PingWindow)pingSamples.RemoveAt(0);
+                        var sorted=new List<int>(pingSamples);sorted.Sort();ping=sorted[sorted.Count/2];
+                    }
+                    warm=true;
+                }
+                else{warm=false;pingSamples.Clear();ping=-1;}
+                yield return wait;
+            }
+        }
+        /// <summary>O'zimizning ping (ms, median); o'lchanmagan bo'lsa -1.</summary>
+        public int PingMs=>ping;
         /// <summary>Do'stni lobbyga chaqirish: navbatga qo'yiladi, hozirgi heartbeat tugashi bilan yuboriladi.</summary>
         public void Invite(string nickname)
         {
@@ -159,7 +189,6 @@ namespace CraDev.MainMenu
         }
         IEnumerator Command(string action,PartyRequest request)
         {
-            float start=Time.realtimeSinceStartup;
             ApiResult<PartyState> result=default;
             yield return lobby.Api.Party(PlayerProfile.Token,action,request,r=>result=r);
             if(!result.Ok)
@@ -168,8 +197,6 @@ namespace CraDev.MainMenu
                 yield break;
             }
             lastContact=Time.realtimeSinceStartup;
-            int measured=Mathf.Clamp(Mathf.RoundToInt((lastContact-start)*1000),0,10000);
-            ping=ping<0?measured:Mathf.RoundToInt(Mathf.Lerp(ping,measured,.4f));
             Apply(result.Data);
             // Guruh tarkibi o'zgarsa do'stlar paneli "Lobbyingizda" belgisini va taklif tugmalarini yangilaydi
             string members=string.Join("|",System.Array.ConvertAll(result.Data.members??System.Array.Empty<PartyMember>(),m=>m.nickname));

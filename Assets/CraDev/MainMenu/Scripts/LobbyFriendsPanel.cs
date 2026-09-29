@@ -30,6 +30,17 @@ namespace CraDev.MainMenu
         [SerializeField] Text bellBadge;
         [Tooltip("Ikonkali tugmalar uchun umumiy suzuvchi izoh matni (LobbyIconHint).")]
         [SerializeField] Text tooltip;
+        [Header("Guruhlar va o'z ID")]
+        [Tooltip("Guruhlar bo'limi (builder shu panelga qo'shadi). Bo'lmasa bo'lim tugmasi yashiriladi.")]
+        [SerializeField] LobbyGroupsPanel groups;
+        [SerializeField] Button groupsTab;
+        [SerializeField] Text groupsCount;
+        [Tooltip("Guruhlar rejimida do'stlar asboblari o'rniga ko'rinadigan qator.")]
+        [SerializeField] GameObject groupTools;
+        [Tooltip("Pastki qatordagi o'z raqamli ID (bosilsa nusxa olinadi).")]
+        [SerializeField] Text footerId;
+        [SerializeField] Button copyId;
+        LocalizedText placeholderText;
         MainMenuScreen lobby;
         FriendsResponse connections;
         PlayerSummary[] visible=Array.Empty<PlayerSummary>();
@@ -47,6 +58,8 @@ namespace CraDev.MainMenu
         readonly HashSet<string> busy=new HashSet<string>();
         static readonly string[] ToolModes={"find","online","remove","requests","refresh"};
         static readonly string[] FilterModes={"friends","online","offline"};
+        // Nickname qidiruvi uchun eng kam belgi (Server/src/app.js MIN_NICKNAME_QUERY); 6 xonali ID aniq qidiriladi
+        const int MinQuery=2;
         static readonly Color Fill=new Color32(41,40,40,248);
         static readonly Color Accent=LobbyPalette.Accent;
         static readonly Color InviteFill=new Color32(66,59,43,255);
@@ -75,10 +88,29 @@ namespace CraDev.MainMenu
                     string action=FilterModes[i];
                     if(filters[i].TryGetComponent(out Button filter)&&!filters[i].TryGetComponent(out LobbyCommand _))filter.onClick.AddListener(()=>Toggle(action));
                 }
+            PrepareSearch();
             search.onValueChanged.AddListener(_=>{
                 if(debounce!=null)StopCoroutine(debounce);
                 debounce=StartCoroutine(SearchLater());
             });
+            // Enter: kutmasdan darhol qidiradi va maydonda qoladi (onEndEdit fokus yo'qolganda ham keladi)
+            search.onEndEdit.AddListener(_=>{
+                if(!Anim.SubmitPressed())return;
+                StopDebounce();
+                if(mode!="groups")mode="find";
+                if(mode=="groups")groups.Search(search.text);else Refresh(true);
+                search.ActivateInputField();
+            });
+            if(groups!=null)
+            {
+                groups.Begin(lobby,this);
+                groups.CountsChanged+=UpdateGroupCount;
+                if(groupsTab!=null)groupsTab.onClick.AddListener(()=>Toggle("groups"));
+            }
+            else if(groupsTab!=null)groupsTab.gameObject.SetActive(false);
+            if(groupTools!=null)groupTools.SetActive(false);
+            if(footerId!=null)footerId.text=PlayerProfile.PublicId>0?Loc.F("social.my_id",PlayerProfile.PublicId.ToString("D6")):"";
+            if(copyId!=null)copyId.onClick.AddListener(CopyId);
             BindBell();
             notifyShown=LobbyPrefs.NotifyFriendRequests;UpdateBadges();
             Loc.Changed+=LanguageChanged;
@@ -87,10 +119,63 @@ namespace CraDev.MainMenu
         void OnDestroy(){Loc.Changed-=LanguageChanged;}
         void LanguageChanged()
         {
+            if(footerId!=null)footerId.text=PlayerProfile.PublicId>0?Loc.F("social.my_id",PlayerProfile.PublicId.ToString("D6")):"";
+            if(mode=="groups"){groups.Redraw();return;}
             if(notice!=null)ShowNotice(notice);else{fingerprint=null;Draw();}
             UpdateCount();
         }
-        IEnumerator SearchLater(){yield return new WaitForSecondsRealtime(.3f);mode="find";Refresh(true);debounce=null;}
+        IEnumerator SearchLater()
+        {
+            yield return new WaitForSecondsRealtime(.3f);debounce=null;
+            if(mode=="groups"){groups.Search(search.text);yield break;}
+            mode="find";Refresh(true);
+        }
+
+        // Qidiruv maydoni: yozilgan matn ko'rinsin (oq karetka, rich text yo'q - "<" belgisi matnni buzmaydi),
+        // matn va placeholder bosishni ushlamasin, maydon panel CanvasGroup'i ostida doim faol bo'lsin.
+        void PrepareSearch()
+        {
+            search.interactable=true;
+            if(search.targetGraphic==null)search.targetGraphic=search.GetComponent<Image>();
+            if(search.textComponent!=null){search.textComponent.supportRichText=false;search.textComponent.raycastTarget=false;}
+            if(search.placeholder!=null){search.placeholder.raycastTarget=false;placeholderText=search.placeholder.GetComponent<LocalizedText>();}
+            search.lineType=InputField.LineType.SingleLine;
+            search.characterLimit=Mathf.Max(search.characterLimit,40);
+            search.customCaretColor=true;search.caretColor=Color.white;search.caretWidth=2;
+            search.selectionColor=new Color(.45f,.62f,1f,.45f);
+        }
+        /// <summary>Qidiruv maydoniga o'tadi va placeholder'da izoh ko'rsatadi (masalan "kodni yoki havolani qo'ying").</summary>
+        public void FocusSearch(string placeholder)
+        {
+            if(placeholder!=null&&search.placeholder is Text text){if(placeholderText!=null)placeholderText.enabled=false;text.text=placeholder;}
+            search.Select();search.ActivateInputField();
+        }
+        /// <summary>Qidiruv matnini tozalaydi (qidiruvni qayta ishga tushirmaydi).</summary>
+        public void ClearSearch(){StopDebounce();search.SetTextWithoutNotify("");}
+        /// <summary>Esc: guruh sahifasi/formasidan ro'yxatga qaytish. true - Esc shu yerda ishlatildi.</summary>
+        public bool Back()=>mode=="groups"&&groups!=null&&groups.Back();
+        void CopyId()
+        {
+            if(PlayerProfile.PublicId<=0)return;
+            string id=PlayerProfile.PublicId.ToString("D6");
+            GUIUtility.systemCopyBuffer=id;
+            lobby.Toast(Loc.F("social.id_copied",id));
+        }
+        void UpdateGroupCount()
+        {
+            if(groupsCount==null||groups==null)return;
+            groupsCount.text=groups.MineCount.ToString();
+            groupsCount.alignment=TextAnchor.MiddleCenter;
+        }
+        // Bo'lim almashganda: asboblar qatori, placeholder va guruhlar bo'limining faolligi
+        void ApplySection()
+        {
+            bool grouped=mode=="groups";
+            for(int i=0;i<tools.Length;i++)if(tools[i]!=null)tools[i].gameObject.SetActive(!grouped);
+            if(groupTools!=null)groupTools.SetActive(grouped);
+            if(placeholderText!=null){placeholderText.enabled=true;placeholderText.Key=grouped?"groups.search":"friends.search";}
+            if(groupsTab!=null&&groupsTab.TryGetComponent(out ReferenceSurface tab))tab.Style=grouped?4:5;
+        }
         IEnumerator Poll(){while(true){yield return new WaitForSecondsRealtime(30);Refresh(false);}}
         void Update()
         {
@@ -108,12 +193,14 @@ namespace CraDev.MainMenu
             if(drawer!=null)drawer.SetCollapsed(false);
             StopDebounce();
             if(action=="refresh"){Refresh(true);return;}
+            if(action=="groups"&&groups==null)action="friends";
             SetMode(action);
         }
         // Panel ichidagi asbob yoki filtr: ikkinchi bosish do'stlar ro'yxatiga qaytaradi.
         void Toggle(string action)
         {
             if(lobby==null)return;
+            if(action=="groups"&&groups==null)return;
             StopDebounce();
             if(action=="refresh"){Refresh(true);return;}
             SetMode(mode==action?"friends":action);
@@ -121,8 +208,14 @@ namespace CraDev.MainMenu
         void StopDebounce(){if(debounce!=null){StopCoroutine(debounce);debounce=null;}}
         void SetMode(string next)
         {
+            bool wasGroups=mode=="groups";
             mode=next;
-            if(mode!="find")search.SetTextWithoutNotify("");
+            // Guruhlar bo'limi qatorlarni o'zi chizgan bo'lishi mumkin: do'stlar ro'yxati albatta qayta chiziladi
+            fingerprint=null;
+            // Do'st qidiruvi va guruh qidiruvi bir maydonda: bo'lim almashsa matn tozalanadi
+            if(mode!="find"||wasGroups)search.SetTextWithoutNotify("");
+            ApplySection();
+            if(groups!=null)groups.SetActive(mode=="groups",search.text.Trim());
             if(mode=="find"){search.Select();search.ActivateInputField();}
             Refresh(true);
         }
@@ -137,7 +230,7 @@ namespace CraDev.MainMenu
             if(filters!=null)
                 for(int i=0;i<filters.Length&&i<FilterModes.Length;i++)
                     if(filters[i].TryGetComponent(out ReferenceSurface filter))filter.Style=mode==FilterModes[i]?4:5;
-            if(connections==null)ShowNotice(()=>Loc.T("common.connecting"));
+            if(connections==null&&mode!="groups")ShowNotice(()=>Loc.T("common.connecting"));
             StartCoroutine(Load(request,user));
         }
         IEnumerator Load(int request,bool user)
@@ -159,14 +252,17 @@ namespace CraDev.MainMenu
                 // Oxirgi muvaffaqiyatli ro'yxat saqlanadi: bitta xato so'rov (tarmoq, 429) qatorlarni o'chirmaydi
                 bool network=friends.NetworkError;long status=friends.Status;
                 failure=()=>ErrorMessage(network,status,null);
-                if(user&&connections!=null&&mode!="find")lobby.Toast(failure());
+                if(user&&connections!=null&&mode!="find"&&mode!="groups")lobby.Toast(failure());
             }
+            // Guruhlar bo'limi o'z ro'yxatini o'zi chizadi (do'stlar ro'yxati faqat belgilar uchun yangilandi)
+            if(mode=="groups"){Loading=false;if(!user)groups.Refresh();yield break;}
             if(mode=="find")
             {
                 ApiResult<PlayerList> result=default;
                 string query=search.text.Trim();
-                if(query.Length==0)yield return lobby.Api.SuggestedPlayers(PlayerProfile.Token,r=>result=r);
-                else yield return lobby.Api.SearchPlayers(PlayerProfile.Token,query,r=>result=r);
+                // Hamma o'yinchilar ro'yxati yo'q: bo'sh yoki juda qisqa so'rovda faqat izoh (nickname kamida 2 harf yoki ID)
+                if(query.Length<MinQuery){Loading=false;visible=Array.Empty<PlayerSummary>();ShowNotice(()=>Loc.T("social.search_hint"));yield break;}
+                yield return lobby.Api.SearchPlayers(PlayerProfile.Token,query,r=>result=r);
                 if(request!=revision)yield break;
                 Loading=false;
                 if(!result.Ok)
@@ -271,6 +367,7 @@ namespace CraDev.MainMenu
         // Ro'yxat o'rnida xabar (ulanmoqda, oflayn, xato): til almashsa qayta yoziladi.
         void ShowNotice(Func<string> text)
         {
+            if(mode=="groups")return;
             notice=text;listShown=false;
             RenderMessage(text());
         }
@@ -281,9 +378,15 @@ namespace CraDev.MainMenu
             rows.sizeDelta=new Vector2(rows.sizeDelta.x,rows.parent.GetComponent<RectTransform>().rect.height);
         }
         /// <summary>Qatorlarni joriy ma'lumot bilan qayta chizadi (masalan, lobby guruhi tarkibi o'zgarganda).</summary>
-        public void Redraw(){if(lobby!=null&&listShown&&!Loading)Draw();}
+        public void Redraw()
+        {
+            if(lobby==null)return;
+            if(mode=="groups"){groups.Redraw();return;}
+            if(listShown&&!Loading)Draw();
+        }
         void Draw()
         {
+            if(mode=="groups")return;
             notice=null;listShown=true;
             var party=lobby.GetComponent<LobbyParty>();
             string next=mode+Loc.Current+string.Join("|",visible.Select(p=>p.nickname+":"+p.avatarId+":"+p.friendship+":"+p.online+":"+busy.Contains(p.nickname)+":"+(party!=null&&party.IsInviting(p.nickname))+":"+(party!=null&&party.InParty(p.nickname))));
@@ -311,7 +414,9 @@ namespace CraDev.MainMenu
                 name.name="FriendNickname";
                 name.resizeTextForBestFit=true;name.resizeTextMinSize=17;name.resizeTextMaxSize=22;
                 string state=player.friendship=="incoming"?"friends.status.incoming":player.friendship=="outgoing"?"friends.status.outgoing":member?"lobby.party.member":player.online?"common.online":"common.offline";
-                Label(row.transform,Loc.T(state),74,36,w-90,27,17).color=player.online||member?new Color32(53,211,139,255):new Color32(154,155,167,255);
+                // Qidiruv natijasida ommaviy ID ham ko'rinadi (bir xil nickname'ga o'xshashlarni ajratish uchun)
+                string stateText=Loc.T(state)+(mode=="find"&&player.publicId>0?" · ID "+player.publicId.ToString("D6"):"");
+                Label(row.transform,stateText,74,36,w-90,27,17).color=player.online||member?new Color32(53,211,139,255):new Color32(154,155,167,255);
                 bool idle=!busy.Contains(player.nickname);
                 if(player.friendship=="incoming")
                 {
@@ -377,6 +482,7 @@ namespace CraDev.MainMenu
                 case "self":return Loc.T("lobby.friend.self");
                 case "no_request":return Loc.T("lobby.friend.no_request");
                 case "invalid_query":return Loc.T("lobby.friend.invalid_query");
+                case "query_too_short":return Loc.T("social.search_hint");
                 case "too_many_requests":return Loc.T("lobby.error.rate_limited");
                 case "unauthorized":return Loc.T("party.error.unauthorized");
             }

@@ -58,7 +58,7 @@ namespace CraDev
             ["lobby.friend.not_found"] = ("Bunday o'yinchi topilmadi", "Player not found"),
             ["lobby.friend.self"] = ("O'zingizni do'st qilib qo'sha olmaysiz", "You can't add yourself"),
             ["lobby.friend.no_request"] = ("Bu so'rov endi mavjud emas", "This request is no longer available"),
-            ["lobby.friend.invalid_query"] = ("Qidiruv 1–24 belgidan iborat bo'lsin", "Search must be 1–24 characters"),
+            ["lobby.friend.invalid_query"] = ("Qidiruv 2–40 belgidan iborat bo'lsin", "Search must be 2–40 characters"),
             ["lobby.error.rate_limited"] = ("Juda ko'p urinish. Bir oz kutib, qayta urinib ko'ring.", "Too many attempts. Please wait a moment and try again."),
             ["lobby.error.server"] = ("Serverda xatolik. Birozdan keyin qayta urinib ko'ring.", "Server error. Please try again shortly."),
 

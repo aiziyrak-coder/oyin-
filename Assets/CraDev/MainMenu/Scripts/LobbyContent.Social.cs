@@ -124,11 +124,8 @@ namespace CraDev.MainMenu
                     if(!result.Ok){Text(Loc.T("common.server_error"),20,85,550,160);return;}
                     Lobby.SetIncoming(result.Data.incoming?.Length??0);
                     var rows=(result.Data.incoming??new PlayerSummary[0]).Concat(result.Data.friends??new PlayerSummary[0]).Concat(result.Data.outgoing??new PlayerSummary[0]).ToArray();
-                    float y=SocialRows(rows,80,true);
-                    StartCoroutine(Lobby.Api.SuggestedPlayers(PlayerProfile.Token,suggestions=>{
-                        if(request!=revision)return;
-                        if(suggestions.Ok) SocialRows(suggestions.Data.items,y+30,false);
-                    }));
+                    // Hamma o'yinchilar (tavsiyalar) ro'yxati olib tashlangan: faqat do'stlar va so'rovlar
+                    SocialRows(rows,80,true);
                 }));
             }
         }

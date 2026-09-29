@@ -7,6 +7,8 @@ const VOICE_KEEP_MS = 3000, VOICE_MAX_CHUNKS = 150, VOICE_MAX_BYTES = 12000;
 
 // Lobby vaqtinchalik: profil va do'stlik bazasiga yozmaydi.
 export function createParties(db) {
+  // Lobbyga faqat do'st yoki umumiy guruhdagi a'zo chaqiriladi (xato kodi eski mijozlar uchun 'friends_only')
+  const related = (a, b) => db.friendship(a, b) === 'friends' || (db.groups?.shareGroup(a, b) ?? false);
   const rooms = new Map(), membership = new Map(), invites = new Map();
   function leave(id) {
     const room = rooms.get(membership.get(id));
@@ -100,7 +102,7 @@ export function createParties(db) {
       const room = own(id, time);
       if (room.host !== id) return fail(403, 'host_only');
       const target = typeof body.nickname === 'string' && db.findPlayerByNicknameKey(nicknameKey(body.nickname.trim()));
-      if (!target || db.friendship(id, target.id) !== 'friends') return fail(403, 'friends_only');
+      if (!target || !related(id, target.id)) return fail(403, 'friends_only');
       if (room.members.has(target.id)) return fail(409, 'already_joined');
       const pending = [...invites.values()].filter(i => i.room === room.id);
       if (pending.some(i => i.target === target.id)) return [200, snapshot(id, time)];
@@ -114,7 +116,7 @@ export function createParties(db) {
       if (kind === 'accept') {
         const room = rooms.get(invite.room);
         if (!room || room.members.size >= 5) return fail(409, 'party_full');
-        if (db.friendship(invite.host, id) !== 'friends') return fail(403, 'friends_only');
+        if (!related(invite.host, id)) return fail(403, 'friends_only');
         const previous = rooms.get(membership.get(id));
         if (previous && previous.members.size > 1) return fail(409, 'leave_first');
         leave(id);

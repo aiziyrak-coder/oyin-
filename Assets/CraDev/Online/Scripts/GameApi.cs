@@ -135,7 +135,48 @@ namespace CraDev.Online
         public IEnumerator SearchPlayers(string token, string query, Action<ApiResult<PlayerList>> done) =>
             SendList("/api/players/search?q=" + UnityWebRequest.EscapeURL(query), token, done);
 
-        public IEnumerator SuggestedPlayers(string token, Action<ApiResult<PlayerList>> done) => SendList("/api/players/suggested", token, done);
+        /// <summary>
+        /// Ping: bazaga tegmaydigan GET /api/ping ning to'liq aylanish vaqti (ms). Boshqa so'rovlar bilan bitta navbatda
+        /// emas: chaqiruvchi uni alohida korutinada yuboradi. done(ok, ms): tarmoq xatosida ok = false.
+        /// Aniqlik kadr chastotasiga bog'liq (javob keyingi kadrda o'qiladi): 60 FPS da +0..16 ms.
+        /// </summary>
+        public IEnumerator Ping(Action<bool, int> done)
+        {
+            using (var request = UnityWebRequest.Get(baseUrl + "/api/ping?_=" + DateTime.UtcNow.Ticks))
+            {
+                request.timeout = 5;
+                request.SetRequestHeader("Cache-Control", "no-cache");
+                var watch = System.Diagnostics.Stopwatch.StartNew();
+                var operation = request.SendWebRequest();
+                // completed kadr oxirini kutmasdan chaqiriladi (asosiy oqimda, so'rov tugagani aniqlangan zahoti)
+                long elapsed = -1;
+                operation.completed += _ => elapsed = watch.ElapsedMilliseconds;
+                yield return operation;
+                if (elapsed < 0) elapsed = watch.ElapsedMilliseconds;
+                bool ok = request.result == UnityWebRequest.Result.Success && request.responseCode == 200;
+                done(ok, (int)Math.Min(elapsed, 10000));
+            }
+        }
+
+        // ---------------- Guruhlar (Server/src/groups.js)
+
+        public IEnumerator GroupsMine(string token, Action<ApiResult<GroupList>> done) => Send("GET", "/api/groups/mine", token, null, done);
+
+        public IEnumerator GroupSearch(string token, string query, Action<ApiResult<GroupList>> done) =>
+            SendList("/api/groups/search?q=" + UnityWebRequest.EscapeURL(query), token, done);
+
+        public IEnumerator GroupDetail(string token, string code, Action<ApiResult<GroupInfo>> done) =>
+            Send("GET", "/api/groups/detail?code=" + UnityWebRequest.EscapeURL(code ?? ""), token, null, done);
+
+        public IEnumerator GroupCreate(string token, GroupCreateRequest body, Action<ApiResult<GroupInfo>> done) =>
+            Send("POST", "/api/groups/create", token, JsonUtility.ToJson(body), done);
+
+        public IEnumerator GroupJoin(string token, string code, Action<ApiResult<GroupJoinResponse>> done) =>
+            Send("POST", "/api/groups/join", token, JsonUtility.ToJson(new GroupActionRequest { code = code }), done);
+
+        /// <summary>cancel, leave, approve, reject, remove, role, delete: javob - yangilangan guruh (leave/delete da { ok }).</summary>
+        public IEnumerator GroupAction(string token, string action, string code, string nickname, string role, Action<ApiResult<GroupInfo>> done) =>
+            Send("POST", "/api/groups/" + action, token, JsonUtility.ToJson(new GroupActionRequest { code = code, nickname = nickname, role = role }), done);
 
         public IEnumerator Friends(string token, Action<ApiResult<FriendsResponse>> done) => Send("GET", "/api/friends", token, null, done);
 
@@ -270,11 +311,68 @@ namespace CraDev.Online
     public class PlayerSummary
     {
         public string nickname;
+        public int publicId;
         public string avatarId;
         public string gender;
         public bool online;
         /// <summary>"none", "friends", "outgoing" (men so'rov yuborganman), "incoming" (menga so'rov kelgan).</summary>
         public string friendship;
+    }
+
+    [Serializable]
+    public class GroupMember
+    {
+        public string nickname, avatarId, gender, role, expiresAt;
+        /// <summary>"none", "friends", "outgoing", "incoming" yoki "self" (o'zim).</summary>
+        public string friendship;
+        public int publicId;
+        public bool online;
+    }
+
+    /// <summary>Guruh: ro'yxatda qisqa, batafsil ko'rinishda a'zolar (faqat a'zoga) va so'rovlar (faqat admin/egaga) bilan.</summary>
+    [Serializable]
+    public class GroupInfo
+    {
+        public string code, name, description, owner, createdAt, error;
+        /// <summary>"free", "private", "paid".</summary>
+        public string kind;
+        public int price;
+        public string currency, period;
+        /// <summary>"owner", "admin", "member" yoki "" (a'zo emas).</summary>
+        public string role;
+        public string expiresAt;
+        public int memberCount, onlineCount, pending;
+        public bool requested, ok;
+        public GroupMember[] members, requests;
+        public bool IsMember => !string.IsNullOrEmpty(role);
+        public bool IsAdmin => role == "owner" || role == "admin";
+    }
+
+    [Serializable]
+    public class GroupList
+    {
+        public GroupInfo[] groups, requests, items;
+        public string error;
+    }
+
+    [Serializable]
+    public class GroupJoinResponse
+    {
+        public string status, error;
+        public GroupInfo group;
+    }
+
+    [Serializable]
+    public class GroupCreateRequest
+    {
+        public string name, description, kind, currency = "UZS", period = "month";
+        public int price;
+    }
+
+    [Serializable]
+    class GroupActionRequest
+    {
+        public string code, nickname, role;
     }
 
     [Serializable]

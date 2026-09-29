@@ -1,5 +1,28 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI — PING, QIDIRUV, ID VA GURUHLAR (2026-09-29)
+
+Unity'siz yozilgan (C# tekshiruvi OK, server testlari 80/80). **Unity'da hali sinalmagan:** `tools\lobby.ps1 -Build`.
+
+- **Ping** (`LobbyParty.PingLoop`, `GameApi.Ping`): ilgari party heartbeat'ining vaqti edi (navbatdagi so'rovlar, baza,
+  JSON bilan birga, Lerp bilan). Endi bazaga tegmaydigan `GET /api/ping` har 2 s alohida korutinada, Stopwatch bilan;
+  birinchi o'lchov (TLS ochilishi) tashlanadi, ko'rsatilgani oxirgi 7 tasining medianasi. Cloudflare tunnel orqali
+  ping kamida mijoz→Cloudflare→tunnel→server yo'li (odatda 60-200 ms): bu tarmoqning o'zi, kod emas.
+- **Qidiruv**: hamma o'yinchilar ro'yxati (`/api/players/suggested`) olib tashlandi. 6 xonali ID (`123456`, `#123456`,
+  `ID 123456`) - aniq o'yinchi; nickname - kamida 2 belgi (`query_too_short`). Natijada ID ko'rinadi. Qidiruv maydoni:
+  Enter darhol qidiradi, oq karetka, rich text o'chiq, matn/placeholder bosishni ushlamaydi.
+- **O'z ID**: panel pastida nickname ostida "ID: 123456 · nusxa" (bosilsa nusxalanadi), Sozlamalarda ham bor.
+- **Guruhlar** (`Server/src/groups.js`, `MainMenu/Scripts/LobbyGroupsPanel.cs`, matnlar `Loc.Social.cs`): filtrlar
+  yonidagi "Guruhlar" tugmasi panelni guruh rejimiga o'tkazadi (asboblar: Yangi guruh, Kod bilan, Yangilash; qidiruv
+  maydoni guruh nomi/kodini qidiradi). Turlar: ochiq (darhol qo'shilish), yopiq (qidiruvda yo'q, kod/havola bilan
+  so'rov, admin tasdiqlaydi), pullik obuna (narx+valyuta+davr; **to'lov tizimi yo'q** - so'rovni ega to'lovni o'zi
+  tekshirib tasdiqlaydi, obuna davr oxirida tugaydi). Kod `NW-XXXXXX`, havola `newworld://group/XXXXXX`. Guruh
+  sahifasida a'zolar (onlayn holati), lobbyga taklif (endi do'st YOKI guruhdosh chaqiriladi), do'stlik so'rovi,
+  admin qilish, chiqarish, so'rovlar, chiqish/o'chirish. Cheklovlar: 50 ta o'z guruhi, 200 a'zolik, 500 a'zo, 20 admin,
+  50 kutilayotgan so'rov; `groups` 240/daq, `groupCreate` 10/daq. Esc guruh sahifasi/formadan ro'yxatga qaytaradi.
+- Cheklovlar: `newworld://` havolasi OS'da ro'yxatdan o'tmagan (nusxa olib qidiruvga qo'yiladi); guruh chat yo'q;
+  qidiruv maydoni xatosining aniq sababi Unity'siz takrorlanmadi - maydon ish vaqtida mustahkamlandi, sinab ko'ring.
+
 ## ENG YANGI — LOBBY OVOZLI CHATI, SALOM VA "LOBBYDAN CHIQISH" (2026-09-29)
 
 Unity'siz yozilgan (C# tekshiruvi OK, server testlari 73/73). **Unity'da hali sinalmagan:** `tools\lobby.ps1 -Build`.

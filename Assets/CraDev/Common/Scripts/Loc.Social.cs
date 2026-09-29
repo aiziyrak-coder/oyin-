@@ -1,0 +1,142 @@
+using System.Collections.Generic;
+
+namespace CraDev
+{
+    // Chap ijtimoiy panel: o'z raqamli ID, do'st qidiruvi izohlari va Guruhlar bo'limi (LobbyGroupsPanel) matnlari.
+    public static partial class Loc
+    {
+        static readonly Dictionary<string, (string uz, string en)> SocialTable = Register(new Dictionary<string, (string uz, string en)>
+        {
+            // ---------------- O'z ID va qidiruv
+            ["social.my_id"] = ("ID: {0}  ·  nusxa", "ID: {0}  ·  copy"),
+            ["social.copy_id"] = ("ID'ni nusxalash: do'stingiz shu raqam bilan topadi", "Copy your ID: friends can find you by it"),
+            ["social.id_copied"] = ("ID nusxalandi: {0}", "ID copied: {0}"),
+            ["social.search_hint"] = ("Nickname'ning kamida 2 harfini yoki 6 xonali ID'ni yozing", "Type at least 2 letters of a nickname or a 6-digit ID"),
+
+            // ---------------- Guruhlar: bo'lim va asboblar
+            ["groups.tab"] = ("Guruhlar", "Groups"),
+            ["groups.tab_hint"] = ("Guruhlar: yaratish, qo'shilish, a'zolar", "Groups: create, join, members"),
+            ["groups.search"] = ("Guruh nomi yoki kodi (NW-...)", "Group name or code (NW-...)"),
+            ["groups.new"] = ("Yangi guruh", "New group"),
+            ["groups.new_hint"] = ("Yangi guruh yaratish", "Create a new group"),
+            ["groups.by_code"] = ("Kod bilan", "Join by code"),
+            ["groups.join_hint"] = ("Guruh kodi yoki havolasini qo'ying", "Paste a group code or link"),
+            ["groups.search_short"] = ("Guruh nomining kamida 2 harfini yoki kodini yozing", "Type at least 2 letters of a group name or its code"),
+
+            // ---------------- Ro'yxat
+            ["groups.mine"] = ("Mening guruhlarim ({0})", "My groups ({0})"),
+            ["groups.sent"] = ("Yuborilgan so'rovlar ({0})", "Sent requests ({0})"),
+            ["groups.results"] = ("Topilgan guruhlar ({0})", "Groups found ({0})"),
+            ["groups.no_results"] = ("Guruh topilmadi. Yopiq guruhga faqat kodi yoki havolasi bilan kiriladi.", "No groups found. Private groups can only be found by their code or link."),
+            ["groups.empty"] = ("Hali guruhingiz yo'q. Yangi guruh yarating yoki kod bilan qo'shiling.", "You have no groups yet. Create one or join with a code."),
+            ["groups.members_count"] = ("{0} a'zo", "{0} members"),
+            ["groups.online_count"] = ("{0} onlayn", "{0} online"),
+            ["groups.requested"] = ("So'rov yuborilgan", "Requested"),
+            ["groups.pending_hint"] = ("Javob kutayotgan qo'shilish so'rovlari", "Pending join requests"),
+
+            // ---------------- Turlar, rollar, narx
+            ["groups.kind.free"] = ("Ochiq guruh", "Open group"),
+            ["groups.kind.private"] = ("Yopiq guruh", "Private group"),
+            ["groups.kind.paid"] = ("Pullik obuna", "Paid subscription"),
+            ["groups.kind_paid_short"] = ("Obuna: {0}", "Subscription: {0}"),
+            ["groups.kind_hint.free"] = ("Hamma topadi va darhol qo'shiladi.", "Anyone can find it and join instantly."),
+            ["groups.kind_hint.private"] = ("Qidiruvda ko'rinmaydi. Kod yoki havola orqali so'rov yuboriladi, siz tasdiqlaysiz.", "Hidden from search. People request to join with the code or link, you approve."),
+            ["groups.kind_hint.paid"] = ("Narx va davrni belgilaysiz. Obuna so'rovini to'lovni tekshirib, o'zingiz tasdiqlaysiz.", "You set the price and period. You approve each subscription request after checking the payment yourself."),
+            ["groups.role.owner"] = ("Egasi", "Owner"),
+            ["groups.role.admin"] = ("Admin", "Admin"),
+            ["groups.role.member"] = ("A'zo", "Member"),
+            ["groups.per.week"] = ("hafta", "week"),
+            ["groups.per.month"] = ("oy", "month"),
+            ["groups.per.year"] = ("yil", "year"),
+            ["groups.period.week"] = ("Haftalik", "Weekly"),
+            ["groups.period.month"] = ("Oylik", "Monthly"),
+            ["groups.period.year"] = ("Yillik", "Yearly"),
+
+            // ---------------- Guruh sahifasi
+            ["groups.back"] = ("‹  Guruhlar", "‹  Groups"),
+            ["groups.copy_code"] = ("Kodni nusxalash", "Copy code"),
+            ["groups.copy_link"] = ("Havolani nusxalash", "Copy link"),
+            ["groups.code_copied"] = ("Kod nusxalandi: {0}", "Code copied: {0}"),
+            ["groups.link_copied"] = ("Havola nusxalandi: {0}", "Link copied: {0}"),
+            ["groups.owner"] = ("Egasi: {0}", "Owner: {0}"),
+            ["groups.price_line"] = ("Obuna narxi: {0}", "Subscription price: {0}"),
+            ["groups.expires"] = ("Obunangiz {0} gacha amal qiladi", "Your subscription is valid until {0}"),
+            ["groups.until"] = ("{0} gacha", "until {0}"),
+            ["groups.paid_note"] = ("O'yinda to'lov qabul qilinmaydi. \"Obuna bo'lish\" so'rov yuboradi: to'lovni guruh egasi bilan kelishasiz, u tasdiqlagach a'zo bo'lasiz.", "No payments are taken in the game. \"Subscribe\" sends a request: arrange the payment with the group owner, you become a member once they approve."),
+            ["groups.private_note"] = ("Yopiq guruh: so'rovingizni admin tasdiqlashi kerak.", "Private group: an admin must approve your request."),
+            ["groups.join"] = ("Qo'shilish", "Join"),
+            ["groups.request_join"] = ("Qo'shilish so'rovi", "Request to join"),
+            ["groups.subscribe"] = ("Obuna bo'lish (so'rov)", "Subscribe (request)"),
+            ["groups.cancel_request"] = ("So'rovni bekor qilish", "Cancel request"),
+            ["groups.leave"] = ("Guruhdan chiqish", "Leave group"),
+            ["groups.leave_confirm"] = ("\"{0}\" guruhidan chiqasizmi?", "Leave \"{0}\"?"),
+            ["groups.delete"] = ("Guruhni o'chirish", "Delete group"),
+            ["groups.delete_confirm"] = ("\"{0}\" guruhi va uning barcha a'zoliklari o'chiriladi. Davom etasizmi?", "\"{0}\" and all its memberships will be deleted. Continue?"),
+            ["groups.confirm"] = ("Ha", "Yes"),
+            ["groups.members"] = ("A'zolar ({0})", "Members ({0})"),
+            ["groups.members_hidden"] = ("A'zolar ro'yxati faqat guruh a'zolariga ko'rinadi.", "Only group members can see the member list."),
+            ["groups.requests"] = ("Qo'shilish so'rovlari ({0})", "Join requests ({0})"),
+            ["groups.requests_paid"] = ("Obuna so'rovlari ({0}) - to'lovni tekshirib tasdiqlang", "Subscription requests ({0}) - approve after checking payment"),
+            ["groups.approve_hint"] = ("Tasdiqlash", "Approve"),
+            ["groups.reject_hint"] = ("Rad etish", "Decline"),
+            ["groups.remove_hint"] = ("Guruhdan chiqarish", "Remove from group"),
+            ["groups.remove_confirm"] = ("{0} \"{1}\" guruhidan chiqarilsinmi?", "Remove {0} from \"{1}\"?"),
+            ["groups.admin_hint"] = ("Admin qilish", "Make admin"),
+            ["groups.unadmin_hint"] = ("Adminlikdan olish", "Remove admin"),
+            ["groups.you"] = ("(siz)", "(you)"),
+
+            // ---------------- Yangi guruh formasi
+            ["groups.create_title"] = ("Yangi guruh", "New group"),
+            ["groups.field.name"] = ("Nomi", "Name"),
+            ["groups.field.name_hint"] = ("3-40 belgi", "3-40 characters"),
+            ["groups.field.description"] = ("Tavsif", "Description"),
+            ["groups.field.description_hint"] = ("Guruh nima haqida (ixtiyoriy, 300 belgigacha)", "What the group is about (optional, up to 300)"),
+            ["groups.field.kind"] = ("Turi", "Type"),
+            ["groups.field.price"] = ("Narxi va valyuta", "Price and currency"),
+            ["groups.field.price_hint"] = ("Masalan 50000", "e.g. 50000"),
+            ["groups.field.period"] = ("Obuna davri", "Billing period"),
+            ["groups.paid_owner_note"] = ("To'lov tizimi yo'q: obunachi bilan to'lovni o'zingiz kelishasiz va so'rovini tasdiqlaysiz.", "There is no payment system: you arrange payment with each subscriber yourself and approve their request."),
+            ["groups.create"] = ("Guruh yaratish", "Create group"),
+
+            // ---------------- Natija xabarlari
+            ["groups.created"] = ("Guruh yaratildi. Kodi: {0}", "Group created. Code: {0}"),
+            ["groups.joined"] = ("Guruhga qo'shildingiz", "You joined the group"),
+            ["groups.request_sent"] = ("So'rov yuborildi: admin tasdiqlashini kuting", "Request sent: wait for an admin to approve"),
+            ["groups.subscribe_sent"] = ("Obuna so'rovi yuborildi: to'lovni egasi bilan kelishing, u tasdiqlaydi", "Subscription request sent: arrange payment with the owner, who will approve it"),
+            ["groups.done.cancel"] = ("So'rov bekor qilindi", "Request cancelled"),
+            ["groups.done.leave"] = ("\"{0}\" guruhidan chiqdingiz", "You left \"{0}\""),
+            ["groups.done.delete"] = ("\"{0}\" guruhi o'chirildi", "\"{0}\" was deleted"),
+            ["groups.done.approve"] = ("{0} guruhga qabul qilindi", "{0} was approved"),
+            ["groups.done.reject"] = ("{0} so'rovi rad etildi", "{0}'s request was declined"),
+            ["groups.done.remove"] = ("{0} guruhdan chiqarildi", "{0} was removed"),
+            ["groups.done.role_admin"] = ("{0} endi admin", "{0} is now an admin"),
+            ["groups.done.role_member"] = ("{0} endi oddiy a'zo", "{0} is now a member"),
+
+            // ---------------- Server xatolari (Server/src/groups.js)
+            ["groups.error.bad_json"] = ("So'rov buzilgan", "Malformed request"),
+            ["groups.error.invalid_code"] = ("Guruh kodi noto'g'ri (masalan NW-AB23CD)", "Invalid group code (e.g. NW-AB23CD)"),
+            ["groups.error.group_not_found"] = ("Guruh topilmadi yoki o'chirilgan", "Group not found or deleted"),
+            ["groups.error.query_too_short"] = ("Kamida 2 harf yoki guruh kodini yozing", "Type at least 2 letters or a group code"),
+            ["groups.error.invalid_query"] = ("Qidiruv matni juda uzun", "Search text is too long"),
+            ["groups.error.invalid_name"] = ("Guruh nomi 3-40 belgidan iborat bo'lsin", "Group name must be 3-40 characters"),
+            ["groups.error.invalid_description"] = ("Tavsif 300 belgidan oshmasin", "Description must be at most 300 characters"),
+            ["groups.error.invalid_kind"] = ("Guruh turini tanlang", "Choose a group type"),
+            ["groups.error.invalid_price"] = ("Narx 1 dan 1 000 000 000 gacha butun son bo'lsin", "Price must be a whole number from 1 to 1,000,000,000"),
+            ["groups.error.invalid_currency"] = ("Valyutani tanlang", "Choose a currency"),
+            ["groups.error.invalid_period"] = ("Obuna davrini tanlang", "Choose a billing period"),
+            ["groups.error.too_many_groups"] = ("Ko'pi bilan 50 ta guruh yaratish mumkin", "You can own at most 50 groups"),
+            ["groups.error.too_many_memberships"] = ("Guruhlar soni chegarasiga yetildi (200)", "Group membership limit reached (200)"),
+            ["groups.error.group_full"] = ("Guruh to'la (500 a'zo)", "The group is full (500 members)"),
+            ["groups.error.too_many_pending"] = ("Javob kutayotgan so'rovlaringiz juda ko'p", "You have too many pending requests"),
+            ["groups.error.owner_cannot_leave"] = ("Egasi guruhdan chiqa olmaydi: guruhni o'chiring", "The owner cannot leave: delete the group instead"),
+            ["groups.error.not_member"] = ("U guruh a'zosi emas", "Not a member of this group"),
+            ["groups.error.admin_only"] = ("Buni faqat admin yoki egasi qila oladi", "Only an admin or the owner can do this"),
+            ["groups.error.owner_only"] = ("Buni faqat guruh egasi qila oladi", "Only the group owner can do this"),
+            ["groups.error.no_request"] = ("So'rov topilmadi (bekor qilingan bo'lishi mumkin)", "Request not found (it may have been cancelled)"),
+            ["groups.error.cannot_remove"] = ("Bu a'zoni chiqarib bo'lmaydi", "This member cannot be removed"),
+            ["groups.error.invalid_role"] = ("Noto'g'ri rol", "Invalid role"),
+            ["groups.error.cannot_change_owner"] = ("Egasining rolini o'zgartirib bo'lmaydi", "The owner's role cannot be changed"),
+            ["groups.error.too_many_admins"] = ("Adminlar soni chegarasiga yetildi (20)", "Admin limit reached (20)"),
+        });
+    }
+}

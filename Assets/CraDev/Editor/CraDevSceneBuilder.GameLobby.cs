@@ -41,8 +41,16 @@ namespace CraDev.EditorTools
                 counts[i]=V2Text(tab.transform,"0",i==0?92:61,13,36,30,17,false);
             }
             SetArray(friends,"filters",filters);SetArray(friends,"filterCounts",counts);
-            var summary=V2Panel(panel.transform,"FriendSummary",388,18,86,80,V2Glass);
-            Set(friends,"countLabel",V2Text(summary.transform,"",5,12,76,56,17,false));
+            // Filtrlar yonida "Guruhlar" bo'limi tugmasi (ilgari bu yerda do'stlar soni turardi - u "Do'stlar"
+            // filtrida ham bor). Bosilsa panel guruhlar rejimiga o'tadi (LobbyFriendsPanel.Toggle("groups")).
+            var groupsTab=V2Button(panel.transform,"",null,388,18,86,80,localized:false);groupsTab.name="FriendSection_groups";
+            V2Icon(groupsTab.transform,"Chat",14,12,24);
+            var groupsCount=V2Text(groupsTab.transform,"0",44,9,34,30,17,false);groupsCount.alignment=TextAnchor.MiddleCenter;
+            var groupsLabel=groupsTab.GetComponentInChildren<Text>();
+            groupsLabel.text="";Localized(groupsLabel,"groups.tab");groupsLabel.fontSize=15;groupsLabel.alignment=TextAnchor.MiddleCenter;
+            groupsLabel.resizeTextForBestFit=true;groupsLabel.resizeTextMinSize=11;groupsLabel.resizeTextMaxSize=15;
+            PlaceTopLeft(groupsLabel.rectTransform,2,42,82,30);
+            Set(friends,"groupsTab",groupsTab);Set(friends,"groupsCount",groupsCount);hints.Add((groupsTab,"groups.tab_hint"));
             var field=V2Search(panel.transform,"friends.search",18,110,456);Set(friends,"search",field);
             field.characterLimit=24; // server qidiruvi 1-24 belgi (Server/src/app.js MAX_QUERY_LENGTH)
             Set(friends,"drawer",drawer);
@@ -61,16 +69,43 @@ namespace CraDev.EditorTools
                 PlaceTopLeft(buttons[i].transform.Find(icons[i]).GetComponent<RectTransform>(),28,14,24,24);
             }
             SetArray(friends,"tools",buttons);
+            // Guruhlar rejimidagi asboblar (do'stlar asboblari o'rnida; ish vaqtida almashtiriladi). Builder'da faol
+            // qoladi: pastdagi ReferenceSurface uslubi ularga ham qo'llansin.
+            var groupTools=CreateRect("GroupTools",panel.transform);PlaceTopLeft(groupTools,18,176,456,52);
+            var groupCreate=V2Button(groupTools,"groups.new","Plus",0,0,176,52);groupCreate.name="GroupTool_create";
+            var groupJoin=V2Button(groupTools,"groups.by_code","Key",188,0,176,52);groupJoin.name="GroupTool_join";
+            foreach(var tool in new[]{groupCreate,groupJoin})
+            {
+                var label=tool.GetComponentInChildren<Text>();label.fontSize=18;label.resizeTextForBestFit=true;label.resizeTextMinSize=12;label.resizeTextMaxSize=18;
+                PlaceTopLeft(label.rectTransform,50,0,120,52);
+            }
+            var groupRefresh=V2Button(groupTools,"","Refresh",376,0,80,52,localized:false);groupRefresh.name="GroupTool_refresh";
+            PlaceTopLeft(groupRefresh.transform.Find("Refresh").GetComponent<RectTransform>(),28,14,24,24);
+            hints.Add((groupCreate,"groups.new_hint"));hints.Add((groupJoin,"groups.join_hint"));hints.Add((groupRefresh,"lobby.tool.refresh"));
+            Set(friends,"groupTools",groupTools.gameObject);
             var viewport=CreateRect("FriendViewport",panel.transform);PlaceTopLeft(viewport,18,242,456,552);
             viewport.anchorMin=Vector2.zero;viewport.anchorMax=new Vector2(0,1);viewport.sizeDelta=new Vector2(456,-344);
             viewport.gameObject.AddComponent<RectMask2D>();
             var scroll=viewport.gameObject.AddComponent<ScrollRect>();scroll.viewport=viewport;scroll.horizontal=false;
             scroll.movementType=ScrollRect.MovementType.Clamped;scroll.scrollSensitivity=35;
             var rows=CreateRect("FriendRows",viewport);PlaceTopLeft(rows,0,0,456,552);scroll.content=rows;Set(friends,"rows",rows);
+            // Guruhlar bo'limi shu ro'yxat maydonini ishlatadi
+            var groups=panel.gameObject.AddComponent<LobbyGroupsPanel>();
+            Set(groups,"font",v2.Medium);Set(groups,"boldFont",v2.SemiBold);Set(groups,"rounded",v2.RoundFill);Set(groups,"rows",rows);
+            Set(groups,"addIcon",LineIcon("UserPlus"));Set(groups,"removeIcon",LineIcon("Minus"));Set(groups,"acceptIcon",LineIcon("Check"));
+            Set(groups,"inviteIcon",LineIcon("Ticket"));Set(groups,"adminIcon",LineIcon("Shield"));
+            Set(groups,"createButton",groupCreate);Set(groups,"joinButton",groupJoin);Set(groups,"refreshButton",groupRefresh);
+            Set(friends,"groups",groups);
             var footer=V2Panel(panel.transform,"SelfFooter",16,810,460,70,V2Glass);
             footer.rectTransform.anchorMin=footer.rectTransform.anchorMax=Vector2.zero;footer.rectTransform.anchoredPosition=new Vector2(16,86);
             Set(friends,"footerPortrait",V2Picture(footer.transform,"SelfPortrait",null,12,8,54,54));
-            Set(friends,"footerName",V2Text(footer.transform,"",66,14,215,42,23,false));
+            Set(friends,"footerName",V2Text(footer.transform,"",66,4,250,36,23,false));
+            // O'z raqamli ID: bosilsa nusxa olinadi (do'st shu ID bilan qidirib topadi)
+            var copyId=CreateImage("CopyId",footer.transform,null,Vector2.zero,Vector2.zero,new Color(1,1,1,0));
+            PlaceTopLeft(copyId.rectTransform,62,38,200,28);copyId.raycastTarget=true;
+            var copyButton=copyId.gameObject.AddComponent<Button>();copyButton.transition=Selectable.Transition.None;copyButton.targetGraphic=copyId;
+            var footerId=V2Text(copyId.transform,"",4,0,196,28,17,false);footerId.color=new Color32(173,190,163,255);
+            Set(friends,"footerId",footerId);Set(friends,"copyId",copyButton);hints.Add((copyButton,"social.copy_id"));
             var gear=V2Button(footer.transform,"","Gear",326,9,56,52,"page","settings",localized:false);gear.name="LobbySettings";hints.Add((gear,"menu.settings"));
             // Bu tugma o'yindan chiqadi (tasdiqlash oynasi bilan): izohi ham shuni aytadi
             var quit=V2Button(footer.transform,"","Logout",392,9,56,52,"quit",localized:false);quit.name="LobbyQuit";hints.Add((quit,"lobby.tool.quit"));
@@ -135,7 +170,7 @@ namespace CraDev.EditorTools
             }
             // Kelgan do'stlik so'rovlari soni (qo'ng'iroqdagisi ish vaqtida LobbyFriendsPanel'da qo'shiladi)
             Set(friends,"requestsBadge",V2Badge(buttons[3].transform));
-            var tooltip=V2Tooltip(root);Set(friends,"tooltip",tooltip);
+            var tooltip=V2Tooltip(root);Set(friends,"tooltip",tooltip);Set(groups,"tooltip",tooltip);
             foreach(var (target,key) in hints)V2Hint(target,tooltip,key);
             // Kichik ekranlarda yozuvlar 8 px gacha kichrayib ketmasin (1080p da 65% dizayn o'zgarmaydi)
             root.parent.gameObject.AddComponent<LobbyUiScale>();

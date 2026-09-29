@@ -1,6 +1,7 @@
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { MAX_PENDING_REQUESTS } from './db.js';
 import { createParties } from './party.js';
+import { groupRoutes } from './groups.js';
 import { upcomingEvents } from './events.js';
 import { AVATARS, GENDERS, isValidAvatar, MAX_LENGTH, nicknameKey, validateNickname } from './nickname.js';
 import { isValidOutfit } from './outfit.js';
@@ -19,6 +20,8 @@ const LEADERBOARD_MAX = 50;
 // chunki bitta IP ortida (kompyuter klubi, NAT, proksi) ko'p o'yinchi bo'lishi mumkin.
 // Server teskari proksi ortida bo'lsa trustProxy (TRUST_PROXY) beriladi: IP X-Forwarded-For'dan olinadi.
 export const DEFAULT_RATE_LIMITS = { check: 60, create: 10, social: 120, search: 60, presence: 120 };
+// Nickname qidiruvi uchun eng kam belgi (ID raqam bilan aniq qidiriladi)
+export const MIN_NICKNAME_QUERY = 2;
 
 /**
  * HTTP so'rovlarini qayta ishlovchi funksiyani yaratadi.
@@ -41,8 +44,12 @@ export const DEFAULT_RATE_LIMITS = { check: 60, create: 10, social: 120, search:
  *                                 invalid_allowRequests | nothing_to_update
  * POST  /api/presence (A)   -> { online, players }  (mijoz har 30 soniyada yuboradigan heartbeat)
  * GET   /api/stats          -> { online, players }
+ * GET   /api/ping             -> { ok, t } (bazaga tegmaydi: mijoz ping'ni shu bilan o'lchaydi)
  * GET   /api/players/search?q=<matn> (A) -> [summary] (ko'pi bilan 20) | 400 invalid_query (1..64 belgi)
- * GET   /api/players/suggested (A)       -> [summary] (ko'pi bilan 10)
+ *                                           q = 6 xonali ID ("123456", "#123456", "ID 123456") - aniq o'yinchi;
+ *                                           aks holda nickname (avval boshi, keyin ichi), kamida 2 belgi:
+ *                                           400 query_too_short. Hamma o'yinchilar ro'yxati (tavsiyalar) yo'q.
+ * Guruhlar (A): groups.js dagi groupRoutes izohi.
  * GET   /api/friends (A)                 -> { friends: [summary], incoming: [summary], outgoing: [summary] }
  *                                           (incoming va outgoing ko'pi bilan MAX_PENDING_REQUESTS ta)
  * POST  /api/friends/request (A) { nickname } -> { friendship } | 404 not_found | 400 self | 403 requests_disabled
@@ -54,7 +61,7 @@ export const DEFAULT_RATE_LIMITS = { check: 60, create: 10, social: 120, search:
  *                                   onlayn holatini yashirgan o'yinchilar ko'rsatilmaydi)
  * GET   /api/events              -> [{ id, zone, title: { uz, en }, place: { uz, en }, startsAt, endsAt }]
  *
- * summary = { nickname, avatarId, gender, online, friendship: 'none' | 'friends' | 'outgoing' | 'incoming' }
+ * summary = { nickname, publicId, avatarId, gender, online, friendship: 'none' | 'friends' | 'outgoing' | 'incoming' }
  * outfit  = "" yoki Unity Outfit JSON'i: { top, topColor, bottom, bottomColor, shoes, shoesColor, hair, hairColor }
  *           (hammasi ixtiyoriy satr: buyum - garderob id'si, rang - RRGGBB yoki ""; ko'pi bilan 512 belgi): outfit.js
  *
@@ -68,12 +75,18 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   limits.party = rateLimits.party ?? 120;
   // Ovoz: ~5 yuborish + ~5 o'qish soniyasiga (har o'yinchiga alohida)
   limits.voice = rateLimits.voice ?? 1200;
+  // Ping: har ~2 s (IP bo'yicha; bitta NAT ortida bir necha o'yinchi bo'lishi mumkin)
+  limits.ping = rateLimits.ping ?? 600;
+  // Guruhlar: o'qish va amallar o'yinchi bo'yicha; yaratish alohida, sekinroq
+  limits.groups = rateLimits.groups ?? 240;
+  limits.groupCreate = rateLimits.groupCreate ?? 10;
 
   // "METOD /yo'l" -> { limit: rateLimits kaliti, bucket?: cheklovchi kaliti (standart: limit), auth?,
   //                    perPlayer?: cheklov IP emas, o'yinchi bo'yicha (auth kerak), run }
   // run(ctx) [status, body] qaytaradi.
   const routes = new Map(Object.entries({
     'GET /health': { run: () => [200, { ok: true }] },
+    'GET /api/ping': { limit: 'ping', run: ({ req }) => { req.resume(); return [200, { ok: true, t: Date.now() }]; } },
     'GET /api/nicknames/availability': { limit: 'check', run: checkAvailability },
     'POST /api/players': { limit: 'create', run: createPlayer },
     'POST /api/players/restore': { limit: 'create', run: restorePlayer },
@@ -84,9 +97,6 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
     'POST /api/presence': { limit: 'presence', auth: true, perPlayer: true, run: heartbeat },
     'GET /api/stats': { limit: 'check', bucket: 'public', run: ctx => [200, db.stats(ctx.now)] },
     'GET /api/players/search': { limit: 'search', auth: true, run: searchPlayers },
-    'GET /api/players/suggested': {
-      limit: 'social', auth: true, run: ctx => [200, db.suggestedPlayers(ctx.player.id, ctx.now)],
-    },
     'GET /api/friends': { limit: 'social', auth: true, run: ctx => [200, db.listFriends(ctx.player.id, ctx.now)] },
     'POST /api/friends/request': { limit: 'social', auth: true, run: requestFriend },
     'POST /api/friends/accept': { limit: 'social', auth: true, run: acceptFriend },
@@ -98,6 +108,12 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   for (const kind of ['heartbeat', 'invite', 'accept', 'decline', 'leave']) {
     routes.set('POST /api/party/' + kind, { limit: 'party', auth: true, perPlayer: true,
       run: async ctx => party(kind, ctx.player, await readJson(ctx.req), ctx.now) });
+  }
+
+  for (const [key, run] of Object.entries(groupRoutes(db))) {
+    const post = key.startsWith('POST ');
+    routes.set(key, { limit: key.endsWith('/create') ? 'groupCreate' : 'groups', auth: true, perPlayer: true,
+      run: async ctx => run(ctx, post ? await readJson(ctx.req) : undefined) });
   }
 
   routes.set('POST /api/party/voice', { limit: 'voice', auth: true, perPlayer: true,
@@ -213,6 +229,9 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   function searchPlayers({ url, player, now }) {
     const query = (url.searchParams.get('q') ?? '').trim();
     if (query.length < 1 || query.length > MAX_QUERY_LENGTH) return [400, { error: 'invalid_query' }];
+    const id = /^(?:#|id[:\s#]*)?(\d{6})$/i.exec(query);
+    if (id) return [200, db.findByPublicId(player.id, Number(id[1]), now)];
+    if (query.length < MIN_NICKNAME_QUERY) return [400, { error: 'query_too_short' }];
     if (query.length > MAX_LENGTH) return [200, []]; // hech bir nickname bunchalik uzun emas
     return [200, db.searchPlayers(player.id, nicknameKey(query), now)];
   }

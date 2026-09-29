@@ -17,7 +17,7 @@ const START = Date.parse('2026-09-27T12:00:00.000Z');
 
 const PROFILE_KEYS = ['id', 'publicId', 'nickname', 'gender', 'avatarId', 'outfit', 'country', 'showOnline',
   'allowRequests', 'createdAt', 'onlineSeconds'];
-const SUMMARY_KEYS = ['nickname', 'avatarId', 'gender', 'online', 'friendship'];
+const SUMMARY_KEYS = ['nickname', 'publicId', 'avatarId', 'gender', 'online', 'friendship'];
 
 /**
  * Xotiradagi (yoki berilgan) baza ustida server. Vaqt `clock` orqali boshqariladi.
@@ -60,7 +60,6 @@ async function startApi({ db = openDatabase(':memory:'), rateLimits = HIGH_LIMIT
     friends: token => call('GET', '/api/friends', { token }),
     friend: (action, token, nickname) => call('POST', `/api/friends/${action}`, { token, body: { nickname } }),
     search: (token, q) => call('GET', `/api/players/search?q=${encodeURIComponent(q)}`, { token }),
-    suggested: token => call('GET', '/api/players/suggested', { token }),
     async close() {
       server.closeAllConnections();
       await new Promise(resolve => server.close(resolve));
@@ -397,7 +396,7 @@ describe('qidiruv va tavsiyalar', () => {
     assert.equal(res.status, 200);
     assert.deepEqual(names(res.body), ['Alibek', 'alisher', 'Bali', 'Kali_Ali']);
     for (const summary of res.body) assert.deepEqual(Object.keys(summary), SUMMARY_KEYS);
-    assert.deepEqual(res.body[0], { nickname: 'Alibek', avatarId: 'M1', gender: 'male', online: false, friendship: 'none' });
+    assert.deepEqual({ ...res.body[0], publicId: 0 }, { nickname: 'Alibek', publicId: 0, avatarId: 'M1', gender: 'male', online: false, friendship: 'none' });
 
     assert.deepEqual(names((await api.search(seeker.token, '   ali  ')).body), ['Alibek', 'alisher', 'Bali', 'Kali_Ali']);
     assert.deepEqual(names((await api.search(seeker.token, 'BEK')).body), ['Bekzod', 'Alibek']); // alifbodan qat'i nazar
@@ -405,10 +404,28 @@ describe('qidiruv va tavsiyalar', () => {
     assert.deepEqual((await api.search(seeker.token, 'xyz')).body, []);
   });
 
-  test('"_" va "%" oddiy belgi sifatida qidiriladi', async () => {
-    assert.deepEqual(names((await api.search(seeker.token, '_')).body), ['Kali_Ali']);
-    assert.deepEqual((await api.search(seeker.token, '%')).body, []);
+  test('"_" va "%" oddiy belgi sifatida qidiriladi; nickname uchun kamida 2 belgi', async () => {
+    assert.deepEqual(names((await api.search(seeker.token, 'i_')).body), ['Kali_Ali']);
+    assert.deepEqual((await api.search(seeker.token, '%%')).body, []);
     assert.deepEqual((await api.search(seeker.token, 'a%i')).body, []);
+    for (const q of ['_', 'a', ' b ']) {
+      const res = await api.search(seeker.token, q);
+      assert.deepEqual([res.status, res.body], [400, { error: 'query_too_short' }], q);
+    }
+  });
+
+  test('ID bo\'yicha aniq qidiruv; bo\'sh so\'rovda hech kim ro\'yxatlanmaydi', async () => {
+    const zed = (await api.search(seeker.token, 'zed')).body[0];
+    assert.match(String(zed.publicId), /^\d{6}$/);
+    for (const q of [String(zed.publicId), `#${zed.publicId}`, `ID ${zed.publicId}`, `id:${zed.publicId}`]) {
+      assert.deepEqual(names((await api.search(seeker.token, q)).body), ['Zed'], q);
+    }
+    // O'zining ID'si va mavjud bo'lmagan ID - bo'sh
+    assert.deepEqual((await api.search(seeker.token, String(seeker.publicId))).body, []);
+    const unused = zed.publicId === 999999 ? 100000 : zed.publicId + 1;
+    const hit = (await api.search(seeker.token, String(unused))).body;
+    assert.ok(hit.length <= 1);
+    assert.equal((await api.call('GET', '/api/players/suggested', { token: seeker.token })).status, 404);
   });
 
   test('so\'rov 1..64 belgi; nickname\'dan uzuni xato emas, bo\'sh natija', async () => {
@@ -458,7 +475,6 @@ describe('qidiruv va tavsiyalar', () => {
 
   test('qidiruv token talab qiladi', async () => {
     assert.equal((await api.search(undefined, 'ali')).status, 401);
-    assert.equal((await api.suggested(undefined)).status, 401);
   });
 
   test('chaqiruvchining o\'zi mos kelsa ham 20 ta boshqa o\'yinchi qaytadi', async () => {
@@ -471,93 +487,7 @@ describe('qidiruv va tavsiyalar', () => {
     // Boshlanishi mos kelganlar kam bo'lsa, qolgani ichida bor bilan to'ldiriladi
     const mixed = names((await api.search(seeker.token, 'b0')).body);
     assert.deepEqual(mixed, others.slice(0, 9));
-    assert.deepEqual(names((await api.search(seeker.token, 'b')).body).slice(0, 3), ['Bali', 'Bekzod', 'Alfa_B01']);
-  });
-});
-
-describe('tavsiya etilgan o\'yinchilar', () => {
-  let api;
-  before(async () => { api = await startApi(); });
-  after(() => api.close());
-
-  test('aloqasi yo\'qlar, avval yaqinda ko\'ringanlar, keyin yangilar; ko\'pi bilan 10 ta', async () => {
-    const me = await api.register('Center');
-    const players = {};
-    for (let i = 1; i <= 14; i++) {
-      api.tick(1);
-      players[i] = await api.register(`Player${String(i).padStart(2, '0')}`);
-    }
-    // Munosabatlar: 1 - do'st, 2 - chiquvchi so'rov, 3 - kiruvchi so'rov
-    await api.friend('request', me.token, 'Player01');
-    await api.friend('accept', players[1].token, 'Center');
-    await api.friend('request', me.token, 'Player02');
-    await api.friend('request', players[3].token, 'Center');
-
-    await api.heartbeat(players[5].token);
-    api.tick(10);
-    await api.heartbeat(players[7].token);
-    api.tick(10);
-    await api.heartbeat(players[4].token);
-    await api.heartbeat(me.token);
-    api.tick(500); // hech kim onlayn emas, lekin tartib last_seen bo'yicha qoladi
-
-    const res = await api.suggested(me.token);
-    assert.equal(res.status, 200);
-    assert.deepEqual(names(res.body), [
-      'Player04', 'Player07', 'Player05',
-      'Player14', 'Player13', 'Player12', 'Player11', 'Player10', 'Player09', 'Player08',
-    ]);
-    for (const summary of res.body) {
-      assert.deepEqual(Object.keys(summary), SUMMARY_KEYS);
-      assert.equal(summary.friendship, 'none');
-      assert.equal(summary.online, false);
-    }
-
-    // Munosabat o'chirilgach o'yinchi yana tavsiya qilinadi
-    await api.friend('remove', me.token, 'Player01');
-    await api.heartbeat(players[1].token);
-    const again = await api.suggested(me.token);
-    assert.equal(again.body[0].nickname, 'Player01');
-    assert.equal(again.body[0].online, true);
-  });
-
-  test('onlayn holatini yashirgan o\'yinchining o\'rni oxirgi kirishiga bog\'liq emas', async () => {
-    const own = await startApi();
-    try {
-      const players = {};
-      for (const name of ['Oldest', 'Hidden', 'Visible', 'Newest', 'Spy']) {
-        players[name] = await own.register(name);
-        own.tick(1);
-      }
-      await own.patch(players.Hidden.token, { showOnline: false });
-      const spy = players.Spy.token;
-
-      await own.heartbeat(players.Visible.token);
-      const before = (await own.suggested(spy)).body;
-      // Yashirgan o'yinchi "hech ko'rinmagan"lar qatorida, ro'yxatdan o'tgan vaqti bo'yicha
-      assert.deepEqual(names(before), ['Visible', 'Newest', 'Hidden', 'Oldest']);
-      assert.deepEqual(before.map(p => p.online), [true, false, false, false]);
-
-      // U hozir kirdi: ro'yxat umuman o'zgarmaydi
-      own.tick(5);
-      await own.heartbeat(players.Hidden.token);
-      assert.deepEqual((await own.suggested(spy)).body, before);
-
-      // Ko'rinadigan o'yinchi oflayn bo'lsa ham undan yuqoriga chiqmaydi
-      own.tick(120);
-      await own.heartbeat(players.Hidden.token);
-      const later = (await own.suggested(spy)).body;
-      assert.deepEqual(names(later), ['Visible', 'Newest', 'Hidden', 'Oldest']);
-      assert.ok(later.every(p => p.online === false));
-
-      // Yashirish o'chirilsa oddiy tartib qaytadi
-      await own.patch(players.Hidden.token, { showOnline: true });
-      const shown = (await own.suggested(spy)).body;
-      assert.deepEqual(names(shown), ['Hidden', 'Visible', 'Newest', 'Oldest']);
-      assert.equal(shown[0].online, true);
-    } finally {
-      await own.close();
-    }
+    assert.deepEqual(names((await api.search(seeker.token, 'b0')).body).slice(0, 3), ['Alfa_B01', 'Alfa_B02', 'Alfa_B03']);
   });
 });
 
@@ -615,7 +545,7 @@ describe('do\'stlar', () => {
 
     const { body } = await api.friends(bek.token);
     assert.deepEqual(body.incoming[0],
-      { nickname: 'Ali', avatarId: 'M1', gender: 'male', online: false, friendship: 'incoming' });
+      { nickname: 'Ali', publicId: ali.publicId, avatarId: 'M1', gender: 'male', online: false, friendship: 'incoming' });
     assert.deepEqual((await api.friends(ali.token)).body.outgoing[0].friendship, 'outgoing');
   });
 
@@ -954,7 +884,7 @@ describe('so\'rovlar cheklovi va CORS', () => {
       const { token } = await api.register('Limited');
       await api.register('Other');
       assert.equal((await api.friends(token)).status, 200);
-      assert.equal((await api.suggested(token)).status, 200);
+      assert.equal((await api.friends(token)).status, 200);
       assert.equal((await api.search(token, 'oth')).status, 200);
       assert.equal((await api.search(token, 'oth')).status, 200);
       assert.deepEqual((await api.search(token, 'oth')).body, { error: 'too_many_requests' });
@@ -989,9 +919,9 @@ describe('so\'rovlar cheklovi va CORS', () => {
       const a = await api.register('LimitA');
       const b = await api.register('LimitB');
 
-      // social: friends, suggested va friends/* ikkala o'yinchi uchun bitta hisobda
+      // social: friends va friends/* ikkala o'yinchi uchun bitta hisobda
       for (let i = 0; i < 120; i++) {
-        const res = i % 2 ? await api.friends(a.token) : await api.suggested(b.token);
+        const res = i % 2 ? await api.friends(a.token) : await api.friends(b.token);
         assert.equal(res.status, 200, `social ${i}`);
       }
       assert.deepEqual((await api.friend('request', b.token, 'LimitA')).body, { error: 'too_many_requests' });

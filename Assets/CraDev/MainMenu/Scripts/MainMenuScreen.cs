@@ -340,6 +340,10 @@ namespace CraDev.MainMenu
             else if(settingsOpen)SetSettings(false);
             else if (menuOpen)
                 SetMenu(false);
+            // Guruh sahifasi yoki yangi guruh formasi ochiq bo'lsa: guruhlar ro'yxatiga qaytiladi
+            else if (friendsPanel != null && friendsPanel.isActiveAndEnabled && friendsPanel.Back())
+            {
+            }
             else if (current != null && current.OnBack())
             {
             }
