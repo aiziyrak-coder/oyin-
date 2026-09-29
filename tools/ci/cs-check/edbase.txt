@@ -1,0 +1,10 @@
+Assets/CraDev/Editor/CraDevModelImporter.cs(164,17): error CS0103: The name 'context' does not exist in the current context
+Assets/CraDev/Editor/CraDevModelImporter.cs(49,22): error CS1061: 'ModelImporter' does not contain a definition for 'avatarSetup' and no accessible extension method 'avatarSetup' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)
+Assets/CraDev/Editor/CraDevModelImporter.cs(49,36): error CS0103: The name 'ModelImporterAvatarSetup' does not exist in the current context
+Assets/CraDev/Editor/CraDevModelImporter.cs(57,26): error CS1061: 'ModelImporter' does not contain a definition for 'materialImportMode' and no accessible extension method 'materialImportMode' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)
+Assets/CraDev/Editor/CraDevModelImporter.cs(57,47): error CS0103: The name 'ModelImporterMaterialImportMode' does not exist in the current context
+Assets/CraDev/Editor/CraDevModelImporter.cs(63,26): error CS1061: 'ModelImporter' does not contain a definition for 'materialImportMode' and no accessible extension method 'materialImportMode' accepting a first argument of type 'ModelImporter' could be found (are you missing a using directive or an assembly reference?)
+Assets/CraDev/Editor/CraDevModelImporter.cs(63,47): error CS0103: The name 'ModelImporterMaterialImportMode' does not exist in the current context
+Assets/CraDev/Editor/CraDevSceneBuilder.LobbyV2.cs(61,24): error CS1061: 'TextureImporter' does not contain a definition for 'GetSourceTextureWidthAndHeight' and no accessible extension method 'GetSourceTextureWidthAndHeight' accepting a first argument of type 'TextureImporter' could be found (are you missing a using directive or an assembly reference?)
+Assets/CraDev/Editor/CraDevSceneBuilder.Menu.cs(283,32): error CS0117: 'PlayerSettings' does not contain a definition for 'SetIcons'
+Assets/CraDev/Editor/CraDevSceneBuilder.Menu.cs(283,41): error CS0103: The name 'NamedBuildTarget' does not exist in the current context

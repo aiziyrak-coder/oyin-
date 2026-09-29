@@ -1,0 +1,25 @@
+<!--
+  Runtime assembly (Assets/CraDev, Editor papkasisiz) uchun taxminiy kompilyatsiya.
+  check.sh uni vaqtinchalik papkaga ko'chirib, quyidagi xususiyatlarni beradi (oxirida "/" bilan):
+    RepoRoot   - repo ildizi
+    HarnessDir - tools/ci/cs-check papkasi
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>disable</Nullable>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DefineConstants>UNITY_EDITOR_OFF;ENABLE_LEGACY_INPUT_MANAGER;UNITY_STANDALONE_WIN;UNITY_6000_0_OR_NEWER</DefineConstants>
+    <NoWarn>CS0414;CS0649;CS0169;CS0067;CS8632;CS0618</NoWarn>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33" />
+    <PackageReference Include="Unity3D.UnityEngine.UI" Version="2020.3.21" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(HarnessDir)Stubs.cs;$(HarnessDir)StubsUnity6.cs" />
+    <Compile Include="$(RepoRoot)Assets/CraDev/**/*.cs" Exclude="$(RepoRoot)Assets/CraDev/Editor/**" />
+  </ItemGroup>
+</Project>
