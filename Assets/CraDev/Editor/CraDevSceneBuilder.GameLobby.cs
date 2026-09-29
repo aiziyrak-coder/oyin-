@@ -159,9 +159,38 @@ namespace CraDev.EditorTools
             V2Text(profile.transform,"lobby.profile_hint",76,36,200,24,17).color=new Color32(173,190,163,255);
             ReferenceSurface.Apply(language.GetComponent<Image>(),0,22);ReferenceSurface.Apply(profile.GetComponent<Image>(),0,22);
             foreach(var button in right.GetComponentsInChildren<Button>())if(button.GetComponent<ReferenceSurface>()==null)ReferenceSurface.Apply(button.GetComponent<Image>(),5,18);
+            V2VoiceControls(home,right,screen);
             // Do'stlar paneli pastidagi o'yinchi rasmi: MainMenuScreen yuz yoki avatar kartasini qo'yadi va yangilaydi
             foreach(var image in home.GetComponentsInChildren<RawImage>(true))if(image.name=="SelfPortrait")Set(screen,"selfPortrait",image);
             V2AvatarStudio(home.parent,screen);
+        }
+
+        // Profil ostidagi qator: karnay va mikrofon (LobbyVoice) hamda party'dagina ko'rinadigan "Lobbydan chiqish"
+        // (LobbyParty). Ikonkalar vektor (LobbyVoiceIcon): o'chiq holatda ustidan chiziladi.
+        static void V2VoiceControls(Transform home,Transform right,MainMenuScreen screen)
+        {
+            var voice=screen.gameObject.AddComponent<LobbyVoice>();Set(voice,"lobby",screen);
+            var tooltipBubble=home.Find("LobbyTooltip");
+            var tooltip=tooltipBubble!=null?tooltipBubble.GetComponentInChildren<Text>(true):null;
+            Button Toggle(string name,int kind,float x,string hint,string iconField)
+            {
+                var button=V2Button(right,"",null,x,108,62,54,localized:false);button.name=name;
+                var icon=CreateRect("Icon",button.transform);PlaceTopLeft(icon,16,12,30,30);
+                var graphic=icon.gameObject.AddComponent<LobbyVoiceIcon>();graphic.kind=kind;graphic.color=Color.white;graphic.raycastTarget=false;
+                Set(voice,iconField,graphic);
+                ReferenceSurface.Apply(button.GetComponent<Image>(),5,18);
+                if(tooltip!=null)V2Hint(button,tooltip,hint);
+                return button;
+            }
+            Set(voice,"speakerButton",Toggle("LobbySpeaker",1,516,"voice.speaker","speakerIcon"));
+            Set(voice,"micButton",Toggle("LobbyMic",0,588,"voice.mic","micIcon"));
+            // Qizg'ish, yozuvli va aniq: party'da bo'lganda ko'rinadi (LobbyParty boshqaradi)
+            var leave=V2Button(right,"voice.leave_lobby","Logout",276,108,228,54);leave.name="LobbyLeaveParty";
+            leave.GetComponent<Image>().color=new Color32(150,42,56,235);
+            var label=leave.GetComponentInChildren<Text>();label.fontSize=20;label.horizontalOverflow=HorizontalWrapMode.Overflow;
+            PlaceTopLeft(label.rectTransform,50,0,170,54);
+            PlaceTopLeft(leave.transform.Find("Logout").GetComponent<RectTransform>(),16,15,24,24);
+            leave.gameObject.SetActive(false);
         }
 
         // Qizil son belgisi (kelgan so'rovlar): tugmaning o'ng-yuqori burchagidan biroz chiqib turadi, boshida yashirin.

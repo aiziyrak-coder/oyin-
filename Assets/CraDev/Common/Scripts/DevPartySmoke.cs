@@ -70,8 +70,9 @@ namespace CraDev
                     if(screen.x<drawer.ExpandedRight*scale||screen.x>corners[0].x){failures++;Debug.LogError($"[PartyTest] Nameplate under side panel: {plate.name} x={screen.x:F0}");}
                 }
             }
-            var leave=lobby.transform.Find("LeaveParty");
-            if(leave==null||!leave.gameObject.activeSelf||leave.GetSiblingIndex()>lobby.Dialog.transform.GetSiblingIndex()){failures++;Debug.LogError("[PartyTest] Leave button missing or drawn above dialogs");}
+            // "Lobbydan chiqish" yuqori o'ng boshqaruvda (builder); eski sahnada ish vaqtida yaratilgan zaxira tugma
+            var leave=lobby.GetComponentsInChildren<Transform>(true).FirstOrDefault(t=>t.name=="LobbyLeaveParty")??lobby.transform.Find("LeaveParty");
+            if(leave==null||!leave.gameObject.activeInHierarchy||(leave.parent==lobby.transform&&leave.GetSiblingIndex()>lobby.Dialog.transform.GetSiblingIndex())){failures++;Debug.LogError("[PartyTest] Leave button missing or drawn above dialogs");}
             if(GameObject.Find("Sofa")!=null||GameObject.Find("ArmchairLeft")!=null||GameObject.Find("LobbySeating")!=null)failures++;
             foreach(var viewer in Object.FindObjectsByType<CraDev.CharacterCreation.AvatarViewer>(FindObjectsSortMode.None))
                 if(viewer.CurrentModel!=null&&viewer.CurrentModel.GetComponent<Animator>().runtimeAnimatorController==null)failures++;

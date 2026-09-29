@@ -236,6 +236,7 @@ namespace CraDev.EditorTools
             Set(screen, "fader", CreateFullscreen("Fader", root, Color.black));
             var party=root.gameObject.AddComponent<LobbyParty>();
             Set(party,"lobby",screen);Set(party,"font",v2.Medium);
+            foreach(var button in root.GetComponentsInChildren<Button>(true))if(button.name=="LobbyLeaveParty")Set(party,"leaveButton",button);
             AddUiSounds();
             Save(scene, MenuScene);
         }

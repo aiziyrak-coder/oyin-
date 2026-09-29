@@ -156,6 +156,14 @@ namespace CraDev.Online
         public IEnumerator Party(string token, string action, PartyRequest body, Action<ApiResult<PartyState>> done) =>
             Send("POST", "/api/party/" + action, token, JsonUtility.ToJson(body), done);
 
+        /// <summary>Ovoz bo'lagini guruhga yuborish (8-bit mu-law, base64).</summary>
+        public IEnumerator VoiceSend(string token, VoiceChunk chunk, Action<ApiResult<VoiceCursor>> done) =>
+            Send("POST", "/api/party/voice", token, JsonUtility.ToJson(chunk), done);
+
+        /// <summary>Guruhdagi boshqalarning <paramref name="since"/> dan keyingi ovoz bo'laklari.</summary>
+        public IEnumerator VoicePoll(string token, int since, Action<ApiResult<VoiceBatch>> done) =>
+            Send("GET", "/api/party/voice?since=" + since, token, null, done);
+
         /// <summary>
         /// Server ro'yxatni JSON massiv qilib qaytaradi, JsonUtility esa faqat obyektni o'qiydi: javob {"items":[...]}
         /// ga o'raladi.
@@ -213,8 +221,11 @@ namespace CraDev.Online
         }
     }
 
-    [Serializable] public class PartyRequest { public string nickname, invitationId; public int pingMs = -1; }
-    [Serializable] public class PartyMember { public string nickname, avatarId, gender, outfit; public int seat, pingMs; public bool online; }
+    [Serializable] public class PartyRequest { public string nickname, invitationId; public int pingMs = -1; public bool micOn, speakerOn; }
+    [Serializable] public class PartyMember { public string nickname, avatarId, gender, outfit; public int seat, pingMs; public bool online, micOn, speakerOn; }
+    [Serializable] public class VoiceChunk { public int seq, rate; public string nickname, data; }
+    [Serializable] public class VoiceCursor { public int cursor; public string error; }
+    [Serializable] public class VoiceBatch { public int cursor; public VoiceChunk[] chunks; }
     [Serializable] public class PartyInvitation { public string id, nickname; }
     [Serializable] public class PartyState { public string roomId, error; public bool host; public PartyMember[] members; public PartyInvitation[] invitations; }
 

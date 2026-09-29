@@ -1,5 +1,27 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI — LOBBY OVOZLI CHATI, SALOM VA "LOBBYDAN CHIQISH" (2026-09-29)
+
+Unity'siz yozilgan (C# tekshiruvi OK, server testlari 73/73). **Unity'da hali sinalmagan:** `tools\lobby.ps1 -Build`.
+
+- **Ovozli chat** (`MainMenu/Scripts/LobbyVoice.cs`): WebSocket yo'q, oddiy HTTP(S). Mikrofon 16 kHz, 20 ms kadrlar,
+  energiya darvozasi (sukut yuborilmaydi), ~200 ms bo'laklar 8-bit mu-law + base64 bilan `POST /api/party/voice`;
+  boshqalarniki `GET /api/party/voice?since=<kursor>` (~120 ms oraliq). Har so'zlovchiga jitter buferli (~180 ms,
+  700 ms dan oshsa kesiladi) oqimli `AudioClip`. Umumiy ovoz `GameSettings.Volume` (AudioListener) orqali.
+- **Tugmalar** profil ostidagi qatorda (builder `V2VoiceControls`, `CraDevSceneBuilder.GameLobby.cs`): karnay va
+  mikrofon (`LobbyVoiceIcon` vektor belgilar, o'chiqda chiziq). Qoida: karnay o'chsa mikrofon ham o'chadi va kulrang;
+  karnay yoqilsa mikrofon ham yoqiladi; M - mikrofon. Holat PlayerPrefs (`cradev.voice.*`).
+- **Nameplate**: ping yonida a'zoning mikrofon/karnay belgilari (server heartbeat `micOn/speakerOn`), gapirayotgan
+  a'zoning nomi va mikrofoni yashil.
+- **Salom** (`LobbyGreeting.cs`): guruhga yangi qo'shilgan a'zo 6 s o'ng qo'lini ko'ksiga qo'yib, boshini egadi
+  (Bip01 skeletida protsedural ikki bo'g'imli IK, Animator idle ustidan), ustida "Assalomu alaykum!" pufagi.
+  Qo'shilgan o'yinchining o'z ekranida u o'zi salom beradi.
+- **"Lobbydan chiqish"** qizg'ish tugma (yuqori o'ngda, faqat party'da ko'rinadi) tasdiqlash oynasi bilan.
+- Server: `Server/src/party.js` (xotiradagi 3 s halqa bufer, faqat guruh a'zolari, o'ziga qaytmaydi, bo'lak
+  <=12000 bayt, `voice` limiti 1200/daq), `app.js` route'lari, test `Server/test/voice.test.js`. Matnlar `Loc.Voice.cs`.
+- Cheklovlar: aks-sado bekor qilinmaydi (quloqchin), kechikish ~0.4-0.8 s (HTTP polling + tunnel), faqat standart
+  mikrofon qurilmasi.
+
 ## ENG YANGI — AVATAR STUDIYASI, SOZLAMALAR VA TUZATISHLAR (2026-09-29)
 
 Branch: `claude/trusting-archimedes-aq2wdl`. Unity'siz (bulutda) yozilgan va taxminiy C# kompilyatsiya tekshiruvidan

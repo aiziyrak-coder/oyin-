@@ -6,6 +6,8 @@ import { AVATARS, GENDERS, isValidAvatar, MAX_LENGTH, nicknameKey, validateNickn
 import { isValidOutfit } from './outfit.js';
 
 const MAX_BODY_BYTES = 4 * 1024;
+// Ovoz bo'lagi (base64) uchun kattaroq chegara
+const VOICE_BODY_BYTES = 20 * 1024;
 // Qidiruv maydoni o'yinda 40 belgigacha yozadi: undan uzunlari ham xato emas, nickname'dan (16) uzun so'rov
 // shunchaki hech kimni topmaydi
 const MAX_QUERY_LENGTH = 64;
@@ -64,6 +66,8 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   const limiter = createRateLimiter(windowMs);
   const party = createParties(db);
   limits.party = rateLimits.party ?? 120;
+  // Ovoz: ~5 yuborish + ~5 o'qish soniyasiga (har o'yinchiga alohida)
+  limits.voice = rateLimits.voice ?? 1200;
 
   // "METOD /yo'l" -> { limit: rateLimits kaliti, bucket?: cheklovchi kaliti (standart: limit), auth?,
   //                    perPlayer?: cheklov IP emas, o'yinchi bo'yicha (auth kerak), run }
@@ -95,6 +99,11 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
     routes.set('POST /api/party/' + kind, { limit: 'party', auth: true, perPlayer: true,
       run: async ctx => party(kind, ctx.player, await readJson(ctx.req), ctx.now) });
   }
+
+  routes.set('POST /api/party/voice', { limit: 'voice', auth: true, perPlayer: true,
+    run: async ctx => party.postVoice(ctx.player, await readJson(ctx.req, VOICE_BODY_BYTES), ctx.now) });
+  routes.set('GET /api/party/voice', { limit: 'voice', bucket: 'voice-read', auth: true, perPlayer: true,
+    run: ctx => party.readVoice(ctx.player, Number(ctx.url.searchParams.get('since') ?? -1), ctx.now) });
 
   function checkAvailability({ url }) {
     const name = url.searchParams.get('name') ?? '';
@@ -360,12 +369,12 @@ function send(res, status, body) {
 }
 
 /** JSON tanani o'qiydi. Noto'g'ri yoki juda katta bo'lsa null qaytaradi. */
-async function readJson(req) {
+async function readJson(req, maxBytes = MAX_BODY_BYTES) {
   let size = 0;
   const chunks = [];
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > MAX_BODY_BYTES) return null;
+    if (size > maxBytes) return null;
     chunks.push(chunk);
   }
   try {
