@@ -5,7 +5,8 @@ namespace CraDev.Online
     /// <summary>
     /// Server'da yaratilgan o'yinchi profili shu kompyuterda saqlanadi.
     /// Profil bo'lsa, o'yin avatar yaratish ekranini o'tkazib yuboradi. Server - asosiy manba: bosh menyu ochilganda
-    /// profil serverdan yangilanadi (avatar, kiyim, mamlakat, maxfiylik).
+    /// profil serverdan yangilanadi (avatar, kiyim, mamlakat, maxfiylik). Server o'yinchini tanimasa (yangi baza yoki
+    /// boshqa server), <see cref="GameApi.GetMe"/> profilni shu yerdagi ma'lumotlardan serverda qayta yaratadi.
     /// </summary>
     public static class PlayerProfile
     {
@@ -87,6 +88,20 @@ namespace CraDev.Online
         {
             PlayerPrefs.SetInt(ShowOnlineKey, showOnline ? 1 : 0);
             PlayerPrefs.SetInt(AllowRequestsKey, allowRequests ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>Bitta maxfiylik bayrog'i (ikkinchisiga tegmaydi): kalit darhol almashadi, xatoda eski qiymat qaytariladi.</summary>
+        public static void SetShowOnline(bool value)
+        {
+            PlayerPrefs.SetInt(ShowOnlineKey, value ? 1 : 0);
+            PlayerPrefs.Save();
+        }
+
+        /// <inheritdoc cref="SetShowOnline"/>
+        public static void SetAllowRequests(bool value)
+        {
+            PlayerPrefs.SetInt(AllowRequestsKey, value ? 1 : 0);
             PlayerPrefs.Save();
         }
 

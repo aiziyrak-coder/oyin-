@@ -12,6 +12,7 @@ namespace CraDev.Online
     public class Presence : MonoBehaviour
     {
         const float Interval = 30f;
+        const float MaxRejectedInterval = 300f;
 
         static Presence instance;
 
@@ -36,15 +37,20 @@ namespace CraDev.Online
         IEnumerator Start()
         {
             var api = new GameApi(serverUrl);
+            int rejected = 0; // ketma-ket 401 javoblari
             while (true)
             {
                 if (PlayerProfile.Exists)
                     yield return api.Presence(PlayerProfile.Token, result =>
                     {
                         Online = result.Ok ? result.Data.online : -1;
+                        rejected = !result.NetworkError && result.Status == 401 ? rejected + 1 : 0;
                         Changed?.Invoke();
                     });
-                yield return new WaitForSecondsRealtime(Interval);
+                // Server profilni tanimasa (bosh menyu uni tiklaguncha yoki o'yinchi yangi qahramon yaratguncha) signal
+                // kamroq yuboriladi: birinchi rad etishdan keyin odatdagidek, keyin 1, 2, 4, 5 daqiqa
+                float wait = rejected <= 1 ? Interval : Mathf.Min(Interval * (1 << Mathf.Min(rejected - 1, 4)), MaxRejectedInterval);
+                yield return new WaitForSecondsRealtime(wait);
             }
         }
     }
