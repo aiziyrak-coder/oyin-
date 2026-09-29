@@ -8,6 +8,7 @@
 /[Uu]ser[Ss]ettings/
 /[Mm]emoryCaptures/
 /[Rr]ecordings/
+/.utmp/
 
 # .meta fayllar albatta saqlanadi
 !/[Aa]ssets/**/*.meta
@@ -30,6 +31,10 @@
 *.mdb
 *.opendb
 *.VC.db
+# CI kompilyatsiya tekshiruvi loyihalari (tools/ci/cs-check) - IDE fayli emas, saqlanadi
+!/tools/ci/cs-check/**/*.csproj
+/tools/ci/cs-check/**/bin/
+/tools/ci/cs-check/**/obj/
 
 # Build natijalari
 sysinfo.txt
@@ -47,3 +52,25 @@ Thumbs.db
 
 # Python
 __pycache__/
+
+# CI skriptlari chiqishi (tools/ci/server-exe.sh dist, tools/ci/smoke.sh game smoke)
+/dist/
+/smoke/
+/game/
+/server-exe/
+
+# Node.js va o'yin serverining ma'lumotlar bazasi (standart: Server/data/cradev.db)
+node_modules/
+npm-debug.log*
+/Server/data/
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+
+# Ildizdagi vaqtinchalik loglar (asosiy loglar Logs/ da)
+/*.log
+
+# Mahalliy AI yordamchi holati (umumiy .claude/settings.json saqlanadi)
+/.claude/settings.local.json
+/.claude/worktrees/

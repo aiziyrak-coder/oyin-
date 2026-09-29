@@ -1,11 +1,13 @@
-# CraDev CI: har bir push'da server testlari va serverni bitta .exe ga yig'ish, Unity'da o'yinni yig'ish
-# (Windows va Linux) va Linux build'ni virtual ekranda ishga tushirib tekshirish (tools/ci/smoke.sh).
+# CraDev CI: har bir push'da server testlari va serverni bitta .exe ga yig'ish, Unity'siz taxminiy C#
+# kompilyatsiya tekshiruvi (tools/ci/cs-check), Unity'da o'yinni yig'ish (Windows va Linux) va Linux build'ni
+# virtual ekranda ishga tushirib tekshirish (tools/ci/smoke.sh).
 #
 # Unity qismi uchun repo'da 3 ta secret kerak (Settings -> Secrets and variables -> Actions):
 #   UNITY_LICENSE  - C:\ProgramData\Unity\Unity_lic.ulf faylining to'liq matni
 #   UNITY_EMAIL    - Unity akkaunti email'i
 #   UNITY_PASSWORD - Unity akkaunti paroli
-# Ular bo'lmasa Unity job'lari o'tkazib yuboriladi (ogohlantirish bilan).
+# Ular bo'lmasa Unity build va smoke job'lari o'tkazib yuboriladi (ogohlantirish va run xulosasida yozuv bilan):
+# unda yashil belgi faqat server testlari va taxminiy C# tekshiruvi o'tganini bildiradi.
 
 name: CraDev CI
 
@@ -51,6 +53,40 @@ jobs:
           path: dist/CraDevServer.exe
           retention-days: 30
 
+  # Unity'siz, litsenziyasiz: Unity 2021 modullari + stublar bilan kompilyatsiya (tools/ci/cs-check/README.md).
+  # Haqiqiy Unity 6 build'ining o'rnini bosmaydi, lekin sintaksis va tur xatolarini har push'da ushlaydi.
+  csharp:
+    name: C# kompilyatsiya (taxminiy, Unity'siz)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 8.0.x
+      - uses: actions/cache@v5
+        with:
+          path: |
+            ~/.nuget/packages
+            ${{ runner.temp }}/cradev-cs-check-cache
+          key: cs-check-${{ hashFiles('tools/ci/cs-check/**/*.csproj', 'tools/ci/cs-check/check.sh') }}
+      - name: Kompilyatsiya
+        env:
+          CS_CHECK_CACHE: ${{ runner.temp }}/cradev-cs-check-cache
+        run: |
+          set -o pipefail
+          tools/ci/cs-check/check.sh | tee "$RUNNER_TEMP/cs-check.log"
+      - name: Xulosa
+        if: always()
+        run: |
+          {
+            echo "### C# kompilyatsiya (taxminiy)"
+            echo "Unity 2021 modullari va stublar bilan; Unity 6 build'ining o'rnini bosmaydi."
+            echo '```'
+            tail -n 60 "$RUNNER_TEMP/cs-check.log" 2>/dev/null || echo "log yo'q"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
   license:
     name: Unity litsenziyasi
     runs-on: ubuntu-latest
@@ -69,6 +105,11 @@ jobs:
           else
             echo "available=false" >> "$GITHUB_OUTPUT"
             echo "::warning title=Unity litsenziyasi yo'q::UNITY_LICENSE, UNITY_EMAIL va UNITY_PASSWORD secret'larini qo'shing (README: GitHub'da avtomatik yig'ish). Unity build o'tkazib yuborildi."
+            {
+              echo "### Unity build va smoke test ISHLAMADI"
+              echo "UNITY_LICENSE, UNITY_EMAIL, UNITY_PASSWORD secret'lari yo'q: o'yin Unity'da yig'ilmadi va ishga tushirib tekshirilmadi."
+              echo "Yashil natija faqat server testlari va taxminiy C# kompilyatsiya tekshiruvi o'tganini bildiradi."
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
   build:
@@ -102,7 +143,8 @@ jobs:
         with:
           targetPlatform: ${{ matrix.target }}
           buildName: CraDev
-          # Sahnalar repo'da yo'q: bu metod avval ularni yaratadi, keyin o'yinni yig'adi
+          # Sahnalar repo'da bor, lekin builder koddan qayta yaratadi: bu metod avval barcha 6 sahnani yaratadi,
+          # keyin o'yinni yig'adi (grafika bo'lmasa yuz/kiyim xaritalari commit qilingan JSON'dan olinadi)
           buildMethod: CraDev.EditorTools.CraDevBatch.BuildGame
           versioning: None
       # Windows o'yini yonida server va ikkalasini birga ochadigan Play.cmd
