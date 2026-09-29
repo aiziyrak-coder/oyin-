@@ -11,7 +11,7 @@ namespace CraDev
     /// Matn kalit bo'yicha olinadi: <c>Loc.T("menu.enter")</c>. Til almashsa <see cref="Changed"/> chaqiriladi,
     /// <see cref="LocalizedText"/> komponentlari o'zi yangilanadi.
     /// </summary>
-    public static class Loc
+    public static partial class Loc
     {
         const string PrefKey = "cradev.language";
         static Language? current;
@@ -40,7 +40,7 @@ namespace CraDev
 
         public static string T(string key)
         {
-            if (!Table.TryGetValue(key, out var pair))
+            if (!Table.TryGetValue(key, out var pair) && (extra == null || !extra.TryGetValue(key, out pair)))
             {
                 Debug.LogWarning("[CraDev] Tarjima yo'q: " + key);
                 return key;
@@ -53,6 +53,20 @@ namespace CraDev
 
         /// <summary>Harflar orasini ochadi ("XUSH" -> "X U S H"): Text'da harf oralig'i sozlamasi yo'q.</summary>
         public static string Spaced(string text) => string.Join(" ", text.ToCharArray()).Replace("   ", "     ");
+
+        /// <summary>Qo'shimcha matnlar: <c>Loc.*.cs</c> partial fayllari o'z jadvalini <see cref="Register"/> orqali qo'shadi.</summary>
+        static Dictionary<string, (string uz, string en)> extra;
+
+        static Dictionary<string, (string uz, string en)> Register(Dictionary<string, (string uz, string en)> table)
+        {
+            extra ??= new Dictionary<string, (string uz, string en)>();
+            foreach (var pair in table)
+                extra[pair.Key] = pair.Value;
+            return table;
+        }
+
+        /// <summary>Kalit jadvalda bormi (test va zaxira matnlar uchun).</summary>
+        public static bool Has(string key) => Table.ContainsKey(key) || (extra != null && extra.ContainsKey(key));
 
         static readonly Dictionary<string, (string uz, string en)> Table = new Dictionary<string, (string, string)>
         {
