@@ -170,4 +170,4 @@ Joriy holat uchun `HANDOFF.md` boshidagi yangilanish va `USTA.md` ni o'qing; pas
 7. `tools/unity.ps1 run` o'yin serverini ham o'zi yoqadi (ishlamayotgan bo'lsa). Har bir sahnada Esc ishlaydi:
    ochiq oyna yopiladi, bosh menyu va yangi o'yinchida "Quit game?", tahrirlashda menyuga qaytish.
 
-Git: ish `claude/gallant-dijkstra-r0opib` branch'ida. `Library/`, `Temp/`, `Logs/`, `Builds/` commit qilinmaydi.
+Git: ish `claude/trusting-archimedes-aq2wdl` branch'ida. `Library/`, `Temp/`, `Logs/`, `Builds/` commit qilinmaydi.

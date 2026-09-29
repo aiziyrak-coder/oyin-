@@ -1,5 +1,25 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI — AVATAR STUDIYASI, SOZLAMALAR VA TUZATISHLAR (2026-09-29)
+
+Branch: `claude/trusting-archimedes-aq2wdl`. Unity'siz (bulutda) yozilgan va taxminiy C# kompilyatsiya tekshiruvidan
+(`tools/ci/cs-check/check.sh`, Unity 2021 API + stublar) va server testlaridan (72/72) o'tgan. **Unity'da hali sinalmagan:**
+foydalanuvchi `tools\lobby.ps1 -Build` bilan sahnalarni qayta yaratib tekshirishi kerak.
+
+- Lobbyda **Avatar studiyasi** (`LobbyAvatarStudio.cs`, builder `CraDevSceneBuilder.AvatarStudio.cs`): sahna almashmaydi
+  (party saqlanadi), jinsdagi avatarni almashtirish, yuz: jonli kamera skaneri (`FaceScanner`/`FaceScanView`: yuz
+  sifatiga ko'ra ko'rsatmalar, qurilma tanlash, xato holatlari) yoki rasm yuklash, Saqlash/Bekor qilish. Kirish: profil
+  yonidagi Avatar tugmasi va Sozlamalar > Profil.
+- **Sozlamalar** qayta qurildi (slayder/selektorlar, ekran rejimi + rezolyutsiya + tasdiqlash taymeri, FPS limiti, farqli
+  sifat darajalari, ovoz kanallari, boshqaruv olam bilan umumiy `WorldPreferences`, standartga qaytarish).
+- Lobby: do'stlik so'rovlari belgisi, tadbir kartasi, fon ekran nisbatiga moslanadi, party/tugma tuzatishlari.
+- Olam: Esc menyusida grafika/ovoz, sichqoncha birligi, cho'kkalash va Esc xatolari.
+- Server: baza doimiy joyda (`%LOCALAPPDATA%\CraDev\server`, eski baza ko'chiriladi), server manzili `-server <url>`
+  bilan o'zgaradi, outfit validatsiyasi, maxfiylik qisman PATCH.
+- CI: Unity'siz C# kompilyatsiya tekshiruvi (`tools/ci/cs-check`).
+- Matnlar: katta jadval `Loc.cs`, yangi matnlar `Loc.<Bo'lim>.cs` partial fayllarida (`Register`).
+
+
 ## ENG YANGI — OLAM GRAFIKASI (2026-09-28)
 
 Foydalanuvchi realizmni birinchi o'ringa qo'ydi. WorldSandbox endi fotografik CC0 PBR materiallar, 4K Radiance osmon, skanerlangan Boulder 01 (faqat LOD2), 3D tepaliklar va ingichka shamolli o'tlarni ishlatadi. Asosiy harakat/collider geometriyasi saqlangan. Bu haqiqiy 3D render, lobby foniga tegilmagan; mahalliy birinchi-shaxs sinov bosqichi davom etmoqda.

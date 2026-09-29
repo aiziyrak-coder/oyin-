@@ -22,7 +22,7 @@ qisqa va silliq harakatlar. Uchqun, nur yoki "kosmik" effektlar yo'q.
 
 1. Loyihani kompyuterga yuklab oling:
    - GitHub Desktop yoki `git clone https://github.com/aiziyrak-coder/oyin-.git`, so'ng
-     `claude/gallant-dijkstra-r0opib` branch'iga o'ting;
+     `claude/trusting-archimedes-aq2wdl` branch'iga o'ting;
    - yoki GitHub'da shu branch'ni tanlab, **Code → Download ZIP**.
 2. **Unity Hub → Projects → Add → Add project from disk** va loyiha papkasini tanlang
    (ichida `Assets` va `ProjectSettings` papkalari bor papka).
