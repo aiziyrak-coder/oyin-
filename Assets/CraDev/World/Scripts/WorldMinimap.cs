@@ -3,52 +3,56 @@ using UnityEngine.UI;
 
 namespace CraDev.World
 {
-    /// <summary>Kichik xarita: shimol doim yuqorida, o'yinchi markazda; chizish ko'pi bilan 30 Hz.</summary>
+    /// <summary>
+    /// Kichik xarita: shimol doim yuqorida, o'yinchi markazda; chizish ko'pi bilan 30 Hz.
+    /// Xarita kamerasini faqat shu komponent yaratadi va sozlaydi (yagona manba): builder kamera qurmaydi.
+    /// </summary>
     public sealed class WorldMinimap : MonoBehaviour
     {
+        const float ViewRadius = 32f;       // ortografik yarim balandlik, metr
+        const float CameraHeight = 60f;     // o'yinchidan balandlik
+        const float FarClip = 150f;
+        static readonly Color Background = new Color(.2f, .29f, .24f);
+
         Transform target;
         Camera mapCamera;
         RectTransform heading;
         RenderTexture texture;
         float nextRender;
-        bool ownsCamera;
 
         public RenderTexture Texture => texture;
         public Camera MapCamera => mapCamera;
 
-        public void Configure(Transform follow, Camera camera, RawImage output, RectTransform marker)
+        public void Configure(Transform follow, RawImage output, RectTransform marker)
         {
             target = follow;
             heading = marker;
-            mapCamera = camera;
-            if (!mapCamera)
-            {
-                var go = new GameObject("WorldMapCamera");
-                mapCamera = go.AddComponent<Camera>();
-                ownsCamera = true;
-            }
+            if (!mapCamera) mapCamera = new GameObject("WorldMapCamera").AddComponent<Camera>();
             mapCamera.enabled = false;
             mapCamera.orthographic = true;
-            mapCamera.orthographicSize = 32f;
+            mapCamera.orthographicSize = ViewRadius;
             mapCamera.nearClipPlane = .1f;
-            mapCamera.farClipPlane = 150f;
+            mapCamera.farClipPlane = FarClip;
             mapCamera.cullingMask = ~((1 << 5) | (1 << 8));
             mapCamera.clearFlags = CameraClearFlags.SolidColor;
-            mapCamera.backgroundColor = new Color(.2f, .29f, .24f);
+            mapCamera.backgroundColor = Background;
             mapCamera.allowHDR = false;
             mapCamera.allowMSAA = false;
             mapCamera.useOcclusionCulling = false;
             mapCamera.depthTextureMode = DepthTextureMode.None;
             mapCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-            texture = new RenderTexture(256, 256, 16, RenderTextureFormat.ARGB32)
+            if (!texture)
             {
-                name = "WorldMinimap256",
-                filterMode = FilterMode.Bilinear,
-                wrapMode = TextureWrapMode.Clamp,
-                antiAliasing = 1,
-                useMipMap = false
-            };
-            texture.Create();
+                texture = new RenderTexture(256, 256, 16, RenderTextureFormat.ARGB32)
+                {
+                    name = "WorldMinimap256",
+                    filterMode = FilterMode.Bilinear,
+                    wrapMode = TextureWrapMode.Clamp,
+                    antiAliasing = 1,
+                    useMipMap = false
+                };
+                texture.Create();
+            }
             mapCamera.targetTexture = texture;
             output.texture = texture;
             output.raycastTarget = false;
@@ -57,7 +61,7 @@ namespace CraDev.World
         void LateUpdate()
         {
             if (!target || !mapCamera || !texture) return;
-            mapCamera.transform.position = target.position + Vector3.up * 60f;
+            mapCamera.transform.position = target.position + Vector3.up * CameraHeight;
             if (heading) heading.localRotation = Quaternion.Euler(0f, 0f, -target.eulerAngles.y);
             if (Time.unscaledTime < nextRender) return;
             nextRender = Time.unscaledTime + 1f / 30f;
@@ -72,7 +76,7 @@ namespace CraDev.World
                 texture.Release();
                 Destroy(texture);
             }
-            if (ownsCamera && mapCamera) Destroy(mapCamera.gameObject);
+            if (mapCamera) Destroy(mapCamera.gameObject);
         }
     }
 

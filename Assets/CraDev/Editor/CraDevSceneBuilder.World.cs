@@ -64,11 +64,9 @@ namespace CraDev.EditorTools
             RenderSettings.fog=true;RenderSettings.fogMode=FogMode.Linear;RenderSettings.fogStartDistance=140;RenderSettings.fogEndDistance=430;RenderSettings.fogColor=new Color(.65f,.72f,.76f);
             DynamicGI.UpdateEnvironment();
             BakeWorldReflection();
-            var map=new GameObject("MinimapCamera").AddComponent<Camera>();map.orthographic=true;map.orthographicSize=24;
-            map.nearClipPlane=.1f;map.farClipPlane=120;map.cullingMask=~((1<<5)|(1<<8));map.clearFlags=CameraClearFlags.SolidColor;map.backgroundColor=new Color(.25f,.33f,.23f);map.allowHDR=false;map.allowMSAA=false;
-            map.transform.SetPositionAndRotation(new Vector3(0,60,0),Quaternion.Euler(90,0,0));map.enabled=false;
+            // Mini-xarita kamerasini WorldMinimap o'zi yaratadi va sozlaydi (yagona manba): bu yerda kamera qurilmaydi.
             var hud=root.gameObject.AddComponent<WorldHud>();var kit=Kit();
-            Set(hud,"player",controller);Set(hud,"font",kit.Medium);Set(hud,"rounded",kit.RoundFill);Set(hud,"mapCamera",map);
+            Set(hud,"player",controller);Set(hud,"font",kit.Medium);Set(hud,"boldFont",kit.SemiBold);Set(hud,"rounded",kit.RoundFill);
             Save(scene,WorldScene);
             var scenes=EditorBuildSettings.scenes.Where(s=>s.path!=WorldScene).ToList();scenes.Add(new EditorBuildSettingsScene(WorldScene,true));EditorBuildSettings.scenes=scenes.ToArray();
             AssetDatabase.SaveAssets();Debug.Log("[CraDev] WorldSandbox yaratildi.");

@@ -18,7 +18,11 @@ namespace CraDev.World
         const float JumpHeight = 1f;
         const float CoyoteSeconds = .12f;
         const float JumpBufferSeconds = .12f;
-        const float MouseDegreesPerPixel = .085f;
+        /// <summary>Sezgirlik 1.00 da bir piksel sichqoncha siljishi necha daraja buradi.</summary>
+        public const float MouseDegreesPerPixel = .085f;
+        // InputManager.asset: "Mouse X/Y" sensitivity = 0.1, ya'ni GetAxisRaw = piksel * 0.1.
+        // 10 ga ko'paytirib Input System'dagi Mouse.delta bilan bir xil piksel birligiga qaytaramiz.
+        const float LegacyMouseAxisToPixels = 10f;
 
         [SerializeField] Camera viewCamera;
         [SerializeField] LayerMask collisionLayers = ~0;
@@ -45,6 +49,7 @@ namespace CraDev.World
         float stepCameraOffset;
         bool crouchLatched;
         bool previousCrouchInput;
+        bool toggleCrouchMode;
         bool skipNextLook;
         bool paused;
         bool initialized;
@@ -84,6 +89,7 @@ namespace CraDev.World
             yaw = transform.eulerAngles.y;
             spawnYaw = yaw;
             spawnPosition = transform.position;
+            toggleCrouchMode = WorldPreferences.ToggleCrouch;
         }
 
         public void Configure(Camera camera)
@@ -107,7 +113,10 @@ namespace CraDev.World
             Speed = 0f;
             IsSprinting = false;
             jumpBuffer = 0f;
-            previousCrouchInput = false;
+            // Pauza/davom etishda toggle holati tushadi: joy bo'lsa o'yinchi tik turib qaytadi, past shift
+            // ostida esa MoveStep baribir cho'kkalatib turadi. Pauzadan oldin ushlangan tugma yangi bosish emas.
+            if (changed) crouchLatched = false;
+            previousCrouchInput = true;
             skipNextLook = !value;
             if (!TestMode) ApplyCursor();
             if (changed) PauseChanged?.Invoke(value);
@@ -187,16 +196,23 @@ namespace CraDev.World
             if (!Finite(move.x) || !Finite(move.y)) move = Vector2.zero;
             if (!Finite(look.x) || !Finite(look.y)) look = Vector2.zero;
             move = Vector2.ClampMagnitude(move, 1f);
-            float sensitivity = Mathf.Clamp(WorldPreferences.Sensitivity, .1f, 3f);
+            float sensitivity = Mathf.Clamp(WorldPreferences.Sensitivity, WorldPreferences.MinSensitivity, WorldPreferences.MaxSensitivity);
             yaw = Mathf.Repeat(yaw + look.x * sensitivity * MouseDegreesPerPixel, 360f);
             pitch = Mathf.Clamp(pitch - look.y * sensitivity * MouseDegreesPerPixel *
                 (WorldPreferences.InvertY ? -1f : 1f), -85f, 85f);
             transform.rotation = Quaternion.Euler(0f, yaw, 0f);
 
-            if (WorldPreferences.ToggleCrouch && crouch && !previousCrouchInput)
+            bool toggleMode = WorldPreferences.ToggleCrouch;
+            if (toggleMode != toggleCrouchMode)
+            {
+                // Rejim almashsa (menyu, lobby yoki Reset) eski toggle holati qayta tiklanmaydi.
+                toggleCrouchMode = toggleMode;
+                crouchLatched = false;
+            }
+            if (toggleMode && crouch && !previousCrouchInput)
                 crouchLatched = !crouchLatched;
             previousCrouchInput = crouch;
-            bool wantsCrouch = WorldPreferences.ToggleCrouch ? crouchLatched : crouch;
+            bool wantsCrouch = toggleMode ? crouchLatched : crouch;
             if (jump) jumpBuffer = JumpBufferSeconds;
 
             // Uzun kadrda devordan o'tish va sakrash natijasining FPSga bog'liqligini kamaytiradi.
@@ -331,8 +347,8 @@ namespace CraDev.World
             bobOffset = Mathf.Lerp(bobOffset, targetBob, blend);
             viewCamera.transform.localPosition = new Vector3(0f, capsule.height - .14f + bobOffset + stepCameraOffset, 0f);
             viewCamera.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
-            viewCamera.fieldOfView = Mathf.Lerp(viewCamera.fieldOfView,
-                Mathf.Clamp(WorldPreferences.FieldOfView, 65f, 100f), blend);
+            viewCamera.fieldOfView = Mathf.Lerp(viewCamera.fieldOfView, Mathf.Clamp(WorldPreferences.FieldOfView,
+                WorldPreferences.MinFieldOfView, WorldPreferences.MaxFieldOfView), blend);
         }
 
         static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
@@ -370,7 +386,7 @@ namespace CraDev.World
                      (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow) ? 1f : 0f);
             move.y = (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow) ? 1f : 0f) -
                      (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow) ? 1f : 0f);
-            look = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")) * 25f;
+            look = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")) * LegacyMouseAxisToPixels;
             sprint = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
             crouch = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.C);
             jump = Input.GetKeyDown(KeyCode.Space);
