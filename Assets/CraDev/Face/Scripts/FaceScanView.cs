@@ -71,6 +71,7 @@ namespace CraDev.Face
         float warmAt = -1f;
         float countdownStart = -1f;
         Coroutine analysis, processing;
+        bool analyzing;
         Texture2D pending;    // tekshirilayotgan rasm
         Texture2D rejected;   // yuz topilmagan rasm (xabar bilan ko'rsatib turiladi)
         FaceData candidate;   // topilgan, hali tanlanmagan yuz
@@ -289,10 +290,14 @@ namespace CraDev.Face
                 {
                     if (previewFitter != null)
                         previewFitter.aspectRatio = scanner.PreviewAspect;
-                    if (analysis == null && now >= nextAnalysis)
+                    if (!analyzing && now >= nextAnalysis)
                     {
+                        // Bayroq alohida: korutina darhol tugasa ham keyingi tekshiruv to'xtab qolmaydi
                         nextAnalysis = now + analyzeInterval;
-                        analysis = StartCoroutine(Analyze());
+                        analyzing = true;
+                        var routine = StartCoroutine(Analyze());
+                        if (analyzing)
+                            analysis = routine;
                     }
                     if (countdownStart >= 0f)
                     {
@@ -317,6 +322,7 @@ namespace CraDev.Face
             var result = ScanHint.Find;
             yield return scanner.Analyze(h => result = h);
             analysis = null;
+            analyzing = false;
             if (mode != Mode.Camera || scanner.State != FaceScanner.CameraState.Live)
                 yield break;
             if (scanner.Error != null)
@@ -352,10 +358,12 @@ namespace CraDev.Face
 
         void StopAnalysis()
         {
-            if (analysis == null)
+            if (!analyzing)
                 return;
-            StopCoroutine(analysis);
+            if (analysis != null)
+                StopCoroutine(analysis);
             analysis = null;
+            analyzing = false;
             scanner.ResetBuffers();
         }
 
