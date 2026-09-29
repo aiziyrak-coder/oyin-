@@ -79,7 +79,7 @@ namespace CraDev.EditorTools
             PlaceTopLeft(label.rectTransform, x, y, w, h);
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             label.verticalOverflow = VerticalWrapMode.Truncate;
-            if (localized) Localized(label, text);
+            if (localized && !string.IsNullOrEmpty(text)) Localized(label, text);
             return label;
         }
 

@@ -59,7 +59,7 @@ elseif ($status.Stale) {
 if ($reason) {
     Write-Step "O'yin qayta yig'iladi ($reason)."
     if (-not $Full) {
-        Write-Host "         Faqat MainMenu va WorldSandbox sahnalari qayta yaratiladi. Boshqa sahnalar builder'i o'zgargan bo'lsa: Play-LobbyV2.cmd -Full"
+        Write-Host "         Barcha sahnalar qayta yaratiladi."
     }
     $code = Invoke-GameBuild -Full:$Full -UnityOverride $Unity
     if ($code -ne 0) {

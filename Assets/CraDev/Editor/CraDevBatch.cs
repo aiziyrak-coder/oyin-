@@ -16,7 +16,8 @@ namespace CraDev.EditorTools
         {
             try
             {
-                CraDevSceneBuilder.RebuildLobby();
+                // Barcha sahnalar qayta yaratiladi: faqat lobbyni yaratish boshqa sahnalarni eskirgan holda qoldirardi
+                CraDevSceneBuilder.CreateScenes();
                 var target = ResolveTarget();
                 var path = Argument("-customBuildPath") ?? "Builds/LobbyV2/CraDev.exe";
                 var report = CraDevSceneBuilder.BuildGame(target, path, run: false);
