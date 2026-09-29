@@ -68,6 +68,7 @@ namespace CraDev.Face
         ScanHint lastHint = ScanHint.Find;
         int goodStreak, badStreak;
         float nextAnalysis;
+        float warmAt = -1f;
         float countdownStart = -1f;
         Coroutine analysis, processing;
         Texture2D pending;    // tekshirilayotgan rasm
@@ -217,7 +218,27 @@ namespace CraDev.Face
                 scanner.StartCamera();
             ShowCameraTexture();
             nextAnalysis = Time.unscaledTime + 0.3f;
+            // Modellar oyna ekranga chiqqandan keyin, kamera yoqilayotganda yuklanadi (bir martalik kichik to'xtalish)
+            warmAt = scanner.TrackerReady ? -1f : Time.unscaledTime + 0.15f;
             Refresh();
+        }
+
+        void WarmUp()
+        {
+            warmAt = -1f;
+            try
+            {
+                if (scanner.Tracker != null)
+                    Refresh();
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("[CraDev] Yuz aniqlash modellarini yuklab bo'lmadi: " + e);
+                trackerFailed = true;
+                StopCamera();
+                shownState = scanner.State;
+                Refresh();
+            }
         }
 
         void StopCamera()
@@ -254,6 +275,8 @@ namespace CraDev.Face
 
             if (mode == Mode.Camera)
             {
+                if (warmAt >= 0f && now >= warmAt && !Broken)
+                    WarmUp();
                 scanner.Update();
                 if (scanner.State != shownState)
                 {
