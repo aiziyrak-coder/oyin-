@@ -52,6 +52,7 @@ namespace CraDev.MainMenu
         public override void OnShow()
         {
             if (Id == "wardrobe") { draft = Outfit.FromJson(PlayerProfile.Outfit); saved = draft.Clone(); }
+            if (Id == "settings") SettingsShown();
             // Static pages retain their existing hierarchy; live data still refreshes on entry.
             if(!rendered || renderedLanguage!=Loc.Current || Id=="wardrobe" || Id=="settings" || Id=="friends" || Id=="top") Render();
             if(Id=="home" && eventTitle!=null) StartCoroutine(Lobby.Api.Events(result=>{
@@ -65,14 +66,16 @@ namespace CraDev.MainMenu
         }
         public override void OnHide()
         {
+            if (Id == "settings") SettingsHidden();
             revision++; StopAllCoroutines(); searchRoutine = null;
             previewRoutine=null;previewQueue.Clear();
             if (Id == "world") SetMapZoom(1);
             if (Id == "wardrobe") Lobby.Viewer.SetOutfit(Outfit.FromJson(PlayerProfile.Outfit));
         }
-        protected override void OnLanguageChanged() { if (Lobby != null && isActiveAndEnabled) Render(); }
+        protected override void OnLanguageChanged() { if (Lobby != null && isActiveAndEnabled) { keepSettingsScroll = Id == "settings"; Render(); } }
         public override bool OnBack()
         {
+            if (Id == "settings") return SettingsBack();
             if (search != null && search.text.Length > 0) { search.text = ""; return true; }
             return false;
         }
@@ -94,7 +97,7 @@ namespace CraDev.MainMenu
                 return;
             }
             if (value == "zoom-in" || value == "zoom-out") { SetMapZoom(Mathf.Clamp(zoom + (value == "zoom-in" ? .15f : -.15f), 1, 1.8f)); return; }
-            if (int.TryParse(value, out int index)) { section = index; Render(); }
+            if (int.TryParse(value, out int index)) { section = index; countryView = false; Render(); }
         }
         void SetMapZoom(float value)
         {
@@ -113,6 +116,9 @@ namespace CraDev.MainMenu
         }
         void Render()
         {
+            // Sozlamalarda shu bo'lim qayta chizilsa (til, profil) aylantirish joyi saqlanadi
+            float scrollY = Id == "settings" && keepSettingsScroll && surface != null ? surface.anchoredPosition.y : 0;
+            keepSettingsScroll = false;
             revision++;
             rendered=true;renderedLanguage=Loc.Current;
             previewQueue.Clear();
@@ -143,7 +149,10 @@ namespace CraDev.MainMenu
                 case "business": Business(); break;
                 case "friends": Friends(); break;
                 case "top": Ranking(); break;
-                case "settings": Settings(); break;
+                case "settings":
+                    Settings();
+                    if (scrollY > 0) surface.anchoredPosition = new Vector2(0, Mathf.Min(scrollY, Mathf.Max(0, surface.sizeDelta.y - content.rect.height)));
+                    break;
             }
         }
         void RefreshLiveLabels()
@@ -157,7 +166,7 @@ namespace CraDev.MainMenu
             if(footer!=null) foreach(Transform child in footer) {child.gameObject.SetActive(false);Destroy(child.gameObject);}
             width = content.rect.width;
             if (content.GetComponent<RectMask2D>() == null) content.gameObject.AddComponent<RectMask2D>();
-            var scroll = content.GetComponent<ScrollRect>() ?? content.gameObject.AddComponent<ScrollRect>();
+            if (!content.TryGetComponent(out ScrollRect scroll)) scroll = content.gameObject.AddComponent<ScrollRect>();
             surface = Rect("Rows",content,0,0,width,height);
             scroll.viewport = content; scroll.content=surface; scroll.horizontal=false; scroll.vertical=true;
             scroll.movementType=ScrollRect.MovementType.Clamped; scroll.scrollSensitivity=45;
@@ -193,6 +202,7 @@ namespace CraDev.MainMenu
             var label=Text(text,14,0,w-28,h,25,image.transform);
             label.resizeTextForBestFit=false;
             if(action!=null) button.onClick.AddListener(()=>action());
+            UiSounds.Hook(button);
             return button;
         }
         void Message(string key) => Text(Loc.T(key),30,30,width-60,180,28).color=Muted;

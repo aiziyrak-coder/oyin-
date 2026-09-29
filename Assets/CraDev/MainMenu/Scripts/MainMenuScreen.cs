@@ -581,6 +581,8 @@ namespace CraDev.MainMenu
             if(!singleWindow || settingsOpen==open)return;
             settingsOverlay ??= Array.Find(pages,p=>p.Id=="settings");
             if(settingsOverlay==null)return;
+            // Esc: sozlamalar ichidagi kichik ko'rinish (mamlakat tanlash, "Saqlansinmi?") avval o'zi yopiladi
+            if(!open && Anim.BackPressed() && settingsOverlay.OnBack())return;
             settingsOpen=open;
             if(open)
             {

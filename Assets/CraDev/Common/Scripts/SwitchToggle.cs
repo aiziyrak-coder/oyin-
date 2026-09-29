@@ -4,7 +4,11 @@ using UnityEngine.UI;
 
 namespace CraDev
 {
-    /// <summary>Yoqish/o'chirish tugmasi (iOS uslubidagi "switch"): bosilganda qiymat almashadi, tugmacha silliq suriladi.</summary>
+    /// <summary>
+    /// Yoqish/o'chirish tugmasi (iOS uslubidagi "switch"): bosilganda qiymat almashadi, tugmacha silliq suriladi.
+    /// Builder maydonlarni Set bilan yozadi; ish vaqtida yaratilgan qatorlar <see cref="Init"/> ni chaqiradi.
+    /// Tugmacha trek markaziga bog'lanadi va -travel..+travel oralig'ida suriladi.
+    /// </summary>
     [RequireComponent(typeof(Button))]
     public class SwitchToggle : MonoBehaviour
     {
@@ -19,10 +23,22 @@ namespace CraDev
 
         public event Action<bool> Changed;
 
+        /// <summary>Qiymat (animatsiya bilan suriladi, Changed chaqirilmaydi).</summary>
         public bool Value
         {
             get => value;
             set { this.value = value; }
+        }
+
+        /// <summary>Ish vaqtida yaratilgan switch uchun: qismlar, ranglar va boshlang'ich qiymat (animatsiyasiz).</summary>
+        public void Init(Image track, RectTransform knob, Color on, Color off, float travel, bool value)
+        {
+            this.track = track;
+            this.knob = knob;
+            onColor = on;
+            offColor = off;
+            this.travel = travel;
+            Set(value);
         }
 
         void Awake() => GetComponent<Button>().onClick.AddListener(() =>
@@ -47,6 +63,8 @@ namespace CraDev
 
         void Apply()
         {
+            if (track == null || knob == null)
+                return;
             float t = Ease.InOutSine(shown);
             track.color = Color.Lerp(offColor, onColor, t);
             knob.anchoredPosition = new Vector2(Mathf.Lerp(-travel, travel, t), 0f);

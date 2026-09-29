@@ -6,6 +6,7 @@ namespace CraDev
     /// <summary>
     /// Sahnadagi barcha tugmalarga (yashiringan oynalardagilar ham) sichqoncha ustiga kelganda va bosilganda
     /// qisqa ovoz beradi. Sahnada bitta bo'ladi; ovozlarni builder yaratadi (Assets/CraDev/UI/Audio).
+    /// Ish vaqtida yaratilgan tugmalar <see cref="Hook"/> bilan ulanadi. Balandlik: volume x GameSettings.SfxVolume.
     /// </summary>
     [RequireComponent(typeof(AudioSource))]
     public class UiSounds : MonoBehaviour
@@ -29,12 +30,23 @@ namespace CraDev
         void Start()
         {
             foreach (var selectable in FindObjectsByType<Selectable>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-            {
-                if (selectable.GetComponent<UiSoundHook>() == null)
-                    selectable.gameObject.AddComponent<UiSoundHook>();
-                if (selectable is Button button)
-                    button.onClick.AddListener(PlayClick);
-            }
+                Hook(selectable);
+        }
+
+        /// <summary>
+        /// Tugma yoki boshqa boshqaruv elementiga ovoz ulaydi: ustiga kelganda (faol bo'lsa) va tugma bosilganda.
+        /// Ikki marta chaqirilsa ham ovoz bir marta chiqadi. Ish vaqtida yaratilgan qatorlar uchun.
+        /// </summary>
+        public static void Hook(Selectable selectable)
+        {
+            if (selectable == null)
+                return;
+            if (!selectable.TryGetComponent(out UiSoundHook hook))
+                hook = selectable.gameObject.AddComponent<UiSoundHook>();
+            if (hook.ClickHooked || !(selectable is Button button))
+                return;
+            hook.ClickHooked = true;
+            button.onClick.AddListener(PlayClick);
         }
 
         void OnDestroy()
@@ -46,16 +58,19 @@ namespace CraDev
         public static void PlayHover()
         {
             // Tugmalar ustidan tez o'tganda ovozlar ustma-ust tushmasin
-            if (instance == null || instance.hover == null || Time.unscaledTime - instance.lastHover < 0.05f)
+            if (instance == null || instance.hover == null || Volume <= 0f || Time.unscaledTime - instance.lastHover < 0.05f)
                 return;
             instance.lastHover = Time.unscaledTime;
-            instance.source.PlayOneShot(instance.hover, instance.volume);
+            instance.source.PlayOneShot(instance.hover, Volume);
         }
 
         public static void PlayClick()
         {
-            if (instance != null && instance.click != null)
-                instance.source.PlayOneShot(instance.click, instance.volume);
+            if (instance != null && instance.click != null && Volume > 0f)
+                instance.source.PlayOneShot(instance.click, Volume);
         }
+
+        /// <summary>Interfeys ovozi balandligi: komponentdagi asosiy qiymat x sozlamalardagi "Interfeys ovozlari".</summary>
+        static float Volume => instance == null ? 0f : instance.volume * Mathf.Clamp01(GameSettings.SfxVolume);
     }
 }

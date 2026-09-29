@@ -338,11 +338,21 @@ namespace CraDev.EditorTools
             if (id == "home") { Set(page,"background",V2Texture("sunset-home")); V2GameHome(rect,page); return page; }
             if(id=="settings")
             {
-                rect.anchorMin=rect.anchorMax=rect.pivot=new Vector2(.5f,.5f);
-                rect.sizeDelta=new Vector2(1920,1080);rect.anchoredPosition=Vector2.zero;
+                // Sahifa butun ekranga cho'zilgan: qorong'i fon har qanday ekran nisbatida hammasini qoplaydi va
+                // oyna tashqarisiga bosilsa sozlamalar yopiladi. Qolgan hamma narsa markazdagi 1920x1080 ramkada.
                 var dim=CreateFullscreen("SettingsBackdrop",rect,new Color(0,0,0,.62f));dim.raycastTarget=true;
-                V2Panel(rect,"SettingsSheet",40,140,1830,900,new Color32(16,22,30,255)).raycastTarget=true;
+                var dimButton=dim.gameObject.AddComponent<Button>();dimButton.transition=Selectable.Transition.None;
+                dimButton.navigation=new Navigation{mode=Navigation.Mode.None};
+                dim.gameObject.AddComponent<LobbyCommand>().action="close-settings";
+                Set(dim.gameObject.AddComponent<UiSoundHook>(),"hover",false);
+                var frame=CreateRect("SettingsFrame",rect);
+                frame.anchorMin=frame.anchorMax=frame.pivot=new Vector2(.5f,.5f);
+                frame.sizeDelta=new Vector2(1920,1080);frame.anchoredPosition=Vector2.zero;
+                rect=frame;
+                V2Panel(rect,"SettingsSheet",40,140,1830,900,LobbyContent.SettingsSheet).raycastTarget=true;
                 V2Button(rect,"","Close",1788,156,60,52,"close-settings").name="SettingsClose";
+                Set(page,"chevronLeft",LineIcon("ChevronLeft"));Set(page,"chevronRight",LineIcon("ChevronRight"));
+                Set(page,"pencil",LineIcon("Pencil"));Set(page,"resetIcon",LineIcon("Refresh"));
             }
             string prefix = id == "entertainment" ? "fun" : id;
             V2Text(rect, prefix + ".title", 65, 153, id == "friends" ? 660 : 590, 64, 38).font = v2.SemiBold;
@@ -369,15 +379,15 @@ namespace CraDev.EditorTools
                     categories = new[] { "business.cat.main", "business.cat.offices", "business.cat.coworking", "business.cat.startups", "business.cat.investors", "business.cat.events", "business.cat.services" };
                     categoryIcons = new[] { "Home", "Office", "Coworking", "Rocket", "Coins", "Calendar", "Gear" }; break;
                 case "settings":
-                    categories = new[] { "settings.section.profile", "settings.section.security", "settings.section.notifications", "settings.section.sound", "settings.section.controls", "settings.section.privacy", "settings.section.language", "settings.section.help" };
-                    categoryIcons = new[] { "User", "Shield", "Bell", "Volume", "Gamepad", "Lock", "Globe", "Help" }; break;
+                    categories = LobbyContent.SettingsSections.Select(s => "settings.section." + s).ToArray();
+                    categoryIcons = new[] { "User", "Laptop", "Volume", "Mouse", "Home", "Lock", "Globe", "Help" }; break;
                 case "entertainment":
                     categories = new[] { "fun.cat.all", "fun.cat.concerts", "fun.cat.cinema", "fun.cat.games", "fun.cat.sport", "fun.cat.parks" };
                     categoryIcons = new[] { "Grid", "Music", "Film", "Gamepad", "Ball", "Home" }; break;
                 default: categories = new string[0]; categoryIcons = new string[0]; break;
             }
             var categoriesButtons = new List<Button>();
-            if(categories.Length>0)V2Panel(rect,"Sidebar",49,283,367,categories.Length*64+24,new Color(.045f,.06f,.085f,.94f));
+            if(categories.Length>0)V2Panel(rect,"Sidebar",49,283,367,categories.Length*64+24,id=="settings"?LobbyContent.SettingsSidebar:new Color(.045f,.06f,.085f,.94f));
             for (int i = 0; i < categories.Length; i++)
                 categoriesButtons.Add(V2Button(rect, categories[i], categoryIcons[i], 61, 295+i*64, 343, 56, "choose", i.ToString(), i == 0));
             SetArray(page, "categories", categoriesButtons.Cast<Object>().ToArray());
@@ -394,7 +404,8 @@ namespace CraDev.EditorTools
             float bodyX = id == "wardrobe" ? 1030 : id == "friends" || id == "top" ? 65 : 545;
             PlaceTopLeft(body, bodyX, id == "shops" ? 650 : 315, 1850-bodyX, id == "shops" ? 370 : 720);
             Set(page, "content", body);
-            if(id=="settings") PlaceTopLeft(body,705,210,1145,820);
+            // Sozlamalar: yon menyudan 24 px keyin, sarlavha ostidan boshlanadi (bo'sh ustun qolmaydi)
+            if(id=="settings") PlaceTopLeft(body,440,283,1410,747);
             if(id=="wardrobe")
             {
                 PlaceTopLeft(body,1030,195,820,708);

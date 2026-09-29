@@ -9,6 +9,7 @@ namespace CraDev
     /// <summary>
     /// Sozlamalar oynasi. Har bir qator: nomi va "&lt; qiymat &gt;" tanlagichi. O'zgarish darhol qo'llanadi va saqlanadi.
     /// Qatorlar tartibi: ekran rejimi, oyna o'lchami, grafika, V-Sync, ovoz, til.
+    /// Faqat eski bosh menyu builderi (BuildLegacyMainMenu) ishlatadi; hozirgi lobby sozlamalari LobbyContent.Settings.cs da.
     /// </summary>
     public class SettingsPanel : ModalWindow
     {
@@ -99,11 +100,7 @@ namespace CraDev
         }
 
         /// <summary>Unity sifat darajalari (Very Low … Ultra) joriy tilda.</summary>
-        static string QualityName(int level)
-        {
-            string key = "quality." + level;
-            return QualitySettings.names.Length == 6 ? Loc.T(key) : QualitySettings.names[level];
-        }
+        static string QualityName(int level) => GameSettings.QualityName(level);
 
         static int Mod(int a, int n) => ((a % n) + n) % n;
     }
