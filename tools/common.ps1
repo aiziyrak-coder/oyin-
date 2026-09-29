@@ -493,11 +493,18 @@ function Start-GameServer([string]$WindowStyle = 'Hidden') {
         Write-Warn "Eski server qayta yoqiladi: $stale (PID $owner)."
         Stop-ServerProcess $owner
         if (Get-PortOwner $ServerPort) {
-            Write-Fail "Eski serverni to'xtatib bo'lmadi (PID $owner). Vazifalar dispetcherida uni yoping."
-            $result.Ok = $false
-            return $result
+            # Eski server boshqa (masalan, Administrator) oynadan yoqilgan bo'lsa uni yopib bo'lmaydi: bo'sh portda yangisini yoqamiz
+            $free = $null
+            foreach ($candidate in 8090..8099) { if (-not (Get-PortOwner $candidate)) { $free = $candidate; break } }
+            if (-not $free) {
+                Write-Fail "Eski serverni to'xtatib bo'lmadi (PID $owner) va bo'sh port topilmadi. Kompyuterni qayta yoqing."
+                $result.Ok = $false
+                return $result
+            }
+            Write-Warn "Eski serverni to'xtatib bo'lmadi (PID $owner): yangi server $free portda yoqiladi."
+            $script:ServerPort = $free
         }
-        Clear-ServerState $owner
+        else { Clear-ServerState $owner }
     }
 
     if (-not $node.Path -and -not $serverExe) {
@@ -518,6 +525,7 @@ function Start-GameServer([string]$WindowStyle = 'Hidden') {
         $start.FilePath = $serverExe
         Write-Warn "Node.js yo'q ($($node.Problem)): $serverExe ishlatiladi. U yig'ilgan paytdagi server kodi bilan ishlaydi."
     }
+    $env:PORT = "$ServerPort"
     $process = $null
     if ($WindowStyle -eq 'Hidden') {
         try { $process = Start-Process @start -RedirectStandardOutput $outLog -RedirectStandardError $errLog }
@@ -577,7 +585,9 @@ function Get-PlayerLogPath {
 # O'yinni ochadi. -Wait: o'yin va boshqa CraDev.exe nusxalari yopilguncha kutib, $Server ni (shu skript yoqqan
 # bo'lsa) to'xtatadi. Kutmasa, server keyingi ishga tushirishgacha ishlab turadi (launcher uni qayta ishlatadi).
 function Start-Game($Server, [switch]$Wait) {
-    $game = Start-Process -FilePath $GameExe -WorkingDirectory (Split-Path -Parent $GameExe) -PassThru
+    $start = @{ FilePath = $GameExe; WorkingDirectory = (Split-Path -Parent $GameExe); PassThru = $true }
+    if ($ServerPort -ne 8080) { $start.ArgumentList = @('-server', "http://localhost:$ServerPort") }
+    $game = Start-Process @start
     Write-Step "O'yin ochildi. Log: $(Get-PlayerLogPath)"
     if (-not ($Wait -and $Server -and $Server.Started)) { return }
 

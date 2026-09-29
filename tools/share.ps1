@@ -21,6 +21,13 @@ if ($Build -or -not (Test-Path -LiteralPath $gameFile)) {
 $old = Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue
 foreach ($c in $old) { Stop-Process -Id $c.OwningProcess -Force -ErrorAction SilentlyContinue }
 Start-Sleep -Milliseconds 500
+# Eski serverni yopib bo'lmasa (masalan, Administrator oynasidan yoqilgan) bo'sh portni tanlaymiz
+$port = 8080
+foreach ($candidate in @(8080) + (8090..8099)) {
+    if (-not (Get-NetTCPConnection -LocalPort $candidate -State Listen -ErrorAction SilentlyContinue)) { $port = $candidate; break }
+}
+if ($port -ne 8080) { Write-Host "[CraDev] 8080 port band (eski server yopilmadi): server $port portda yoqiladi." }
+$env:PORT = "$port"
 $nodeFile = (Get-Command node -ErrorAction Stop).Source
 $env:TRUST_PROXY = '1'
 $server = Start-Process -FilePath $nodeFile -ArgumentList '--disable-warning=ExperimentalWarning src/server.js' `
@@ -28,10 +35,10 @@ $server = Start-Process -FilePath $nodeFile -ArgumentList '--disable-warning=Exp
     -RedirectStandardOutput (Join-Path $logDir 'share-server.log') -RedirectStandardError (Join-Path $logDir 'share-server.err.log')
 $ready = $false
 for ($i = 0; $i -lt 40; $i++) {
-    try { $null = Invoke-RestMethod 'http://localhost:8080/api/stats' -TimeoutSec 1; $ready = $true; break } catch { Start-Sleep -Milliseconds 250 }
+    try { $null = Invoke-RestMethod 'http://localhost:$port/api/stats' -TimeoutSec 1; $ready = $true; break } catch { Start-Sleep -Milliseconds 250 }
 }
 if (-not $ready) { throw "Server ishga tushmadi. Log: Logs\share-server.err.log" }
-Write-Host "[CraDev] Server yoqildi (http://localhost:8080)."
+Write-Host "[CraDev] Server yoqildi (http://localhost:$port)."
 
 # --- Tunnel (cloudflared bir marta yuklab olinadi)
 $binDir = Join-Path $PSScriptRoot 'bin'
@@ -44,7 +51,7 @@ if (-not (Test-Path -LiteralPath $cf)) {
 }
 $cfLog = Join-Path $logDir 'share-tunnel.log'
 Remove-Item -LiteralPath $cfLog -ErrorAction SilentlyContinue
-$tunnel = Start-Process -FilePath $cf -ArgumentList "tunnel --no-autoupdate --url http://localhost:8080 --logfile `"$cfLog`"" -WindowStyle Hidden -PassThru
+$tunnel = Start-Process -FilePath $cf -ArgumentList "tunnel --no-autoupdate --url http://localhost:$port --logfile `"$cfLog`"" -WindowStyle Hidden -PassThru
 $url = $null
 for ($i = 0; $i -lt 120 -and -not $url; $i++) {
     Start-Sleep -Milliseconds 500
