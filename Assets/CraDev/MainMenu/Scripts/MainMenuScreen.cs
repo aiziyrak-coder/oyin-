@@ -5,6 +5,7 @@ using CraDev.Face;
 using CraDev.Online;
 using CraDev.Wardrobe;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace CraDev.MainMenu
@@ -63,6 +64,12 @@ namespace CraDev.MainMenu
         [Tooltip("Garderob, Personajni sozlash, Sozlamalar, Chiqish.")]
         [SerializeField] Button[] profileMenuButtons;
 
+        [Header("Avatar studiyasi")]
+        [Tooltip("Lobby ichidagi avatar va yuz muharriri (sahna almashmaydi).")]
+        [SerializeField] LobbyAvatarStudio avatarStudio;
+        [Tooltip("Do'stlar panelining pastidagi o'yinchi rasmi (yuz yoki avatar kartasi).")]
+        [SerializeField] RawImage selfPortrait;
+
         [Header("Umumiy")]
         [SerializeField] CanvasGroup toastGroup;
         [SerializeField] Text toastText;
@@ -83,6 +90,10 @@ namespace CraDev.MainMenu
         public void SetEnvironmentBackground(Texture texture) { SetBackground(texture); backgroundDuration=2f; }
         bool menuOpen;
         float menuShown;
+        FaceData savedFace;
+        LobbyParty party;
+        float studioShown;
+        int modalFrame = -10;
 
         public GameApi Api => api;
         public string ServerUrl => serverUrl;
@@ -90,6 +101,13 @@ namespace CraDev.MainMenu
         public LobbyStage Stage => stage;
         public ConfirmDialog Dialog => dialog;
         public LobbyPage Current => current;
+
+        /// <summary>Avatar studiyasi ochiqmi (lobby ichida; party signali to'xtamaydi).</summary>
+        public bool AvatarStudioOpen => avatarStudio != null && avatarStudio.IsOpen;
+        public LobbyAvatarStudio AvatarStudio => avatarStudio;
+
+        /// <summary>Saqlangan yuz (shu kompyuterda; null - yuz yo'q). Studiya saqlaganda yangilanadi.</summary>
+        public FaceData PlayerFace => savedFace;
 
         /// <summary>Kelgan (javob kutayotgan) do'stlik so'rovlari soni.</summary>
         public int IncomingRequests { get; private set; }
@@ -100,6 +118,7 @@ namespace CraDev.MainMenu
         void Awake()
         {
             api = new GameApi(serverUrl);
+            party = GetComponent<LobbyParty>();
             foreach (var page in pages)
             {
                 page.Bind(this);
@@ -131,13 +150,15 @@ namespace CraDev.MainMenu
 
             profileName.text = PlayerProfile.Nickname;
             ShowAvatar(PlayerProfile.AvatarId);
-            var face = FaceStore.Load();
-            viewer.SetFace(face);
+            savedFace = FaceStore.Load();
+            viewer.SetFace(savedFace);
             viewer.SetOutfit(Outfit.FromJson(PlayerProfile.Outfit));
-            ShowProfileThumb(face);
+            ShowProfileThumb();
 
             Show(homePage, immediate: true);
             if(friendsPanel!=null)friendsPanel.Begin(this);
+            // Do'stlar paneli avatar kartasini qo'yadi: yuz bo'lsa o'yinchining yuzi ko'rsatiladi
+            if(selfPortrait!=null)ApplyPortrait(selfPortrait);
             Presence.Begin(serverUrl);
             StartCoroutine(CheckProfile());
             if(friendsPanel==null)StartCoroutine(PollNotifications());
@@ -149,6 +170,7 @@ namespace CraDev.MainMenu
 
         void Show(string id, bool immediate)
         {
+            if(AvatarStudioOpen&&!immediate)return; // studiya o'zi yopiladi (Saqlash/Bekor qilish)
             if(singleWindow)
             {
                 if(id=="settings"){SetSettings(true);return;}
@@ -244,7 +266,8 @@ namespace CraDev.MainMenu
             if (current == null)
                 return;
             float t = Ease.OutCubic(pageShown);
-            current.Group.alpha = t;
+            // Avatar studiyasida lobby boshqaruvlari so'nadi: faqat qahramon va studiya paneli qoladi
+            current.Group.alpha = t * (1f - Ease.OutCubic(studioShown));
             current.transform.localPosition = new Vector3(0f, (1f - t) * -14f, 0f);
         }
 
@@ -267,6 +290,7 @@ namespace CraDev.MainMenu
             }
             else
                 pageShown = Mathf.MoveTowards(pageShown, 1f, dt / 0.28f);
+            studioShown = Mathf.MoveTowards(studioShown, AvatarStudioOpen ? 1f : 0f, dt / 0.25f);
             ApplyPageVisibility();
 
             if (backgroundBlend < 1f)
@@ -296,19 +320,46 @@ namespace CraDev.MainMenu
             if (toastUntil >= 0f)
                 toastGroup.alpha = Mathf.Clamp01((toastUntil - time) / 0.35f) * Mathf.Clamp01((time - (toastUntil - 3.2f)) / 0.2f);
 
-            if (!ModalWindow.AnyOpen && leavingAt < 0f && Anim.BackPressed())
+            // Oyna Esc bilan shu kadrda yopilgan bo'lsa ham bu Esc lobbyga o'tmaydi (skriptlar tartibi noma'lum)
+            if (ModalWindow.AnyOpen)
+                modalFrame = Time.frameCount;
+            else if (modalFrame < Time.frameCount - 1 && leavingAt < 0f && Anim.BackPressed())
+                Back();
+        }
+
+        /// <summary>
+        /// Esc: yozilayotgan maydon bo'lsa - faqat undan chiqiladi; avatar studiyasi (skaner, keyin bekor qilish);
+        /// sozlamalar; menyu; sahifa; Bosh sahifada - chiqish so'raladi.
+        /// </summary>
+        public void Back()
+        {
+            if (BlurInputField())
+                return;
+            if (AvatarStudioOpen)
+                avatarStudio.Back();
+            else if(settingsOpen)SetSettings(false);
+            else if (menuOpen)
+                SetMenu(false);
+            else if (current != null && current.OnBack())
             {
-                if(settingsOpen)SetSettings(false);
-                else if (menuOpen)
-                    SetMenu(false);
-                else if (current != null && current.OnBack())
-                {
-                }
-                else if (current != null && current.Id != homePage)
-                    Show(homePage);
-                else
-                    AskQuit();
             }
+            else if (current != null && current.Id != homePage)
+                Show(homePage);
+            else
+                AskQuit();
+        }
+
+        /// <summary>Qidiruv kabi maydonda yozilayotgan bo'lsa: maydondan chiqiladi (Esc chiqish oynasini ochmaydi).</summary>
+        static bool BlurInputField()
+        {
+            var events = EventSystem.current;
+            var selected = events != null ? events.currentSelectedGameObject : null;
+            var field = selected != null ? selected.GetComponent<InputField>() : null;
+            if (field == null)
+                return false;
+            field.DeactivateInputField();
+            events.SetSelectedGameObject(null);
+            return true;
         }
 
         // ------------------------------------------------------------------ Yuqori o'ng: profil menyusi, qo'ng'iroq
@@ -351,24 +402,79 @@ namespace CraDev.MainMenu
             if(bellDot!=null)bellDot.enabled = count > 0 && LobbyPrefs.NotifyFriendRequests;
         }
 
-        void ShowProfileThumb(FaceData face)
+        /// <summary>Yuqori o'ngdagi profil rasmchasi: yuz yoki avatar kartasidagi bosh (ikkalasi ham kvadrat).</summary>
+        void ShowProfileThumb()
         {
-            bool has = face != null;
-            profileThumb.enabled = has;
-            profileIcon.enabled = !has;
-            if (!has)
-            {
-                var option = FindAvatar(PlayerProfile.AvatarId);
-                if (option?.card != null)
-                {
-                    profileIcon.sprite = option.card;
-                    profileIcon.color = Color.white;
-                    profileIcon.preserveAspect = true;
-                }
+            if (profileThumb == null)
                 return;
+            var texture = PlayerPortrait(out var uv);
+            profileThumb.enabled = texture != null;
+            if (profileIcon != null)
+                profileIcon.enabled = texture == null;
+            profileThumb.texture = texture;
+            profileThumb.uvRect = uv;
+        }
+
+        /// <summary>
+        /// O'yinchining o'z rasmi (profil, do'stlar paneli, sozlamalar): saqlangan yuz bo'lsa - yuz qismi,
+        /// bo'lmasa avatar kartasidagi bosh. uv - RawImage.uvRect uchun kvadrat qism. Rasm yo'q bo'lsa null.
+        /// </summary>
+        public Texture PlayerPortrait(out Rect uv)
+        {
+            if (savedFace != null && savedFace.Photo != null)
+            {
+                uv = FaceThumbRect(savedFace);
+                return savedFace.Photo;
             }
-            profileThumb.texture = face.Photo;
-            profileThumb.uvRect = FaceThumbRect(face);
+            var option = FindAvatar(PlayerProfile.AvatarId);
+            if (option?.card != null)
+            {
+                uv = CardHead(option.card);
+                return option.card.texture;
+            }
+            uv = new Rect(0f, 0f, 1f, 1f);
+            return null;
+        }
+
+        /// <summary><see cref="PlayerPortrait"/> ni RawImage'ga qo'yadi (rasm yo'q bo'lsa yashiriladi).</summary>
+        public void ApplyPortrait(RawImage image)
+        {
+            if (image == null)
+                return;
+            var texture = PlayerPortrait(out var uv);
+            image.texture = texture;
+            image.uvRect = uv;
+            image.enabled = texture != null;
+        }
+
+        /// <summary>Avatar kartasidagi boshning kvadrat qismi (kartalar builder chizgan, bosh tepada).</summary>
+        public static Rect CardHead(Sprite card)
+        {
+            var texture = card.texture;
+            var r = card.rect;
+            float x = r.x / texture.width, y = r.y / texture.height, w = r.width / texture.width, h = r.height / texture.height;
+            return new Rect(x + 0.32f * w, y + 0.76f * h, 0.36f * w, 0.2112f * h);
+        }
+
+        /// <summary>
+        /// Profil o'zgardi (avatar, yuz, kiyim): yuqori o'ngdagi rasmcha, do'stlar paneli rasmi yangilanadi va
+        /// <see cref="ProfileChanged"/> chaqiriladi (sozlamalar va boshqa sahifalar o'zini yangilaydi).
+        /// </summary>
+        public void RefreshProfileVisuals()
+        {
+            if (profileName != null)
+                profileName.text = PlayerProfile.Nickname;
+            ShowProfileThumb();
+            ApplyPortrait(selfPortrait);
+            ProfileChanged?.Invoke();
+        }
+
+        /// <summary>Studiya yangi yuzni saqladi (yoki o'chirdi): eski rasm bo'shatiladi.</summary>
+        public void CommitFace(FaceData face)
+        {
+            if (savedFace != null && savedFace != face && savedFace.Photo != null)
+                Destroy(savedFace.Photo);
+            savedFace = face;
         }
 
         /// <summary>Rasmdagi yuz joylashgan kvadrat (profil rasmchalari uchun).</summary>
@@ -387,6 +493,9 @@ namespace CraDev.MainMenu
         }
 
         // ------------------------------------------------------------------ Qahramon
+
+        /// <summary>Hamma avatarlar (builder tartibida: M1, M2, M3, M5, F1…F5).</summary>
+        public System.Collections.Generic.IReadOnlyList<AvatarOption> Avatars => avatars;
 
         public AvatarOption FindAvatar(string id)
         {
@@ -453,11 +562,12 @@ namespace CraDev.MainMenu
                     // Server - asosiy manba: avatar yoki kiyim boshqa kompyuterda o'zgartirilgan bo'lishi mumkin
                     string oldAvatar = PlayerProfile.AvatarId, oldOutfit = PlayerProfile.Outfit;
                     PlayerProfile.Refresh(result.Data);
-                    if (PlayerProfile.AvatarId != oldAvatar)
+                    // Studiya ochiq bo'lsa qoralama avatar almashtirilmaydi (bekor qilinsa saqlangan avatar qaytadi)
+                    if (PlayerProfile.AvatarId != oldAvatar && !AvatarStudioOpen)
                         ShowAvatar(PlayerProfile.AvatarId);
                     if (PlayerProfile.Outfit != oldOutfit)
                         viewer.SetOutfit(Outfit.FromJson(PlayerProfile.Outfit));
-                    ProfileChanged?.Invoke();
+                    RefreshProfileVisuals();
                     yield break;
                 }
                 yield return new WaitForSecondsRealtime(retryInterval);
@@ -501,11 +611,66 @@ namespace CraDev.MainMenu
             else Toast(Loc.T("lobby.world_pending"));
         }
 
-        public void Customize() => Leave(() =>
+        /// <summary>
+        /// Personajni sozlash: bitta oynali lobbyda - avatar studiyasi (sahna almashmaydi, party saqlanadi);
+        /// eski ko'p sahifali lobbyda - CharacterCreation tahrirlash rejimi.
+        /// </summary>
+        public void Customize()
         {
-            CharacterCreationScreen.EditRequested = true;
-            SceneLoader.Switch("CharacterCreation");
-        });
+            if (singleWindow && avatarStudio != null)
+            {
+                SetAvatarStudio(true);
+                return;
+            }
+            Leave(() =>
+            {
+                CharacterCreationScreen.EditRequested = true;
+                SceneLoader.Switch("CharacterCreation");
+            });
+        }
+
+        /// <summary>
+        /// Avatar studiyasini ochadi yoki yopadi. Ochilganda sozlamalar yopiladi, lobby boshqaruvlari so'nadi,
+        /// kamera qahramonga yaqinlashadi va uni sichqoncha bilan aylantirish mumkin bo'ladi. Yopilganda
+        /// saqlanmagan o'zgarishlar bekor qilinadi (qahramon saqlangan avatar va yuzga qaytadi).
+        /// </summary>
+        public void SetAvatarStudio(bool open)
+        {
+            if (avatarStudio == null)
+                return;
+            if (open)
+            {
+                if (avatarStudio.IsOpen || leavingAt >= 0f || viewer.CurrentOption == null)
+                    return;
+                SetSettings(false);
+                SetMenu(false);
+                BlurInputField();
+                if (current != null)
+                {
+                    current.Group.interactable = false;
+                    current.Group.blocksRaycasts = false;
+                }
+                viewer.ResetView();
+                viewer.LockRotation = false;
+                avatarStudio.Open();
+                stage.SetStudio(true, viewer.ModelRoot, viewer.BodyHeight, avatarStudio.ScreenFraction);
+                return;
+            }
+            if (!avatarStudio.IsOpen)
+                return;
+            avatarStudio.Close();
+            stage.SetStudio(false);
+            // Qahramon yana lobbydagi holatiga qaytadi (party har a'zoni o'z joyiga qo'yadi)
+            viewer.LockRotation = true;
+            viewer.ModelRoot.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            if (current != null && !settingsOpen && leavingAt < 0f)
+            {
+                current.Group.interactable = true;
+                current.Group.blocksRaycasts = true;
+            }
+            if (party != null)
+                party.Refresh();
+        }
 
         public void Toast(string text)
         {

@@ -57,6 +57,9 @@ namespace CraDev.CharacterCreation
         RenderTexture previewBody, previewGloss, previewHead, previewHair;
         readonly System.Collections.Generic.List<(Material material, Texture original)> heads =
             new System.Collections.Generic.List<(Material, Texture)>();
+        // renderer.materials yaratgan nusxalar: model almashganda va komponent yo'q qilinganda o'chiriladi
+        readonly System.Collections.Generic.List<Material> instances = new System.Collections.Generic.List<Material>();
+        bool facePainted; // faceTexture joriy yuz va avatar bilan chizilganmi (faqat soch o'zgarsa qayta chizilmaydi)
         Material bodyMaterial, hairCardMaterial;
         Texture bodyOriginal, hairCardOriginal;
         float bodyHeight = 1.75f;
@@ -87,10 +90,12 @@ namespace CraDev.CharacterCreation
         {
             if (current != null)
                 Destroy(current);
+            DestroyInstances();
             current = null;
             currentOption = option;
+            facePainted = false;
             CollectMaterials();
-            if (option.model == null)
+            if (option == null || option.model == null)
                 return;
 
             current = Instantiate(option.model, turntable, false);
@@ -125,6 +130,25 @@ namespace CraDev.CharacterCreation
         public GameObject CurrentModel => current;
         public Transform ModelRoot => turntable;
         public bool LockRotation { get; set; }
+
+        /// <summary>Hozirgi yuz (null - yuz yo'q).</summary>
+        public FaceData Face => face;
+
+        /// <summary>Qahramon bo'yi: oyoqdan boshning tepasigacha (metr).</summary>
+        public float BodyHeight => bodyHeight;
+
+        /// <summary>Kamerani boshqa komponent boshqarganda (lobby): g'ildirakcha shu hodisa bilan beriladi.</summary>
+        public event System.Action<float> Scrolled;
+
+        /// <summary>Qahramon kameraga qaragan holatga qaytadi (aylantirish va inersiya to'xtaydi).</summary>
+        public void ResetView()
+        {
+            yaw = targetYaw = 0f;
+            velocity = 0f;
+            turning = dragging = false;
+            swapTime = 1f;
+        }
+
         public AvatarViewer Replica(Transform parent, AvatarOption option)
         {
             var copy = new GameObject("PartyAvatar").AddComponent<AvatarViewer>();
@@ -145,6 +169,7 @@ namespace CraDev.CharacterCreation
         public void SetFace(FaceData data)
         {
             face = data;
+            facePainted = false;
             ApplyHeads();
         }
 
@@ -246,6 +271,7 @@ namespace CraDev.CharacterCreation
             foreach (var renderer in current.GetComponentsInChildren<Renderer>())
                 foreach (var material in renderer.materials)
                 {
+                    instances.Add(material);
                     if (material.mainTexture == null)
                         continue;
                     if (material.name.Contains("_head"))
@@ -262,20 +288,26 @@ namespace CraDev.CharacterCreation
         {
             if (current == null)
                 return;
-            var old = faceTexture;
-            faceTexture = null;
-            bool paint = face != null && currentOption != null && currentOption.SupportsFace && facePaint != null;
+            bool paint = face != null && face.Photo != null && currentOption != null && currentOption.SupportsFace && facePaint != null && heads.Count > 0;
+            if (!paint)
+            {
+                ReleaseTexture(ref faceTexture);
+                facePainted = false;
+            }
+            else if (!facePainted)
+            {
+                // Yuz faqat yuz yoki avatar almashganda chiziladi (bir xil RenderTexture qayta ishlatiladi);
+                // soch rangi o'zgarsa tayyor yuz ustiga faqat soch bo'yaladi
+                FacePainter.Paint(heads[0].original, face, currentOption.faceUv, currentOption.faceTriangles, facePaint, ref faceTexture);
+                facePainted = true;
+            }
             foreach (var (material, original) in heads)
             {
-                if (paint && faceTexture == null)
-                    faceTexture = FacePainter.Paint(original, face, currentOption.faceUv, currentOption.faceTriangles, facePaint);
                 Texture result = paint ? faceTexture : original;
                 if (OutfitPainter.PaintHair(result, currentOption, outfit, outfitPaint, false, ref hairTexture))
                     result = hairTexture;
                 material.mainTexture = result;
             }
-            if (old != null)
-                old.Release();
 
             if (hairCardMaterial != null)
                 hairCardMaterial.mainTexture = OutfitPainter.PaintHair(hairCardOriginal, currentOption, outfit, outfitPaint, true, ref hairCardTexture)
@@ -303,9 +335,36 @@ namespace CraDev.CharacterCreation
 
         void OnDestroy()
         {
-            foreach (var texture in new[] { faceTexture, hairTexture, bodyTexture, glossTexture, hairCardTexture, previewBody, previewGloss, previewHead, previewHair })
-                if (texture != null)
-                    texture.Release();
+            ReleaseTexture(ref faceTexture);
+            ReleaseTexture(ref hairTexture);
+            ReleaseTexture(ref bodyTexture);
+            ReleaseTexture(ref glossTexture);
+            ReleaseTexture(ref hairCardTexture);
+            ReleaseTexture(ref previewBody);
+            ReleaseTexture(ref previewGloss);
+            ReleaseTexture(ref previewHead);
+            ReleaseTexture(ref previewHair);
+            DestroyInstances();
+        }
+
+        static void ReleaseTexture(ref RenderTexture texture)
+        {
+            if (texture == null)
+                return;
+            texture.Release();
+            Destroy(texture);
+            texture = null;
+        }
+
+        /// <summary>Unity model yo'q qilinganda material nusxalarini o'zi o'chirmaydi: ular shu yerda o'chiriladi.</summary>
+        void DestroyInstances()
+        {
+            foreach (var material in instances)
+                if (material != null)
+                    Destroy(material);
+            instances.Clear();
+            heads.Clear();
+            bodyMaterial = hairCardMaterial = null;
         }
 
         /// <summary>Qahramonni berilgan tomonga eng qisqa yo'l bilan buradi.</summary>
@@ -410,7 +469,12 @@ namespace CraDev.CharacterCreation
         public void OnScroll(PointerEventData eventData)
         {
             if (!driveCamera)
+            {
+                // Lobbyda kamerani LobbyStage boshqaradi (avatar studiyasida yaqinlashtirish)
+                if (!LockRotation)
+                    Scrolled?.Invoke(eventData.scrollDelta.y);
                 return;
+            }
             targetZoom = Mathf.Clamp01(targetZoom + Mathf.Sign(eventData.scrollDelta.y) * zoomStep);
         }
     }

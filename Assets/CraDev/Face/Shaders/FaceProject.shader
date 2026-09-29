@@ -1,5 +1,5 @@
 // O'yinchi rasmidagi yuzni bosh teksturasiga chizish uchun (FacePainter). Rasm rangi teri rangiga
-// moslashtiriladi (_Gain), shaffoflik esa uchburchak uchlaridagi rangdan olinadi: chetlari silliq so'nadi.
+// moslashtiriladi (_Gain), shaffoflik esa uchburchak uchlaridagi rangdan olinadi (smoothstep): chetlari silliq so'nadi.
 Shader "Hidden/CraDev/FaceProject"
 {
     Properties
@@ -38,7 +38,8 @@ Shader "Hidden/CraDev/FaceProject"
             {
                 fixed4 c = tex2D(_MainTex, i.uv);
                 c.rgb *= _Gain.rgb;
-                c.a = i.color.a;
+                // Uchlar orasida chiziqli emas, silliq egri bilan so'nadi: chetda "chok" chizig'i ko'rinmaydi
+                c.a = smoothstep(0.0, 1.0, saturate(i.color.a));
                 return c;
             }
             ENDCG

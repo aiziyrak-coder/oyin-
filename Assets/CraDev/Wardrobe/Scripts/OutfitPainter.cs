@@ -88,7 +88,12 @@ namespace CraDev.Wardrobe
             if (texture != null && texture.width == width && texture.height == height)
                 return texture;
             if (texture != null)
+            {
+                // Release faqat GPU xotirasini bo'shatadi: obyektning o'zi ham o'chiriladi (aks holda to'planib qoladi)
                 texture.Release();
+                if (Application.isPlaying) Object.Destroy(texture);
+                else Object.DestroyImmediate(texture);
+            }
             var result = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, srgb ? RenderTextureReadWrite.sRGB : RenderTextureReadWrite.Linear)
             {
                 useMipMap = true,

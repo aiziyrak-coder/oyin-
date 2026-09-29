@@ -124,6 +124,10 @@ namespace CraDev.EditorTools
         {
             Set(screen,"friendsPanel",home.GetComponentInChildren<LobbyFriendsPanel>());
             var right=home.Find("LobbyRightRail");
+            // Avatar studiyasi: qahramon va yuzni lobbydan chiqmasdan o'zgartirish (party saqlanadi)
+            var avatar=V2Button(right,"lobby.avatar","Mannequin",0,32,134,60,"avatar");avatar.name="LobbyAvatar";
+            var avatarLabel=avatar.GetComponentInChildren<Text>();avatarLabel.horizontalOverflow=HorizontalWrapMode.Overflow;PlaceTopLeft(avatarLabel.rectTransform,50,0,78,60);
+            PlaceTopLeft(avatar.transform.Find("Mannequin").GetComponent<RectTransform>(),16,18,24,24);
             var language=V2Button(right,"UZ","Globe",146,32,110,60,localized:false);
             Set(language.gameObject.AddComponent<LanguageToggle>(),"label",language.GetComponentInChildren<Text>());
             V2Button(right,"","Bell",274,32,66,60,"friends","requests");
@@ -135,6 +139,9 @@ namespace CraDev.EditorTools
             V2Text(profile.transform,"lobby.profile_hint",76,36,200,24,17).color=new Color32(173,190,163,255);
             ReferenceSurface.Apply(language.GetComponent<Image>(),0,22);ReferenceSurface.Apply(profile.GetComponent<Image>(),0,22);
             foreach(var button in right.GetComponentsInChildren<Button>())if(button.GetComponent<ReferenceSurface>()==null)ReferenceSurface.Apply(button.GetComponent<Image>(),5,18);
+            // Do'stlar paneli pastidagi o'yinchi rasmi: MainMenuScreen yuz yoki avatar kartasini qo'yadi va yangilaydi
+            foreach(var image in home.GetComponentsInChildren<RawImage>(true))if(image.name=="SelfPortrait")Set(screen,"selfPortrait",image);
+            V2AvatarStudio(home.parent,screen);
         }
     }
 }

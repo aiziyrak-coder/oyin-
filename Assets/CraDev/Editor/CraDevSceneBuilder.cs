@@ -601,48 +601,78 @@ namespace CraDev.EditorTools
             SetArray(viewer, "viewFills", viewFills);
             SetArray(viewer, "viewLabels", viewLabels);
             Set(viewer, "facePaint", FacePaintMaterial());
+            // Tahrirlashda qahramon lobbydagi kiyim va soch rangida ko'rinadi (CharacterCreationScreen.SetOutfit)
+            Set(viewer, "outfitPaint", OutfitPaintMaterial());
+            Set(viewer, "glossVariant", GlossVariantMaterial());
 
-            // ---------- Kamera oynasi: suratga tushish ----------
-            var modal = CreateFullscreen("FaceModal", root, new Color(0f, 0f, 0f, 0.82f));
+            // ---------- Jonli yuz skaneri: forma ustida (chapda), qahramon o'ngda ko'rinib turadi ----------
+            // Natija (topilgan yuz) darhol 3D qahramonda ko'rinadi: o'yinchi uni ko'rib "Ishlatish"ni bosadi.
+            var modal = CreateImage("FaceModal", root, null, Vector2.zero, Vector2.zero, new Color(Background.r, Background.g, Background.b, 0.9f));
+            modal.rectTransform.anchorMin = Vector2.zero;
+            modal.rectTransform.anchorMax = new Vector2(0.6f, 1f);
+            modal.rectTransform.offsetMin = modal.rectTransform.offsetMax = Vector2.zero;
             modal.raycastTarget = true; // orqadagi forma bosilmaydi
             var panel = CreateSliced("Panel", modal.transform, roundFill, 16f, 24f, new Color32(19, 20, 23, 255));
-            Place(panel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(720f, 690f));
             var panelBorder = CreateSliced("Border", panel.transform, roundStroke, 16f, 24f, line);
             Stretch(panelBorder.rectTransform);
-            PlaceTopLeft(Localized(CreateLabel("Title", panel.transform, display, "", 24, Color.white, TextAnchor.MiddleLeft), "face.modal_title").rectTransform, 40f, 32f, 640f, 36f);
 
-            var frame = CreateSliced("Frame", panel.transform, roundFill, 12f, 24f, Color.black);
-            PlaceTopLeft(frame.rectTransform, 40f, 92f, 640f, 480f);
-            var frameMask = CreateRect("Mask", frame.transform);
-            Stretch(frameMask);
-            frameMask.gameObject.AddComponent<RectMask2D>();
-            var preview = new GameObject("Preview", typeof(RectTransform), typeof(RawImage), typeof(AspectRatioFitter));
-            preview.transform.SetParent(frameMask, false);
-            var previewImage = preview.GetComponent<RawImage>();
-            previewImage.raycastTarget = false;
-            var fitter = preview.GetComponent<AspectRatioFitter>();
-            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
-            fitter.aspectRatio = 16f / 9f;
-            var oval = CreateImage("Oval", frameMask, OvalSprite(), new Vector2(280f, 360f), new Vector2(0f, 6f), new Color(1f, 1f, 1f, 0.75f));
-            oval.raycastTarget = false;
-
-            var modalStatus = CreateLabel("Status", panel.transform, medium, "", 15, UiMuted, TextAnchor.MiddleCenter);
-            PlaceTopLeft(modalStatus.rectTransform, 40f, 580f, 640f, 24f);
-            var cancelButton = CreateSecondaryButton("Cancel", panel.transform, "", null, 40f, 614f, 300f, roundFill, roundStroke, semiBold, field, line);
-            LocalizeButton(cancelButton, "common.cancel");
-            var captureFill = CreateSliced("Capture", panel.transform, roundFill, 12f, 24f, accent);
-            PlaceTopLeft(captureFill.rectTransform, 380f, 614f, 300f, 44f);
-            captureFill.raycastTarget = true;
-            var captureButton = captureFill.gameObject.AddComponent<Button>();
-            captureButton.targetGraphic = captureFill;
-            var captureLabel = Localized(CreateLabel("Label", captureFill.transform, bold, "", 16, Color.white, TextAnchor.MiddleCenter), "face.capture");
-            Place(captureLabel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(280f, 30f));
+            Button ScanButton(Transform parent, string name, Sprite icon, float x, float y, float w, float h, bool primary)
+            {
+                Button button;
+                Text label;
+                if (primary)
+                {
+                    var fill = CreateSliced(name, parent, roundFill, 12f, 24f, accent);
+                    PlaceTopLeft(fill.rectTransform, x, y, w, h);
+                    fill.raycastTarget = true;
+                    button = fill.gameObject.AddComponent<Button>();
+                    button.targetGraphic = fill;
+                    var colors = button.colors;
+                    colors.normalColor = Color.white;
+                    colors.highlightedColor = new Color(1.15f, 1.15f, 1.15f, 1f);
+                    colors.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
+                    colors.selectedColor = Color.white;
+                    colors.disabledColor = new Color(0.55f, 0.55f, 0.6f, 0.45f);
+                    colors.fadeDuration = 0.1f;
+                    button.colors = colors;
+                    label = CreateLabel("Label", fill.transform, bold, "", 16, Color.white, TextAnchor.MiddleCenter);
+                    Stretch(label.rectTransform);
+                }
+                else
+                {
+                    button = CreateSecondaryButton(name, parent, "", null, x, y, w, roundFill, roundStroke, semiBold, field, line);
+                    ((RectTransform)button.transform).sizeDelta = new Vector2(w, h);
+                    label = button.transform.Find("Label").GetComponent<Text>();
+                }
+                if (icon != null)
+                {
+                    bool wide = w > h * 1.5f;
+                    var image = CreateImage("Icon", button.transform, icon, new Vector2(18f, 18f), Vector2.zero, Color.white);
+                    if (wide)
+                    {
+                        Place(image.rectTransform, new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(26f, 0f), new Vector2(18f, 18f));
+                        label.rectTransform.offsetMin = new Vector2(44f, 0f);
+                        label.rectTransform.offsetMax = new Vector2(-16f, 0f);
+                        label.alignment = TextAnchor.MiddleLeft;
+                        label.color = UiMuted;
+                    }
+                }
+                return button;
+            }
 
             var faceGo = new GameObject("FaceCapture");
+            var scanStyle = new ScanStyle
+            {
+                Title = display, Body = medium, Strong = bold, S = 1f, Round = roundFill,
+                Oval = OvalSprite(), Spinner = Icon("Spinner"), Alert = Icon("Alert"), Close = Icon("Close"), Camera = DrawnIcon("Camera"),
+                Button = ScanButton,
+            };
+            var scanView = BuildFaceScanView(faceGo, panel.transform, modal.gameObject, 600f, scanStyle, out float scanHeight);
+            Place(panel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(600f, scanHeight));
+
             var faceCapture = faceGo.AddComponent<FaceCapture>();
-            Set(faceCapture, "detectorModel", AssetDatabase.LoadAssetAtPath<ModelAsset>(FaceModels + "face_detector.onnx"));
-            Set(faceCapture, "landmarkModel", AssetDatabase.LoadAssetAtPath<ModelAsset>(FaceModels + "face_landmarks_detector.onnx"));
             Set(faceCapture, "viewer", viewer);
+            Set(faceCapture, "scanner", scanView);
             Set(faceCapture, "takeButton", takeButton);
             Set(faceCapture, "uploadButton", uploadButton);
             Set(faceCapture, "thumb", thumb);
@@ -650,15 +680,8 @@ namespace CraDev.EditorTools
             Set(faceCapture, "removeButton", removeButton);
             Set(faceCapture, "statusIcon", faceStatusIcon);
             Set(faceCapture, "statusText", faceStatus);
-            Set(faceCapture, "modal", modal.gameObject);
-            Set(faceCapture, "preview", previewImage);
-            Set(faceCapture, "previewFitter", fitter);
-            Set(faceCapture, "captureButton", captureButton);
-            Set(faceCapture, "cancelButton", cancelButton);
-            Set(faceCapture, "modalStatus", modalStatus);
             Set(faceCapture, "checkSprite", Icon("Check"));
             Set(faceCapture, "alertSprite", Icon("Alert"));
-            Set(faceCapture, "spinnerSprite", Icon("Spinner"));
 
             CreateLanguagePill(root, Kit(), new Vector2(-64f, -44f));
             var confirmDialog = BuildConfirmDialog(root, Kit());

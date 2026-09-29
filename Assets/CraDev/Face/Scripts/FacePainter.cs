@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace CraDev.Face
@@ -15,8 +16,12 @@ namespace CraDev.Face
     ///
     /// Har bir avatar uchun builder oldindan yuz nuqtalarining bosh teksturasidagi o'rnini (faceUv) va ular
     /// orasidagi uchburchaklarni topib qo'ygan. Rasmdagi har bir uchburchak teksturadagi mos uchburchakka
-    /// cho'ziladi: yuz qahramon yuzining shakliga aniq tushadi. Chetlari (yuz ovali, ko'zlar) silliq
-    /// shaffoflashadi, rasmning teri rangi esa qahramon terisiga moslashtiriladi.
+    /// cho'ziladi: yuz qahramon yuzining shakliga aniq tushadi. Chetlari (yuz ovali, ko'zlar va to'rning tashqi
+    /// chegarasi) silliq shaffoflashadi, rasmning teri rangi esa qahramon terisiga moslashtiriladi.
+    ///
+    /// Yuz xaritasidagi xatolar o'yinda to'g'rilanadi (<see cref="CleanTriangles"/>): boshqa UV orolga tushib
+    /// qolgan nuqtalar (ko'z, og'iz ichi) va ularga "ko'prik" bo'lgan uzun uchburchaklar tashlanadi, ovalning
+    /// topilmagan nuqtalari o'rnida esa to'rning haqiqiy chegarasi so'nadi - chetda keskin chiziq qolmaydi.
     /// </summary>
     public static class FacePainter
     {
@@ -33,6 +38,8 @@ namespace CraDev.Face
         };
         // Teri rangini solishtirish uchun nuqtalar: peshona, yonoqlar, iyak
         static readonly int[] SkinSamples = { 151, 108, 337, 50, 280, 205, 425, 199, 118, 347 };
+        // Yuz markazi: burun va peshona o'rtasi (UV orolini aniqlash uchun)
+        static readonly int[] CoreIds = { 1, 4, 5, 6, 8, 9, 151, 168, 195, 197 };
 
         /// <summary>Rasm terisi qahramon terisiga qanchalik moslashtiriladi (0 - o'zgarmaydi, 1 - to'liq).</summary>
         const float SkinMatch = 0.8f;
@@ -40,23 +47,62 @@ namespace CraDev.Face
         /// <summary>Rang tusi qanchalik moslashtiriladi (0 - faqat yorug'lik, 1 - tus ham to'liq).</summary>
         const float HueMatch = 0.25f;
 
-        static float[] alpha;
+        /// <summary>Markazdan (nuqtalar masofasi medianasiga nisbatan) shundan uzoq nuqta - boshqa UV orol.</summary>
+        const float OutlierRadius = 3.4f;
+
+        /// <summary>Chegaradan keyingi qator nuqtalarining shaffofligi: so'nish kengroq va yumshoqroq bo'ladi.</summary>
+        const float InnerRing = 0.6f;
+
+        sealed class FaceMesh
+        {
+            public int[] Triangles;
+            public float[] Alpha;
+        }
+
+        sealed class HeadSkin
+        {
+            public Vector2[] Uv;
+            public Color Sum;
+            public int Count;
+        }
+
+        // Har avatar xaritasi va bosh teksturasi uchun bir marta hisoblanadi (sahna almashsa o'zi tozalanadi)
+        static readonly ConditionalWeakTable<int[], FaceMesh> meshes = new ConditionalWeakTable<int[], FaceMesh>();
+        static readonly ConditionalWeakTable<Texture, HeadSkin> skins = new ConditionalWeakTable<Texture, HeadSkin>();
 
         /// <summary>
         /// Bosh teksturasi ustiga yuzni chizib, yangi RenderTexture qaytaradi (material'ga qo'yiladi).
-        /// Eskisini chaqiruvchi o'zi Release qiladi.
+        /// Uni chaqiruvchi o'zi Release va Destroy qiladi.
         /// </summary>
         public static RenderTexture Paint(Texture head, FaceData face, Vector2[] faceUv, int[] triangles, Material material)
         {
-            var result = new RenderTexture(head.width, head.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)
+            RenderTexture result = null;
+            Paint(head, face, faceUv, triangles, material, ref result);
+            return result;
+        }
+
+        /// <summary>Yuzni result ga chizadi: o'lchami mos bo'lsa o'sha tekstura qayta ishlatiladi, aks holda yangisi yaratiladi.</summary>
+        public static void Paint(Texture head, FaceData face, Vector2[] faceUv, int[] triangles, Material material, ref RenderTexture result)
+        {
+            if (result != null && (result.width != head.width || result.height != head.height))
             {
-                useMipMap = true,
-                autoGenerateMips = false,
-                wrapMode = TextureWrapMode.Clamp,
-                anisoLevel = 4,
-                name = "PlayerFace",
-            };
-            result.Create();
+                result.Release();
+                Release(result);
+                result = null;
+            }
+            if (result == null)
+                result = new RenderTexture(head.width, head.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)
+                {
+                    useMipMap = true,
+                    autoGenerateMips = false,
+                    wrapMode = TextureWrapMode.Clamp,
+                    anisoLevel = 4,
+                    name = "PlayerFace",
+                };
+            if (!result.IsCreated())
+                result.Create();
+
+            var mesh = Prepare(faceUv, triangles);
             var previous = RenderTexture.active;
             Graphics.Blit(head, result);
 
@@ -70,11 +116,10 @@ namespace CraDev.Face
             GL.LoadOrtho();
             material.SetPass(0);
             GL.Begin(GL.TRIANGLES);
-            var weights = Alpha();
-            for (int i = 0; i < triangles.Length; i++)
+            for (int i = 0; i < mesh.Triangles.Length; i++)
             {
-                int k = triangles[i];
-                GL.Color(new Color(1f, 1f, 1f, weights[k]));
+                int k = mesh.Triangles[i];
+                GL.Color(new Color(1f, 1f, 1f, mesh.Alpha[k]));
                 GL.TexCoord2(face.Landmarks[k].x, face.Landmarks[k].y);
                 GL.Vertex3(faceUv[k].x, faceUv[k].y, 0f);
             }
@@ -83,27 +128,175 @@ namespace CraDev.Face
             RenderTexture.active = previous;
 
             result.GenerateMips();
-            return result;
         }
 
-        /// <summary>Har bir nuqtaning shaffofligi: ovalda va ko'z chizig'ida 0, qolganlarida 1.</summary>
-        static float[] Alpha()
+        static void Release(Object o)
         {
-            if (alpha != null)
-                return alpha;
-            alpha = new float[FaceTracker.LandmarkCount];
-            for (int i = 0; i < alpha.Length; i++)
+            if (Application.isPlaying) Object.Destroy(o);
+            else Object.DestroyImmediate(o);
+        }
+
+        static FaceMesh Prepare(Vector2[] uv, int[] triangles)
+        {
+            if (meshes.TryGetValue(triangles, out var cached))
+                return cached;
+            var clean = CleanTriangles(uv, triangles);
+            var mesh = new FaceMesh { Triangles = clean, Alpha = BlendWeights(clean, Mathf.Max(uv.Length, FaceTracker.LandmarkCount)) };
+            meshes.Add(triangles, mesh);
+            return mesh;
+        }
+
+        /// <summary>
+        /// Yuz to'ridan boshqa UV orolga tushgan nuqtalar (markazdan juda uzoq) va juda uzun uchburchaklar
+        /// olib tashlanadi. Toza to'rga qayta qo'llansa natija o'zgarmaydi (builder ham ishlatadi).
+        /// </summary>
+        public static int[] CleanTriangles(Vector2[] uv, int[] triangles)
+        {
+            if (uv == null || triangles == null || triangles.Length < 3)
+                return triangles ?? new int[0];
+            var xs = new List<float>();
+            var ys = new List<float>();
+            foreach (int i in CoreIds)
+                if (i < uv.Length && uv[i].x >= 0f)
+                {
+                    xs.Add(uv[i].x);
+                    ys.Add(uv[i].y);
+                }
+            if (xs.Count == 0)
+                return triangles;
+            var center = new Vector2(Median(xs), Median(ys));
+            var distances = new List<float>();
+            int count = Mathf.Min(uv.Length, FaceTracker.MeshLandmarkCount);
+            for (int i = 0; i < count; i++)
+                if (uv[i].x >= 0f)
+                    distances.Add(Vector2.Distance(uv[i], center));
+            float limit = Median(distances) * OutlierRadius;
+
+            bool Inside(int i) => i >= 0 && i < count && uv[i].x >= 0f && Vector2.Distance(uv[i], center) <= limit;
+            bool Kept(int t) => Inside(triangles[t]) && Inside(triangles[t + 1]) && Inside(triangles[t + 2]);
+            float Longest(int t) => Mathf.Max(Vector2.Distance(uv[triangles[t]], uv[triangles[t + 1]]),
+                Mathf.Max(Vector2.Distance(uv[triangles[t + 1]], uv[triangles[t + 2]]), Vector2.Distance(uv[triangles[t + 2]], uv[triangles[t]])));
+
+            var edges = new List<float>();
+            for (int t = 0; t + 2 < triangles.Length; t += 3)
+                if (Kept(t))
+                    edges.Add(Longest(t));
+            if (edges.Count == 0)
+                return triangles;
+            // Oddiy uchburchak qirrasi ~0.015; bundan 5 barobar uzuni - teshik yoki boshqa orol ustidan "ko'prik"
+            float maxEdge = Mathf.Max(0.06f, Median(edges) * 5f);
+            var result = new List<int>(triangles.Length);
+            for (int t = 0; t + 2 < triangles.Length; t += 3)
+                if (Kept(t) && Longest(t) <= maxEdge)
+                {
+                    result.Add(triangles[t]);
+                    result.Add(triangles[t + 1]);
+                    result.Add(triangles[t + 2]);
+                }
+            return result.ToArray();
+        }
+
+        static float Median(List<float> values)
+        {
+            if (values.Count == 0)
+                return 0f;
+            values.Sort();
+            return values[values.Count / 2];
+        }
+
+        /// <summary>
+        /// Har bir nuqtaning shaffofligi: yuz ovali, ko'z chiziqlari va to'rning tashqi chegarasida 0, chegaraning
+        /// ichki qo'shnilarida <see cref="InnerRing"/>, qolganlarida 1 (shader ularni silliq egri bilan so'ndiradi).
+        /// </summary>
+        static float[] BlendWeights(int[] triangles, int count)
+        {
+            var alpha = new float[count];
+            for (int i = 0; i < count; i++)
                 alpha[i] = 1f;
-            foreach (int i in FaceOval) alpha[i] = 0f;
-            foreach (int i in Eyes) alpha[i] = 0f;
+            // Faqat bitta uchburchakka tegishli qirralar - to'rning chegarasi
+            var uses = new Dictionary<long, int>();
+            for (int t = 0; t + 2 < triangles.Length; t += 3)
+                for (int e = 0; e < 3; e++)
+                {
+                    int a = triangles[t + e], b = triangles[t + (e + 1) % 3];
+                    long key = (long)Mathf.Min(a, b) * 100000 + Mathf.Max(a, b);
+                    uses.TryGetValue(key, out int n);
+                    uses[key] = n + 1;
+                }
+            var outer = new HashSet<int>(FaceOval);
+            foreach (var pair in uses)
+                if (pair.Value == 1)
+                {
+                    outer.Add((int)(pair.Key / 100000));
+                    outer.Add((int)(pair.Key % 100000));
+                }
+            foreach (int i in outer)
+                if (i < count)
+                    alpha[i] = 0f;
+            foreach (int i in Eyes)
+                if (i < count)
+                    alpha[i] = 0f;
+            // Tashqi chegaraning ichki qo'shnilari yarim shaffof (ko'z atrofiga tegilmaydi: u yerda aniq chiziq kerak)
+            for (int t = 0; t + 2 < triangles.Length; t += 3)
+            {
+                if (!outer.Contains(triangles[t]) && !outer.Contains(triangles[t + 1]) && !outer.Contains(triangles[t + 2]))
+                    continue;
+                for (int e = 0; e < 3; e++)
+                {
+                    int v = triangles[t + e];
+                    if (v < count && alpha[v] > InnerRing)
+                        alpha[v] = InnerRing;
+                }
+            }
             return alpha;
         }
 
         /// <summary>
         /// Rasmdagi teri rangini qahramon terisiga yaqinlashtiruvchi ko'paytiruvchi (chiziqli rang fazosida).
-        /// Aks holda yuz bilan bo'yin orasida rang farqi ko'rinib qoladi.
+        /// Aks holda yuz bilan bo'yin orasida rang farqi ko'rinib qoladi. Qahramon terisi har bosh teksturasi
+        /// uchun bir marta o'qiladi (GPU'dan o'qish sekin).
         /// </summary>
         static Color SkinGain(Texture head, FaceData face, Vector2[] faceUv)
+        {
+            if (!skins.TryGetValue(head, out var skin) || skin.Uv != faceUv)
+            {
+                if (skin != null)
+                    skins.Remove(head);
+                skin = ReadHeadSkin(head, faceUv);
+                skins.Add(head, skin);
+            }
+
+            Color photoSum = Color.clear;
+            int count = 0;
+            foreach (int i in SkinSamples)
+            {
+                if (faceUv[i].x < 0f)
+                    continue;
+                photoSum += Average(face.Photo, face.Landmarks[i]);
+                count++;
+            }
+            if (count == 0 || skin.Count == 0)
+                return Color.white;
+
+            Color headLinear = Linear(skin.Sum / skin.Count), photoLinear = Linear(photoSum / count);
+            float headLuma = Luma(headLinear), photoLuma = Luma(photoLinear);
+            // Asosan yorug'lik moslashadi (yuz bo'yin bilan bir xil yoritilgandek); rang tusi (ton) esa o'yinchiniki
+            // bo'lib qoladi, faqat ozgina yaqinlashtiriladi. Aks holda yuz sarg'ayib yoki ko'karib ketadi.
+            float brightness = photoLuma > 0.001f ? Mathf.Clamp(headLuma / photoLuma, 0.5f, 2f) : 1f;
+            Color gain = Color.white;
+            for (int c = 0; c < 3; c++)
+            {
+                float full = photoLinear[c] > 0.001f ? Mathf.Clamp(headLinear[c] / photoLinear[c], 0.5f, 2f) : 1f;
+                float target = Mathf.Lerp(brightness, full, HueMatch);
+                gain[c] = Mathf.Lerp(1f, target, SkinMatch);
+            }
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
+            Debug.Log($"[CraDev] Teri rangi: qahramon {skin.Sum / skin.Count}, rasm {photoSum / count}, ko'paytiruvchi {gain}");
+#endif
+            return gain;
+        }
+
+        static HeadSkin ReadHeadSkin(Texture head, Vector2[] faceUv)
         {
             // Bosh teksturasini kichraytirib o'qiymiz (to'liq 2048x2048 ni o'qish shart emas)
             const int size = 256;
@@ -117,35 +310,17 @@ namespace CraDev.Face
             RenderTexture.active = previous;
             RenderTexture.ReleaseTemporary(small);
 
-            Color headSum = Color.clear, photoSum = Color.clear;
-            int count = 0;
+            var skin = new HeadSkin { Uv = faceUv };
             foreach (int i in SkinSamples)
             {
                 Vector2 uv = faceUv[i];
                 if (uv.x < 0f)
                     continue;
-                headSum += readback.GetPixelBilinear(uv.x, uv.y);
-                photoSum += Average(face.Photo, face.Landmarks[i]);
-                count++;
+                skin.Sum += readback.GetPixelBilinear(uv.x, uv.y);
+                skin.Count++;
             }
-            if (Application.isPlaying) Object.Destroy(readback); else Object.DestroyImmediate(readback);
-            if (count == 0)
-                return Color.white;
-
-            Color headLinear = Linear(headSum / count), photoLinear = Linear(photoSum / count);
-            float headLuma = Luma(headLinear), photoLuma = Luma(photoLinear);
-            // Asosan yorug'lik moslashadi (yuz bo'yin bilan bir xil yoritilgandek); rang tusi (ton) esa o'yinchiniki
-            // bo'lib qoladi, faqat ozgina yaqinlashtiriladi. Aks holda yuz sarg'ayib yoki ko'karib ketadi.
-            float brightness = photoLuma > 0.001f ? Mathf.Clamp(headLuma / photoLuma, 0.5f, 2f) : 1f;
-            Color gain = Color.white;
-            for (int c = 0; c < 3; c++)
-            {
-                float full = photoLinear[c] > 0.001f ? Mathf.Clamp(headLinear[c] / photoLinear[c], 0.5f, 2f) : 1f;
-                float target = Mathf.Lerp(brightness, full, HueMatch);
-                gain[c] = Mathf.Lerp(1f, target, SkinMatch);
-            }
-            Debug.Log($"[CraDev] Teri rangi: qahramon {headSum / count}, rasm {photoSum / count}, ko'paytiruvchi {gain}");
-            return gain;
+            Release(readback);
+            return skin;
         }
 
         static Color Linear(Color c) => new Color(Mathf.GammaToLinearSpace(c.r), Mathf.GammaToLinearSpace(c.g), Mathf.GammaToLinearSpace(c.b));

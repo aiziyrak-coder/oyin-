@@ -152,7 +152,8 @@ namespace CraDev.EditorTools
                     }
 
                     var map = new FaceMap { Uv = RaycastHead(go, camera, points, out var headTexture) };
-                    map.Triangles = FacePainter.Triangulate(map.Uv);
+                    // Boshqa UV orolga tushgan nuqtalar va ularga "ko'prik" uchburchaklar tashlanadi (o'yin ham shunday qiladi)
+                    map.Triangles = FacePainter.CleanTriangles(map.Uv, FacePainter.Triangulate(map.Uv));
                     int found = map.Uv.Count(uv => uv.x >= 0f);
                     Debug.Log($"[CraDev] {info.Id}: yuz xaritasi tayyor ({found} nuqta, {map.Triangles.Length / 3} uchburchak).");
                     if (found > 300)
@@ -303,6 +304,108 @@ namespace CraDev.EditorTools
             material = new Material(Shader.Find("Hidden/CraDev/FaceProject"));
             AssetDatabase.CreateAsset(material, FacePaintPath);
             return material;
+        }
+
+        // ---------------------------------------------------------------- Jonli skaner oynasi (umumiy)
+
+        /// <summary>Skaner oynasi uslubi: avatar yaratish ekrani va lobby studiyasi o'z tugma/panel uslubini beradi.</summary>
+        sealed class ScanStyle
+        {
+            public Font Title, Body, Strong;
+            /// <summary>O'lcham ko'paytiruvchisi (lobby canvas'i 65% ixcham: ~1.45).</summary>
+            public float S = 1f;
+            public Color Text = Color.white, Muted = UiMuted;
+            public Sprite Round, Oval, Spinner, Alert, Close, Camera;
+            /// <summary>Tugma: (ota, nom, ikonka yoki null, x, y, eni, bo'yi, asosiy) - "Label" nomli Text bilan.</summary>
+            public System.Func<Transform, string, Sprite, float, float, float, float, bool, Button> Button;
+        }
+
+        /// <summary>
+        /// Jonli yuz skaneri: sarlavha, kamera ko'rinishi (oval, 3-2-1, spinner, xato xabari), maslahat, kamerani
+        /// almashtirish, ikki tugma va maxfiylik izohi. page - elementlar joylanadigan ota (yuqori-chapdan o'lchanadi),
+        /// window - ochiq/yopiq bo'ladigan obyekt, host - FaceScanView qo'shiladigan doim faol obyekt.
+        /// Qaytaradi: skaner; height - band qilingan balandlik.
+        /// </summary>
+        static FaceScanView BuildFaceScanView(GameObject host, Transform page, GameObject window, float width, ScanStyle st, out float height)
+        {
+            float s = st.S, pad = 32f * s, inner = width - 2f * pad;
+            Text Label(string name, Transform parent, string key, float x, float y, float w, float h, float size, Font font, Color color, TextAnchor anchor)
+            {
+                var text = CreateLabel(name, parent, font, "", Mathf.RoundToInt(size * s), color, anchor);
+                PlaceTopLeft(text.rectTransform, x, y, w, h);
+                text.horizontalOverflow = HorizontalWrapMode.Wrap;
+                text.verticalOverflow = VerticalWrapMode.Truncate;
+                if (key != null)
+                    Localized(text, key);
+                return text;
+            }
+
+            Label("ScanTitle", page, "face.scan_title", pad, 24f * s, inner - 56f * s, 44f * s, 24f, st.Title, st.Text, TextAnchor.MiddleLeft);
+            var close = st.Button(page, "ScanClose", st.Close, width - pad - 44f * s, 24f * s, 44f * s, 44f * s, false);
+
+            // Kamera ko'rinishi: yumaloq burchakli qora ramka, tasvir uni to'ldiradi (ortig'i kesiladi)
+            float frameY = 84f * s, frameH = Mathf.Round(inner * 0.75f);
+            var frame = CreateSliced("ScanFrame", page, st.Round, 12f * s, 24f, Color.black);
+            PlaceTopLeft(frame.rectTransform, pad, frameY, inner, frameH);
+            frame.gameObject.AddComponent<Mask>().showMaskGraphic = true;
+            var previewGo = new GameObject("Preview", typeof(RectTransform), typeof(RawImage), typeof(AspectRatioFitter));
+            previewGo.layer = LayerMask.NameToLayer("UI");
+            previewGo.transform.SetParent(frame.transform, false);
+            var preview = previewGo.GetComponent<RawImage>();
+            preview.raycastTarget = false;
+            var fitter = previewGo.GetComponent<AspectRatioFitter>();
+            fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
+            fitter.aspectRatio = 16f / 9f;
+            float ovalH = frameH * 0.78f;
+            var oval = CreateImage("Oval", frame.transform, st.Oval, new Vector2(ovalH * 560f / 720f, ovalH), new Vector2(0f, 4f * s), new Color(1f, 1f, 1f, 0.8f));
+            var countdown = CreateLabel("Countdown", frame.transform, st.Strong, "3", Mathf.RoundToInt(96f * s), Color.white, TextAnchor.MiddleCenter);
+            countdown.rectTransform.sizeDelta = new Vector2(200f * s, 160f * s);
+            var shade = countdown.gameObject.AddComponent<Shadow>();
+            shade.effectColor = new Color(0f, 0f, 0f, 0.7f);
+            shade.effectDistance = new Vector2(2f, -2f);
+            countdown.enabled = false;
+            var spinner = CreateImage("Spinner", frame.transform, st.Spinner, new Vector2(40f * s, 40f * s), Vector2.zero, Color.white);
+            spinner.enabled = false;
+            var failure = CreateFullscreen("Failure", frame.transform, new Color(0.05f, 0.05f, 0.06f, 0.92f));
+            CreateImage("Icon", failure.transform, st.Alert, new Vector2(36f * s, 36f * s), new Vector2(0f, 64f * s), new Color32(240, 92, 92, 255));
+            var failureText = CreateLabel("Text", failure.transform, st.Body, "", Mathf.RoundToInt(16f * s), Color.white, TextAnchor.UpperCenter);
+            Place(failureText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 1f), new Vector2(0f, 30f * s), new Vector2(inner - 64f * s, 150f * s));
+            failureText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            failureText.verticalOverflow = VerticalWrapMode.Truncate;
+            failure.gameObject.SetActive(false);
+
+            float y = frameY + frameH + 14f * s;
+            var hint = Label("ScanHint", page, null, pad, y, inner, 52f * s, 16f, st.Body, st.Muted, TextAnchor.UpperCenter);
+            y += 58f * s;
+            var switchButton = st.Button(page, "ScanSwitchCamera", st.Camera, pad, y, inner, 40f * s, false);
+            y += 52f * s;
+            float half = (inner - 16f * s) / 2f;
+            var secondary = st.Button(page, "ScanSecondary", null, pad, y, half, 50f * s, false);
+            var primary = st.Button(page, "ScanPrimary", null, pad + half + 16f * s, y, half, 50f * s, true);
+            y += 64f * s;
+            Label("ScanPrivacy", page, "face.privacy", pad, y, inner, 36f * s, 13f, st.Body, st.Muted, TextAnchor.UpperCenter);
+            height = y + 36f * s + pad;
+
+            var view = host.AddComponent<FaceScanView>();
+            Set(view, "detectorModel", AssetDatabase.LoadAssetAtPath<ModelAsset>(FaceModels + "face_detector.onnx"));
+            Set(view, "landmarkModel", AssetDatabase.LoadAssetAtPath<ModelAsset>(FaceModels + "face_landmarks_detector.onnx"));
+            Set(view, "window", window);
+            Set(view, "preview", preview);
+            Set(view, "previewFitter", fitter);
+            Set(view, "oval", oval);
+            Set(view, "countdown", countdown);
+            Set(view, "spinner", spinner);
+            Set(view, "failure", failure.gameObject);
+            Set(view, "failureText", failureText);
+            Set(view, "hint", hint);
+            Set(view, "switchButton", switchButton);
+            Set(view, "switchLabel", switchButton.transform.Find("Label").GetComponent<Text>());
+            Set(view, "closeButton", close);
+            Set(view, "secondaryButton", secondary);
+            Set(view, "secondaryLabel", secondary.transform.Find("Label").GetComponent<Text>());
+            Set(view, "primaryButton", primary);
+            Set(view, "primaryLabel", primary.transform.Find("Label").GetComponent<Text>());
+            return view;
         }
 
         /// <summary>Kamera oynasidagi oval: yuz shu chiziq ichiga joylanadi.</summary>
