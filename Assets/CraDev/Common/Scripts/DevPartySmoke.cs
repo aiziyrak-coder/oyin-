@@ -59,7 +59,16 @@ namespace CraDev
             {
                 var screen=RectTransformUtility.WorldToScreenPoint(null,plate.position);
                 if(screen.x<0||screen.x>Screen.width||screen.y<0||screen.y>Screen.height)failures++;
+                // Nomlar chap panel (ochiq) va o'ng ustun orasida: panellar ostida qolmaydi
+                var drawer=lobby.Current.GetComponent<LobbyFriendsDrawer>();var rail=lobby.Current.transform.Find("LobbyRightRail") as RectTransform;
+                if(drawer!=null&&rail!=null)
+                {
+                    var corners=new Vector3[4];rail.GetWorldCorners(corners);float scale=lobby.GetComponent<Canvas>().scaleFactor;
+                    if(screen.x<drawer.ExpandedRight*scale||screen.x>corners[0].x){failures++;Debug.LogError($"[PartyTest] Nameplate under side panel: {plate.name} x={screen.x:F0}");}
+                }
             }
+            var leave=lobby.transform.Find("LeaveParty");
+            if(leave==null||!leave.gameObject.activeSelf||leave.GetSiblingIndex()>lobby.Dialog.transform.GetSiblingIndex()){failures++;Debug.LogError("[PartyTest] Leave button missing or drawn above dialogs");}
             if(GameObject.Find("Sofa")!=null||GameObject.Find("ArmchairLeft")!=null||GameObject.Find("LobbySeating")!=null)failures++;
             foreach(var viewer in Object.FindObjectsByType<CraDev.CharacterCreation.AvatarViewer>(FindObjectsSortMode.None))
                 if(viewer.CurrentModel!=null&&viewer.CurrentModel.GetComponent<Animator>().runtimeAnimatorController==null)failures++;

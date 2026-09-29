@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace CraDev.MainMenu
 {
@@ -19,16 +21,52 @@ namespace CraDev.MainMenu
         [SerializeField] int stagePose = -1;
 
         CanvasGroup group;
+        Texture liveBackground;
 
         public string Id => pageId;
         public int NavTab => navTab;
-        public Texture Background => background;
+        public Texture Background => liveBackground != null ? liveBackground : background;
         public int StagePose => stagePose;
         public CanvasGroup Group => group != null ? group : group = GetComponent<CanvasGroup>();
 
         protected MainMenuScreen Lobby { get; private set; }
 
-        public void Bind(MainMenuScreen lobby) => Lobby = lobby;
+        public void Bind(MainMenuScreen lobby)
+        {
+            Lobby = lobby;
+            if (lobby.SingleWindow) ReleaseArchivedArt(lobby);
+        }
+
+        /// <summary>Ish vaqtidagi fon (masalan, soat bo'yicha lobby rasmi): builder bergan rasm o'rniga ishlatiladi.</summary>
+        public void SetLiveBackground(Texture texture) => liveBackground = texture;
+
+        // Yagona oyna rejimida arxivdagi sahifalar ochilmaydi (MainMenuScreen.Show), lekin ularning to'liq ekranli
+        // rasmlari (har biri ~6 MB, jami ~42 MB) sahna bilan birga xotiraga yuklanadi. Ular xotiradan bo'shatiladi:
+        // sahifa baribir ko'rsatilsa, Unity rasmni diskdan o'zi qayta yuklaydi. Sahifalar va havolalar o'zgarmaydi.
+        static MainMenuScreen released;
+        static void ReleaseArchivedArt(MainMenuScreen lobby)
+        {
+            if (released == lobby || Application.isEditor) return;
+            released = lobby;
+            var live = new HashSet<Texture>();
+            var archived = new HashSet<Texture>();
+            foreach (var page in lobby.GetComponentsInChildren<LobbyPage>(true))
+            {
+                var target = page.Id == "home" || page.Id == "settings" ? live : archived;
+                foreach (var texture in page.ArtTextures())
+                    if (texture != null) target.Add(texture);
+            }
+            foreach (var texture in archived)
+                if (texture is Texture2D && !live.Contains(texture)) Resources.UnloadAsset(texture);
+        }
+
+        /// <summary>Sahifa sahnada ushlab turgan katta rasmlar (fon, hero rasmlar va h.k.).</summary>
+        protected virtual IEnumerable<Texture> ArtTextures()
+        {
+            yield return background;
+            foreach (var image in GetComponentsInChildren<RawImage>(true))
+                yield return image.texture;
+        }
 
         /// <summary>Sahifa ochilganda (kontentni yangilash, serverdan ma'lumot olish).</summary>
         public virtual void OnShow() { }

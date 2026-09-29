@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using CraDev.MainMenu;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,12 +26,16 @@ namespace CraDev.EditorTools
             var friends=panel.gameObject.AddComponent<LobbyFriendsPanel>();
             Set(friends,"font",v2.Medium);Set(friends,"rounded",v2.RoundFill);
             Set(friends,"addIcon",LineIcon("UserPlus"));Set(friends,"removeIcon",LineIcon("Minus"));Set(friends,"acceptIcon",LineIcon("Check"));
+            // Lobbyga taklif do'st qo'shishdan boshqa belgi (chipta) va oltin rangda
+            Set(friends,"inviteIcon",LineIcon("Ticket"));
+            var hints=new List<(Component target,string key)>();
             var filters=new Image[3];var counts=new Text[3];
             string[] filterModes={"friends","online","offline"};string[] filterKeys={"friends.tab.friends","lobby.online","lobby.offline"};
             for(int i=0;i<3;i++)
             {
                 float x=i==0?18:164+(i-1)*112;float w=i==0?136:100;
-                var tab=V2Button(panel.transform,filterKeys[i],null,x,18,w,80,"friends",filterModes[i]);tab.name="FriendFilter_"+filterModes[i];filters[i]=tab.GetComponent<Image>();
+                // Filtr panel ichidagi almashtirgich: LobbyFriendsPanel o'zi ulaydi (qayta bosish ro'yxatga qaytaradi)
+                var tab=V2Button(panel.transform,filterKeys[i],null,x,18,w,80);tab.name="FriendFilter_"+filterModes[i];filters[i]=tab.GetComponent<Image>();
                 var label=tab.GetComponentInChildren<Text>();label.fontSize=17;label.alignment=TextAnchor.MiddleCenter;PlaceTopLeft(label.rectTransform,4,40,w-8,32);
                 Solid(tab.transform,"Status",i==0?32:23,12,25,i==0?1:4).color=i==1?new Color32(48,226,137,255):i==2?new Color32(149,152,166,255):Color.white;
                 counts[i]=V2Text(tab.transform,"0",i==0?92:61,13,36,30,17,false);
@@ -39,8 +44,9 @@ namespace CraDev.EditorTools
             var summary=V2Panel(panel.transform,"FriendSummary",388,18,86,80,V2Glass);
             Set(friends,"countLabel",V2Text(summary.transform,"",5,12,76,56,17,false));
             var field=V2Search(panel.transform,"friends.search",18,110,456);Set(friends,"search",field);
+            field.characterLimit=24; // server qidiruvi 1-24 belgi (Server/src/app.js MAX_QUERY_LENGTH)
             Set(friends,"drawer",drawer);
-            var handle=V2Button(root,"‹",null,528,148,48,76,localized:false);handle.name="FriendsDrawerToggle";
+            var handle=V2Button(root,"‹",null,528,148,48,76,localized:false);handle.name="FriendsDrawerToggle";hints.Add((handle,"lobby.tool.drawer"));
             var arrow=handle.GetComponentInChildren<Text>();arrow.alignment=TextAnchor.MiddleCenter;arrow.fontSize=40;
             PlaceTopLeft(arrow.rectTransform,0,0,48,76);
             Set(drawer,"panel",panel.rectTransform);Set(drawer,"handle",handle.GetComponent<RectTransform>());Set(drawer,"content",panelGroup);
@@ -50,8 +56,8 @@ namespace CraDev.EditorTools
             var buttons=new Button[5];
             for(int i=0;i<5;i++)
             {
-                buttons[i]=V2Button(panel.transform,"",icons[i],18+i*94,176,80,52);
-                buttons[i].name="FriendTool_"+modes[i];
+                buttons[i]=V2Button(panel.transform,"",icons[i],18+i*94,176,80,52,localized:false);
+                buttons[i].name="FriendTool_"+modes[i];hints.Add((buttons[i],"lobby.tool."+modes[i]));
                 PlaceTopLeft(buttons[i].transform.Find(icons[i]).GetComponent<RectTransform>(),28,14,24,24);
             }
             SetArray(friends,"tools",buttons);
@@ -65,32 +71,40 @@ namespace CraDev.EditorTools
             footer.rectTransform.anchorMin=footer.rectTransform.anchorMax=Vector2.zero;footer.rectTransform.anchoredPosition=new Vector2(16,86);
             Set(friends,"footerPortrait",V2Picture(footer.transform,"SelfPortrait",null,12,8,54,54));
             Set(friends,"footerName",V2Text(footer.transform,"",66,14,215,42,23,false));
-            V2Button(footer.transform,"","Gear",326,9,56,52,"page","settings").name="LobbySettings";
-            V2Button(footer.transform,"","Logout",392,9,56,52,"quit").name="LobbyQuit";
+            var gear=V2Button(footer.transform,"","Gear",326,9,56,52,"page","settings",localized:false);gear.name="LobbySettings";hints.Add((gear,"menu.settings"));
+            // Bu tugma o'yindan chiqadi (tasdiqlash oynasi bilan): izohi ham shuni aytadi
+            var quit=V2Button(footer.transform,"","Logout",392,9,56,52,"quit",localized:false);quit.name="LobbyQuit";hints.Add((quit,"lobby.tool.quit"));
 
             var right=CreateRect("LobbyRightRail",root);
             right.anchorMin=new Vector2(1,0);right.anchorMax=new Vector2(1,1);right.pivot=new Vector2(1,1);
             right.anchoredPosition=new Vector2(-48,0);right.sizeDelta=new Vector2(650,0);
-            V2Text(right,"W E L C O M E   T O",0,163,650,38,18,false).color=new Color32(206,195,194,255);
+            Localized(V2Text(right,"",0,163,650,38,18,false),"lobby.welcome_to",spaced:true).color=new Color32(206,195,194,255);
             var title=V2Text(right,"NewWorld",-5,188,680,130,104,false);title.font=v2.Bold;title.fontSize=104;title.verticalOverflow=VerticalWrapMode.Overflow;
             var gradient=title.gameObject.AddComponent<LobbyGradient>();gradient.left=Color.white;
             V2Text(right,"lobby.caption",0,301,650,46,31).color=new Color32(236,226,216,255);
             var promo=V2Panel(right,"LobbyPromo",0,437,650,190,V2Glass);
-            V2Text(promo.transform,"lobby.promo",34,20,330,90,27).font=v2.SemiBold;
-            V2Text(promo.transform,"lobby.promo_hint",34,107,300,64,22).color=new Color32(194,189,183,255);
+            V2Text(promo.transform,"lobby.home.promo",34,20,330,90,27).font=v2.SemiBold;
+            V2Text(promo.transform,"lobby.home.promo_hint",34,107,300,64,22).color=new Color32(194,189,183,255);
             var promoArrow=V2Button(promo.transform,"›",null,560,105,62,62,"enter-world",localized:false);promoArrow.name="PromoArrow";promoArrow.GetComponentInChildren<Text>().fontSize=42;
+            hints.Add((promoArrow,"lobby.enter"));
             V2Panel(promo.transform,"PromoProgress",38,174,36,3,new Color32(116,224,188,255));
             string[] cardIcons={"Users","Globe","Calendar"};
-            string[] cardTitles={"lobby.with_friends","lobby.your_world","home.event_next"};
+            string[] cardTitles={"lobby.with_friends","lobby.home.your_world","home.event_next"};
             string[] cardHints={"lobby.together","lobby.possibilities",""};
             for(int i=0;i<3;i++)
             {
-                var card=V2Button(right,"",null,i*222,643,206,147,i==0?"friends":i==1?"enter-world":"soon",i==0?"find":null);
+                // Tadbir kartasi "tez orada" emas: LobbyContent uni serverdagi tadbir bilan to'ldiradi, bosilsa batafsil oyna
+                var card=V2Button(right,"",null,i*222,643,206,147,i==0?"friends":i==1?"enter-world":null,i==0?"find":null,localized:false);
                 card.name=i==2?"LobbyEvent":"LobbyFeature"+i;
                 if(i<2)Solid(card.transform,cardIcons[i],87,24,32,i==0?1:2);else V2Icon(card.transform,cardIcons[i],87,24,32);
-                var label=V2Text(card.transform,cardTitles[i],6,67,194,38,23);label.alignment=TextAnchor.MiddleCenter;
+                var label=V2Text(card.transform,i==2?Loc.T(cardTitles[i]):cardTitles[i],6,67,194,38,23,i!=2);label.alignment=TextAnchor.MiddleCenter;
                 var hint=V2Text(card.transform,cardHints[i],8,107,190,29,17,i!=2);hint.alignment=TextAnchor.MiddleCenter;hint.color=new Color32(178,174,169,255);
-                if(i==2)Set(page,"eventTitle",hint);
+                if(i==2)
+                {
+                    label.name="EventName";label.resizeTextForBestFit=true;label.resizeTextMinSize=15;label.resizeTextMaxSize=label.fontSize;
+                    hint.name="EventWhen";hint.text=Loc.T("common.connecting");hint.resizeTextForBestFit=true;hint.resizeTextMinSize=14;hint.resizeTextMaxSize=hint.fontSize;
+                    Set(page,"eventTitle",hint);Set(page,"eventName",label);Set(page,"eventCard",card);
+                }
             }
             var entryGlow=V2Panel(right,"EntryGlow",-18,803,686,162,Color.white);entryGlow.raycastTarget=false;
             var enter=V2Button(right,"lobby.enter","Play",0,821,650,126,"enter-world");enter.name="EnterNewWorld";
@@ -100,7 +114,7 @@ namespace CraDev.EditorTools
             var entryLabel=enter.GetComponentInChildren<Text>();entryLabel.font=v2.SemiBold;entryLabel.fontSize=32;
             PlaceTopLeft(entryLabel.rectTransform,260,0,338,126);
             V2Text(enter.transform,"→",574,20,58,82,45,false);
-            var sign=V2Text(right,"—   Game On   —",0,965,650,48,27,false);sign.alignment=TextAnchor.MiddleCenter;sign.color=new Color32(199,198,176,255);
+            var sign=V2Text(right,"lobby.home.sign",0,965,650,48,27);sign.alignment=TextAnchor.MiddleCenter;sign.color=new Color32(199,198,176,255);
             foreach(var label in right.GetComponentsInChildren<Text>())
                 if(label.transform.parent==right)
                 {
@@ -119,6 +133,12 @@ namespace CraDev.EditorTools
             {
                 float y=item.anchoredPosition.y;item.anchorMin=item.anchorMax=Vector2.zero;item.anchoredPosition=new Vector2(item.anchoredPosition.x,1080+y);
             }
+            // Kelgan do'stlik so'rovlari soni (qo'ng'iroqdagisi ish vaqtida LobbyFriendsPanel'da qo'shiladi)
+            Set(friends,"requestsBadge",V2Badge(buttons[3].transform));
+            var tooltip=V2Tooltip(root);Set(friends,"tooltip",tooltip);
+            foreach(var (target,key) in hints)V2Hint(target,tooltip,key);
+            // Kichik ekranlarda yozuvlar 8 px gacha kichrayib ketmasin (1080p da 65% dizayn o'zgarmaydi)
+            root.parent.gameObject.AddComponent<LobbyUiScale>();
         }
         static void V2GameControls(Transform home,MainMenuScreen screen)
         {
@@ -135,6 +155,31 @@ namespace CraDev.EditorTools
             V2Text(profile.transform,"lobby.profile_hint",76,36,200,24,17).color=new Color32(173,190,163,255);
             ReferenceSurface.Apply(language.GetComponent<Image>(),0,22);ReferenceSurface.Apply(profile.GetComponent<Image>(),0,22);
             foreach(var button in right.GetComponentsInChildren<Button>())if(button.GetComponent<ReferenceSurface>()==null)ReferenceSurface.Apply(button.GetComponent<Image>(),5,18);
+        }
+
+        // Qizil son belgisi (kelgan so'rovlar): tugmaning o'ng-yuqori burchagidan biroz chiqib turadi, boshida yashirin.
+        static Text V2Badge(Transform host)
+        {
+            var badge=V2Panel(host,"RequestBadge",0,0,26,24,new Color32(243,65,95,255));
+            var rect=badge.rectTransform;rect.anchorMin=rect.anchorMax=rect.pivot=Vector2.one;rect.anchoredPosition=new Vector2(6,6);
+            var count=V2Text(badge.transform,"0",0,0,26,24,19,false);count.alignment=TextAnchor.MiddleCenter;count.color=Color.white;
+            Stretch(count.rectTransform);
+            badge.gameObject.SetActive(false);
+            return count;
+        }
+        // Ikonkali tugmalar uchun bitta suzuvchi izoh pufagi (LobbyIconHint uni tugma yoniga qo'yadi).
+        static Text V2Tooltip(Transform root)
+        {
+            var bubble=V2Panel(root,"LobbyTooltip",0,0,240,42,new Color32(18,18,20,242));bubble.raycastTarget=false;
+            var text=V2Text(bubble.transform,"",16,0,208,42,21,false);text.alignment=TextAnchor.MiddleCenter;
+            text.color=new Color32(236,232,226,255);text.verticalOverflow=VerticalWrapMode.Overflow;
+            bubble.gameObject.SetActive(false);
+            return text;
+        }
+        static void V2Hint(Component target,Text tooltip,string key)
+        {
+            var hint=target.gameObject.AddComponent<LobbyIconHint>();
+            Set(hint,"label",tooltip);Set(hint,"key",key);Set(hint,"floating",true);
         }
     }
 }

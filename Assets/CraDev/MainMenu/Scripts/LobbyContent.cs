@@ -54,10 +54,7 @@ namespace CraDev.MainMenu
             if (Id == "wardrobe") { draft = Outfit.FromJson(PlayerProfile.Outfit); saved = draft.Clone(); }
             // Static pages retain their existing hierarchy; live data still refreshes on entry.
             if(!rendered || renderedLanguage!=Loc.Current || Id=="wardrobe" || Id=="settings" || Id=="friends" || Id=="top") Render();
-            if(Id=="home" && eventTitle!=null) StartCoroutine(Lobby.Api.Events(result=>{
-                var evt=result.Ok?result.Data.items?.FirstOrDefault():null;
-                nextEvent=evt; RefreshLiveLabels();
-            }));
+            if(Id=="home" && eventTitle!=null) StartCoroutine(EventLoop());
             if (Id == "world") StartCoroutine(Lobby.Api.Stats(result =>
             {
                 onlineCount=result.Ok?result.Data.online:(int?)null; RefreshLiveLabels();
@@ -148,7 +145,7 @@ namespace CraDev.MainMenu
         }
         void RefreshLiveLabels()
         {
-            if(eventTitle!=null)eventTitle.text=nextEvent==null?Loc.T("home.event_none"):nextEvent.title.Value+"  "+nextEvent.StartsLocal.ToString("HH:mm");
+            RefreshEventCard();
             if(status!=null)status.text=onlineCount.HasValue?Loc.F("world.online",onlineCount.Value):Loc.T("world.online_unknown");
         }
         void Begin(float height = 720)
