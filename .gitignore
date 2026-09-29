@@ -74,3 +74,4 @@ npm-debug.log*
 # Mahalliy AI yordamchi holati (umumiy .claude/settings.json saqlanadi)
 /.claude/settings.local.json
 /.claude/worktrees/
+/tools/bin/
