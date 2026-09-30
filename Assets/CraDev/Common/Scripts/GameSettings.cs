@@ -83,6 +83,14 @@ namespace CraDev
             _ = DefaultQuality; // hali hech narsa o'zgarmagan: loyiha standartini eslab qolamiz
             Load();
             Apply();
+            // Capture dimensions override the display only in developer runs; never save them as user preferences.
+            var args=Environment.GetCommandLineArgs();
+            if(Array.IndexOf(args,"-cradevShot")>=0)
+            {
+                int wi=Array.IndexOf(args,"-screen-width"),hi=Array.IndexOf(args,"-screen-height");
+                if(wi>=0&&hi>=0&&wi+1<args.Length&&hi+1<args.Length&&int.TryParse(args[wi+1],out int w)&&int.TryParse(args[hi+1],out int h)
+                    &&w>=640&&w<=7680&&h>=360&&h<=4320)Screen.SetResolution(w,h,FullScreenMode.Windowed);
+            }
         }
 
         // ------------------------------------------------------------------ O'lchamlar

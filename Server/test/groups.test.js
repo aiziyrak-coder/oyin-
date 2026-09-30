@@ -66,7 +66,7 @@ describe('guruhlar', () => {
       [{ name: 'Paid club', kind: 'paid', price: 0, currency: 'UZS', period: 'month' }, 'invalid_price'],
       [{ name: 'Paid club', kind: 'paid', price: 1.5, currency: 'UZS', period: 'month' }, 'invalid_price'],
       [{ name: 'Paid club', kind: 'paid', price: 1000, currency: 'EUR', period: 'month' }, 'invalid_currency'],
-      [{ name: 'Paid club', kind: 'paid', price: 1000, currency: 'UZS', period: 'day' }, 'invalid_period'],
+      [{ name: 'Paid club', kind: 'paid', price: 1000, currency: 'CDCoin', period: 'day' }, 'invalid_period'],
     ]) {
       const res = await api.post('create', owner, body);
       assert.deepEqual([res.status, res.body], [400, { error }], JSON.stringify(body));
@@ -151,15 +151,21 @@ describe('guruhlar', () => {
     assert.equal((await api.get(`detail?code=${group.code}`, owner)).status, 404);
   });
 
-  test('pullik obuna: narx ko\'rinadi, to\'lov yo\'q - ega tasdiqlaydi, muddat tugasa a\'zolik tugaydi', async () => {
+  test('paid membership: owner receives full CDCoin payment, retries cannot double charge, membership expires', async () => {
     const { body: group } = await api.post('create', owner,
-      { name: 'Premium kurs', kind: 'paid', price: 50000, currency: 'UZS', period: 'month', description: 'Oylik' });
+      { name: 'Premium kurs', kind: 'paid', price: 500, currency: 'CDCoin', period: 'month', description: 'Oylik' });
     const [found] = (await api.get('search?q=premium', cara)).body;
-    assert.deepEqual([found.kind, found.price, found.currency, found.period], ['paid', 50000, 'UZS', 'month']);
-    const sub = await api.post('join', cara, { code: group.code });
-    assert.equal(sub.body.status, 'requested'); // to'lov yo'q: faqat so'rov
-    const approved = await api.post('approve', owner, { code: group.code, nickname: 'Cara' });
-    const cara1 = approved.body.members.find(m => m.nickname === 'Cara');
+    assert.deepEqual([found.kind, found.price, found.currency, found.period], ['paid', 500, 'CDCoin', 'month']);
+    const body = { code: group.code, expectedPrice: 500, paymentKey: 'subscription-test-0001' };
+    assert.equal((await api.post('join', cara, body)).body.error, 'insufficient_coins');
+    assert.equal((await api.post('approve', owner, { code: group.code, nickname: 'Cara' })).body.error, 'payment_required');
+    api.db.wallet.creditVerified(cara.id, 'test:receipt:0001', 1000, new Date(api.clock.ms));
+    const sub = await api.post('join', cara, body);
+    assert.equal(sub.body.status, 'joined');
+    await api.post('join', cara, body);
+    assert.equal(api.db.wallet.balance(cara.id), 500);
+    assert.equal(api.db.wallet.balance(owner.id), 500);
+    const cara1 = sub.body.group.members.find(m => m.nickname === 'Cara');
     assert.equal(cara1.expiresAt, new Date(api.clock.ms + 30 * DAY).toISOString());
     assert.equal((await api.get(`detail?code=${group.code}`, cara)).body.expiresAt, cara1.expiresAt);
 
@@ -167,6 +173,9 @@ describe('guruhlar', () => {
     const after = (await api.get(`detail?code=${group.code}`, owner)).body;
     assert.deepEqual(after.members.map(m => m.nickname), ['GroupOwner']);
     assert.equal((await api.get(`detail?code=${group.code}`, cara)).body.role, '');
+    assert.equal((await api.post('join', cara, body)).body.status, 'already_processed');
+    assert.equal((await api.get(`detail?code=${group.code}`, cara)).body.role, '');
+    assert.equal(api.db.wallet.balance(cara.id), 500);
   });
 
   test('guruhdoshni lobbyga chaqirish mumkin (do\'st bo\'lmasa ham)', async () => {
@@ -179,6 +188,45 @@ describe('guruhlar', () => {
     assert.equal((await api.call('POST', '/api/party/accept', stranger, { invitationId: invite.id })).status, 200);
   });
 
+  test('group editing and ownership transfer preserve members and enforce owner permissions', async () => {
+    const {body:g}=await api.post('create',owner,{name:'Editable club',kind:'free'});
+    await api.post('join',bob,{code:g.code});
+    const edit={code:g.code,name:'Renamed club',description:'Updated',kind:'free'};
+    assert.equal((await api.post('edit',bob,edit)).status,403);
+    assert.equal((await api.post('edit',owner,edit)).body.name,'Renamed club');
+    assert.equal((await api.post('transfer',bob,{code:g.code,nickname:owner.nickname})).status,403);
+    assert.equal((await api.post('transfer',owner,{code:g.code,nickname:dan.nickname})).status,400);
+    const transfer=await api.post('transfer',owner,{code:g.code,nickname:bob.nickname});
+    assert.equal(transfer.status,200);assert.equal(transfer.body.role,'admin');assert.equal(transfer.body.owner,bob.nickname);
+    assert.equal(transfer.body.members.filter(m=>m.role==='owner').length,1);
+    assert.equal((await api.post('edit',owner,edit)).status,403);
+    assert.equal((await api.post('edit',bob,edit)).status,200);
+    assert.equal((await api.post('leave',bob,{code:g.code})).body.error,'owner_cannot_leave');
+    assert.equal((await api.post('delete',owner,{code:g.code})).status,403);
+  });
+
+  test('paid group edits preserve expiry and future payments follow the new owner', async () => {
+    const {body:g}=await api.post('create',owner,{name:'Transferred paid club',kind:'paid',price:100,currency:'CDCoin',period:'month'});
+    api.db.wallet.creditVerified(bob.id,'test:transfer:bob',100,new Date(api.clock.ms));
+    api.db.wallet.creditVerified(cara.id,'test:transfer:cara',500,new Date(api.clock.ms));
+    await api.post('join',bob,{code:g.code,expectedPrice:100,paymentKey:'transfer-bob-0001'});
+    const joined=await api.post('join',cara,{code:g.code,expectedPrice:100,paymentKey:'transfer-cara-0001'});
+    const expiry=joined.body.group.expiresAt;
+    const edit={code:g.code,name:'Transferred paid club',description:'New price',kind:'paid',price:200,currency:'CDCoin',period:'week'};
+    assert.equal((await api.post('edit',owner,edit)).status,200);
+    assert.equal((await api.get(`detail?code=${g.code}`,cara)).body.expiresAt,expiry);
+    assert.equal((await api.post('transfer',owner,{code:g.code,nickname:bob.nickname})).status,200);
+    const oldBalance=api.db.wallet.balance(owner.id),newBalance=api.db.wallet.balance(bob.id);
+    api.db.wallet.creditVerified(dan.id,'test:transfer:dan',200,new Date(api.clock.ms));
+    const payment={code:g.code,expectedPrice:100,paymentKey:'transfer-dan-0001'};
+    assert.equal((await api.post('join',dan,payment)).body.error,'price_changed');
+    payment.expectedPrice=200;
+    assert.equal((await api.post('join',dan,payment)).body.status,'joined');
+    assert.equal(api.db.wallet.balance(owner.id),oldBalance);
+    assert.equal(api.db.wallet.balance(bob.id),newBalance+200);
+    assert.equal(api.db.wallet.balance(dan.id),0);
+  });
+
   test('cheklovlar: egalik qilinadigan guruhlar soni', async () => {
     const busy = await api.register('BusyOwner');
     for (let i = 0; i < GROUP_LIMITS.owned; i++) {
@@ -186,6 +234,22 @@ describe('guruhlar', () => {
     }
     assert.deepEqual((await api.post('create', busy, { name: 'Yana bitta', kind: 'free' })).body, { error: 'too_many_groups' });
   });
+});
+
+test('expired subscription cannot invite or accept without visiting any group endpoint', async () => {
+  const api=await startApi();
+  try {
+    const owner=await api.register('ExpiryOwner'),guest=await api.register('ExpiryGuest');
+    const {body:g}=await api.post('create',owner,{name:'Expiring membership',kind:'paid',price:1,currency:'CDCoin',period:'week'});
+    api.db.wallet.creditVerified(guest.id,'expiry:test:receipt',1,new Date(api.clock.ms));
+    await api.post('join',guest,{code:g.code,expectedPrice:1,paymentKey:'expiry-join-00001'});
+    api.clock.ms+=7*DAY-1000;
+    assert.equal((await api.call('POST','/api/party/invite',owner,{nickname:guest.nickname})).status,200);
+    const invite=(await api.call('POST','/api/party/heartbeat',guest,{pingMs:5})).body.invitations[0];
+    api.clock.ms+=1000;
+    assert.equal((await api.call('POST','/api/party/accept',guest,{invitationId:invite.id})).status,403);
+    assert.equal((await api.call('POST','/api/party/invite',owner,{nickname:guest.nickname})).status,403);
+  } finally {await api.close();}
 });
 
 test('guruh yaratish cheklovi (daqiqasiga) va ping', async () => {

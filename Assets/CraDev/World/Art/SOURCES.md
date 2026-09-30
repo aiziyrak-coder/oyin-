@@ -1,5 +1,22 @@
 # NewWorld: real dunyo materiallari
 
+## Shaxmat galereyasi — 2026-09-30
+
+`ChessGallery/` ichidagi to'rtta haqiqiy foto Wikimedia Commons rasmiy `imageinfo` API va asl `upload.wikimedia.org` manbalaridan o'zgartirmasdan yuklandi. API qaytargan **SHA-1 va bayt hajmi to'rttalasida ham mos**. Original piksel fayllarida retush, AI yuz yoki upscale yo'q. Unity importi uzun tomonni ko'pi bilan 2048 px qilib mipmap/compression qo'llaydi; ramka asl aspect ratio'ni saqlaydi. Abdusattorov manbasining EXIF orientation=6 belgisi uchun zarur bo'lsa mesh UV clockwise aylantiriladi, original JPG baytlari o'zgarmaydi.
+
+Mualliflar o'yinni yoki platformani qo'llab-quvvatlaydi degan ma'no yo'q; bu nomli tarixiy/sport galereyasi. Muallif va litsenziya devordagi lavhalarda ham ko'rsatiladi. Tarqatiladigan o'yinga loyiha ildizidagi **ASSET-CREDITS.txt** nusxasi kiritilishi shart (ayniqsa CC BY 4.0 Carlsen fotosi uchun).
+
+| Fayl | Tasvir / muallif | Huquq | Bayt | SHA-256 |
+| --- | --- | --- | ---: | --- |
+| `ChessGallery/Carlsen.jpg` | [Magnus Carlsen in 2025](https://commons.wikimedia.org/wiki/File:Magnus_Carlsen_in_2025.jpg), Miroslav.vajdic, Commons crop: SpyroeBM | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | 995450 | `B5FCA4F6600619EE803E63803C6969D967FE334BC31770A8AA95B06F65D8CC3C` |
+| `ChessGallery/Polgar.jpg` | [HoogovensChess1998JuditPolgar](https://commons.wikimedia.org/wiki/File:HoogovensChess1998JuditPolgar.jpg), Noord-Hollands Archief / Fotoburo de Boer | [CC0](https://creativecommons.org/publicdomain/zero/1.0/), archive transferred copyright and dedicated this collection | 1518379 | `3BD99C18D10BD4EBF4ED3431DDE8B15E1D093596F2EA91A88DFC0F1F39E63BB9` |
+| `ChessGallery/Capablanca.jpg` | [Jose Raul Capablanca 1921](https://commons.wikimedia.org/wiki/File:Jos%C3%A9_Ra%C3%BAl_Capablanca_1921.jpg), Agence Rol / BnF Gallica, ID btv1b53045803j | Public domain, Commons PD-anon-expired, published 1921 | 1953805 | `529C8EDBB89A9B040E42062A383968F06C505FBFD9722C1530D065007037A59F` |
+| `ChessGallery/Abdusattorov.jpg` | [2024 FIDE World Blitz portrait](https://commons.wikimedia.org/wiki/File:Nodirbek_Abdusattorov_during_2024_FIDE_World_Blitz_Championship_4_(cropped).jpg), Ofb | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) | 905343 | `588F645ED46328A981EAD4C5CDD5FB1D82171C8EA5B6115D35AD36A8D0E20028` |
+
+Originals: [Carlsen](https://upload.wikimedia.org/wikipedia/commons/1/1a/Magnus_Carlsen_in_2025.jpg), [Polgar](https://upload.wikimedia.org/wikipedia/commons/1/17/HoogovensChess1998JuditPolgar.jpg), [Capablanca](https://upload.wikimedia.org/wikipedia/commons/0/0f/Jos%C3%A9_Ra%C3%BAl_Capablanca_1921.jpg), [Abdusattorov](https://upload.wikimedia.org/wikipedia/commons/3/3d/Nodirbek_Abdusattorov_during_2024_FIDE_World_Blitz_Championship_4_%28cropped%29.jpg). Jami **5 372 977 bayt**. Foto manbasida mavjud homiy logotiplari hujjatli foto tarkibidir; NewWorld hamkorligi yoki reklama deb ko'rsatilmaydi.
+
+Stadion arxitekturasi, kuboklar, tribunalar, darvoza/to'r va maydon chiziqlari loyiha kodi bilan yaratiladi. Chim uchun oldingi CC0 Grass Ground mikrorelyefi va o'zimiz yozgan world-space mowing pattern shader ishlatiladi; alohida tijoriy yoki yopiq asset qo'shilmagan.
+
 Manba: **Poly Haven** — fotografik PBR materiallar va haqiqiy HDR osmon. Bu fayllar generativ AI bilan yaratilmagan. Ular rasmiy manbadan o'zgartirmasdan yuklangan; faqat loyiha ichidagi fayl nomi soddalashtirilgan.
 
 Yuklangan sana: 2026-09-28. Barcha 13 faylning MD5 qiymati Poly Haven `/files/{id}` API javobi bilan solishtirildi va mos keldi. Jami: 56 722 406 bayt (54.09 MiB).
@@ -62,3 +79,48 @@ API fayl ro'yxatlari: [ground](https://api.polyhaven.com/files/grass_ground), [c
 ## Qo'shimcha skanerlangan tosh
 
 `ScannedRock/` ichidagi haqiqiy FBX tosh va uning o'ziga mos UV atlaslari: [Boulder 01 manbalari va import yo'riqnomasi](ScannedRock/SOURCES.md). Bu qo'shimcha 18 131 956 bayt yuqoridagi dastlabki 13 fayl jami hisobiga kiritilmagan.
+
+## Shahar yo'li uchun asfalt — 2026-09-30
+
+[Asphalt 02](https://polyhaven.com/a/asphalt_02), muallif **Rob Tuytel**, Poly Haven **CC0**. Asl fizik tile **3 × 3 metr**, fotografik mayda tosh donalari va tabiiy yoriqlar. 2048 × 2048 px to'rtta JPG rasmiy [fayllar API](https://api.polyhaven.com/files/asphalt_02) orqali o'zgartirmasdan yuklandi; [aktiv ma'lumoti](https://api.polyhaven.com/info/asphalt_02) bilan muallif, o'lcham va nom tasdiqlandi. API so'rovlari yuqoridagi `NewWorldAssetPreparation/1.0 (local CC0 asset integration)` User-Agent bilan bajarildi. Tayyor o'yin API'dan tekstura yuklamaydi.
+
+Diffuse — sRGB; Normal — OpenGL normal-map; Rough va AO — linear. UV tile'ni 3 m atrofida qo'llang; asfalt metall emas. Bu qo'shimcha **12 289 570 bayt** dastlabki 13 fayl jami hisobiga kiritilmagan. Yuklangan fayllarning bayt hajmi va MD5'i API bilan mos, SHA-256 quyida. Rang xaritasi ko'z bilan ham tekshirildi; aktivni kattalashtirish yoki sun'iy detal qo'shish qilinmadi.
+
+| Lokal fayl | Bayt | Asl MD5 | SHA-256 |
+| --- | ---: | --- | --- |
+| `Asphalt_Diffuse.jpg` | 3075676 | `336AF399FD98A39AB986D8B3BF73B4FF` | `28F5BA8690553F192C0E5E1A5FF40F34765B4B93F4CC7059B1A3E9C795B6C28C` |
+| `Asphalt_Normal.jpg` | 4943950 | `77EBD1CC0B020CCAA1C6B58F103D1F75` | `FFE49DB71A0FD34C1E259625DF66A302A237597D6EF655307987EC4E45BC6F21` |
+| `Asphalt_Rough.jpg` | 2230457 | `6FE669AB38640EF2009D6A28D1AD5EE9` | `B9A516B61B7040A9245AC206642D5F767AD9589A0169C4A1668221429E8A998C` |
+| `Asphalt_AO.jpg` | 2039487 | `2BF61D77E68DA004EEA168B88C4C31B5` | `5FE1737CBBCD55F2FEC3632D6170762E5733F24BBC7A7816AFB22A23C710B11F` |
+
+- [Asphalt Diffuse](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_02/asphalt_02_diff_2k.jpg)
+- [Asphalt Normal GL](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_02/asphalt_02_nor_gl_2k.jpg)
+- [Asphalt Roughness](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_02/asphalt_02_rough_2k.jpg)
+- [Asphalt AO](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/asphalt_02/asphalt_02_ao_2k.jpg)
+
+## Shaxmat zali: marmar va yong'oq yog'ochi — 2026-09-30
+
+- `CityFloor_`: [Marble 01](https://polyhaven.com/a/marble_01), **Rob Tuytel**, fizik tile **1.5 × 1.5 m**. Och krem-bej tabiiy marmar plitalari, mayda tomirlar va choklar; silliq ichki pol uchun. [Ma'lumot](https://api.polyhaven.com/info/marble_01), [fayllar](https://api.polyhaven.com/files/marble_01).
+- `CityWood_`: [Black Walnut Veneer 02](https://polyhaven.com/a/black_walnut_veneer_02), **Jenelle van Heerden**, fizik tile **1 × 1 m**. Tabiiy yong'oq yog'ochining ingichka tolalari; shaxmat stoli va mebel uchun. Diffuse asl tabiiy jigarrang; to'q lak ko'rinishi materialning tint/smoothness sozlamalari bilan berilishi mumkin, manba fayl qayta bo'yalmagan. [Ma'lumot](https://api.polyhaven.com/info/black_walnut_veneer_02), [fayllar](https://api.polyhaven.com/files/black_walnut_veneer_02).
+
+Ikkalasi ham rasmiy **Poly Haven CC0** aktivlaridir, generativ rasm emas. Har birida to'rtta **2048 × 2048** JPG: sRGB Diffuse, OpenGL NormalMap, linear Rough va AO. Ikki material ham metall emas. API yuqoridagi User-Agent bilan ishlatildi. Barcha sakkiz faylning MD5'i va bayt hajmi rasmiy API javobiga mos keldi; Diffuse xaritalari ko'z bilan tekshirildi. O'zgartirmasdan yuklangan jami **12 446 593 bayt**, dastlabki aktivlar jami hisobiga kiritilmagan.
+
+| Lokal fayl | Bayt | Asl MD5 | SHA-256 |
+| --- | ---: | --- | --- |
+| `CityFloor_Diffuse.jpg` | 1269188 | `4EEEFEA16242CECB3B429AC0C8F88740` | `D403786171716F86718BDD67EBA923D4FB6125C0636BACEF0E6A21DD5D623A48` |
+| `CityFloor_Normal.jpg` | 409581 | `F25EFB0B61EC7AC183B3B0F4D032ED17` | `D5E17CCB2913ADBF28FCB781FDDF0AA711259DDEA6C1C918442F9A3589AA4660` |
+| `CityFloor_Rough.jpg` | 281388 | `C4CF0375D84277C6020BF230823EFDCC` | `1B970E033856C93EE7390D947DA5340E101B489FC8C1463354EA9E6655CE039A` |
+| `CityFloor_AO.jpg` | 999921 | `1DE878F3C292637E3A101D81BFBFCA69` | `E0D535B591430F1EBFD8FFA38086949BB074AE470F6FEC7F3DCD55F594F52D4E` |
+| `CityWood_Diffuse.jpg` | 2365710 | `E4EF13D171747D6C877BEC563B67D389` | `AC4CD64753A55684EFE4CCAF6F81B465E237A8A885FFFB95377CC371924C0F88` |
+| `CityWood_Normal.jpg` | 1877332 | `F2AF23CE4886EDCEF6B1E7226183D445` | `125A46A42525157CB2CF277B712C9933A76518D5A729B43CAAFCE1AEBD96BBBB` |
+| `CityWood_Rough.jpg` | 2670532 | `C1C2F3BFC6942B516499500C60200A9A` | `172832F6FA42E539E35B04F321C067B61962DA7AEBE106FCD7934B84AA5DC204` |
+| `CityWood_AO.jpg` | 2572941 | `160F4F0A609808257F3715DD3D854105` | `FE27B499DC80CB22BF3B940C5E8937BE0F4ACE699ACFAD28E876C4453934E534` |
+
+- [CityFloor Diffuse](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_01/marble_01_diff_2k.jpg)
+- [CityFloor Normal GL](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_01/marble_01_nor_gl_2k.jpg)
+- [CityFloor Roughness](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_01/marble_01_rough_2k.jpg)
+- [CityFloor AO](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/marble_01/marble_01_ao_2k.jpg)
+- [CityWood Diffuse](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/black_walnut_veneer_02/black_walnut_veneer_02_diff_2k.jpg)
+- [CityWood Normal GL](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/black_walnut_veneer_02/black_walnut_veneer_02_nor_gl_2k.jpg)
+- [CityWood Roughness](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/black_walnut_veneer_02/black_walnut_veneer_02_rough_2k.jpg)
+- [CityWood AO](https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/black_walnut_veneer_02/black_walnut_veneer_02_ao_2k.jpg)

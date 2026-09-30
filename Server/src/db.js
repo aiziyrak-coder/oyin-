@@ -1,6 +1,8 @@
 import { randomInt } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { createGroupStore } from './groups.js';
+import { createWalletStore } from './wallet.js';
+import { createChatStore } from './chat.js';
 
 /** Oxirgi heartbeat'dan keyin o'yinchi shuncha vaqt onlayn hisoblanadi. */
 export const ONLINE_WINDOW_MS = 90_000;
@@ -201,10 +203,14 @@ export function openDatabase(path) {
   const summaries = (statement, params) => statement.all(params).map(toSummary);
 
   const groups = createGroupStore(db, cutoff);
+  const wallet = createWalletStore(db);
+  const chat = createChatStore(db);
 
   return {
     /** Guruhlar jadvallari va so'rovlari (groups.js). */
     groups,
+    wallet,
+    chat,
     /** Token xeshi bo'yicha o'yinchi profili (topilmasa undefined). */
     findPlayerByTokenHash(tokenHash) {
       return toProfile(findByToken.get(tokenHash));

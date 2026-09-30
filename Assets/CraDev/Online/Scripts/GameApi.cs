@@ -10,7 +10,7 @@ namespace CraDev.Online
     /// O'yin serveri bilan ishlash (Server/ papkasidagi Node.js server).
     /// Metodlar korutina: <c>StartCoroutine(api.CheckNickname(...))</c>.
     /// </summary>
-    public class GameApi
+    public partial class GameApi
     {
         /// <summary>
         /// Sahnalardagi standart manzil: o'yin yonidagi server (Server/ papkasi). Umumiy serverga o'yinni qayta yig'masdan
@@ -174,6 +174,17 @@ namespace CraDev.Online
         public IEnumerator GroupJoin(string token, string code, Action<ApiResult<GroupJoinResponse>> done) =>
             Send("POST", "/api/groups/join", token, JsonUtility.ToJson(new GroupActionRequest { code = code }), done);
 
+        public IEnumerator GroupSubscribe(string token, string code, int price, string key, Action<ApiResult<GroupJoinResponse>> done) =>
+            Send("POST", "/api/groups/join", token, JsonUtility.ToJson(new GroupActionRequest { code = code, expectedPrice = price, paymentKey = key }), done);
+        public IEnumerator GroupEdit(string token,GroupCreateRequest body,Action<ApiResult<GroupInfo>> done) =>
+            Send("POST","/api/groups/edit",token,JsonUtility.ToJson(body),done);
+
+        public IEnumerator Wallet(string token, Action<ApiResult<WalletResponse>> done) => Send("GET", "/api/wallet", token, null, done);
+        public IEnumerator ChatMessages(string token,string kind,string target,long after,long before,Action<ApiResult<ChatBatch>> done) =>
+            Send("GET","/api/chat/messages?kind="+UnityWebRequest.EscapeURL(kind)+"&target="+UnityWebRequest.EscapeURL(target)+"&after="+after+"&before="+before,token,null,done);
+        public IEnumerator ChatSend(string token,ChatSendRequest body,Action<ApiResult<ChatSent>> done) =>
+            Send("POST","/api/chat/send",token,JsonUtility.ToJson(body),done);
+
         /// <summary>cancel, leave, approve, reject, remove, role, delete: javob - yangilangan guruh (leave/delete da { ok }).</summary>
         public IEnumerator GroupAction(string token, string action, string code, string nickname, string role, Action<ApiResult<GroupInfo>> done) =>
             Send("POST", "/api/groups/" + action, token, JsonUtility.ToJson(new GroupActionRequest { code = code, nickname = nickname, role = role }), done);
@@ -264,7 +275,7 @@ namespace CraDev.Online
 
     [Serializable] public class PartyRequest { public string nickname, invitationId; public int pingMs = -1; public bool micOn, speakerOn; }
     [Serializable] public class PartyMember { public string nickname, avatarId, gender, outfit; public int seat, pingMs; public bool online, micOn, speakerOn; }
-    [Serializable] public class VoiceChunk { public int seq, rate; public string nickname, data; }
+    [Serializable] public class VoiceChunk { public int seq, rate; public string nickname, data, roomId; }
     [Serializable] public class VoiceCursor { public int cursor; public string error; }
     [Serializable] public class VoiceBatch { public int cursor; public VoiceChunk[] chunks; }
     [Serializable] public class PartyInvitation { public string id, nickname; }
@@ -365,7 +376,7 @@ namespace CraDev.Online
     [Serializable]
     public class GroupCreateRequest
     {
-        public string name, description, kind, currency = "UZS", period = "month";
+        public string code, name, description, kind, currency = "CDCoin", period = "month";
         public int price;
     }
 
@@ -373,7 +384,24 @@ namespace CraDev.Online
     class GroupActionRequest
     {
         public string code, nickname, role;
+        public string paymentKey;
+        public int expectedPrice;
     }
+
+    [Serializable] public class WalletResponse
+    {
+        public int balance, coinUzs;
+        public string currency, error;
+        public bool checkoutAvailable;
+        public CoinPack[] packs;
+        public CoinTransaction[] transactions;
+    }
+    [Serializable] public class CoinPack { public string id; public int coins, amountUzs; }
+    [Serializable] public class CoinTransaction { public int delta, balance; public string kind, reference, createdAt; }
+    [Serializable] public class ChatSendRequest { public string kind,target,text,clientId; }
+    [Serializable] public class ChatMessage { public long id; public int publicId; public string nickname,text,createdAt; }
+    [Serializable] public class ChatBatch { public ChatMessage[] items; public bool hasMore; public string error; }
+    [Serializable] public class ChatSent { public long id; public string error; }
 
     [Serializable]
     public class PlayerList

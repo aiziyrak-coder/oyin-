@@ -318,6 +318,19 @@ namespace CraDev.MainMenu
                     o.bubble.alpha=Mathf.Min(1,greetAge/.3f,(LobbyGreeting.Duration-greetAge)/.5f);
                 }
                 var point=lobby.Stage.Camera.WorldToScreenPoint(o.head.position+Vector3.up*.19f);
+                // On small displays five full-width labels cannot share one horizontal row.
+                // Alternate their height by left-to-right position, without shrinking the text.
+                if(occupants.Count>2&&canvas!=null)
+                {
+                    float nearest=float.MaxValue;int rank=0;
+                    foreach(var other in occupants.Values)
+                    {
+                        if(other==o||other.head==null)continue;
+                        float x=lobby.Stage.Camera.WorldToScreenPoint(other.head.position).x;
+                        nearest=Mathf.Min(nearest,Mathf.Abs(x-point.x));if(x<point.x)rank++;
+                    }
+                    if(nearest<240*canvas.scaleFactor)point.y+=(rank%2)*76*canvas.scaleFactor;
+                }
                 RectTransformUtility.ScreenPointToLocalPointInRectangle(overlay,point,null,out var pos);
                 o.label.anchorMin=o.label.anchorMax=new Vector2(.5f,.5f);o.label.anchoredPosition=pos;
                 o.name.text=o.member.nickname;

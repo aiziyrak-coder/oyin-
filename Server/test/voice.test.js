@@ -9,7 +9,9 @@ test('Lobby ovozli chat: mic/karnay holati, bo\'laklar faqat guruh ichida, o\'zi
   const server = createServer(createApp(db, { now: () => new Date(time), rateLimits: { create: 100, party: 1000, voice: 1000 } }));
   await new Promise(r => server.listen(0, '127.0.0.1', r));
   const base = `http://127.0.0.1:${server.address().port}/api/`;
+  let voiceRoom;
   async function call(path, player, body = {}, method = 'POST') {
+    if(path==='party/voice')body={roomId:voiceRoom,...body};
     const res = await fetch(base + path, { method, headers: { 'Content-Type': 'application/json',
       ...(player ? { Authorization: `Bearer ${player.token}` } : {}) }, body: method === 'GET' ? undefined : JSON.stringify(body) });
     return { status: res.status, data: await res.json() };
@@ -28,6 +30,9 @@ test('Lobby ovozli chat: mic/karnay holati, bo\'laklar faqat guruh ichida, o\'zi
     await call('party/invite', h, { nickname: g.nickname });
     const inv = (await call('party/heartbeat', g, { pingMs: 1 })).data.invitations[0].id;
     await call('party/accept', g, { invitationId: inv });
+    voiceRoom=(await call('party/heartbeat',h,{pingMs:5})).data.roomId;
+    assert.equal((await call('party/voice',h,{roomId:'old-lobby',rate:16000,data:audio})).data.error,'voice_room_changed');
+    assert.equal((await call('party/voice',h,{roomId:undefined,rate:16000,data:audio})).data.error,'voice_room_changed');
     // Holat: noto'g'ri tur 400, mikrofon karnaysiz yoqilmaydi
     assert.equal((await call('party/heartbeat', h, { pingMs: 5, micOn: 'yes' })).status, 400);
     let state = (await call('party/heartbeat', h, { pingMs: 5, micOn: true, speakerOn: false })).data;
@@ -37,6 +42,9 @@ test('Lobby ovozli chat: mic/karnay holati, bo\'laklar faqat guruh ichida, o\'zi
     state = (await call('party/heartbeat', h, { pingMs: 5, micOn: true, speakerOn: true })).data;
     me = state.members.find(m => m.nickname === h.nickname);
     assert.equal(me.micOn, true); assert.equal(me.speakerOn, true);
+    state=(await call('party/heartbeat',h,{pingMs:5,speakerOn:false})).data;
+    assert.equal(state.members.find(m=>m.nickname===h.nickname).micOn,false);
+    await call('party/heartbeat',h,{pingMs:5,micOn:true,speakerOn:true});
     await call('party/heartbeat', g, { pingMs: 5, micOn: true, speakerOn: true });
     // Tekshiruvlar
     assert.equal((await call('party/voice', h, { rate: 100, data: audio })).status, 400);
@@ -67,5 +75,14 @@ test('Lobby ovozli chat: mic/karnay holati, bo\'laklar faqat guruh ichida, o\'zi
     await call('party/voice', h, { rate: 16000, data: audio });
     await call('party/leave', g);
     assert.equal((await poll(g, c2)).data.chunks.length, 0);
+    const previousRoom=voiceRoom;
+    await call('party/leave',h);
+    await call('party/invite',h,{nickname:s.nickname});
+    const nextInvite=(await call('party/heartbeat',s,{pingMs:5})).data.invitations[0].id;
+    await call('party/accept',s,{invitationId:nextInvite});
+    voiceRoom=(await call('party/heartbeat',h,{pingMs:5,micOn:true,speakerOn:true})).data.roomId;
+    assert.notEqual(voiceRoom,previousRoom);
+    assert.equal((await call('party/voice',h,{roomId:previousRoom,rate:16000,data:audio})).data.error,'voice_room_changed');
+    assert.equal((await call('party/voice',h,{rate:16000,data:audio})).status,200);
   } finally { server.closeAllConnections(); await new Promise(r => server.close(r)); db.close(); }
 });

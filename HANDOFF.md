@@ -1,4 +1,60 @@
-# Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
+# Ishni boshqa AI yordamchida davom ettirish (NewWorld)
+
+## ENG YANGI — do'stga yuboriladigan Share-Test ZIP (2026-09-30)
+
+- Foydalanuvchi Cloudflare orqali o'yin API serverini vaqtincha ochishga aniq ruxsat berdi. `Share-Test.cmd` endi tayyor tunnel/serverni jarayon tugaganda o'chirmaydi; `-NoWait` ham ishlaydi. To'xtatish uchun yangi `Stop-Share-Test.cmd`. Oyna yopilishi mumkin, kompyuter/internet va server ishlashi kerak.
+- Mavjud tasdiqlangan launcher serveri qayta ishlatiladi: mezbon va do'st bir xil xotiradagi olam/partiyaga ulanadi. `common.ps1` fingerprint oldin PS5 va PS7 da turlicha chiqardi; ordinal kanonik yo'llar bilan bir xil qilindi. Begona jarayon to'xtatilmaydi; to'xtatishda PID + boshlanish vaqti tekshiriladi.
+- Eski xato qayta takrorlandi: Cloudflare ulangan bo'lsa ham yangi domen DNS'da hali topilmay, qisqa HTTPS tekshiruv ZIPni yaratmasdan to'xtatgan. Endi 120 soniyagacha tayyorlik kutiladi, haqiqiy xato va har bir bosqich `Logs/share-session-*.log`ga yoziladi. HTTPS tekshiruvi o'chirilmagan. Cloudflare vaqtinchalik sinov vositasi, doimiy VPS o'rniga emas.
+- `tools/share-package.ps1`: faqat Unity runtime allowlist, shaxsiy/debug fayllari chiqariladi, junction/reparse taqiqlanadi. `Start-NewWorld.cmd` aniq `-server` bilan eski `CRADEV_SERVER` muhit sozlamasidan ustun keladi. ZIP to'liq ochilishi kerak. Eski nusxalar ustidan yozilmaydi; tayyor arxiv `.partial.zip`dan nashr qilinadi.
+- Faol ulashishni qayta bosish URL va tayyor ZIPni saqlaydi. PS5 `Get-Content` metama'lumoti JSONga obyekt bo'lib tushib, ZIP har safar qayta yaratilishi ham real sinovda topildi va tuzatildi. Holat `Logs/share-state.json`, manba fayllari yoki Git ichida emas.
+- Windows PS5.1 paket sinovlari 136/136; own-server Stop va borrowed-server Stop alohida o'tdi. PS5/PS7 fingerprint mos. Ochiq HTTPS orqali ZIPdan ochilgan Unity o'yini: `Logs/share-public-client.log`, 59/59 shahar testi va lobbyga qaytish PASS; `server.txt` manbasi tasdiqlandi. Bu boshqa jismoniy kompyuterdagi mikrofon sinovi emas.
+- Yuborish nusxasi: `Builds/NewWorld-test-20260930-121524-cab4b0.zip`, 346474816 bayt (~330.4 MiB). Joriy manzil va jarayonlar `Logs/share-state.json`da. Holat yopilsa yoki kompyuter qayta yoqilsa, eski ZIP ishlamaydi; yangisini Share-Test bilan yarating. Loyiha/baza/tokenlar ZIPga kiritilmagan. GitHubga push qilinmagan.
+
+## ENG YANGI — umumiy shahar va shaxmat (2026-09-30)
+
+Foydalanuvchi endi olamga o'tishni aniq so'radi. Quyidagi eski "olamga o'tilmadi" jumlalari tarixiy; lobbydagi tashqi xizmat/hardware bandlari esa ochiqligicha qoladi. O'zgarishdan oldingi mahalliy saqlash nuqtasi `af2c2d3`; GitHubga push qilinmagan.
+
+- Tekis 300x300 m shahar asosi, yo'llar, chorrahalar, zebra, belgilar, chiroqlar, bo'sh bino uchastkalari va ko'rinadigan tashqi chegara. Oddiy binolar yo'q. Yagona bino: piyoda kiriladigan shaxmat pavilioni, 10 doska / 20 stul / 320 instansiyali 3D dona. To'rtta monitor "Sizning reklamangiz uchun joy" yozuvini aylantiradi.
+- Fotografik 4K HDR osmon va CC0 2K asfalt, marmar, yong'oq-yog'och PBR xaritalari. Manba va hashlar `Assets/CraDev/World/Art/SOURCES.md`. Bu yoritilgan 3D poydevor, AAA fotorealizm da'vosi emas. Material/meshlar builder orqali hosil qilinadi; `.unity` YAMLni qo'lda tahrirlamang.
+- `Server/src/world.js`: autentifikatsiyali umumiy olam, ko'chada tasodifiy spawn, sessiya/uzilish, tezlik va hudud cheklovi; serverda 128 o'rin, bu yuklama sinovidan o'tgan son emas. `WorldNetwork` ketma-ket HTTP snapshot (~8 Hz), ko'rinish radiusi 100 m, silliqlash, 512 px limitli avatar bo'yash. Mahalliy kamera birinchi shaxs, o'z tanasi hali ko'rinmaydi; boshqa o'yinchining yurish/cho'kkalash animatsiyasi protsedurali.
+- `WorldVoice`: server va klientda 18 m yaqinlik ovozi. Olamga kirganda mikrofon o'chiq; M mikrofon, N eshitish, sozlangan bo'lsa V bosib gapirish. Lobby tanlagan qurilma/balandlik ishlatiladi. Eski sessiya/mute audiosi tashlanadi. HTTP G.711 ovozi AEC yoki professional past-kechikishli transport emas; haqiqiy ikki mikrofon tekshiruvi hali kerak.
+- `Server/src/chess.js` + `chess.js@1.4.0`: server tekshiradigan qonuniy yurishlar, navbat, promotion, rok, en-passant, yakun, ikki tomon roziligi bilan qayta o'yin. O'ringa qo'shilish/yurish 3 m ichida; 5 m dan uzoqlashish/uzilish o'rinni bo'shatadi. Coin/tikish yo'q, partiyalar xotirada. `WorldChess` E bilan sahnani almashtirmasdan ochiladi; Esc faqat oynani yopadi, tasdiqlangan chiqish partiyani tugatadi.
+- Unity JsonUtility `null` o'rinni `publicId=0` obyektga aylantirishi aniq takrorlandi; `ChessSnapshot.NormalizeSeats()` API chegaralarida to'g'rilaydi. Aks holda bo'sh o'ringa qo'shilish tugmasi o'chiq qolardi.
+- Yig'ish: `CraDevBatch.BuildWorld` faqat olam sahnasini yangilaydi va saqlangan lobby sahnalari bilan `Builds/LobbyV2/CraDev.exe` yaratadi. To'liq yig'ish `BuildLobby`. Server dependency o'rnatilishi lockfile bilan boshqariladi; mavjud to'g'ri dependency bo'lsa launcher offline ham ochiladi.
+
+Sinov tafsilotlari va ochiq cheklovlar: `REMAINING-WORK.md` boshida. Barcha bot akkauntlari alohida `Logs/city-network-clone-20260930.db` bazasida; haqiqiy foydalanuvchilarga sinov xabari, guruh yoki pul amali yo'q. `tools/world-visual-bot.mjs` faqat maxsus loopback test portida, 120 soniyagacha, ovozsiz ishlaydi; oddiy 8080 da ishlashni rad etadi. Uni haqiqiy serverga yo'naltirmang.
+
+## ENG YANGI — olamdan oldingi konflikt auditi
+
+`REMAINING-WORK.md` boshidagi audit bo'limi eng dolzarb. Saqlash nuqtasi `4488ecd`, push yo'q. Chat qoralamasi/lifecycle/history, guruh formasi/kech javoblar, ovozning roomId bo'yicha izolyatsiyasi, qisman mute va tugagan obuna bilan lobby taklifi tuzatildi. Server 85/85; Unity 1280x720 da 124/124, `Logs/lobby-audit-final-player.log`; build `Logs/lobby-audit-final-build.log` Succeeded. Kamera xatosi UI bilan boshqariladi, lekin video qurilma ochilmagan. Ovoz serveri roomId talab qiladi: eski ZIP mijozlarini ham yangilang. LocalOnly ZIP tekshirildi, ommaviy tunnel emas. Olamga o'tilmadi, tashqi xizmat/hardware talab qiladigan bandlar ochiq.
+
+## ENG YANGI — yozishma, guruh boshqaruvi va sinovlar (2026-09-30)
+
+To'liq dolzarb navbat: `REMAINING-WORK.md`. Quyidagi tarixiy bo'limlarda chat yo'q, mikrofon faqat standart yoki karnay mikrofonni yoqadi degan gaplar endi eskirgan.
+
+- Do'st/guruh chat serveri va Unity modal oynasi; `Server/src/chat.js`, `ChatWindow.cs`, `CraDevSceneBuilder.Chat.cs`. Xabar 1000 belgi, ruxsat har so'rovda, pagination 50, klient keshi 200, rich text o'chiq, yuborish idempotent.
+- `/api/groups/edit`, `/api/groups/transfer`; faqat ega. Oldingi ega admin. Pullik guruhning kelgusi daromadi yangi egaga 100%. Narxni almashtirish o'tgan muddatni qisqartirmaydi.
+- `VoicePreferences`: qurilma tanlash, ovoz balandligi, V push-to-talk. Birinchi ishga tushishda mikrofon o'chiq; avvalgi saqlangan tanlov saqlanadi. AEC hali yo'q.
+- `GroupDeepLink` parser/ochish; OS uchun `tools/register-protocol.ps1` hali bajarilmagan. Havola hech qachon o'zi to'lamaydi yoki guruhga qo'shmaydi.
+- `tools/share.ps1` bo'sh port, o'z jarayonlarini tozalash va alohida paket. Mahalliy 8090 fallback sinovi o'tdi, ommaviy tunnel/ZIP sinovi yo'q.
+- Unity capture rezolyutsiyasini saqlangan foydalanuvchi sozlamasi bosib ketmasligi tuzatildi (faqat `-cradevShot`); eski lobby smoke endi suratlar oldidan world sahnasini asinxron ochmaydi.
+- Server 84/84 o'tdi; chat bo'sh holati 1366x768 da render qilindi (`Logs/ChatVerify/lobby_2.png`). Yangi .65 minimal UI masshtabida lobby 110/110 (`Logs/roadmap-final-player.log`). Olam fizikasi 101 o'tdi, multiplayer emas. Kamera qurilmasi ochilmadi.
+- Baza zaxirasi `Logs/pre-roadmap-20260930.db`; oldingi kod commit `70569bd`; push yo'q.
+- Yakuniy build `Logs/roadmap-layout-build.log` Succeeded. 1366x768 da 9 avatar / 5 kishilik dasturiy sinov 0 xato (`Logs/roadmap-layout-player.log`, renderlar `Logs/RoadmapLayout`). Zich joyda nom-ping yorliqlari navbatma-navbat balandlikda chiziladi. Bu 5 haqiqiy qurilmali sinov emas. `DevPartySmoke` profil yangilanishi yo'q qilmaydigan alohida replikada animatsiyani tekshiradi.
+
+## ENG YANGI — CDCoin va guruh to'lovi (2026-09-30)
+
+- Qaror: 1 CDCoin = 100 UZS. Pullik guruh tushumi egaga 100%, komissiya 0%; pul yechish va avtomatik obuna yangilash yo'q.
+- Server `wallet.js`: butun sonli balans, amallar tarixi, takroriy to'lovdan himoya, bitta tranzaksiyada ikki hisob va a'zolik. Mijoz coin qo'sha olmaydi.
+- `/api/wallet` autentifikatsiyali. 100/500/1000/5000 CDCoin paketlari. `/api/wallet/checkout` hozir 503 `payments_not_configured`: Click/Payme integratsiyasi YO'Q. `creditVerified` faqat ichki metod, HTTP yo'li yo'q; testlardan tashqarida chaqirilmaydi.
+- Yangi pullik guruh narxi faqat CDCoin. Eski UZS/USD guruhlari qayta talqin qilinmaydi; yangi to'lovlari `legacy_currency` bilan bloklangan. Eski faol a'zolar muddatigacha qoladi. Pullik a'zolikni admin qo'lda bepul tasdiqlay olmaydi.
+- Unity: lobby o'ng tomonda CDCoin +, lobby ichidagi hamyon, paket narxlari, oxirgi 4 amal, to'lov hali yopiq ekanligi. Obuna oldidan aniq summa/komissiya tasdig'i.
+- Qidiruv: har tugma bosilganda eski so'rov natijasi bekor qilinadi; qidiruv oldidan ortiqcha friends so'rovi kutmaydi. Bo'sh so'rovda hech kim ko'rsatilmaydi. ID va nickname qidiruvi saqlangan.
+- Zaxira: oldingi holat commit `3832f71`; bazaning izchil SQLite zaxirasi `Logs/pre-cdcoin-20260930.db` (shaxsiy, Gitga qo'shmang).
+- Server 81/81 sinov o'tdi (jumladan wallet rollback, idempotency, auth, balans limitlari, to'liq egaga tushum va obuna muddati).
+- Unity `Logs/cdcoin-final-build.log` Succeeded; `Logs/cdcoin-player.log` EconomyTest 10 PASS, 0 FAIL: raycast, fokus, klaviatura belgisi, bo'sh qidiruv, ID rejimi, hamyon API/modal/paketlar/yopish. Bu dasturiy UI testi, foydalanuvchining haqiqiy klaviatura sinovi emas. Renderlar `Logs/cdcoin-lobby*.png`. Mahalliy Unity HTTP ping 3–4 ms; internet/tunnel o'lchanmagan.
+- Qolgan: Click/Payme merchant sozlamalari, haqiqiy imzolangan callback tekshiruvi, idempotent settlement/cancel/refund, sandbox sertifikatsiya; bundan oldin checkout ochilmasin. Kalitlarni kod/chat/Gitga yozmang.
+- `newworld://group/...` hozir matn sifatida nusxalab qidiruvga qo'yiladi; operatsion tizimda deep-link ro'yxatdan o'tkazish hali yo'q. Olam multiplayeri alohida ish.
 
 ## ENG YANGI — PING, QIDIRUV, ID VA GURUHLAR (2026-09-29)
 

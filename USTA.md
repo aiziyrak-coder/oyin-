@@ -1,4 +1,42 @@
-# NewWorld Lobby
+# NewWorld
+
+## Eng yangi — Share-Test tuzatildi (2026-09-30)
+
+- [x] Do'st ZIPi uchun tasdiqlangan vaqtinchalik Cloudflare HTTPS; DNS tayyorligi kutiladi, xatolar yoziladi.
+- [x] NoWait serverni yopmaydi; qayta bosish joriy ZIP/manzilni saqlaydi; alohida Stop-Share-Test tugmasi.
+- [x] Mezbon/do'st bir serverga ulanadi; PS5/PS7 fingerprint bir xil. ZIP launcher eski muhit sozlamasidan ustun.
+- [x] 136 paket testi; real ZIPdan internet olamiga kirish 59/59 + lobbyga qaytish. Paket va foydalanish ma'lumoti `HANDOFF.md` boshida.
+- [ ] Haqiqiy boshqa kompyuter va mikrofonlar bilan sinov, doimiy server keyin.
+
+## Eng yangi — umumiy shahar va shaxmat (2026-09-30)
+
+- [x] Foydalanuvchi yangi so'rov bilan olamga o'tishni tasdiqladi; oldingi holat `af2c2d3`da saqlandi.
+- [x] Tekis shahar infratuzilmasi, bo'sh bino joylari, belgilar va animatsiyali reklama monitorlari.
+- [x] Kiriladigan shaxmat pavilioni: 10 haqiqiy multiplayer doska, kuzatuvchi, qonuniy yurishlar va qayta o'yin; tikish yo'q.
+- [x] Random ko'cha spawn, umumiy sessiya va silliq masofadagi avatarlar; 18 m proximity voice kodi.
+- [x] Fotografik osmon, 2K CC0 asfalt/marmar/yog'och. Manba va dalillar `HANDOFF.md`, `REMAINING-WORK.md` boshida.
+- [x] Unity shahar sinovi ikki marta 75/75, real GUI e2-e4 va ikkinchi klient e7-e5, lobbyga qaytish; eski lobby regressiyasi 124/124.
+- [x] Server 107/107; kechikkan HTTP body orqali vaqt/tezlik limitini chetlab o'tish yopildi. Dalillar `Logs/city-server-final-107-tests.log`, `Logs/city-stable2-player.log`.
+- [ ] Ikki jismoniy qurilmada internet/nutq, uzoq muddatli barqarorlik, AEC, katta yuklama va mukammal locomotion hali tekshirilsin.
+- [ ] Boshqa shahar binolari keyingi foydalanuvchi topshirig'i bilan bittadan qo'shiladi; tarixiy pre-world ochiq bandlar yo'qolmagan.
+
+## Eng yangi — lobby konflikt auditi (2026-09-30)
+
+- [x] Chat tez yopib-ochish, qoralama, tarix, bo'sh yuborish va huquq bekor bo'lishi tuzatildi.
+- [x] Guruh formasi/kech javoblar va tugagan obunaning lobby taklif huquqi tuzatildi.
+- [x] Ovoz roomId bilan bog'landi; lobby almashganda buferlar tozalanadi; qisman speaker-mute serverda ham mic'ni o'chiradi.
+- [x] Server 85/85; Unity 1280x720 da 124/124; kamera xatosi tushunarli UI ga o'tishi tasdiqlandi.
+- [x] LocalOnly ZIP va fallback port sinovi; bu ommaviy tarqatish yoki internet testi emas.
+- [ ] Hamma pre-world imkoniyatlar hali bitmagan: aniq ochiq bandlar va dalillar `REMAINING-WORK.md` boshida. Olamga o'tilmadi.
+
+## CDCoin va ijtimoiy lobby (2026-09-30)
+
+- [x] Qaror: guruh tushumi egaga to'liq, komissiya yo'q; 1 CDCoin = 100 so'm.
+- [x] Serverda balans, tarix, atomik guruh to'lovi va takror to'lovdan himoya; 81/81 test.
+- [x] Lobbyda CDCoin +, paket narxlari va obuna tasdiqlash oynasi.
+- [x] Qidiruv oldidagi ortiqcha tarmoq kutishi olib tashlandi; eski javoblar darhol bekor qilinadi.
+- [ ] Click/Payme merchant + sandbox + ishonchli to'lov/qaytarish integratsiyasi. Hozir checkout xavfsiz yopiq.
+- [ ] Olam multiplayeri, haqiqiy akkaunt tiklash, moderatsiya/report/block va production monitoring alohida ko'lam bilan rejalashtirilsin.
 
 ## Olam grafikasi — fotografik materiallar (2026-09-28)
 
@@ -157,3 +195,16 @@ Server qayta ishga tushirildi. Migratsiyadan oldingi baza: `Logs/cradev-before-l
 Server sinovlari: 56/56. Yakuniy UI smoke: 0 failure. Runtime logda exception, yo'q tarjima, qora kadr va RenderTexture.active ogohlantirishi yo'q.
 Yakuniy build ishga tushirilib, tekshiruvdan keyin bosh sahifada foydalanuvchi uchun ochiq qoldirildi.
 Oldindan keyinga qoldirilgan: haqiqiy dunyo/interyerlar, chat/guruhlar, email/parol, aksessuar modellari. Ularning tugmalari rostgo'y “tez orada” xabarini ko'rsatadi.
+## 2026-09-30 — qolgan ishlar navbati
+
+Dolzarb batafsil ro'yxat: `REMAINING-WORK.md` (barcha ishlar bitgani yo'q).
+
+- [x] Do'st/guruh yozishmasi serveri va lobby oynasi, guruhni tahrirlash/egalikni topshirish: 84 server testi o'tdi.
+- [x] Mikrofon tanlash, V bilan gapirish, alohida ovozli chat balandligi; AEC yo'q.
+- [x] Share-Test port va jarayon xavfsizligi; 8090 mahalliy test o'tdi.
+- [x] Guruh havolasi parseri va tafsilotlarni ochish; Windows ro'yxatdan o'tkazish skripti tayyor, bajarilmagan.
+- [x] Chat bo'sh holati haqiqiy 1366x768 da ko'rildi. Unity build o'tdi; yangi kichik-ekran masshtabida 110 lobby testi o'tdi.
+- [x] Yakuniy 9 avatar / 5 kishilik dasturiy sinov: 0 xato. Kichik ekranda nom-ping yozuvlari ustma-ust tushmasligi tuzatildi; `Logs/RoadmapLayout` rasmlari ko'rildi.
+- [ ] Ikki haqiqiy qurilmada chat/ovoz/guruhlar; kamera skaneri (video qurilma ochilmadi).
+- [ ] Olam multiplayeri, o'z tanasi/animatsiyasi va masofaviy ovoz — keyingi asosiy yo'nalish.
+- [ ] Haqiqiy to'lov, VPS, installer/yangilash, email/pasport, yuzni bo'lishish, 4K — qolgan; batafsil mezonlar alohida ro'yxatda.

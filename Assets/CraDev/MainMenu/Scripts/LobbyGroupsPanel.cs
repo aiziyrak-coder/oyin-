@@ -14,7 +14,7 @@ namespace CraDev.MainMenu
     /// Do'stlar paneli (LobbyFriendsPanel) bilan bitta ro'yxat maydonini (rows) va qidiruv maydonini bo'lishadi:
     /// "groups" rejimida qidiruv maydoni guruh nomi yoki kodini qidiradi. Ko'rinishlar: ro'yxat (mening guruhlarim,
     /// yuborgan so'rovlarim yoki qidiruv natijalari), guruh sahifasi (a'zolar, so'rovlar, amallar), yangi guruh formasi.
-    /// Pullik guruhda to'lov tizimi yo'q: "Obuna bo'lish" so'rov yuboradi, egasi to'lovni o'zi tekshirib tasdiqlaydi.
+    /// Pullik a'zolik CDCoin orqali tasdiqlangan narxda atomik to'lanadi.
     /// </summary>
     public class LobbyGroupsPanel : MonoBehaviour
     {
@@ -48,7 +48,8 @@ namespace CraDev.MainMenu
         Func<string> failure;
         int revision;
         // Yangi guruh formasi (tur almashtirilganda qayta chiziladi, yozilgan matn saqlanadi)
-        string formName = "", formDescription = "", formPrice = "", formKind = "free", formCurrency = "UZS", formPeriod = "month";
+        string formName = "", formDescription = "", formPrice = "", formKind = "free", formCurrency = "CDCoin", formPeriod = "month";
+        string paymentKey, paymentCode;
 
         /// <summary>Guruhlar bo'limi hozir ko'rinib turibdi (panel "groups" rejimida).</summary>
         public bool Active { get; private set; }
@@ -90,8 +91,8 @@ namespace CraDev.MainMenu
             if (!on) { revision++; return; }
             query = text ?? "";
             // Oxirgi ma'lum ro'yxat darhol ko'rinadi (do'stlar qatorlari qolib ketmaydi), keyin yangilanadi
-            if (mineLoaded || view == "create") Draw();
-            if (view != "create") Load();
+            if (mineLoaded || view == "create" || view == "edit") Draw();
+            if (view != "create" && view != "edit" && view != "transfer") Load();
         }
 
         /// <summary>Qidiruv maydoni o'zgardi: ro'yxat ko'rinishiga qaytib qidiradi (bo'sh - mening guruhlarim).</summary>
@@ -105,7 +106,7 @@ namespace CraDev.MainMenu
         /// <summary>Yangilash (asbob tugmasi, 30 s lik so'rov): forma ochiq bo'lsa unga tegilmaydi.</summary>
         public void Refresh()
         {
-            if (!Active || view == "create") return;
+            if (!Active || view == "create" || view == "edit" || view == "transfer") return;
             Load();
         }
 
@@ -113,13 +114,16 @@ namespace CraDev.MainMenu
         public bool Back()
         {
             if (!Active || view == "list") return false;
+            revision++;loading=false;
+            if(view=="edit"||view=="transfer"){view="detail";Draw();return true;}
             view = "list"; detail = null; openCode = null;
             Load();
             return true;
         }
 
         /// <summary>Ro'yxatni qayta chizadi (masalan party tarkibi o'zgarganda taklif tugmalari uchun).</summary>
-        public void Redraw() { if (Active && !loading) Draw(); }
+        public void Redraw() { if (Active && !loading && view!="edit" && view!="create") Draw(); }
+        public void OpenLink(string code) { host.Choose("groups");Open(code); }
 
         void Open(string code)
         {
@@ -130,8 +134,17 @@ namespace CraDev.MainMenu
         void OpenCreate()
         {
             if (!Active) return;
+            revision++;loading=false;failure=null;
             view = "create";
             Draw();
+        }
+        void OpenEdit()
+        {
+            if(detail==null||detail.role!="owner")return;
+            revision++;loading=false;failure=null;
+            formName=detail.name;formDescription=detail.description;formKind=detail.kind;
+            formPrice=detail.currency=="CDCoin"?detail.price.ToString():"";formCurrency="CDCoin";formPeriod=detail.period;
+            view="edit";Draw();
         }
 
         void Load()
@@ -199,7 +212,8 @@ namespace CraDev.MainMenu
             Clear();
             float y;
             if (failure != null && !(view == "detail" && detail != null)) { ShowMessage(failure()); return; }
-            if (view == "create") y = DrawCreate();
+            if (view == "create" || view == "edit") y = DrawCreate();
+            else if(view=="transfer")y=DrawTransfer();
             else if (view == "detail" && detail != null) y = DrawDetail();
             else y = DrawList();
             Finish(y);
@@ -303,6 +317,12 @@ namespace CraDev.MainMenu
                 TextButton(rows, 0, y, w, 44, Loc.T(g.kind == "paid" ? "groups.subscribe" : g.kind == "private" ? "groups.request_join" : "groups.join"), LobbyPalette.Accent, Join);
             y += 54;
 
+            if(g.role=="owner")
+            {
+                TextButton(rows,0,y,w,44,Loc.T("groups.edit"),LobbyPalette.Accent,OpenEdit);y+=52;
+                TextButton(rows,0,y,w,44,Loc.T("groups.transfer"),new Color32(66,59,43,255),()=>{view="transfer";Draw();});y+=52;
+            }
+
             if (g.IsAdmin && g.requests != null && g.requests.Length > 0)
             {
                 y = Header(Loc.F(g.kind == "paid" ? "groups.requests_paid" : "groups.requests", g.requests.Length), y);
@@ -370,9 +390,10 @@ namespace CraDev.MainMenu
 
         float DrawCreate()
         {
+            bool editing=view=="edit";
             float w = rows.rect.width, y = 0;
             TextButton(rows, 0, y, 150, 38, Loc.T("groups.back"), new Color32(52, 52, 56, 255), () => Back());
-            var title = Label(rows, Loc.T("groups.create_title"), 162, 0, w - 162, 38, 23);
+            var title = Label(rows, Loc.T(editing?"groups.edit":"groups.create_title"), 162, 0, w - 162, 38, 23);
             title.font = boldFont != null ? boldFont : font;
             y += 50;
             y = FieldLabel("groups.field.name", y);
@@ -382,27 +403,36 @@ namespace CraDev.MainMenu
             Field(0, y, w, 86, formDescription, 300, true, "groups.field.description_hint", v => formDescription = v);
             y += 94;
             y = FieldLabel("groups.field.kind", y);
-            y = Segments(new[] { "free", "private", "paid" }, k => Loc.T("groups.kind." + k), formKind, k => { formKind = k; Draw(); }, y, w);
+            if(!editing)y = Segments(new[] { "free", "private", "paid" }, k => Loc.T("groups.kind." + k), formKind, k => { formKind = k; Draw(); }, y, w);
             y = Paragraph(Loc.T("groups.kind_hint." + formKind), y, w, Muted, 16) + 4;
             if (formKind == "paid")
             {
                 y = FieldLabel("groups.field.price", y);
                 var price = Field(0, y, 200, 46, formPrice, 10, false, "groups.field.price_hint", v => formPrice = v);
                 price.contentType = InputField.ContentType.IntegerNumber;
-                float x = 210, cw = (w - 210 - 6) / 2;
-                foreach (var currency in new[] { "UZS", "USD" })
-                {
-                    string c = currency;
-                    TextButton(rows, x, y, cw, 46, c, formCurrency == c ? LobbyPalette.Accent : new Color32(52, 52, 56, 255), () => { formCurrency = c; Draw(); });
-                    x += cw + 6;
-                }
+                Label(rows, "CDCoin", 216, y, w - 216, 46, 22).color = Gold;
                 y += 54;
                 y = FieldLabel("groups.field.period", y);
                 y = Segments(new[] { "week", "month", "year" }, p => Loc.T("groups.period." + p), formPeriod, p => { formPeriod = p; Draw(); }, y, w);
                 y = Paragraph(Loc.T("groups.paid_owner_note"), y, w, Gold, 16) + 4;
             }
-            TextButton(rows, 0, y + 4, w, 48, Loc.T(busy ? "common.connecting" : "groups.create"), LobbyPalette.Accent, Create).interactable = !busy;
+            TextButton(rows, 0, y + 4, w, 48, Loc.T(busy ? "common.connecting" : editing?"groups.save":"groups.create"), LobbyPalette.Accent, Create).interactable = !busy;
             return y + 60;
+        }
+
+        float DrawTransfer()
+        {
+            float y=0,w=rows.rect.width;
+            TextButton(rows,0,y,w,40,Loc.T("groups.back"),RowFill,()=>Back());y+=50;
+            y=Paragraph(Loc.T("groups.transfer_hint"),y,w,Gold,19);
+            foreach(var member in detail.members??Array.Empty<GroupMember>())
+            {
+                if(member.role=="owner")continue;
+                string nickname=member.nickname;
+                TextButton(rows,0,y,w,46,nickname+" · ID "+member.publicId,RowFill,()=>Confirm("groups.transfer",Loc.F("groups.transfer_confirm",nickname),()=>Act("transfer",nickname,null)));
+                y+=54;
+            }
+            return y;
         }
 
         float Segments(string[] values, Func<string, string> label, string selected, Action<string> pick, float y, float w)
@@ -411,7 +441,7 @@ namespace CraDev.MainMenu
             foreach (var value in values)
             {
                 string v = value;
-                TextButton(rows, x, y, cw, 42, label(v), v == selected ? LobbyPalette.Accent : new Color32(52, 52, 56, 255), () => pick(v));
+                TextButton(rows, x, y, cw, 42, label(v), v == selected ? LobbyPalette.Accent : new Color32(52, 52, 56, 255), () => pick(v)).interactable=!busy;
                 x += cw + 6;
             }
             return y + 50;
@@ -423,61 +453,102 @@ namespace CraDev.MainMenu
             return y + 26;
         }
 
+        internal void VerifyForDevelopment(Action<bool,string> check)
+        {
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-cradevSingleLobbySmoke")<0)return;
+            string savedName=formName,savedDescription=formDescription;
+            host.Choose("groups");failure=()=>"AUDIT error";int old=revision;OpenCreate();
+            check(revision>old&&!loading&&failure==null,"opening group form invalidates old loading/error state");
+            var field=rows.GetComponentsInChildren<InputField>().FirstOrDefault();
+            if(field!=null)field.text="AUDIT unsaved group";
+            Refresh();Redraw();
+            check(field!=null&&field.gameObject.activeInHierarchy&&field.text=="AUDIT unsaved group","group draft survives refresh and party redraw");
+            busy=true;Draw();
+            check(rows.GetComponentsInChildren<InputField>().All(f=>!f.interactable),"in-flight group save locks draft fields");
+            busy=false;formName=savedName;formDescription=savedDescription;view="list";revision++;
+            host.Choose("friends");
+        }
+
         // ------------------------------------------------------------------ Amallar
 
         void Create()
         {
             if (busy) return;
+            bool editing=view=="edit";
             string name = System.Text.RegularExpressions.Regex.Replace(formName ?? "", @"\s+", " ").Trim();
             if (name.Length < 3 || name.Length > 40) { lobby.Toast(Loc.T("groups.error.invalid_name")); return; }
-            var body = new GroupCreateRequest { name = name, description = (formDescription ?? "").Trim(), kind = formKind, currency = formCurrency, period = formPeriod };
+            var body = new GroupCreateRequest { code=editing?detail?.code:null,name = name, description = (formDescription ?? "").Trim(), kind = formKind, currency = formCurrency, period = formPeriod };
             if (formKind == "paid")
             {
                 if (!int.TryParse(formPrice, NumberStyles.Integer, CultureInfo.InvariantCulture, out int price) || price < 1 || price > 1000000000)
                 { lobby.Toast(Loc.T("groups.error.invalid_price")); return; }
                 body.price = price;
             }
-            busy = true; Draw();
-            lobby.StartCoroutine(lobby.Api.GroupCreate(PlayerProfile.Token, body, result =>
+            int operation=++revision;loading=false;busy = true; Draw();
+            Action<ApiResult<GroupInfo>> done = result =>
             {
                 if (this == null) return;
                 busy = false;
+                if(operation!=revision){if(result.Ok)StartCoroutine(LoadMineOnly());return;}
                 if (!result.Ok) { lobby.Toast(ErrorText(result.NetworkError, result.Status, result.Data?.error)); Draw(); return; }
                 formName = formDescription = formPrice = ""; formKind = "free";
-                lobby.Toast(Loc.F("groups.created", CodePrefix + result.Data.code));
+                lobby.Toast(Loc.F(editing?"groups.saved":"groups.created", CodePrefix + result.Data.code));
                 view = "detail"; openCode = result.Data.code; detail = result.Data;
                 host.ClearSearch();
                 Draw();
                 StartCoroutine(LoadMineOnly());
-            }));
+            };
+            lobby.StartCoroutine(editing?lobby.Api.GroupEdit(PlayerProfile.Token,body,done):lobby.Api.GroupCreate(PlayerProfile.Token,body,done));
         }
 
         void Join()
         {
             if (busy || detail == null) return;
-            busy = true; Draw();
+            if (detail.kind == "paid")
+            {
+                if (detail.currency != "CDCoin") { lobby.Toast(Loc.T("groups.error.legacy_currency")); return; }
+                string code = detail.code; int price = detail.price;
+                Confirm("wallet.subscribe", Loc.F("wallet.confirm_subscription", price, detail.name), () => {
+                    if (detail != null && detail.code == code && detail.price == price) JoinConfirmed(true);
+                });
+                return;
+            }
+            JoinConfirmed(false);
+        }
+
+        void JoinConfirmed(bool paid)
+        {
+            if (busy || detail == null) return;
+            int operation=++revision;loading=false;busy = true; Draw();
             string kind = detail.kind;
-            lobby.StartCoroutine(lobby.Api.GroupJoin(PlayerProfile.Token, detail.code, result =>
+            if (paid && (paymentKey == null || paymentCode != detail.code)) { paymentKey = Guid.NewGuid().ToString("N"); paymentCode = detail.code; }
+            Action<ApiResult<GroupJoinResponse>> done = result =>
             {
                 if (this == null) return;
                 busy = false;
+                if(operation!=revision){if(result.Ok){lobby.GetComponent<LobbyWallet>()?.Refresh();StartCoroutine(LoadMineOnly());}return;}
                 if (!result.Ok) { lobby.Toast(ErrorText(result.NetworkError, result.Status, result.Data?.error)); Draw(); return; }
-                lobby.Toast(Loc.T(result.Data.status == "requested" ? kind == "paid" ? "groups.subscribe_sent" : "groups.request_sent" : "groups.joined"));
+                paymentKey = null;
+                lobby.GetComponent<LobbyWallet>()?.Refresh();
+                lobby.Toast(Loc.T(result.Data.status == "already_processed" ? "wallet.already_processed" : result.Data.status == "requested" ? "groups.request_sent" : "groups.joined"));
                 if (result.Data.group != null) detail = result.Data.group;
                 Draw();
                 StartCoroutine(LoadMineOnly());
-            }));
+            };
+            lobby.StartCoroutine(paid ? lobby.Api.GroupSubscribe(PlayerProfile.Token, detail.code, detail.price, paymentKey, done)
+                : lobby.Api.GroupJoin(PlayerProfile.Token, detail.code, done));
         }
 
         void Act(string action, string nickname, string role)
         {
             if (busy || detail == null) return;
-            busy = true; Draw();
+            int operation=++revision;loading=false;busy = true; Draw();
             string name = detail.name;
             lobby.StartCoroutine(lobby.Api.GroupAction(PlayerProfile.Token, action, detail.code, nickname, role, result =>
             {
                 if (this == null) return;
                 busy = false;
+                if(operation!=revision){if(result.Ok)StartCoroutine(LoadMineOnly());return;}
                 if (!result.Ok) { lobby.Toast(ErrorText(result.NetworkError, result.Status, result.Data?.error)); Draw(); return; }
                 string done = "groups.done." + action + (action == "role" ? "_" + role : "");
                 lobby.Toast(Loc.F(done, nickname ?? name));
@@ -650,6 +721,7 @@ namespace CraDev.MainMenu
             field.textComponent = text; field.placeholder = placeholder; field.targetGraphic = fill;
             field.lineType = multiline ? InputField.LineType.MultiLineNewline : InputField.LineType.SingleLine;
             field.characterLimit = limit;
+            field.interactable=!busy;
             field.customCaretColor = true; field.caretColor = Color.white; field.caretWidth = 2;
             field.selectionColor = new Color(.45f, .62f, 1f, .45f);
             field.text = value ?? "";

@@ -314,15 +314,21 @@ function Get-ServerFiles {
     if (Test-Path -LiteralPath $src) { $files += @(Get-ChildItem -LiteralPath $src -Recurse -File) }
     $package = Join-Path $ServerDir 'package.json'
     if (Test-Path -LiteralPath $package) { $files += Get-Item -LiteralPath $package }
+    $lock = Join-Path $ServerDir 'package-lock.json'
+    if (Test-Path -LiteralPath $lock) { $files += Get-Item -LiteralPath $lock }
     return $files
 }
 
 # Server kodining barmoq izi (Server/src va package.json mazmuni): o'zgarsa, launcher yoqqan server qayta yoqiladi
 function Get-ServerFingerprint {
-    $lines = foreach ($file in (@(Get-ServerFiles) | Sort-Object FullName)) {
-        $relative = $file.FullName.Substring($ServerDir.Length)
-        "$relative=$((Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash)"
+    # Windows PowerShell 5.1 and PowerShell 7 sort punctuation differently by culture.
+    # Canonical ordinal paths make both launchers recognize the SAME running server.
+    $entries = [System.Collections.Generic.SortedDictionary[string,string]]::new([StringComparer]::Ordinal)
+    foreach ($file in @(Get-ServerFiles)) {
+        $relative = $file.FullName.Substring($ServerDir.Length).Replace('\','/').ToLowerInvariant()
+        $entries[$relative] = (Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash.ToLowerInvariant()
     }
+    $lines = foreach ($entry in $entries.GetEnumerator()) { "$($entry.Key)=$($entry.Value)" }
     $bytes = [System.Text.Encoding]::UTF8.GetBytes((@($lines) -join "`n"))
     $sha = [System.Security.Cryptography.SHA256]::Create()
     try { return (($sha.ComputeHash($bytes) | ForEach-Object { $_.ToString('x2') }) -join '') }
@@ -350,6 +356,23 @@ function Find-Node {
         return [pscustomobject]@{ Path = $null; Problem = "Node.js $text eski yoki ishlamayapti: server uchun 22.13 yoki yangisi kerak" }
     }
     return [pscustomobject]@{ Path = $command.Source; Problem = $null }
+}
+
+# Keep a valid installed set offline. Install only missing/mismatched locked dependencies, without scripts.
+function Ensure-ServerDependencies([string]$NodePath) {
+    $check = Join-Path $ProjectRoot 'tools\ci\check-server-deps.mjs'
+    & $NodePath $check 2>$null
+    if ($LASTEXITCODE -eq 0) { return $true }
+    $npm = Get-Command npm.cmd -ErrorAction SilentlyContinue
+    if (-not $npm) { Write-Fail "Server kutubxonalari yetishmayapti; Node.js bilan npm ham kerak."; return $false }
+    Write-Step "Server kutubxonalari tayyorlanmoqda (birinchi safar internet kerak bo'lishi mumkin)..."
+    Push-Location $ServerDir
+    try {
+        & $npm.Source ci --ignore-scripts --prefer-offline --no-audit --no-fund | ForEach-Object { Write-Host $_ }
+        if ($LASTEXITCODE -ne 0) { Write-Fail "Server kutubxonalarini o'rnatib bo'lmadi."; return $false }
+    } finally { Pop-Location }
+    & $NodePath $check 2>$null
+    return ($LASTEXITCODE -eq 0)
 }
 
 # Node.js bo'lmasa: GitHub CI yig'gan CraDevServer.exe (tools/ci/server-exe.sh), agar shu kompyuterda bo'lsa
@@ -443,6 +466,8 @@ function Stop-ManagedServer {
 function Start-GameServer([string]$WindowStyle = 'Hidden') {
     $result = [pscustomobject]@{ Ok = $true; Started = $false; Pid = 0; StartTicks = ''; Offline = $false }
     $node = Find-Node
+    # Check before stopping an old server: an unavailable download must not disrupt a running session.
+    if ($node.Path -and -not (Ensure-ServerDependencies $node.Path)) { $result.Ok = $false; return $result }
     $serverExe = $null
     if (-not $node.Path) { $serverExe = Find-ServerExe }
     $fingerprint = ''

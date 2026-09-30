@@ -63,6 +63,7 @@ namespace CraDev.CharacterCreation
         Material bodyMaterial, hairCardMaterial;
         Texture bodyOriginal, hairCardOriginal;
         float bodyHeight = 1.75f;
+        int paintTextureLimit = int.MaxValue;
         float yaw;        // 0 = kameraga qaragan, 90 = o'ng yoni, 180 = orqasi
         float targetYaw;
         float velocity;   // gradus/soniya, qo'yib yuborilgandan keyingi inersiya
@@ -136,6 +137,8 @@ namespace CraDev.CharacterCreation
 
         /// <summary>Qahramon bo'yi: oyoqdan boshning tepasigacha (metr).</summary>
         public float BodyHeight => bodyHeight;
+        /// <summary>Per-instance paint cap; source assets stay shared and lobby quality stays unchanged.</summary>
+        public int PaintTextureLimit => paintTextureLimit;
 
         /// <summary>Kamerani boshqa komponent boshqarganda (lobby): g'ildirakcha shu hodisa bilan beriladi.</summary>
         public event System.Action<float> Scrolled;
@@ -149,7 +152,7 @@ namespace CraDev.CharacterCreation
             swapTime = 1f;
         }
 
-        public AvatarViewer Replica(Transform parent, AvatarOption option)
+        public AvatarViewer Replica(Transform parent, AvatarOption option, int maxTextureSize = int.MaxValue)
         {
             var copy = new GameObject("PartyAvatar").AddComponent<AvatarViewer>();
             copy.transform.SetParent(parent, false);
@@ -158,6 +161,8 @@ namespace CraDev.CharacterCreation
             copy.facePaint = facePaint; copy.outfitPaint = outfitPaint; copy.glossVariant = glossVariant;
             copy.maleIdle = maleIdle; copy.femaleIdle = femaleIdle;
             copy.driveCamera = false; copy.LockRotation = true;
+            // Set before SetAvatar: no full-resolution intermediate targets are ever allocated for crowds.
+            copy.paintTextureLimit = maxTextureSize == int.MaxValue ? int.MaxValue : Mathf.Clamp(maxTextureSize, 64, 2048);
             copy.SetAvatar(option);
             return copy;
         }
@@ -298,19 +303,19 @@ namespace CraDev.CharacterCreation
             {
                 // Yuz faqat yuz yoki avatar almashganda chiziladi (bir xil RenderTexture qayta ishlatiladi);
                 // soch rangi o'zgarsa tayyor yuz ustiga faqat soch bo'yaladi
-                FacePainter.Paint(heads[0].original, face, currentOption.faceUv, currentOption.faceTriangles, facePaint, ref faceTexture);
+                FacePainter.Paint(heads[0].original, face, currentOption.faceUv, currentOption.faceTriangles, facePaint, ref faceTexture, paintTextureLimit);
                 facePainted = true;
             }
             foreach (var (material, original) in heads)
             {
                 Texture result = paint ? faceTexture : original;
-                if (OutfitPainter.PaintHair(result, currentOption, outfit, outfitPaint, false, ref hairTexture))
+                if (OutfitPainter.PaintHair(result, currentOption, outfit, outfitPaint, false, ref hairTexture, paintTextureLimit))
                     result = hairTexture;
                 material.mainTexture = result;
             }
 
             if (hairCardMaterial != null)
-                hairCardMaterial.mainTexture = OutfitPainter.PaintHair(hairCardOriginal, currentOption, outfit, outfitPaint, true, ref hairCardTexture)
+                hairCardMaterial.mainTexture = OutfitPainter.PaintHair(hairCardOriginal, currentOption, outfit, outfitPaint, true, ref hairCardTexture, paintTextureLimit)
                     ? hairCardTexture : hairCardOriginal;
         }
 
@@ -319,7 +324,7 @@ namespace CraDev.CharacterCreation
         {
             if (bodyMaterial == null)
                 return;
-            if (OutfitPainter.PaintBody(bodyOriginal, currentOption, outfit, outfitPaint, ref bodyTexture, ref glossTexture))
+            if (OutfitPainter.PaintBody(bodyOriginal, currentOption, outfit, outfitPaint, ref bodyTexture, ref glossTexture, paintTextureLimit))
             {
                 bodyMaterial.mainTexture = bodyTexture;
                 bodyMaterial.SetTexture("_MetallicGlossMap", glossTexture);

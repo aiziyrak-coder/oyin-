@@ -17,6 +17,10 @@ WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 NODE_VERSION=$(node -v)
 
+# The game rules dependency is pinned. Existing installations work without network access.
+node "$ROOT/tools/ci/check-server-deps.mjs" || npm ci --prefix "$ROOT/Server" --ignore-scripts --prefer-offline --no-audit --no-fund
+cp "$ROOT/Server/THIRD-PARTY-NOTICES.txt" "$OUT/NewWorld-Server-THIRD-PARTY-NOTICES.txt"
+
 # 1. Server bitta CommonJS faylga. SQLite'ning "experimental" ogohlantirishi o'yinchiga ko'rsatilmaydi.
 npx -y esbuild@0.25 "$ROOT/Server/src/server.js" --bundle --platform=node --format=cjs --target=node22 \
     --banner:js="process.removeAllListeners('warning');" --outfile="$WORK/server.cjs" --log-level=warning
