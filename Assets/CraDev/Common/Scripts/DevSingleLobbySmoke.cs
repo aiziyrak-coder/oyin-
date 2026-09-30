@@ -148,6 +148,8 @@ namespace CraDev
             Check(sensitivity!=null&&Mathf.Abs(World.WorldPreferences.Sensitivity-sensitivity.value)<.01f,"lobby sensitivity drives world preferences");
             World.WorldPreferences.Sensitivity=savedSensitivity;World.WorldPreferences.Save();
             lobby.ChooseSection("2");yield return null;
+            Check(Find("Microphone_Prev")!=null&&Find("Microphone_Next")!=null,"microphone selector available");
+            Check(settingsPage.GetComponentsInChildren<Slider>().Any(s=>s.name=="VoiceVolume"),"voice playback volume available");
             var volume=settingsPage.GetComponentsInChildren<Slider>().FirstOrDefault(s=>s.name=="MasterVolume");
             float savedVolume=GameSettings.Volume;
             if(volume!=null){volume.value=1f;volume.value=1.5f;}
@@ -161,8 +163,20 @@ namespace CraDev
             Click("SettingsClose");yield return null;
             Check(!lobby.SettingsOpen&&lobby.Current.Group.blocksRaycasts,"settings close restores controls");
             yield return AvatarStudio(lobby,avatar);
-            Click("EnterNewWorld");yield return null;
-            Check(lobby.Current.Id=="home","unconnected world does not open archived map");
+            Check(GroupDeepLink.Parse("newworld://group/ABC234")=="ABC234"&&GroupDeepLink.Parse("newworld://group/ABC234?pay=1")==null&&GroupDeepLink.Parse("https://group/ABC234")==null,"group links accept only an exact invite code");
+            Click("LobbyChat");yield return new WaitForSecondsRealtime(.5f);
+            var chat=Object.FindFirstObjectByType<ChatWindow>();
+            Check(chat!=null&&ModalWindow.AnyOpen,"chat opens without leaving lobby");
+            if(chat!=null)
+            {
+                var field=chat.GetComponentInChildren<InputField>();
+                Check(field!=null&&field.characterLimit==1000&&!field.textComponent.supportRichText,"chat input bounded and markup disabled");
+                chat.Close();yield return null;
+            }
+            Check(!ModalWindow.AnyOpen&&lobby.Current.Id=="home","closing chat returns to the same lobby");
+            // World entry is exercised by DevWorldSmoke. Starting an asynchronous scene load here
+            // destroys the lobby before the remaining assertions and captures can complete.
+            Check(Find("EnterNewWorld")?.GetComponent<LobbyCommand>()?.action=="enter-world","entry routes to the playable world");
             Loc.Current=language==Language.Uz?Language.En:Language.Uz;yield return null;
             Check(Find("EnterNewWorld").GetComponentInChildren<Text>().text==Loc.T("lobby.enter"),"localized entry button");
             Loc.Current=language;

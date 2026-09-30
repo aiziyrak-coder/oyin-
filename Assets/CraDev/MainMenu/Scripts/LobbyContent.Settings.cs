@@ -236,7 +236,11 @@ namespace CraDev.MainMenu
             {
                 GameSettings.SfxVolume = value; GameSettings.Apply(); QueueSave(game: true); PreviewSound();
             });
-            SettingsFooter(GameSettings.ResetAudio);
+            SliderRow("VoiceVolume",Loc.T("voice.volume"),null,0,1,.01f,()=>VoicePreferences.Volume,percent,v=>VoicePreferences.Volume=v);
+            StepperRow("Microphone",Loc.T("voice.device"),Loc.T("voice.device_hint"),()=>VoicePreferences.Label,
+                ()=>true,()=>true,()=>{VoicePreferences.Step(-1);RefreshSettings();},()=>{VoicePreferences.Step(1);RefreshSettings();});
+            SwitchRow("PushToTalk",Loc.T("voice.ptt"),Loc.T("voice.ptt_hint"),()=>VoicePreferences.PushToTalk,v=>VoicePreferences.PushToTalk=v);
+            SettingsFooter(()=>{GameSettings.ResetAudio();VoicePreferences.Reset();});
         }
 
         // Ovoz sozlanayotganda yangi balandlikni eshitish uchun qisqa "tik" (tez-tez emas)

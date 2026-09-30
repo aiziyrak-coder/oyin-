@@ -20,7 +20,7 @@ namespace CraDev
             ["wallet.confirm_subscription"] = ("{1} guruhiga obuna uchun {0} CDCoin yechiladi. To'liq guruh egasiga o'tadi; komissiya 0%. Avtomatik yangilanmaydi. Tasdiqlaysizmi?", "Subscribe to {1} for {0} CDCoin? The owner receives the full amount; 0% commission. No automatic renewal."),
             ["groups.error.insufficient_coins"] = ("CDCoin yetarli emas.", "Insufficient CDCoin."),
             ["groups.error.balance_limit"] = ("Hisob chegarasiga yetildi. To'lov bajarilmadi.", "Balance limit reached. Payment was not made."),
-            ["groups.error.legacy_currency"] = ("Bu guruh eski pul birligida. Egasi CDCoin narxida yangi guruh yaratishi kerak.", "This group uses a legacy currency. Its owner must create a new CDCoin-priced group."),
+            ["groups.error.legacy_currency"] = ("Bu guruh eski pul birligida. Egasi tahrirlash orqali CDCoin narxini belgilashi kerak.", "This group uses a legacy currency. Its owner must edit the group and set a CDCoin price."),
             ["groups.error.price_changed"] = ("Narx o'zgargan. Guruhni qayta oching.", "The price changed. Reopen the group."),
             ["groups.error.payment_required"] = ("A'zolik uchun CDCoin to'lovi kerak.", "Membership requires a CDCoin payment."),
             ["groups.error.idempotency_conflict"] = ("To'lov ma'lumotlari mos kelmadi. Guruhni qayta oching.", "Payment details conflict. Reopen the group."),

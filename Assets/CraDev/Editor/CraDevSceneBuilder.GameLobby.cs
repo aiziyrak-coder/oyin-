@@ -205,7 +205,7 @@ namespace CraDev.EditorTools
         {
             var controller=screen.gameObject.AddComponent<LobbyWallet>();
             Set(controller,"lobby",screen);
-            var balance=V2Button(right,"— CDCoin  +",null,0,108,258,54,localized:false);
+            var balance=V2Button(right,"— CDCoin  +",null,0,108,194,54,localized:false);
             balance.name="LobbyCDCoin";
             balance.GetComponentInChildren<Text>().fontSize=21;
             ReferenceSurface.Apply(balance.GetComponent<Image>(),4,18);
@@ -234,6 +234,10 @@ namespace CraDev.EditorTools
             V2Text(panel.transform,"wallet.pending",32,310,736,80,21).color=new Color32(231,204,141,255);
             Set(modal,"history",V2Text(panel.transform,"",32,410,736,210,22,false));
             Set(controller,"window",modal);
+            var chat=V2Button(right,"...",null,206,108,58,54,"chat",localized:false);chat.name="LobbyChat";
+            chat.GetComponentInChildren<Text>().alignment=TextAnchor.MiddleCenter;
+            var hint=right.parent.Find("LobbyTooltip")?.GetComponentInChildren<Text>(true);if(hint!=null)V2Hint(chat,hint,"chat.title");
+            V2ChatWindow(root);
         }
 
         // Profil ostidagi qator: karnay va mikrofon (LobbyVoice) hamda party'dagina ko'rinadigan "Lobbydan chiqish"

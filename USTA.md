@@ -166,3 +166,16 @@ Server qayta ishga tushirildi. Migratsiyadan oldingi baza: `Logs/cradev-before-l
 Server sinovlari: 56/56. Yakuniy UI smoke: 0 failure. Runtime logda exception, yo'q tarjima, qora kadr va RenderTexture.active ogohlantirishi yo'q.
 Yakuniy build ishga tushirilib, tekshiruvdan keyin bosh sahifada foydalanuvchi uchun ochiq qoldirildi.
 Oldindan keyinga qoldirilgan: haqiqiy dunyo/interyerlar, chat/guruhlar, email/parol, aksessuar modellari. Ularning tugmalari rostgo'y “tez orada” xabarini ko'rsatadi.
+## 2026-09-30 — qolgan ishlar navbati
+
+Dolzarb batafsil ro'yxat: `REMAINING-WORK.md` (barcha ishlar bitgani yo'q).
+
+- [x] Do'st/guruh yozishmasi serveri va lobby oynasi, guruhni tahrirlash/egalikni topshirish: 84 server testi o'tdi.
+- [x] Mikrofon tanlash, V bilan gapirish, alohida ovozli chat balandligi; AEC yo'q.
+- [x] Share-Test port va jarayon xavfsizligi; 8090 mahalliy test o'tdi.
+- [x] Guruh havolasi parseri va tafsilotlarni ochish; Windows ro'yxatdan o'tkazish skripti tayyor, bajarilmagan.
+- [x] Chat bo'sh holati haqiqiy 1366x768 da ko'rildi. Unity build o'tdi; yangi kichik-ekran masshtabida 110 lobby testi o'tdi.
+- [x] Yakuniy 9 avatar / 5 kishilik dasturiy sinov: 0 xato. Kichik ekranda nom-ping yozuvlari ustma-ust tushmasligi tuzatildi; `Logs/RoadmapLayout` rasmlari ko'rildi.
+- [ ] Ikki haqiqiy qurilmada chat/ovoz/guruhlar; kamera skaneri (video qurilma ochilmadi).
+- [ ] Olam multiplayeri, o'z tanasi/animatsiyasi va masofaviy ovoz — keyingi asosiy yo'nalish.
+- [ ] Haqiqiy to'lov, VPS, installer/yangilash, email/pasport, yuzni bo'lishish, 4K — qolgan; batafsil mezonlar alohida ro'yxatda.

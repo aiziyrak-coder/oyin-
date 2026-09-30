@@ -140,6 +140,9 @@ export function createGroupStore(sql, cutoff) {
   const deleteMember = sql.prepare('DELETE FROM group_members WHERE group_id = ? AND player_id = ?');
   const setRole = sql.prepare('UPDATE group_members SET role = ? WHERE group_id = ? AND player_id = ?');
   const deleteGroup = sql.prepare('DELETE FROM social_groups WHERE id = ?');
+  const editGroup = sql.prepare('UPDATE social_groups SET name=?, name_key=?, description=?, price=?, currency=?, period=? WHERE id=? AND owner_id=?');
+  const changeOwner = sql.prepare('UPDATE social_groups SET owner_id=? WHERE id=? AND owner_id=?');
+  const ownerRole = sql.prepare('UPDATE group_members SET role=?, expires_at=NULL WHERE group_id=? AND player_id=?');
   const shared = sql.prepare(`
     SELECT 1 FROM group_members a JOIN group_members b ON b.group_id = a.group_id
     WHERE a.player_id = ? AND b.player_id = ? LIMIT 1`);
@@ -193,6 +196,16 @@ export function createGroupStore(sql, cutoff) {
     removeMember(group, player) { return deleteMember.run(group, player).changes > 0; },
     setRole(group, player, role) { setRole.run(role, group, player); },
     deleteGroup(group) { deleteGroup.run(group); },
+    edit(group, owner, fields) { return editGroup.run(fields.name,fields.name.toLowerCase(),fields.description,fields.price,fields.currency,fields.period,group,owner).changes>0; },
+    transfer(group, from, to) {
+      sql.exec('BEGIN IMMEDIATE');
+      try {
+        if (!changeOwner.run(to,group,from).changes) throw new WalletError('owner_only');
+        if(!ownerRole.run('owner',group,to).changes)throw new WalletError('not_member');
+        ownerRole.run('admin',group,from);
+        sql.exec('COMMIT');
+      } catch(error) {sql.exec('ROLLBACK');throw error;}
+    },
     /** Ikki o'yinchi kamida bitta umumiy guruhda (lobbyga taklif uchun). */
     shareGroup(a, b) { return shared.get(a, b) !== undefined; },
   };
@@ -335,6 +348,8 @@ export function groupRoutes(db) {
         if (store.membershipCount(player.id) >= GROUP_LIMITS.memberships) return fail(403, 'too_many_memberships');
         try {
           const purchased = db.wallet.purchaseGroup(player.id, row.ownerId, code, row.price, body.paymentKey, now, () => {
+            const current=store.byCode(player.id,code,now);
+            if(!current||current.ownerId!==row.ownerId||current.price!==row.price||current.currency!==row.currency)throw new WalletError('price_changed');
             // Recheck under the wallet's write lock if more than one server opens this database.
             if (store.role(row.id, player.id)) throw new WalletError('already_member');
             if (store.memberCount(row.id) >= GROUP_LIMITS.members) throw new WalletError('group_full');
@@ -360,6 +375,33 @@ export function groupRoutes(db) {
         store.addRequest(row.id, player.id, now);
       }
       return [200, { status: 'requested', group: detail(player.id, code, now) }];
+    },
+    'POST /api/groups/edit': ({ player, now }, body) => {
+      const {row,code,error}=target(player.id,body,now);if(error)return error;
+      if(row.role!=='owner')return fail(403,'owner_only');
+      const name=cleanGroupName(body.name);
+      if(!name)return fail(400,'invalid_name');
+      if(typeof body.description!=='string'||body.description.trim().length>DESCRIPTION_MAX||CONTROL_EXCEPT_NEWLINE.test(body.description))return fail(400,'invalid_description');
+      if(body.kind!==row.kind)return fail(400,'invalid_kind');
+      const fields={name,description:body.description.trim(),price:0,currency:'CDCoin',period:''};
+      if(row.kind==='paid') {
+        if(!Number.isInteger(body.price)||body.price<1||body.price>PRICE_MAX)return fail(400,'invalid_price');
+        if(body.currency!=='CDCoin')return fail(400,'invalid_currency');
+        if(!Object.hasOwn(PERIODS,body.period))return fail(400,'invalid_period');
+        Object.assign(fields,{price:body.price,period:body.period});
+      }
+      if(!store.edit(row.id,player.id,fields))return fail(403,'owner_only');return [200,detail(player.id,code,now)];
+    },
+    'POST /api/groups/transfer': ({ player, now }, body) => {
+      store.purge(now);
+      const {row,code,error}=target(player.id,body,now);if(error)return error;
+      if(row.role!=='owner')return fail(403,'owner_only');
+      const other=playerIn(body);
+      if(!other||other.id===player.id||!store.role(row.id,other.id))return fail(400,'not_member');
+      if(store.ownedCount(other.id)>=GROUP_LIMITS.owned)return fail(403,'too_many_groups');
+      if(store.adminCount(row.id)-(store.role(row.id,other.id)==='admin'?1:0)>=GROUP_LIMITS.admins)return fail(409,'too_many_admins');
+      try {store.transfer(row.id,player.id,other.id);return [200,detail(player.id,code,now)];}
+      catch(err){if(err instanceof WalletError)return fail(409,err.message);throw err;}
     },
     'POST /api/groups/cancel': ({ player, now }, body) => {
       const { row, code, error } = target(player.id, body, now);

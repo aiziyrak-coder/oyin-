@@ -188,6 +188,45 @@ describe('guruhlar', () => {
     assert.equal((await api.call('POST', '/api/party/accept', stranger, { invitationId: invite.id })).status, 200);
   });
 
+  test('group editing and ownership transfer preserve members and enforce owner permissions', async () => {
+    const {body:g}=await api.post('create',owner,{name:'Editable club',kind:'free'});
+    await api.post('join',bob,{code:g.code});
+    const edit={code:g.code,name:'Renamed club',description:'Updated',kind:'free'};
+    assert.equal((await api.post('edit',bob,edit)).status,403);
+    assert.equal((await api.post('edit',owner,edit)).body.name,'Renamed club');
+    assert.equal((await api.post('transfer',bob,{code:g.code,nickname:owner.nickname})).status,403);
+    assert.equal((await api.post('transfer',owner,{code:g.code,nickname:dan.nickname})).status,400);
+    const transfer=await api.post('transfer',owner,{code:g.code,nickname:bob.nickname});
+    assert.equal(transfer.status,200);assert.equal(transfer.body.role,'admin');assert.equal(transfer.body.owner,bob.nickname);
+    assert.equal(transfer.body.members.filter(m=>m.role==='owner').length,1);
+    assert.equal((await api.post('edit',owner,edit)).status,403);
+    assert.equal((await api.post('edit',bob,edit)).status,200);
+    assert.equal((await api.post('leave',bob,{code:g.code})).body.error,'owner_cannot_leave');
+    assert.equal((await api.post('delete',owner,{code:g.code})).status,403);
+  });
+
+  test('paid group edits preserve expiry and future payments follow the new owner', async () => {
+    const {body:g}=await api.post('create',owner,{name:'Transferred paid club',kind:'paid',price:100,currency:'CDCoin',period:'month'});
+    api.db.wallet.creditVerified(bob.id,'test:transfer:bob',100,new Date(api.clock.ms));
+    api.db.wallet.creditVerified(cara.id,'test:transfer:cara',500,new Date(api.clock.ms));
+    await api.post('join',bob,{code:g.code,expectedPrice:100,paymentKey:'transfer-bob-0001'});
+    const joined=await api.post('join',cara,{code:g.code,expectedPrice:100,paymentKey:'transfer-cara-0001'});
+    const expiry=joined.body.group.expiresAt;
+    const edit={code:g.code,name:'Transferred paid club',description:'New price',kind:'paid',price:200,currency:'CDCoin',period:'week'};
+    assert.equal((await api.post('edit',owner,edit)).status,200);
+    assert.equal((await api.get(`detail?code=${g.code}`,cara)).body.expiresAt,expiry);
+    assert.equal((await api.post('transfer',owner,{code:g.code,nickname:bob.nickname})).status,200);
+    const oldBalance=api.db.wallet.balance(owner.id),newBalance=api.db.wallet.balance(bob.id);
+    api.db.wallet.creditVerified(dan.id,'test:transfer:dan',200,new Date(api.clock.ms));
+    const payment={code:g.code,expectedPrice:100,paymentKey:'transfer-dan-0001'};
+    assert.equal((await api.post('join',dan,payment)).body.error,'price_changed');
+    payment.expectedPrice=200;
+    assert.equal((await api.post('join',dan,payment)).body.status,'joined');
+    assert.equal(api.db.wallet.balance(owner.id),oldBalance);
+    assert.equal(api.db.wallet.balance(bob.id),newBalance+200);
+    assert.equal(api.db.wallet.balance(dan.id),0);
+  });
+
   test('cheklovlar: egalik qilinadigan guruhlar soni', async () => {
     const busy = await api.register('BusyOwner');
     for (let i = 0; i < GROUP_LIMITS.owned; i++) {

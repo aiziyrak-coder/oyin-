@@ -13,7 +13,7 @@ namespace CraDev.MainMenu
     public class LobbyUiScale : MonoBehaviour
     {
         [Tooltip("Kichik ekranlarda UI masshtabi bundan pastga tushmaydi (1080p dagi dizayn masshtabi 0.65).")]
-        [SerializeField] float minimumScale = .55f;
+        [SerializeField] float minimumScale = .65f;
         [Tooltip("Kanvasning eng kichik balandligi (birlik): 1920x1080 lik sozlamalar oynasi sig'ishi uchun.")]
         [SerializeField] float minimumHeight = 1080;
         CanvasScaler scaler;

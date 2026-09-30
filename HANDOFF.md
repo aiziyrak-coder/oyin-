@@ -1,5 +1,19 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI — yozishma, guruh boshqaruvi va sinovlar (2026-09-30)
+
+To'liq dolzarb navbat: `REMAINING-WORK.md`. Quyidagi tarixiy bo'limlarda chat yo'q, mikrofon faqat standart yoki karnay mikrofonni yoqadi degan gaplar endi eskirgan.
+
+- Do'st/guruh chat serveri va Unity modal oynasi; `Server/src/chat.js`, `ChatWindow.cs`, `CraDevSceneBuilder.Chat.cs`. Xabar 1000 belgi, ruxsat har so'rovda, pagination 50, klient keshi 200, rich text o'chiq, yuborish idempotent.
+- `/api/groups/edit`, `/api/groups/transfer`; faqat ega. Oldingi ega admin. Pullik guruhning kelgusi daromadi yangi egaga 100%. Narxni almashtirish o'tgan muddatni qisqartirmaydi.
+- `VoicePreferences`: qurilma tanlash, ovoz balandligi, V push-to-talk. Birinchi ishga tushishda mikrofon o'chiq; avvalgi saqlangan tanlov saqlanadi. AEC hali yo'q.
+- `GroupDeepLink` parser/ochish; OS uchun `tools/register-protocol.ps1` hali bajarilmagan. Havola hech qachon o'zi to'lamaydi yoki guruhga qo'shmaydi.
+- `tools/share.ps1` bo'sh port, o'z jarayonlarini tozalash va alohida paket. Mahalliy 8090 fallback sinovi o'tdi, ommaviy tunnel/ZIP sinovi yo'q.
+- Unity capture rezolyutsiyasini saqlangan foydalanuvchi sozlamasi bosib ketmasligi tuzatildi (faqat `-cradevShot`); eski lobby smoke endi suratlar oldidan world sahnasini asinxron ochmaydi.
+- Server 84/84 o'tdi; chat bo'sh holati 1366x768 da render qilindi (`Logs/ChatVerify/lobby_2.png`). Yangi .65 minimal UI masshtabida lobby 110/110 (`Logs/roadmap-final-player.log`). Olam fizikasi 101 o'tdi, multiplayer emas. Kamera qurilmasi ochilmadi.
+- Baza zaxirasi `Logs/pre-roadmap-20260930.db`; oldingi kod commit `70569bd`; push yo'q.
+- Yakuniy build `Logs/roadmap-layout-build.log` Succeeded. 1366x768 da 9 avatar / 5 kishilik dasturiy sinov 0 xato (`Logs/roadmap-layout-player.log`, renderlar `Logs/RoadmapLayout`). Zich joyda nom-ping yorliqlari navbatma-navbat balandlikda chiziladi. Bu 5 haqiqiy qurilmali sinov emas. `DevPartySmoke` profil yangilanishi yo'q qilmaydigan alohida replikada animatsiyani tekshiradi.
+
 ## ENG YANGI — CDCoin va guruh to'lovi (2026-09-30)
 
 - Qaror: 1 CDCoin = 100 UZS. Pullik guruh tushumi egaga 100%, komissiya 0%; pul yechish va avtomatik obuna yangilash yo'q.

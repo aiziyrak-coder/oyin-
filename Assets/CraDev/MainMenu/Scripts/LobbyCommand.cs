@@ -23,6 +23,7 @@ namespace CraDev.MainMenu
             else if (action == "enter-world") lobby.EnterWorld();
             else if (action == "quit") lobby.AskQuit();
             else if (action == "friends") lobby.FriendsPanel?.Choose(value);
+            else if (action == "chat") FindFirstObjectByType<ChatWindow>(FindObjectsInactive.Include)?.Show(lobby);
         }
     }
 }

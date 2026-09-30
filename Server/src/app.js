@@ -3,6 +3,7 @@ import { MAX_PENDING_REQUESTS } from './db.js';
 import { createParties } from './party.js';
 import { groupRoutes } from './groups.js';
 import { walletRoutes } from './wallet.js';
+import { chatRoutes } from './chat.js';
 import { upcomingEvents } from './events.js';
 import { AVATARS, GENDERS, isValidAvatar, MAX_LENGTH, nicknameKey, validateNickname } from './nickname.js';
 import { isValidOutfit } from './outfit.js';
@@ -81,6 +82,8 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   // Guruhlar: o'qish va amallar o'yinchi bo'yicha; yaratish alohida, sekinroq
   limits.groups = rateLimits.groups ?? 240;
   limits.groupCreate = rateLimits.groupCreate ?? 10;
+  limits.chatRead = rateLimits.chatRead ?? 120;
+  limits.chatSend = rateLimits.chatSend ?? 30;
 
   // "METOD /yo'l" -> { limit: rateLimits kaliti, bucket?: cheklovchi kaliti (standart: limit), auth?,
   //                    perPlayer?: cheklov IP emas, o'yinchi bo'yicha (auth kerak), run }
@@ -119,6 +122,11 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
 
   routes.set('POST /api/party/voice', { limit: 'voice', auth: true, perPlayer: true,
     run: async ctx => party.postVoice(ctx.player, await readJson(ctx.req, VOICE_BODY_BYTES), ctx.now) });
+  for (const [key, run] of Object.entries(chatRoutes(db))) {
+    const post = key.startsWith('POST ');
+    routes.set(key, { limit: post ? 'chatSend' : 'chatRead', auth: true, perPlayer: true,
+      run: async ctx => run(ctx, post ? await readJson(ctx.req) : undefined) });
+  }
   routes.set('GET /api/party/voice', { limit: 'voice', bucket: 'voice-read', auth: true, perPlayer: true,
     run: ctx => party.readVoice(ctx.player, Number(ctx.url.searchParams.get('since') ?? -1), ctx.now) });
 
