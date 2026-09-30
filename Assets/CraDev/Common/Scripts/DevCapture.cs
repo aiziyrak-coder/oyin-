@@ -42,7 +42,8 @@ namespace CraDev
         IEnumerator Start()
         {
             bool worldSmoke=System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevWorldSmoke")>=0;
-            bool enterWorld=worldSmoke||System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevEnterWorld")>=0;
+            bool citySmoke=System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevCitySmoke")>=0;
+            bool enterWorld=citySmoke||worldSmoke||System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevEnterWorld")>=0;
             if(enterWorld)
             {
                 float enterDeadline=Time.realtimeSinceStartup+90;
@@ -61,6 +62,21 @@ namespace CraDev
                 yield break;
             }
             string page = Argument(System.Environment.GetCommandLineArgs(), "-cradevPage");
+            if(citySmoke)
+            {
+                yield return DevCitySmoke.Run();
+                yield return Shot(path);
+                var cityHud=FindFirstObjectByType<World.WorldHud>();
+                cityHud.SetSettings(true);
+                yield return Shot(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(path),"city-settings.png"));
+                cityHud.ReturnToLobby();
+                float until=Time.realtimeSinceStartup+30;
+                while(SceneManager.GetActiveScene().name!="MainMenu"&&Time.realtimeSinceStartup<until)yield return null;
+                bool returned=SceneManager.GetActiveScene().name=="MainMenu";
+                Debug.Log("[CityTest] "+(returned?"PASS":"FAIL")+": return to lobby");
+                if(quit)Application.Quit(DevCitySmoke.Failures>0||!returned?1:0);
+                yield break;
+            }
             if(worldSmoke)
             {
                 yield return DevWorldSmoke.Run();

@@ -4,6 +4,8 @@ import { createParties } from './party.js';
 import { groupRoutes } from './groups.js';
 import { walletRoutes } from './wallet.js';
 import { chatRoutes } from './chat.js';
+import { createWorld } from './world.js';
+import { createChess } from './chess.js';
 import { upcomingEvents } from './events.js';
 import { AVATARS, GENDERS, isValidAvatar, MAX_LENGTH, nicknameKey, validateNickname } from './nickname.js';
 import { isValidOutfit } from './outfit.js';
@@ -74,6 +76,7 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   const limits = { ...DEFAULT_RATE_LIMITS, ...rateLimits };
   const limiter = createRateLimiter(windowMs);
   const party = createParties(db);
+  const world = createWorld(db);
   limits.party = rateLimits.party ?? 120;
   // Ovoz: ~5 yuborish + ~5 o'qish soniyasiga (har o'yinchiga alohida)
   limits.voice = rateLimits.voice ?? 1200;
@@ -84,6 +87,11 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   limits.groupCreate = rateLimits.groupCreate ?? 10;
   limits.chatRead = rateLimits.chatRead ?? 120;
   limits.chatSend = rateLimits.chatSend ?? 30;
+  limits.world = rateLimits.world ?? 900;
+  limits.worldJoin = rateLimits.worldJoin ?? 20;
+  limits.worldVoice = rateLimits.worldVoice ?? 1200;
+  limits.chessRead = rateLimits.chessRead ?? 600;
+  limits.chessWrite = rateLimits.chessWrite ?? 120;
 
   // "METOD /yo'l" -> { limit: rateLimits kaliti, bucket?: cheklovchi kaliti (standart: limit), auth?,
   //                    perPlayer?: cheklov IP emas, o'yinchi bo'yicha (auth kerak), run }
@@ -129,6 +137,31 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   }
   routes.set('GET /api/party/voice', { limit: 'voice', bucket: 'voice-read', auth: true, perPlayer: true,
     run: ctx => party.readVoice(ctx.player, Number(ctx.url.searchParams.get('since') ?? -1), ctx.now) });
+
+  for (const [key, run] of Object.entries(world.routes)) {
+    routes.set(key, { limit: key.endsWith('/join') ? 'worldJoin' : 'world', auth: true, perPlayer: true,
+      run: async ctx => {
+        const body = await readJson(ctx.req);
+        return run({ ...ctx, now: now() }, body);
+      } });
+  }
+  routes.set('POST /api/world/voice', { limit: 'worldVoice', auth: true, perPlayer: true,
+    run: async ctx => {
+      const body = await readJson(ctx.req, VOICE_BODY_BYTES);
+      return world.postVoice(ctx.player, body, now());
+    } });
+  routes.set('GET /api/world/voice', { limit: 'worldVoice', bucket: 'worldVoice-read', auth: true, perPlayer: true,
+    run: ctx => world.readVoice(ctx.player, ctx.url, ctx.now) });
+  for (const [key, run] of Object.entries(createChess(world))) {
+    const post = key.startsWith('POST ');
+    routes.set(key, { limit: post ? 'chessWrite' : 'chessRead', auth: true, perPlayer: true,
+      run: async ctx => {
+        if (!post) return run(ctx);
+        const body = await readJson(ctx.req);
+        // Validate sessions/seats at execution time, never at the arrival time of an unfinished body.
+        return run({ ...ctx, now: now() }, body);
+      } });
+  }
 
   function checkAvailability({ url }) {
     const name = url.searchParams.get('name') ?? '';

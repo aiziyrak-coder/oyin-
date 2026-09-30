@@ -21,40 +21,17 @@ namespace CraDev.EditorTools
             var player=new GameObject("WorldPlayer",typeof(CharacterController));player.layer=8;
             camera.transform.SetParent(player.transform,false);camera.transform.localPosition=new Vector3(0,1.65f,0);
             var controller=player.AddComponent<WorldPlayerController>();controller.Configure(camera);
-            // Suratga olingan PBR sirtlar: naqsh kattaligi haqiqiy metrga bog'langan.
-            var grass=WorldPhotoMaterial("Grass","Ground",2.51f,new Color(.88f,.94f,.84f),1.05f);
-            grass.SetFloat("_MacroStrength",.35f);
-            var paving=WorldPhotoMaterial("PracticeFloor","Concrete",2,Color.white,.7f);
-            var stone=WorldPhotoMaterial("Stone","Concrete",2,new Color(.86f,.86f,.83f),.85f);
-            var dark=WorldPhotoMaterial("DarkStone","Rock",1.5f,new Color(.72f,.74f,.72f),1);
-            var rock=WorldPhotoMaterial("NaturalRock","ScannedRock/Boulder",1,Color.white,1,"CraDev/WorldUVPBR");
-            var accent=WorldMaterial("Markers",new Color(.28f,.57f,.43f));
-            WorldBox("Ground",new Vector3(0,-.5f,0),new Vector3(500,1,500),grass);
-            // Bir tekis collider: choklarda personaj sakrab ketmaydi. Ustki qatlam faqat chizma.
-            var pad=WorldBox("PracticeArea",new Vector3(0,-.012f,8),new Vector3(44,.025f,48),paving);
-            Object.DestroyImmediate(pad.GetComponent<Collider>());
-            WorldBox("Wall",new Vector3(0,1,12),new Vector3(6,2,.5f),stone);
-            // Cho'kkalab o'tish va bosh ustidagi bo'shliq testi.
-            WorldBox("LowCeiling",new Vector3(-10,1.45f,0),new Vector3(4,.2f,4),stone);
-            foreach(float x in new[]{-12.1f,-7.9f})WorldBox("CeilingLeg",new Vector3(x,.65f,0),new Vector3(.18f,1.3f,4),dark);
-            for(int i=0;i<3;i++)
-            {
-                float height=(i+1)*.15f;
-                WorldBox("Step"+i,new Vector3(10,height*.5f,4+i),new Vector3(3,height,1),stone);
-            }
-            WorldRamp("GentleRamp",new Vector3(12,0,16),4,7,2,stone);
-            WorldRamp("SteepRamp",new Vector3(-12,0,16),3,3,4,dark);
-            for(int i=0;i<3;i++)WorldBox("JumpBlock"+i,new Vector3(6+i*2.8f,.25f+i*.1f,-7),new Vector3(1.8f,.5f+i*.2f,1.8f),stone);
-            // Vizual yo'nalish belgilarigina: collider o'yinchi harakatiga ta'sir qilmaydi.
-            foreach(var p in new[]{new Vector3(-20,0,25),new Vector3(20,0,25),new Vector3(-20,0,-12),new Vector3(20,0,-12)})
-            {
-                WorldBox("MarkerPost",p+Vector3.up*1.2f,new Vector3(.12f,2.4f,.12f),dark);
-                WorldBox("MarkerCap",p+Vector3.up*2.4f,new Vector3(.22f,.15f,.22f),accent);
-            }
-            BuildWorldScenery(grass,rock,grass);
+            BuildCityInfrastructure();
             var sun=NewLight("WorldSun",null,LightType.Directional,new Color(1,.985f,.96f),1.15f,Quaternion.Euler(47.8564f,-55.7666f,0));
             sun.shadows=LightShadows.Soft;sun.shadowStrength=.9f;sun.shadowNormalBias=.15f;sun.shadowBias=.025f;
-            RenderSettings.sun=sun;RenderSettings.ambientMode=UnityEngine.Rendering.AmbientMode.Skybox;RenderSettings.ambientIntensity=.8f;
+            RenderSettings.sun=sun;
+            // Explicit daylight bounce remains deterministic in batch builds; an asynchronous sky GI
+            // update can otherwise serialize a black ambient probe and turn the indoor furniture black.
+            RenderSettings.ambientMode=UnityEngine.Rendering.AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor=new Color(.48f,.55f,.66f);
+            RenderSettings.ambientEquatorColor=new Color(.32f,.35f,.38f);
+            RenderSettings.ambientGroundColor=new Color(.21f,.20f,.17f);
+            RenderSettings.ambientIntensity=1;
             var sky=WorldMaterial("Sky",Color.white,false,"Skybox/Panoramic");
             sky.SetTexture("_MainTex",WorldTexture("Sky.hdr",false,true));
             sky.SetColor("_Tint",Color.gray);sky.SetFloat("_Exposure",.9f);sky.SetFloat("_Rotation",0);sky.SetFloat("_Mapping",1);sky.SetFloat("_ImageType",0);EditorUtility.SetDirty(sky);
@@ -67,6 +44,19 @@ namespace CraDev.EditorTools
             // Mini-xarita kamerasini WorldMinimap o'zi yaratadi va sozlaydi (yagona manba): bu yerda kamera qurilmaydi.
             var hud=root.gameObject.AddComponent<WorldHud>();var kit=Kit();
             Set(hud,"player",controller);Set(hud,"font",kit.Medium);Set(hud,"boldFont",kit.SemiBold);Set(hud,"rounded",kit.RoundFill);
+            var templateGo = new GameObject("WorldAvatarTemplate");
+            var template = templateGo.AddComponent<CraDev.CharacterCreation.AvatarViewer>();
+            var modelRoot = new GameObject("TemplateModel").transform; modelRoot.SetParent(templateGo.transform,false);
+            Set(template,"turntable",modelRoot); Set(template,"maleIdle",IdleController("m_idle_neutral_01","Idle_Male"));
+            Set(template,"femaleIdle",IdleController("f_idle_neutral_01","Idle_Female"));
+            Set(template,"facePaint",FacePaintMaterial());Set(template,"outfitPaint",OutfitPaintMaterial());
+            Set(template,"glossVariant",GlossVariantMaterial());Set(template,"driveCamera",false);templateGo.SetActive(false);
+            var network = root.gameObject.AddComponent<WorldNetwork>();
+            Set(network,"player",controller);Set(network,"avatarTemplate",template);Set(network,"font",kit.Medium);
+            SetAvatars(network,new System.Collections.Generic.Dictionary<string,Sprite>(),LoadFaceMaps());
+            root.gameObject.AddComponent<WorldVoice>();
+            var chess = root.gameObject.AddComponent<WorldChess>();
+            Set(chess,"font",kit.Medium);Set(chess,"boldFont",kit.SemiBold);Set(chess,"rounded",kit.RoundFill);
             Save(scene,WorldScene);
             var scenes=EditorBuildSettings.scenes.Where(s=>s.path!=WorldScene).ToList();scenes.Add(new EditorBuildSettingsScene(WorldScene,true));EditorBuildSettings.scenes=scenes.ToArray();
             AssetDatabase.SaveAssets();Debug.Log("[CraDev] WorldSandbox yaratildi.");

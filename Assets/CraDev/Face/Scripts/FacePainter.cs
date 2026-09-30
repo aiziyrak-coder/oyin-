@@ -82,16 +82,18 @@ namespace CraDev.Face
         }
 
         /// <summary>Yuzni result ga chizadi: o'lchami mos bo'lsa o'sha tekstura qayta ishlatiladi, aks holda yangisi yaratiladi.</summary>
-        public static void Paint(Texture head, FaceData face, Vector2[] faceUv, int[] triangles, Material material, ref RenderTexture result)
+        public static void Paint(Texture head, FaceData face, Vector2[] faceUv, int[] triangles, Material material, ref RenderTexture result, int maxSize = int.MaxValue)
         {
-            if (result != null && (result.width != head.width || result.height != head.height))
+            int width = Mathf.Max(1, Mathf.Min(head.width, maxSize));
+            int height = Mathf.Max(1, Mathf.Min(head.height, maxSize));
+            if (result != null && (result.width != width || result.height != height))
             {
                 result.Release();
                 Release(result);
                 result = null;
             }
             if (result == null)
-                result = new RenderTexture(head.width, head.height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)
+                result = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB)
                 {
                     useMipMap = true,
                     autoGenerateMips = false,

@@ -26,6 +26,18 @@ namespace CraDev.EditorTools
             }
             catch (System.Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
         }
+        /// <summary>Iterate only the city scene; retains already-generated lobby scenes and avatar maps.</summary>
+        public static void BuildWorld()
+        {
+            try
+            {
+                CraDevSceneBuilder.BuildWorldSandbox();
+                var report = CraDevSceneBuilder.BuildGame(ResolveTarget(), Argument("-customBuildPath") ?? "Builds/LobbyV2/CraDev.exe", false);
+                Debug.Log("[CraDev] World build: " + report.summary.result);
+                EditorApplication.Exit(report.summary.result == BuildResult.Succeeded ? 0 : 1);
+            }
+            catch (System.Exception e) { Debug.LogException(e); EditorApplication.Exit(1); }
+        }
         /// <summary>Barcha sahnalarni noldan yaratadi (menyudagi "CraDev → Sahnalarni yaratish" bilan bir xil).</summary>
         public static void CreateScenes()
         {

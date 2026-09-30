@@ -1,4 +1,16 @@
-# NewWorld Lobby
+# NewWorld
+
+## Eng yangi — umumiy shahar va shaxmat (2026-09-30)
+
+- [x] Foydalanuvchi yangi so'rov bilan olamga o'tishni tasdiqladi; oldingi holat `af2c2d3`da saqlandi.
+- [x] Tekis shahar infratuzilmasi, bo'sh bino joylari, belgilar va animatsiyali reklama monitorlari.
+- [x] Kiriladigan shaxmat pavilioni: 10 haqiqiy multiplayer doska, kuzatuvchi, qonuniy yurishlar va qayta o'yin; tikish yo'q.
+- [x] Random ko'cha spawn, umumiy sessiya va silliq masofadagi avatarlar; 18 m proximity voice kodi.
+- [x] Fotografik osmon, 2K CC0 asfalt/marmar/yog'och. Manba va dalillar `HANDOFF.md`, `REMAINING-WORK.md` boshida.
+- [x] Unity shahar sinovi ikki marta 75/75, real GUI e2-e4 va ikkinchi klient e7-e5, lobbyga qaytish; eski lobby regressiyasi 124/124.
+- [x] Server 107/107; kechikkan HTTP body orqali vaqt/tezlik limitini chetlab o'tish yopildi. Dalillar `Logs/city-server-final-107-tests.log`, `Logs/city-stable2-player.log`.
+- [ ] Ikki jismoniy qurilmada internet/nutq, uzoq muddatli barqarorlik, AEC, katta yuklama va mukammal locomotion hali tekshirilsin.
+- [ ] Boshqa shahar binolari keyingi foydalanuvchi topshirig'i bilan bittadan qo'shiladi; tarixiy pre-world ochiq bandlar yo'qolmagan.
 
 ## Eng yangi — lobby konflikt auditi (2026-09-30)
 

@@ -1,4 +1,18 @@
-# Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
+# Ishni boshqa AI yordamchida davom ettirish (NewWorld)
+
+## ENG YANGI — umumiy shahar va shaxmat (2026-09-30)
+
+Foydalanuvchi endi olamga o'tishni aniq so'radi. Quyidagi eski "olamga o'tilmadi" jumlalari tarixiy; lobbydagi tashqi xizmat/hardware bandlari esa ochiqligicha qoladi. O'zgarishdan oldingi mahalliy saqlash nuqtasi `af2c2d3`; GitHubga push qilinmagan.
+
+- Tekis 300x300 m shahar asosi, yo'llar, chorrahalar, zebra, belgilar, chiroqlar, bo'sh bino uchastkalari va ko'rinadigan tashqi chegara. Oddiy binolar yo'q. Yagona bino: piyoda kiriladigan shaxmat pavilioni, 10 doska / 20 stul / 320 instansiyali 3D dona. To'rtta monitor "Sizning reklamangiz uchun joy" yozuvini aylantiradi.
+- Fotografik 4K HDR osmon va CC0 2K asfalt, marmar, yong'oq-yog'och PBR xaritalari. Manba va hashlar `Assets/CraDev/World/Art/SOURCES.md`. Bu yoritilgan 3D poydevor, AAA fotorealizm da'vosi emas. Material/meshlar builder orqali hosil qilinadi; `.unity` YAMLni qo'lda tahrirlamang.
+- `Server/src/world.js`: autentifikatsiyali umumiy olam, ko'chada tasodifiy spawn, sessiya/uzilish, tezlik va hudud cheklovi; serverda 128 o'rin, bu yuklama sinovidan o'tgan son emas. `WorldNetwork` ketma-ket HTTP snapshot (~8 Hz), ko'rinish radiusi 100 m, silliqlash, 512 px limitli avatar bo'yash. Mahalliy kamera birinchi shaxs, o'z tanasi hali ko'rinmaydi; boshqa o'yinchining yurish/cho'kkalash animatsiyasi protsedurali.
+- `WorldVoice`: server va klientda 18 m yaqinlik ovozi. Olamga kirganda mikrofon o'chiq; M mikrofon, N eshitish, sozlangan bo'lsa V bosib gapirish. Lobby tanlagan qurilma/balandlik ishlatiladi. Eski sessiya/mute audiosi tashlanadi. HTTP G.711 ovozi AEC yoki professional past-kechikishli transport emas; haqiqiy ikki mikrofon tekshiruvi hali kerak.
+- `Server/src/chess.js` + `chess.js@1.4.0`: server tekshiradigan qonuniy yurishlar, navbat, promotion, rok, en-passant, yakun, ikki tomon roziligi bilan qayta o'yin. O'ringa qo'shilish/yurish 3 m ichida; 5 m dan uzoqlashish/uzilish o'rinni bo'shatadi. Coin/tikish yo'q, partiyalar xotirada. `WorldChess` E bilan sahnani almashtirmasdan ochiladi; Esc faqat oynani yopadi, tasdiqlangan chiqish partiyani tugatadi.
+- Unity JsonUtility `null` o'rinni `publicId=0` obyektga aylantirishi aniq takrorlandi; `ChessSnapshot.NormalizeSeats()` API chegaralarida to'g'rilaydi. Aks holda bo'sh o'ringa qo'shilish tugmasi o'chiq qolardi.
+- Yig'ish: `CraDevBatch.BuildWorld` faqat olam sahnasini yangilaydi va saqlangan lobby sahnalari bilan `Builds/LobbyV2/CraDev.exe` yaratadi. To'liq yig'ish `BuildLobby`. Server dependency o'rnatilishi lockfile bilan boshqariladi; mavjud to'g'ri dependency bo'lsa launcher offline ham ochiladi.
+
+Sinov tafsilotlari va ochiq cheklovlar: `REMAINING-WORK.md` boshida. Barcha bot akkauntlari alohida `Logs/city-network-clone-20260930.db` bazasida; haqiqiy foydalanuvchilarga sinov xabari, guruh yoki pul amali yo'q. `tools/world-visual-bot.mjs` faqat maxsus loopback test portida, 120 soniyagacha, ovozsiz ishlaydi; oddiy 8080 da ishlashni rad etadi. Uni haqiqiy serverga yo'naltirmang.
 
 ## ENG YANGI — olamdan oldingi konflikt auditi
 

@@ -9,7 +9,7 @@ namespace CraDev.World
     /// </summary>
     public sealed class WorldMinimap : MonoBehaviour
     {
-        const float ViewRadius = 32f;       // ortografik yarim balandlik, metr
+        const float ViewRadius = 52f;       // ortografik yarim balandlik, metr
         const float CameraHeight = 60f;     // o'yinchidan balandlik
         const float FarClip = 150f;
         static readonly Color Background = new Color(.2f, .29f, .24f);
@@ -33,7 +33,7 @@ namespace CraDev.World
             mapCamera.orthographicSize = ViewRadius;
             mapCamera.nearClipPlane = .1f;
             mapCamera.farClipPlane = FarClip;
-            mapCamera.cullingMask = ~((1 << 5) | (1 << 8));
+            mapCamera.cullingMask = ~((1 << 5) | (1 << 8) | (1 << 9));
             mapCamera.clearFlags = CameraClearFlags.SolidColor;
             mapCamera.backgroundColor = Background;
             mapCamera.allowHDR = false;

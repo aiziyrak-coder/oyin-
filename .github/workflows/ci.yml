@@ -34,6 +34,10 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+          cache: npm
+          cache-dependency-path: Server/package-lock.json
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+        working-directory: Server
       - run: npm test
         working-directory: Server
       - name: Serverni bitta faylga yig'ish (Node.js'siz ishlaydi)
@@ -50,7 +54,9 @@ jobs:
       - uses: actions/upload-artifact@v6
         with:
           name: CraDevServer-Windows
-          path: dist/CraDevServer.exe
+          path: |
+            dist/CraDevServer.exe
+            dist/NewWorld-Server-THIRD-PARTY-NOTICES.txt
           retention-days: 30
 
   # Unity'siz, litsenziyasiz: Unity 2021 modullari + stublar bilan kompilyatsiya (tools/ci/cs-check/README.md).
@@ -157,7 +163,7 @@ jobs:
         if: matrix.target == 'StandaloneWindows64'
         run: |
           sudo chown -R "$(id -u):$(id -g)" build
-          cp server-exe/CraDevServer.exe tools/ci/Play.cmd build/StandaloneWindows64/
+          cp server-exe/CraDevServer.exe server-exe/NewWorld-Server-THIRD-PARTY-NOTICES.txt tools/ci/Play.cmd build/StandaloneWindows64/
       - uses: actions/upload-artifact@v6
         with:
           name: CraDev-${{ matrix.target == 'StandaloneWindows64' && 'Windows' || 'Linux' }}

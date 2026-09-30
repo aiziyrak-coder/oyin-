@@ -2,7 +2,34 @@
 
 2026-09-30. Bu ro'yxat bajarilganlik da'vosi emas. Foydalanuvchi barcha ishlarni davom ettirishga ruxsat bergan; mayda dizayn savollari bilan to'xtatmang. Tashqi hisob, to'lov yoki biometrik xizmatni soxtalashtirmang.
 
-## Eng yangi: olamdan oldingi lobby auditi
+## Eng yangi: shahar infratuzilmasi va umumiy shaxmat olami
+
+Foydalanuvchining yangi so'rovi bilan olamga o'tildi; quyidagi lobby-audit bo'limi tarixiy. Hali ochiq hisob/to'lov/hardware ishlarini tayyor deb belgilamang.
+
+- [x] Tekis 300x300 m hudud; yo'l, belgi, zebra, piyoda yo'lagi, chiroqlar, bino uchastkalari va 4 animatsiyali reklama monitori.
+- [x] Ko'chada random spawn, autentifikatsiyali umumiy sessiya, yaqin o'yinchi avatari, nomi va silliqlangan harakati. Hudud va gorizontal tezlik serverda cheklangan; serverda to'liq collider/fizika simulyatsiyasi YO'Q.
+- [x] Alohida kiriladigan shaxmat pavilioni, 10 doska, 20 stul, 320 3D dona; E interaksiyasi, ikki tomon, kuzatuvchi, haqiqiy yurish qoidalari va qayta o'yin.
+- [x] 18 m ovoz filtrining server/klient kodi, mikrofonning aniq rozilik bilan yoqilishi, uzilish/mute paytida eski audio tozalanishi. Bu haqiqiy nutq sifati sinovi degani emas.
+- [x] Fotografik HDR osmon va litsenziyasi toza asfalt/marmar/yog'och xaritalari; manbalari `World/Art/SOURCES.md`.
+- [ ] Ikki haqiqiy kompyuterda internet, mikrofon, paket yo'qotilishi va uzoq muddatli multiplayer sinovi; AEC, individual block/report/mute.
+- [ ] O'z tanasi va to'liq sifatli 9-model locomotion; hozir boshqa o'yinchi protsedurali animatsiya bilan ko'rinadi, o'zi birinchi shaxs kamerasi.
+- [ ] 128 o'yinchi yuklama sinovi, production transport/anti-cheat va server colliderlari. Hozirgi HTTP prototipni cheksiz MMO yoki professional voice deb atamang.
+- [ ] Shaharni keyinchalik bittadan binolar/zonalar bilan to'ldirish. Joriy scope bo'yicha boshqa binolar ataylab qo'yilmagan; eski lobby sahifalari arxivda saqlangan.
+
+Tekshirish dalillari:
+
+- `Logs/city-stable-build.log`: Unity 6000.3.24f1 `BuildWorld` Succeeded, `Builds/LobbyV2/CraDev.exe`.
+- `Logs/city-server-final-107-tests.log`: 107/107 server testi. Qo'shimcha mustaqil audit kechikkan HTTP body vaqt hisobini orqaga qaytarib tezlik cheklovini buzishini aniqladi; world/chess/voice POST vaqti body o'qilgach olinadi, world vaqti monoton. Kechikkan body/sessiya regressiya sinovlari qo'shildi.
+- `Logs/city-stable-player.log`: 75/75 va lobbyga qaytish PASS. Real Unity klienti + alohida HTTP test klienti: oq GUI o'rni, e2-e4, qora e7-e5, navbat va tasdiqlangan chiqish. Bu ikki jismoniy kompyuter testi emas.
+- `Logs/city-stable2-player.log`: yangilangan server bilan takroran 75/75 va lobbyga qaytish PASS; o'sha DX12 sozlamalari, avvalgi kutilmagan yopilish qaytalanmadi. Barcha yangi renderlar `Logs/CityStable2/`; haqiqiy ko'cha, monitor, pavilion, ichkari, multiplayer va e2-e4/e7-e5 doskasi.
+- `Logs/city-lobby-regression.log`: avvalgi lobby 1280x720 da 124/124; foydalanuvchi profili saqlangan. Kamera yo'q holati tushunarli xatoga o'tdi; haqiqiy webcam ishladi degani emas.
+- `Logs/CityStable/city-chess-playing.png`: birinchi qayta sinovning ko'rib tekshirilgan shaxmat renderi. Birinchi uch tashqi surat papka tayyor emasligi uchun saqlanmagan; `CityStable2`da bu takrorlanmadi.
+- 1366x768 RTX3060 da 160 chizilgan kadrli qisqa namuna: 198.7 FPS, eng sekin 8.35 ms, 33 ms dan sekin kadr yo'q. Bu uzoq benchmark emas. Oldingi yashirin oyna sinovidagi qora rasmlar va 2184 FPS yaroqsiz dalil, ishlatmang.
+- `Logs/city-verified-player.log` bir marta Unity native culling-job `c0000005` bilan yopildi. `Logs/city-crash-symbolicated.log` matching UnityPlayer PDB bilan `ujob_find_dependency_chain -> SyncPreparedFences -> CullScene`ni ko'rsatadi; GPU drayveri sababligi isbotlanmagan. Har kadr `TextMesh.characterSize` o'zgartirish o'rniga doimiy geometry + transform scale qilindi, caption faqat o'zgarganda yoziladi. Keyingi ikkita to'liq sinov o'tdi; asl engine sababi aniqlangan/tubdan tuzatilgan deb yozmang.
+
+Tarmoq testlari faqat haqiqiy bazaning izchil mahalliy klonida; Logs/DB/EXE fayllari Gitga qo'shilmaydi. Yangi `-cradevCitySmoke` ishlating: eski `-cradevWorldSmoke` olib tashlangan zina/rampa maydonini kutadi va bu shahar uchun mos emas.
+
+## Tarixiy: olamdan oldingi lobby auditi
 
 Saqlash nuqtasi `4488ecd`, push yo'q. Olam funksiyalariga o'tilmadi.
 
@@ -42,11 +69,11 @@ Hali "hech qanday kamchilik yo'q" deb bo'lmaydi: ikki qurilma/internet sinovi, h
 - [x] 1366x768 va 5 kishilik lobby: 9 avatar animatsiyasi, joylashuv, studio ochib-yopish; 0 xato. Nom-ping yorliqlari zich joyda navbatma-navbat balandlikda. Boshqa nisbatdagi ekranlar hali alohida tekshirilsin.
 - [ ] Haqiqiy internet orqali tunnel/ZIP va Windows havolasi.
 
-## Olam — keyingi asosiy ish
+## Olam — keyingi sifat va kengaytirish ishlari
 
-- [ ] Server boshqaradigan multiplayer sessiya, kirish/chiqish/qayta ulanish, harakat cheklovlari; ikki alohida klientda tekshiruv.
+- [x] Umumiy multiplayer sessiya, kirish/chiqish/qayta ulanish va boshlang'ich harakat cheklovlari; Unity + HTTP klientida tekshirildi. Ikki jismoniy qurilma va server fizikasi hali kerak.
 - [ ] O'z avatari/tanasi, yurish/yugurish/cho'kkalash/burilish animatsiyalari, kamera to'qnashuvi; 9 modelda sinov.
-- [ ] Tarmoqdagi avatarlarni silliq ko'rsatish, noto'g'ri/eskirgan koordinatalar va uzilishlarni to'g'ri qayta ishlash.
+- [x] Tarmoqdagi avatarlarni silliq ko'rsatish va sessiya uzilganda tozalash. Internet/paket yo'qotishidagi kengroq sinov ochiq.
 - [ ] Masofaga qarab ovozli chat, ovoz o'chirish/bloklash, mikrofon ruxsati, AEC uchun mos audio yechim. Lobbydagi HTTP ovozni professional past kechikishli yechim deb atamang.
 - [ ] Olam zonalari: sinov maydonini buzmasdan shahar, do'kon, ta'lim, biznes, ko'ngilochar joylar. Arxiv lobby kodini o'chirmang; xizmatlarga olamdagi nuqtalardan kirish.
 - [ ] Mualliflik huquqi toza musiqa va muhit ovozlari; alohida balandlik kanallari.

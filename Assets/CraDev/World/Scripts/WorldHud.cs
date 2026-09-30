@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using CraDev.MainMenu;
@@ -44,7 +45,11 @@ namespace CraDev.World
         Toggle invertToggle, bobToggle, crouchToggle, vsyncToggle, aoToggle;
         Button resumeButton;
         WorldMinimap minimap;
-        bool settingsOpen, dirty, gameSettingsDirty, leaving;
+        bool settingsOpen, dirty, gameSettingsDirty, leaving, interaction;
+        Text networkState, voiceState;
+        WorldNetwork network;
+        WorldVoice voice;
+        WorldChess chess;
         float saveAt;
         int menuChangedFrame = -1;
         string stateKey;
@@ -55,6 +60,7 @@ namespace CraDev.World
 
         void Start()
         {
+            network = GetComponent<WorldNetwork>(); voice = GetComponent<WorldVoice>(); chess = GetComponent<WorldChess>();
             if (!player) player = FindFirstObjectByType<WorldPlayerController>();
             if (!font) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             WorldPreferences.Load();
@@ -72,6 +78,11 @@ namespace CraDev.World
             if (leaving) return;
             if (MenuPressed()) ToggleMenuFromInput();
             if ((dirty || gameSettingsDirty) && Time.unscaledTime >= saveAt) SavePending();
+            if (networkState && network)
+                networkState.text = network.Connected ? Loc.F("city.presence",network.PlayerCount,network.PingMs) : network.Status;
+            if (voiceState && voice)
+                voiceState.text = voice.Notice ?? Loc.F("city.voice",Loc.T(voice.MicOn ? "city.on" : "city.off"),
+                    Loc.T(voice.SpeakerOn ? "city.on" : "city.off"),Loc.T(VoicePreferences.PushToTalk ? "city.ptt" : "city.open_mic"));
             if (!player || !movementState) return;
             string next = !player.IsGrounded ? "world.hud.airborne" :
                 player.IsCrouching ? "world.hud.crouching" :
@@ -91,6 +102,7 @@ namespace CraDev.World
         public bool ToggleMenuFromInput()
         {
             if (leaving || Time.frameCount == menuChangedFrame) return false;
+            if (chess && chess.IsOpen) { chess.Close(); menuChangedFrame = Time.frameCount; return true; }
             SetSettings(!settingsOpen);
             return true;
         }
@@ -98,11 +110,19 @@ namespace CraDev.World
         public void SetSettings(bool open)
         {
             if (leaving) return;
+            if (open && chess && chess.IsOpen) chess.Close();
             if (player && player.Paused != open) player.SetPaused(open);
             ApplySettingsVisibility(open);
         }
 
-        void OnPauseChanged(bool paused) => ApplySettingsVisibility(paused);
+        public void SetInteraction(bool open)
+        {
+            interaction = open;
+            if (player) player.SetPaused(open);
+            ApplySettingsVisibility(false);
+        }
+
+        void OnPauseChanged(bool paused) { if (!interaction) ApplySettingsVisibility(paused); }
 
         void ApplySettingsVisibility(bool open)
         {
@@ -110,8 +130,8 @@ namespace CraDev.World
             settingsOpen = open;
             if (!settings) return;
             settings.SetActive(open);
-            if (reticle) reticle.SetActive(!open);
-            if (hints) hints.SetActive(!open);
+            if (reticle) reticle.SetActive(!open && !interaction);
+            if (hints) hints.SetActive(!open && !interaction);
             if (open)
             {
                 RefreshPreferences();
@@ -159,6 +179,14 @@ namespace CraDev.World
             stateShadow.effectDistance = new Vector2(0f, -1f);
             minimap = gameObject.AddComponent<WorldMinimap>();
             if (player) minimap.Configure(player.transform, raw, arrowRect);
+            networkState = Label("WorldConnection", transform, null, 17, TextColor, TextAnchor.UpperLeft);
+            TopLeft(networkState.rectTransform, 28, 266, 360, 64);
+            networkState.gameObject.AddComponent<Shadow>().effectDistance = new Vector2(1, -1);
+            var voicePanel = Panel("WorldVoiceStatus", transform, new Color(.025f,.035f,.045f,.7f));
+            voicePanel.anchorMin = voicePanel.anchorMax = voicePanel.pivot = Vector2.one;
+            voicePanel.anchoredPosition = new Vector2(-24,-24); voicePanel.sizeDelta = new Vector2(510,88);
+            voiceState = Label("WorldVoiceText", voicePanel, null, 17, TextColor, TextAnchor.MiddleCenter);
+            Stretch(voiceState.rectTransform);
 
             var dotRect = Panel("WorldReticle", transform, new Color(1f, 1f, 1f, .85f));
             Center(dotRect, Vector2.zero, new Vector2(3f, 3f));
@@ -502,8 +530,21 @@ namespace CraDev.World
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+            StartCoroutine(LeaveWorld());
+        }
+
+        IEnumerator LeaveWorld()
+        {
+            if (network)
+            {
+                bool done = false;
+                StartCoroutine(LeavePresence(() => done = true));
+                float until = Time.realtimeSinceStartup + 1.5f;
+                while (!done && Time.realtimeSinceStartup < until) yield return null;
+            }
             SceneLoader.Load("MainMenu");
         }
+        IEnumerator LeavePresence(Action done) { yield return network.Leave(); done(); }
 
         void OnApplicationPause(bool paused)
         {

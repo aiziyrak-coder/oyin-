@@ -10,7 +10,7 @@ namespace CraDev.Online
     /// O'yin serveri bilan ishlash (Server/ papkasidagi Node.js server).
     /// Metodlar korutina: <c>StartCoroutine(api.CheckNickname(...))</c>.
     /// </summary>
-    public class GameApi
+    public partial class GameApi
     {
         /// <summary>
         /// Sahnalardagi standart manzil: o'yin yonidagi server (Server/ papkasi). Umumiy serverga o'yinni qayta yig'masdan

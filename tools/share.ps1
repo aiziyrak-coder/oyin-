@@ -25,6 +25,7 @@ try {
     if (-not $port) { throw 'No free local test port (8080, 8090..8110).' }
     $env:PORT = "$port"; $env:HOST = '127.0.0.1'; $env:TRUST_PROXY = $(if ($LocalOnly) { '0' } else { '1' })
     $nodeFile = (Get-Command node -ErrorAction Stop).Source
+    if (-not (Ensure-ServerDependencies $nodeFile)) { throw 'Server dependencies are unavailable.' }
     $server = Start-Process -FilePath $nodeFile -ArgumentList '--disable-warning=ExperimentalWarning src/server.js' `
         -WorkingDirectory (Join-Path $ProjectRoot 'Server') -WindowStyle Hidden -PassThru `
         -RedirectStandardOutput (Join-Path $logDir "share-server-$runId.log") -RedirectStandardError (Join-Path $logDir "share-server-$runId.err.log")

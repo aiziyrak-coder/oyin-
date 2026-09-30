@@ -105,6 +105,12 @@ namespace CraDev.World
             UpdateCamera(0f);
         }
 
+        public void SetWorldSpawn(Vector3 position, float heading)
+        {
+            spawnPosition = position; spawnYaw = heading;
+            Teleport(position, heading);
+        }
+
         public void SetPaused(bool value)
         {
             bool changed = paused != value;

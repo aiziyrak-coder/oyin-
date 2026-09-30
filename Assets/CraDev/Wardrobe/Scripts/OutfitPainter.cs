@@ -35,12 +35,12 @@ namespace CraDev.Wardrobe
             material.SetTexture(MaskId, option.outfitMask);
             material.SetFloat(MaskFromAlphaId, 0f);
             material.SetFloat(SmoothnessId, DefaultSmoothness);
-            int width = Mathf.Min(source.width,maxSize), height = Mathf.Min(source.height,maxSize);
+            int width = Mathf.Max(1,Mathf.Min(source.width,maxSize)), height = Mathf.Max(1,Mathf.Min(source.height,maxSize));
             color = Ensure(color, width, height, true, "OutfitBody");
             var previous = RenderTexture.active;
             Graphics.Blit(source, color, material, 0);
             color.GenerateMips();
-            gloss = Ensure(gloss, width / 2, height / 2, false, "OutfitGloss");
+            gloss = Ensure(gloss, Mathf.Max(1,width / 2), Mathf.Max(1,height / 2), false, "OutfitGloss");
             Graphics.Blit(source, gloss, material, 1);
             gloss.GenerateMips();
             RenderTexture.active = previous;
@@ -58,7 +58,7 @@ namespace CraDev.Wardrobe
                 material.SetVector(ColorIds[k], Vector4.zero);
             material.SetTexture(MaskId, fromAlpha ? Texture2D.blackTexture : option.hairMask);
             material.SetFloat(MaskFromAlphaId, fromAlpha ? 1f : 0f);
-            color = Ensure(color, Mathf.Min(source.width,maxSize), Mathf.Min(source.height,maxSize), true, fromAlpha ? "OutfitHairCards" : "OutfitHead");
+            color = Ensure(color, Mathf.Max(1,Mathf.Min(source.width,maxSize)), Mathf.Max(1,Mathf.Min(source.height,maxSize)), true, fromAlpha ? "OutfitHairCards" : "OutfitHead");
             var previous = RenderTexture.active;
             Graphics.Blit(source, color, material, 0);
             color.GenerateMips();
