@@ -84,6 +84,8 @@ namespace CraDev
                 yield break;
             }
             var lobby = FindFirstObjectByType<MainMenu.MainMenuScreen>();
+            if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevEconomySmoke")>=0)
+                yield return DevEconomySmoke.Run(lobby);
             if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevPartySmoke")>=0)
                 yield return DevPartySmoke.Run(lobby,System.IO.Path.GetDirectoryName(path));
             if(lobby!=null && System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevEnvironmentTest")>=0)

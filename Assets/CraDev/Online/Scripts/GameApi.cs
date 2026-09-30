@@ -174,6 +174,11 @@ namespace CraDev.Online
         public IEnumerator GroupJoin(string token, string code, Action<ApiResult<GroupJoinResponse>> done) =>
             Send("POST", "/api/groups/join", token, JsonUtility.ToJson(new GroupActionRequest { code = code }), done);
 
+        public IEnumerator GroupSubscribe(string token, string code, int price, string key, Action<ApiResult<GroupJoinResponse>> done) =>
+            Send("POST", "/api/groups/join", token, JsonUtility.ToJson(new GroupActionRequest { code = code, expectedPrice = price, paymentKey = key }), done);
+
+        public IEnumerator Wallet(string token, Action<ApiResult<WalletResponse>> done) => Send("GET", "/api/wallet", token, null, done);
+
         /// <summary>cancel, leave, approve, reject, remove, role, delete: javob - yangilangan guruh (leave/delete da { ok }).</summary>
         public IEnumerator GroupAction(string token, string action, string code, string nickname, string role, Action<ApiResult<GroupInfo>> done) =>
             Send("POST", "/api/groups/" + action, token, JsonUtility.ToJson(new GroupActionRequest { code = code, nickname = nickname, role = role }), done);
@@ -365,7 +370,7 @@ namespace CraDev.Online
     [Serializable]
     public class GroupCreateRequest
     {
-        public string name, description, kind, currency = "UZS", period = "month";
+        public string name, description, kind, currency = "CDCoin", period = "month";
         public int price;
     }
 
@@ -373,7 +378,20 @@ namespace CraDev.Online
     class GroupActionRequest
     {
         public string code, nickname, role;
+        public string paymentKey;
+        public int expectedPrice;
     }
+
+    [Serializable] public class WalletResponse
+    {
+        public int balance, coinUzs;
+        public string currency, error;
+        public bool checkoutAvailable;
+        public CoinPack[] packs;
+        public CoinTransaction[] transactions;
+    }
+    [Serializable] public class CoinPack { public string id; public int coins, amountUzs; }
+    [Serializable] public class CoinTransaction { public int delta, balance; public string kind, reference, createdAt; }
 
     [Serializable]
     public class PlayerList

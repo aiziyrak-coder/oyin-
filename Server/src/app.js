@@ -2,6 +2,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { MAX_PENDING_REQUESTS } from './db.js';
 import { createParties } from './party.js';
 import { groupRoutes } from './groups.js';
+import { walletRoutes } from './wallet.js';
 import { upcomingEvents } from './events.js';
 import { AVATARS, GENDERS, isValidAvatar, MAX_LENGTH, nicknameKey, validateNickname } from './nickname.js';
 import { isValidOutfit } from './outfit.js';
@@ -110,7 +111,7 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
       run: async ctx => party(kind, ctx.player, await readJson(ctx.req), ctx.now) });
   }
 
-  for (const [key, run] of Object.entries(groupRoutes(db))) {
+  for (const [key, run] of Object.entries({ ...groupRoutes(db), ...walletRoutes(db) })) {
     const post = key.startsWith('POST ');
     routes.set(key, { limit: key.endsWith('/create') ? 'groupCreate' : 'groups', auth: true, perPlayer: true,
       run: async ctx => run(ctx, post ? await readJson(ctx.req) : undefined) });

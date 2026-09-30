@@ -1,5 +1,19 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI — CDCoin va guruh to'lovi (2026-09-30)
+
+- Qaror: 1 CDCoin = 100 UZS. Pullik guruh tushumi egaga 100%, komissiya 0%; pul yechish va avtomatik obuna yangilash yo'q.
+- Server `wallet.js`: butun sonli balans, amallar tarixi, takroriy to'lovdan himoya, bitta tranzaksiyada ikki hisob va a'zolik. Mijoz coin qo'sha olmaydi.
+- `/api/wallet` autentifikatsiyali. 100/500/1000/5000 CDCoin paketlari. `/api/wallet/checkout` hozir 503 `payments_not_configured`: Click/Payme integratsiyasi YO'Q. `creditVerified` faqat ichki metod, HTTP yo'li yo'q; testlardan tashqarida chaqirilmaydi.
+- Yangi pullik guruh narxi faqat CDCoin. Eski UZS/USD guruhlari qayta talqin qilinmaydi; yangi to'lovlari `legacy_currency` bilan bloklangan. Eski faol a'zolar muddatigacha qoladi. Pullik a'zolikni admin qo'lda bepul tasdiqlay olmaydi.
+- Unity: lobby o'ng tomonda CDCoin +, lobby ichidagi hamyon, paket narxlari, oxirgi 4 amal, to'lov hali yopiq ekanligi. Obuna oldidan aniq summa/komissiya tasdig'i.
+- Qidiruv: har tugma bosilganda eski so'rov natijasi bekor qilinadi; qidiruv oldidan ortiqcha friends so'rovi kutmaydi. Bo'sh so'rovda hech kim ko'rsatilmaydi. ID va nickname qidiruvi saqlangan.
+- Zaxira: oldingi holat commit `3832f71`; bazaning izchil SQLite zaxirasi `Logs/pre-cdcoin-20260930.db` (shaxsiy, Gitga qo'shmang).
+- Server 81/81 sinov o'tdi (jumladan wallet rollback, idempotency, auth, balans limitlari, to'liq egaga tushum va obuna muddati).
+- Unity `Logs/cdcoin-final-build.log` Succeeded; `Logs/cdcoin-player.log` EconomyTest 10 PASS, 0 FAIL: raycast, fokus, klaviatura belgisi, bo'sh qidiruv, ID rejimi, hamyon API/modal/paketlar/yopish. Bu dasturiy UI testi, foydalanuvchining haqiqiy klaviatura sinovi emas. Renderlar `Logs/cdcoin-lobby*.png`. Mahalliy Unity HTTP ping 3–4 ms; internet/tunnel o'lchanmagan.
+- Qolgan: Click/Payme merchant sozlamalari, haqiqiy imzolangan callback tekshiruvi, idempotent settlement/cancel/refund, sandbox sertifikatsiya; bundan oldin checkout ochilmasin. Kalitlarni kod/chat/Gitga yozmang.
+- `newworld://group/...` hozir matn sifatida nusxalab qidiruvga qo'yiladi; operatsion tizimda deep-link ro'yxatdan o'tkazish hali yo'q. Olam multiplayeri alohida ish.
+
 ## ENG YANGI — PING, QIDIRUV, ID VA GURUHLAR (2026-09-29)
 
 Unity'siz yozilgan (C# tekshiruvi OK, server testlari 80/80). **Unity'da hali sinalmagan:** `tools\lobby.ps1 -Build`.

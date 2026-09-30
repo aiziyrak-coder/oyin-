@@ -66,7 +66,7 @@ describe('guruhlar', () => {
       [{ name: 'Paid club', kind: 'paid', price: 0, currency: 'UZS', period: 'month' }, 'invalid_price'],
       [{ name: 'Paid club', kind: 'paid', price: 1.5, currency: 'UZS', period: 'month' }, 'invalid_price'],
       [{ name: 'Paid club', kind: 'paid', price: 1000, currency: 'EUR', period: 'month' }, 'invalid_currency'],
-      [{ name: 'Paid club', kind: 'paid', price: 1000, currency: 'UZS', period: 'day' }, 'invalid_period'],
+      [{ name: 'Paid club', kind: 'paid', price: 1000, currency: 'CDCoin', period: 'day' }, 'invalid_period'],
     ]) {
       const res = await api.post('create', owner, body);
       assert.deepEqual([res.status, res.body], [400, { error }], JSON.stringify(body));
@@ -151,15 +151,21 @@ describe('guruhlar', () => {
     assert.equal((await api.get(`detail?code=${group.code}`, owner)).status, 404);
   });
 
-  test('pullik obuna: narx ko\'rinadi, to\'lov yo\'q - ega tasdiqlaydi, muddat tugasa a\'zolik tugaydi', async () => {
+  test('paid membership: owner receives full CDCoin payment, retries cannot double charge, membership expires', async () => {
     const { body: group } = await api.post('create', owner,
-      { name: 'Premium kurs', kind: 'paid', price: 50000, currency: 'UZS', period: 'month', description: 'Oylik' });
+      { name: 'Premium kurs', kind: 'paid', price: 500, currency: 'CDCoin', period: 'month', description: 'Oylik' });
     const [found] = (await api.get('search?q=premium', cara)).body;
-    assert.deepEqual([found.kind, found.price, found.currency, found.period], ['paid', 50000, 'UZS', 'month']);
-    const sub = await api.post('join', cara, { code: group.code });
-    assert.equal(sub.body.status, 'requested'); // to'lov yo'q: faqat so'rov
-    const approved = await api.post('approve', owner, { code: group.code, nickname: 'Cara' });
-    const cara1 = approved.body.members.find(m => m.nickname === 'Cara');
+    assert.deepEqual([found.kind, found.price, found.currency, found.period], ['paid', 500, 'CDCoin', 'month']);
+    const body = { code: group.code, expectedPrice: 500, paymentKey: 'subscription-test-0001' };
+    assert.equal((await api.post('join', cara, body)).body.error, 'insufficient_coins');
+    assert.equal((await api.post('approve', owner, { code: group.code, nickname: 'Cara' })).body.error, 'payment_required');
+    api.db.wallet.creditVerified(cara.id, 'test:receipt:0001', 1000, new Date(api.clock.ms));
+    const sub = await api.post('join', cara, body);
+    assert.equal(sub.body.status, 'joined');
+    await api.post('join', cara, body);
+    assert.equal(api.db.wallet.balance(cara.id), 500);
+    assert.equal(api.db.wallet.balance(owner.id), 500);
+    const cara1 = sub.body.group.members.find(m => m.nickname === 'Cara');
     assert.equal(cara1.expiresAt, new Date(api.clock.ms + 30 * DAY).toISOString());
     assert.equal((await api.get(`detail?code=${group.code}`, cara)).body.expiresAt, cara1.expiresAt);
 
@@ -167,6 +173,9 @@ describe('guruhlar', () => {
     const after = (await api.get(`detail?code=${group.code}`, owner)).body;
     assert.deepEqual(after.members.map(m => m.nickname), ['GroupOwner']);
     assert.equal((await api.get(`detail?code=${group.code}`, cara)).body.role, '');
+    assert.equal((await api.post('join', cara, body)).body.status, 'already_processed');
+    assert.equal((await api.get(`detail?code=${group.code}`, cara)).body.role, '');
+    assert.equal(api.db.wallet.balance(cara.id), 500);
   });
 
   test('guruhdoshni lobbyga chaqirish mumkin (do\'st bo\'lmasa ham)', async () => {

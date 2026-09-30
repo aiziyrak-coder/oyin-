@@ -198,6 +198,42 @@ namespace CraDev.EditorTools
             // Do'stlar paneli pastidagi o'yinchi rasmi: MainMenuScreen yuz yoki avatar kartasini qo'yadi va yangilaydi
             foreach(var image in home.GetComponentsInChildren<RawImage>(true))if(image.name=="SelfPortrait")Set(screen,"selfPortrait",image);
             V2AvatarStudio(home.parent,screen);
+            V2Wallet(home.parent,right,screen);
+        }
+
+        static void V2Wallet(Transform root, Transform right, MainMenuScreen screen)
+        {
+            var controller=screen.gameObject.AddComponent<LobbyWallet>();
+            Set(controller,"lobby",screen);
+            var balance=V2Button(right,"— CDCoin  +",null,0,108,258,54,localized:false);
+            balance.name="LobbyCDCoin";
+            balance.GetComponentInChildren<Text>().fontSize=21;
+            ReferenceSurface.Apply(balance.GetComponent<Image>(),4,18);
+            Set(controller,"button",balance);Set(controller,"balance",balance.GetComponentInChildren<Text>());
+            var host=CreateRect("WalletWindow",root);Stretch(host);
+            var modal=host.gameObject.AddComponent<WalletWindow>();
+            Set(modal,"group",host.gameObject.AddComponent<CanvasGroup>());
+            var shade=CreateFullscreen("WalletShade",host,new Color(0,0,0,.65f));shade.raycastTarget=true;
+            var panel=V2Panel(host,"WalletPanel",0,0,800,660,new Color32(30,31,30,255));
+            panel.raycastTarget=true;
+            panel.rectTransform.anchorMin=panel.rectTransform.anchorMax=panel.rectTransform.pivot=new Vector2(.5f,.5f);
+            panel.rectTransform.anchoredPosition=Vector2.zero;
+            Set(modal,"panel",panel.rectTransform);
+            V2Text(panel.transform,"wallet.title",32,24,660,48,32);
+            Set(modal,"closeButton",V2Button(panel.transform,"×",null,710,24,58,48,localized:false));
+            Set(modal,"summary",V2Text(panel.transform,"",32,90,730,40,27,false));
+            V2Text(panel.transform,"wallet.rate",32,134,730,32,21).color=LobbyPalette.Accent;
+            var labels=new Object[4];
+            for(int i=0;i<4;i++)
+            {
+                var tile=V2Panel(panel.transform,"CoinPack"+i,32+i*186,190,176,100,new Color32(47,49,44,255));
+                labels[i]=V2Text(tile.transform,"—",10,10,156,80,22,false);
+                ((Text)labels[i]).alignment=TextAnchor.MiddleCenter;
+            }
+            SetArray(modal,"packs",labels);
+            V2Text(panel.transform,"wallet.pending",32,310,736,80,21).color=new Color32(231,204,141,255);
+            Set(modal,"history",V2Text(panel.transform,"",32,410,736,210,22,false));
+            Set(controller,"window",modal);
         }
 
         // Profil ostidagi qator: karnay va mikrofon (LobbyVoice) hamda party'dagina ko'rinadigan "Lobbydan chiqish"

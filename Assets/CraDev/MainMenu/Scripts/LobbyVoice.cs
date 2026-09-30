@@ -58,6 +58,8 @@ namespace CraDev.MainMenu
             micMissing = Microphone.devices == null || Microphone.devices.Length == 0;
             speakerOn = PlayerPrefs.GetInt(SpeakerPref, 1) == 1;
             micOn = speakerOn && !micMissing && PlayerPrefs.GetInt(MicPref, 1) == 1;
+            // Read-only UI diagnostics must never open the microphone or change saved preferences.
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-cradevEconomySmoke") >= 0) micOn = false;
             if (micButton != null) micButton.onClick.AddListener(ToggleMic);
             if (speakerButton != null) speakerButton.onClick.AddListener(() => SetSpeaker(!speakerOn));
             RefreshButtons();

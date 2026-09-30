@@ -1,5 +1,14 @@
 # NewWorld Lobby
 
+## CDCoin va ijtimoiy lobby (2026-09-30)
+
+- [x] Qaror: guruh tushumi egaga to'liq, komissiya yo'q; 1 CDCoin = 100 so'm.
+- [x] Serverda balans, tarix, atomik guruh to'lovi va takror to'lovdan himoya; 81/81 test.
+- [x] Lobbyda CDCoin +, paket narxlari va obuna tasdiqlash oynasi.
+- [x] Qidiruv oldidagi ortiqcha tarmoq kutishi olib tashlandi; eski javoblar darhol bekor qilinadi.
+- [ ] Click/Payme merchant + sandbox + ishonchli to'lov/qaytarish integratsiyasi. Hozir checkout xavfsiz yopiq.
+- [ ] Olam multiplayeri, haqiqiy akkaunt tiklash, moderatsiya/report/block va production monitoring alohida ko'lam bilan rejalashtirilsin.
+
 ## Olam grafikasi — fotografik materiallar (2026-09-28)
 
 - [x] Oldingi fizikasi ishlaydigan holat 5a566d0 commitda saqlandi; lobby dizayni o'zgarmadi.

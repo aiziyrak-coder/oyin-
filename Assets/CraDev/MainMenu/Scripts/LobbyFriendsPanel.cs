@@ -90,6 +90,13 @@ namespace CraDev.MainMenu
                 }
             PrepareSearch();
             search.onValueChanged.AddListener(_=>{
+                // Invalidate an in-flight lookup immediately, not only after debounce.
+                ++revision;
+                if(mode!="groups")
+                {
+                    mode="find";visible=Array.Empty<PlayerSummary>();
+                    ShowNotice(()=>Loc.T(search.text.Trim().Length<MinQuery?"social.search_hint":"common.connecting"));
+                }
                 if(debounce!=null)StopCoroutine(debounce);
                 debounce=StartCoroutine(SearchLater());
             });
@@ -137,6 +144,7 @@ namespace CraDev.MainMenu
         {
             search.interactable=true;
             if(search.targetGraphic==null)search.targetGraphic=search.GetComponent<Image>();
+            if(search.targetGraphic!=null)search.targetGraphic.raycastTarget=true;
             if(search.textComponent!=null){search.textComponent.supportRichText=false;search.textComponent.raycastTarget=false;}
             if(search.placeholder!=null){search.placeholder.raycastTarget=false;placeholderText=search.placeholder.GetComponent<LocalizedText>();}
             search.lineType=InputField.LineType.SingleLine;
@@ -236,7 +244,8 @@ namespace CraDev.MainMenu
         IEnumerator Load(int request,bool user)
         {
             ApiResult<FriendsResponse> friends=default;
-            yield return lobby.Api.Friends(PlayerProfile.Token,r=>friends=r);
+            // A lookup must not wait for a second, unrelated friends request first.
+            if(mode!="find")yield return lobby.Api.Friends(PlayerProfile.Token,r=>friends=r);
             if(request!=revision)yield break;
             Func<string> failure=null;
             if(friends.Ok)
@@ -247,7 +256,7 @@ namespace CraDev.MainMenu
                 NotifyIncoming(incoming);
                 UpdateCount();UpdateBadges();
             }
-            else
+            else if(mode!="find")
             {
                 // Oxirgi muvaffaqiyatli ro'yxat saqlanadi: bitta xato so'rov (tarmoq, 429) qatorlarni o'chirmaydi
                 bool network=friends.NetworkError;long status=friends.Status;

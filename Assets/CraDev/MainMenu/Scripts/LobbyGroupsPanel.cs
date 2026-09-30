@@ -48,7 +48,8 @@ namespace CraDev.MainMenu
         Func<string> failure;
         int revision;
         // Yangi guruh formasi (tur almashtirilganda qayta chiziladi, yozilgan matn saqlanadi)
-        string formName = "", formDescription = "", formPrice = "", formKind = "free", formCurrency = "UZS", formPeriod = "month";
+        string formName = "", formDescription = "", formPrice = "", formKind = "free", formCurrency = "CDCoin", formPeriod = "month";
+        string paymentKey, paymentCode;
 
         /// <summary>Guruhlar bo'limi hozir ko'rinib turibdi (panel "groups" rejimida).</summary>
         public bool Active { get; private set; }
@@ -389,13 +390,7 @@ namespace CraDev.MainMenu
                 y = FieldLabel("groups.field.price", y);
                 var price = Field(0, y, 200, 46, formPrice, 10, false, "groups.field.price_hint", v => formPrice = v);
                 price.contentType = InputField.ContentType.IntegerNumber;
-                float x = 210, cw = (w - 210 - 6) / 2;
-                foreach (var currency in new[] { "UZS", "USD" })
-                {
-                    string c = currency;
-                    TextButton(rows, x, y, cw, 46, c, formCurrency == c ? LobbyPalette.Accent : new Color32(52, 52, 56, 255), () => { formCurrency = c; Draw(); });
-                    x += cw + 6;
-                }
+                Label(rows, "CDCoin", 216, y, w - 216, 46, 22).color = Gold;
                 y += 54;
                 y = FieldLabel("groups.field.period", y);
                 y = Segments(new[] { "week", "month", "year" }, p => Loc.T("groups.period." + p), formPeriod, p => { formPeriod = p; Draw(); }, y, w);
@@ -455,18 +450,38 @@ namespace CraDev.MainMenu
         void Join()
         {
             if (busy || detail == null) return;
+            if (detail.kind == "paid")
+            {
+                if (detail.currency != "CDCoin") { lobby.Toast(Loc.T("groups.error.legacy_currency")); return; }
+                string code = detail.code; int price = detail.price;
+                Confirm("wallet.subscribe", Loc.F("wallet.confirm_subscription", price, detail.name), () => {
+                    if (detail != null && detail.code == code && detail.price == price) JoinConfirmed(true);
+                });
+                return;
+            }
+            JoinConfirmed(false);
+        }
+
+        void JoinConfirmed(bool paid)
+        {
+            if (busy || detail == null) return;
             busy = true; Draw();
             string kind = detail.kind;
-            lobby.StartCoroutine(lobby.Api.GroupJoin(PlayerProfile.Token, detail.code, result =>
+            if (paid && (paymentKey == null || paymentCode != detail.code)) { paymentKey = Guid.NewGuid().ToString("N"); paymentCode = detail.code; }
+            Action<ApiResult<GroupJoinResponse>> done = result =>
             {
                 if (this == null) return;
                 busy = false;
                 if (!result.Ok) { lobby.Toast(ErrorText(result.NetworkError, result.Status, result.Data?.error)); Draw(); return; }
-                lobby.Toast(Loc.T(result.Data.status == "requested" ? kind == "paid" ? "groups.subscribe_sent" : "groups.request_sent" : "groups.joined"));
+                paymentKey = null;
+                lobby.GetComponent<LobbyWallet>()?.Refresh();
+                lobby.Toast(Loc.T(result.Data.status == "already_processed" ? "wallet.already_processed" : result.Data.status == "requested" ? "groups.request_sent" : "groups.joined"));
                 if (result.Data.group != null) detail = result.Data.group;
                 Draw();
                 StartCoroutine(LoadMineOnly());
-            }));
+            };
+            lobby.StartCoroutine(paid ? lobby.Api.GroupSubscribe(PlayerProfile.Token, detail.code, detail.price, paymentKey, done)
+                : lobby.Api.GroupJoin(PlayerProfile.Token, detail.code, done));
         }
 
         void Act(string action, string nickname, string role)
