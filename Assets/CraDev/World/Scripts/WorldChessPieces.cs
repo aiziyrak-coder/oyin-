@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace CraDev.World
 {
-    /// <summary>Shared lathed meshes, drawn in 12 instanced batches. No per-piece colliders or updates.</summary>
+    /// <summary>Shared lathed meshes, twelve instanced batches and short board-diff animations. No colliders.</summary>
     internal sealed class WorldChessPieces : IDisposable
     {
         static readonly char[] Types = { 'p', 'r', 'n', 'b', 'q', 'k' };
@@ -37,10 +37,16 @@ namespace CraDev.World
             foreach (var board in boards)
             {
                 if (!board.Table || (board.Table.transform.position - viewerPosition).sqrMagnitude > 85f * 85f) continue;
+                board.Animate();
                 for (int square = 0; square < 64; square++)
                 {
                     int batch = board.Kinds[square]; if (batch < 0) continue;
                     int index = counts[batch]++; batches[batch][index] = board.Matrices[square]; VisibleCount++;
+                }
+                for (int i = 0; i < board.CaptureCount; i++)
+                {
+                    int batch = board.CaptureKinds[i];
+                    batches[batch][counts[batch]++] = board.CaptureMatrices[i];
                 }
             }
             for (int i = 0; i < batches.Length; i++)
@@ -64,19 +70,75 @@ namespace CraDev.World
             internal readonly CityChessTable Table;
             internal readonly Matrix4x4[] Matrices = new Matrix4x4[64];
             internal readonly int[] Kinds = new int[64];
+            internal readonly int[] CaptureKinds = new int[64];
+            internal readonly Matrix4x4[] CaptureMatrices = new Matrix4x4[64];
+            internal int CaptureCount;
+            readonly string[] previous = new string[64];
+            readonly Vector3[] starts = new Vector3[64], ends = new Vector3[64], capturedAt = new Vector3[64];
+            readonly bool[] moving = new bool[64];
+            float animationStart = -1f;
             internal BoardView(CityChessTable table) { Table = table; }
-            public void SetBoard(string[] board)
+            public void SetBoard(string[] board, string lastFrom = "", string lastTo = "")
             {
                 if (board == null || board.Length != 64) return;
+                int changes = 0;
+                for (int i = 0; i < 64; i++) if ((previous[i] ?? "") != (board[i] ?? "")) changes++;
+                if (changes == 0) return;
+                bool animate = changes >= 2 && changes <= 4 && animationStart >= 0f;
+                var consumed = new bool[64];
+                CaptureCount = 0;
                 for (int square = 0; square < 64; square++)
                 {
-                    string piece = board[square]; Kinds[square] = -1;
+                    string piece = board[square]; Kinds[square] = -1; moving[square] = false;
                     if (string.IsNullOrEmpty(piece)) continue;
                     char type = char.ToLowerInvariant(piece[0]); int index = Array.IndexOf(Types, type);
                     if (index < 0) continue;
                     bool white = char.IsUpper(piece[0]); Kinds[square] = index + (white ? 6 : 0);
-                    Matrices[square] = Matrix4x4.TRS(Table.SquareCenter(square % 8, square / 8), Quaternion.Euler(0f, white ? 0f : 180f, 0f), Vector3.one);
+                    ends[square] = Table.SquareCenter(square % 8, square / 8);
+                    starts[square] = ends[square];
+                    if (animate && piece != previous[square])
+                    {
+                        int source = -1, named = WorldChess.SquareIndex(lastFrom);
+                        // The explicit last move also matches a pawn promoted into a different piece.
+                        if (WorldChess.SquareIndex(lastTo) == square && named >= 0 && !string.IsNullOrEmpty(previous[named])) source = named;
+                        if (source < 0) for (int candidate = 0; candidate < 64; candidate++)
+                            if (!consumed[candidate] && previous[candidate] == piece && board[candidate] != piece)
+                            { source = candidate; break; }
+                        if (source >= 0)
+                        {
+                            consumed[source] = true; moving[square] = true;
+                            starts[square] = Table.SquareCenter(source % 8, source / 8);
+                        }
+                    }
+                    Matrices[square] = Matrix4x4.TRS(ends[square], Quaternion.Euler(0f, white ? 0f : 180f, 0f), Vector3.one);
                 }
+                if (animate) for (int square = 0; square < 64; square++)
+                {
+                    string old = previous[square];
+                    if (string.IsNullOrEmpty(old) || consumed[square] || old == board[square]) continue;
+                    int kind = Array.IndexOf(Types, char.ToLowerInvariant(old[0]));
+                    if (kind < 0) continue;
+                    CaptureKinds[CaptureCount] = kind + (char.IsUpper(old[0]) ? 6 : 0);
+                    capturedAt[CaptureCount++] = Table.SquareCenter(square % 8, square / 8);
+                }
+                Array.Copy(board, previous, 64);
+                animationStart = Time.unscaledTime;
+                Animate();
+            }
+            public void Animate()
+            {
+                float t = Mathf.Clamp01((Time.unscaledTime - animationStart) / .28f);
+                float smooth = t * t * (3f - 2f * t);
+                for (int i = 0; i < 64; i++)
+                {
+                    if (!moving[i] || Kinds[i] < 0) continue;
+                    Vector3 p = Vector3.Lerp(starts[i], ends[i], smooth) + Vector3.up * (Mathf.Sin(t * Mathf.PI) * .045f);
+                    Matrices[i] = Matrix4x4.TRS(p, Quaternion.Euler(0, Kinds[i] >= 6 ? 0 : 180, 0), Vector3.one);
+                    if (t >= 1f) moving[i] = false;
+                }
+                if (t >= 1f) CaptureCount = 0;
+                for (int i = 0; i < CaptureCount; i++)
+                    CaptureMatrices[i] = Matrix4x4.TRS(capturedAt[i], Quaternion.identity, Vector3.one * (1f - smooth));
             }
         }
         static string[] Initial()

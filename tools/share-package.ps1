@@ -57,7 +57,7 @@ function Get-SharePackageFiles {
     param([Parameter(Mandatory = $true)][string]$GameDirectory)
     $files = New-Object 'System.Collections.Generic.List[System.IO.FileInfo]'
     $queue = New-Object 'System.Collections.Generic.Queue[System.IO.DirectoryInfo]'
-    $rootFiles = @('CraDev.exe', 'UnityPlayer.dll', 'UnityCrashHandler64.exe', 'DirectML.dll', 'GameAssembly.dll', 'baselib.dll')
+    $rootFiles = @('CraDev.exe', 'UnityPlayer.dll', 'UnityCrashHandler64.exe', 'DirectML.dll', 'GameAssembly.dll', 'baselib.dll', 'ASSET-CREDITS.txt')
     $rootDirectories = @('CraDev_Data', 'MonoBleedingEdge', 'D3D12')
     foreach ($item in Get-ChildItem -LiteralPath $GameDirectory -Force -ErrorAction Stop) {
         if ($item.Name -notin ($rootFiles + $rootDirectories)) { continue }

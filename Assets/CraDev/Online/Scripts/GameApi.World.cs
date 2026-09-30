@@ -22,6 +22,7 @@ namespace CraDev.Online
     [Serializable] public sealed class WorldStateRequest : WorldSession
     {
         public float x, y, z, yaw;
+        public int movementRevision;
         public bool crouching, micOn, speakerOn;
     }
     [Serializable] public sealed class WorldPeer
@@ -31,6 +32,9 @@ namespace CraDev.Online
         public float x, y, z, yaw;
         public bool crouching, micOn, speakerOn;
         public Vector3 Position => new Vector3(x, y, z);
+        public string activity, activityRole, pose, action;
+        public int activitySlot, movementRevision;
+        public long actionAt;
     }
     [Serializable] public sealed class WorldSnapshot
     {

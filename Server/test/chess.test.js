@@ -134,15 +134,82 @@ test('chess rematch requires both votes and a move cancels stale reset consent',
   assert.equal(once.version, twice.version); assert.equal(twice.board[28], 'P');
 });
 
-test('chess leaves/abandons games, resets empty boards, and releases walked-away seats', () => {
+test('chess leaves/abandons games, resets empty boards, and locks seated movement until explicit leave', () => {
   const f = fixture(); f.both(); f.move('e2', 'e4');
   const abandoned = f.call(f.a, 'leave')[1];
   assert.equal(abandoned.status, 'abandoned'); assert.equal(abandoned.winner, 'black'); assert.equal(abandoned.white, null);
   f.call(f.b, 'leave');
   const empty = f.call(f.c, 'table')[1]; assert.equal(empty.status, 'waiting'); assert.equal(empty.board[12], 'P');
   f.both(); f.advance(1000); f.state(f.a, { x: -8 });
-  assert.equal(f.call(f.b, 'table')[1].white, null);
+  assert.equal(f.call(f.b, 'table')[1].white.publicId, f.a.profile.publicId);
+  const seated = f.world.getMember(f.a.profile.id, f.now());
+  assert.equal(seated.x, -14); assert.equal(seated.z, 57.78);
+  f.call(f.a, 'leave');
   assert.equal(f.call(f.c, 'join', { color: 'white' })[0], 200);
+});
+
+test('chess seating is authoritative, oriented at the board and exclusive with another activity', () => {
+  const f = fixture();
+  const original = { x: f.a.self.x, z: f.a.self.z };
+  const table = f.both();
+  assert.equal(table.white.pose, 'sit'); assert.equal(table.white.activity, 'chess');
+  assert.equal(table.white.activitySlot, 0); assert.equal(table.white.activityRole, 'white');
+  assert.equal(table.white.x, -14); assert.equal(table.white.z, 57.78); assert.equal(table.white.yaw, 0);
+  assert.equal(table.black.z, 60.22); assert.equal(table.black.yaw, 180);
+  assert.equal(f.world.setActivity(f.a.profile.id, f.a.sessionId, { kind: 'penalty', slot: 0,
+    role: 'kicker', pose: 'stand', x: -14, y: 0, z: 58, yaw: 0 }, f.now()), false);
+  assert.equal(f.world.setActivity(f.c.profile.id, f.c.sessionId, { kind: 'penalty', slot: 0,
+    role: 'keeper', pose: 'stand', x: -14, y: 0, z: 58, yaw: 0 }, f.now()), true);
+  f.call(f.a, 'leave');
+  assert.equal(f.call(f.c, 'join', { color: 'white' })[1].error, 'activity_busy');
+  const released = f.world.publicPeer(f.world.getMember(f.a.profile.id, f.now()));
+  assert.equal(released.activity, ''); assert.equal(released.pose, 'stand');
+  assert.equal(released.x, original.x); assert.equal(released.z, original.z);
+});
+
+test('chess old-session cleanup cannot clear a newer activity', () => {
+  const f = fixture(); f.both();
+  const joined = f.world.join(f.a.profile, {}, f.now())[1];
+  assert.equal(f.world.setActivity(f.a.profile.id, joined.sessionId, { kind: 'penalty', slot: 0,
+    role: 'kicker', pose: 'stand', x: -14, y: 0, z: 59, yaw: 0 }, f.now()), true);
+  assert.equal(f.call(f.b, 'table')[1].white, null);
+  assert.equal(f.world.publicPeer(f.world.getMember(f.a.profile.id, f.now())).activity, 'penalty');
+});
+
+test('chess supplies SAN history, captures, last move and checked king square', () => {
+  const f = fixture(); f.both(); f.move('e2', 'e4'); f.move('d7', 'd5');
+  const captured = f.move('e4', 'd5')[1];
+  assert.equal(captured.timeControl, 'untimed');
+  assert.deepEqual(captured.history.map(move => move.san), ['e4', 'd5', 'exd5']);
+  assert.deepEqual(captured.history.map(move => move.number), [1, 1, 2]);
+  assert.equal(captured.history[2].color, 'white'); assert.equal(captured.history[2].captured, 'p');
+  assert.deepEqual(captured.whiteCaptures, ['p']); assert.deepEqual(captured.blackCaptures, []);
+  assert.equal(captured.lastFrom, 'e4'); assert.equal(captured.lastTo, 'd5');
+  const check = fixture('4r2k/8/8/8/8/8/P7/4K3 w - - 0 1'); check.both();
+  assert.equal(check.call(check.a, 'table')[1].checkSquare, 'e1');
+  f.call(f.a, 'reset'); const fresh = f.call(f.b, 'reset')[1];
+  assert.deepEqual(fresh.history, []); assert.deepEqual(fresh.whiteCaptures, []);
+});
+
+test('chess draw needs the other player and expires when the opponent plays; resign is guarded', () => {
+  const f = fixture(); let board = f.both();
+  assert.equal(f.call(f.c, 'draw', { version: board.version })[1].error, 'not_seated');
+  assert.equal(f.call(f.a, 'resign', { version: -1 })[1].error, 'stale_board');
+  board = f.call(f.a, 'draw', { version: board.version })[1];
+  assert.equal(board.drawOffer, 'white');
+  assert.equal(f.call(f.a, 'draw', { version: board.version })[1].version, board.version);
+  assert.equal(f.move('e2', 'e4')[1].drawOffer, 'white');
+  assert.equal(f.move('e7', 'e5')[1].drawOffer, '');
+  board = f.call(f.a, 'table')[1];
+  board = f.call(f.b, 'draw', { version: board.version })[1];
+  board = f.call(f.a, 'draw', { version: board.version })[1];
+  assert.equal(board.status, 'draw'); assert.equal(board.winner, ''); assert.equal(board.drawOffer, '');
+  assert.equal(f.move('g1', 'f3')[1].error, 'game_over');
+  f.call(f.a, 'reset'); board = f.call(f.b, 'reset')[1];
+  board = f.call(f.a, 'resign', { version: board.version })[1];
+  assert.equal(board.status, 'resigned'); assert.equal(board.winner, 'black');
+  assert.equal(board.white.pose, 'sit'); // result does not eject seated players
+  assert.equal(f.call(f.b, 'draw', { version: board.version })[1].error, 'game_over');
 });
 
 test('chess reconnect and expired heartbeat release seats even if client never sends leave', () => {

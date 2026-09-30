@@ -35,7 +35,41 @@ export function createWorld(db, { capacity = WORLD_CAPACITY, spawn = chooseSpawn
     const p = value.profile;
     return { publicId: p.publicId, nickname: p.nickname, avatarId: p.avatarId, gender: p.gender,
       outfit: publicOutfit(p.outfit), x: value.x, y: value.y, z: value.z, yaw: value.yaw,
-      crouching: value.crouching, micOn: value.micOn, speakerOn: value.speakerOn };
+      crouching: value.crouching, micOn: value.micOn, speakerOn: value.speakerOn,
+      activity: value.activity?.kind ?? '', activitySlot: value.activity?.slot ?? -1,
+      activityRole: value.activity?.role ?? '', pose: value.activity?.pose ?? 'stand',
+      action: value.activity?.action ?? '', actionAt: value.activity?.actionAt ?? 0,
+      movementRevision: value.movementRevision ?? 0 };
+  }
+  // Internal claims only: no client endpoint may assign a pose or teleport itself into a game.
+  function setActivity(id, sessionId, activity, now) {
+    const time = currentTime(now), value = member(id, sessionId, time);
+    if (!value || !activity || !['chess', 'penalty'].includes(activity.kind) ||
+      !Number.isInteger(activity.slot) || activity.slot < 0 || typeof activity.role !== 'string' ||
+      !['sit', 'stand', 'keeper'].includes(activity.pose) ||
+      ![activity.x, activity.y, activity.z, activity.yaw].every(Number.isFinite) ||
+      Math.abs(activity.x) > WORLD_LIMIT || Math.abs(activity.z) > WORLD_LIMIT ||
+      activity.y < -.5 || activity.y > 3.5) return false;
+    if (value.activity && (value.activity.kind !== activity.kind || value.activity.slot !== activity.slot ||
+      value.activity.role !== activity.role)) return false;
+    if (!value.activity) {
+      value.returnPosition = { x: value.x, y: value.y, z: value.z, yaw: value.yaw };
+      value.movementRevision++;
+    }
+    value.activity = { ...activity };
+    value.x = activity.x; value.y = activity.y; value.z = activity.z; value.yaw = activity.yaw;
+    value.crouching = false; value.credit = 0; value.moved = time;
+    return true;
+  }
+  function clearActivity(id, kind, now, sessionId) {
+    const time = currentTime(now); clean(time);
+    const value = members.get(id);
+    if (!value || !value.activity || value.activity.kind !== kind ||
+      (sessionId !== undefined && value.sessionId !== sessionId)) return false;
+    Object.assign(value, value.returnPosition);
+    value.activity = null; value.returnPosition = null; value.movementRevision++;
+    value.credit = 0; value.moved = time; value.crouching = false;
+    return true;
   }
   function snapshot(value, time, corrected = false) {
     return { sessionId: value.sessionId, self: publicPeer(value),
@@ -50,7 +84,8 @@ export function createWorld(db, { capacity = WORLD_CAPACITY, spawn = chooseSpawn
     const position = spawn([...members.values()].filter(m => m.id !== player.id));
     const value = { id: player.id, profile: player, sessionId: randomUUID(), ...position,
       y: .15, yaw: 0, crouching: false, micOn: false, speakerOn: false,
-      seen: time, moved: time, presenceTouched: time, credit: 2, audio: [], lastVoiceSeq: -1, hearAfter: voiceCursor };
+      seen: time, moved: time, presenceTouched: time, credit: 2, audio: [], lastVoiceSeq: -1, hearAfter: voiceCursor,
+      activity: null, returnPosition: null, movementRevision: 0 };
     members.set(player.id, value);
     db.touchPresence(player.id, new Date(time));
     return [200, snapshot(value, time)];
@@ -69,11 +104,16 @@ export function createWorld(db, { capacity = WORLD_CAPACITY, spawn = chooseSpawn
     value.credit = Math.min(MAX_MOVE_CREDIT, value.credit + SPEED * dt);
     const dx = body.x - value.x, dz = body.z - value.z, distance = Math.hypot(dx, dz);
     const accepted = Math.min(distance, value.credit);
-    const corrected = distance > value.credit + .001;
-    if (distance > 0) { value.x += dx * accepted / distance; value.z += dz * accepted / distance; }
-    value.credit = Math.max(0, value.credit - accepted);
-    value.y = body.y; value.yaw = ((body.yaw % 360) + 360) % 360;
-    value.crouching = body.crouching;
+    // A late movement packet from before sitting/standing must not undo the server's teleport.
+    const stalePose = body.movementRevision !== undefined && body.movementRevision !== value.movementRevision;
+    const locked = !!value.activity || stalePose;
+    const corrected = locked || distance > value.credit + .001;
+    if (!locked) {
+      if (distance > 0) { value.x += dx * accepted / distance; value.z += dz * accepted / distance; }
+      value.credit = Math.max(0, value.credit - accepted);
+      value.y = body.y; value.yaw = ((body.yaw % 360) + 360) % 360;
+      value.crouching = body.crouching;
+    } else value.credit = 0;
     if (body.speakerOn && !value.speakerOn) value.hearAfter = voiceCursor;
     value.speakerOn = body.speakerOn;
     value.micOn = body.micOn && body.speakerOn;
@@ -140,7 +180,7 @@ export function createWorld(db, { capacity = WORLD_CAPACITY, spawn = chooseSpawn
     }
     return [200, { cursor: voiceCursor, chunks }];
   }
-  return { join, state, leave, postVoice, readVoice, member, publicPeer,
+  return { join, state, leave, postVoice, readVoice, member, publicPeer, setActivity, clearActivity,
     getMember(id, time) { clean(time); return members.get(id) ?? null; },
     routes: {
       'POST /api/world/join': (ctx, body) => join(ctx.player, body, ctx.now),

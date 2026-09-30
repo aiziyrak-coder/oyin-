@@ -30,6 +30,9 @@ namespace CraDev.World
         public int PingMs { get; private set; }
         public int PlayerCount => Connected ? peers.Count + 1 : 0;
         public int VisibleCount => remotes.Count;
+        public WorldPeer Self { get; private set; }
+        public double ServerNow => serverTime + (Time.realtimeSinceStartup - lastContact) * 1000.0;
+        long serverTime;
         public WorldPeer Peer(int id) => Connected && peers.TryGetValue(id, out var peer) ? peer : null;
 
         void Start()
@@ -66,6 +69,7 @@ namespace CraDev.World
                 Vector3 position = player.transform.position;
                 var state = new WorldStateRequest { sessionId = SessionId, x = position.x, y = position.y,
                     z = position.z, yaw = player.Yaw, crouching = player.IsCrouching,
+                    movementRevision = Self?.movementRevision ?? 0,
                     micOn = voice && voice.MicOn, speakerOn = voice && voice.SpeakerOn };
                 ApiResult<WorldSnapshot> result = default;
                 yield return Api.WorldState(PlayerProfile.Token, state, r => result = r);
@@ -73,8 +77,6 @@ namespace CraDev.World
                 if (result.Ok && result.Data.self != null)
                 {
                     PingMs = Mathf.RoundToInt((Time.realtimeSinceStartup - started) * 1000);
-                    if (result.Data.corrected && player)
-                        player.Teleport(result.Data.self.Position, player.Yaw);
                     Apply(result.Data);
                 }
                 else
@@ -94,10 +96,23 @@ namespace CraDev.World
         void Apply(WorldSnapshot snapshot)
         {
             lastContact = Time.realtimeSinceStartup;
+            serverTime = snapshot.serverTime;
             statusKey = "city.shared";
+            var oldSelf = Self; Self = snapshot.self;
+            if (player && Self != null) {
+                if (!string.IsNullOrEmpty(Self.activity)) player.ApplyActivityPose(Self.Position, Self.yaw, Self.pose);
+                else {
+                    player.ClearActivityPose();
+                    if (snapshot.corrected || (oldSelf != null && oldSelf.movementRevision != Self.movementRevision))
+                        player.CorrectPosition(Self.Position);
+                }
+            }
             peers.Clear();
             foreach (var peer in snapshot.players ?? System.Array.Empty<WorldPeer>())
-                if (peer.publicId != PlayerProfile.PublicId) peers[peer.publicId] = peer;
+                if (peer.publicId != PlayerProfile.PublicId) {
+                    peers[peer.publicId] = peer;
+                    if (remotes.TryGetValue(peer.publicId, out var remote)) remote.Push(peer, serverTime);
+                }
         }
 
         void Update()
@@ -123,14 +138,14 @@ namespace CraDev.World
                 var remote = pair.Value;
                 if (remote.avatarId != peer.avatarId || remote.outfit != peer.outfit)
                 { remove.Add(pair.Key); continue; }
-                Vector3 before = remote.root.position;
-                float blend = 1 - Mathf.Exp(-12 * Time.unscaledDeltaTime);
-                remote.root.position = Vector3.Lerp(before, peer.Position, blend);
-                remote.root.rotation = Quaternion.Slerp(remote.root.rotation, Quaternion.Euler(0, peer.yaw, 0), blend);
-                Vector3 step = remote.root.position - before; step.y = 0;
-                float speed = step.magnitude / Mathf.Max(.001f, Time.unscaledDeltaTime);
-                remote.motion.SetMotion(speed, peer.crouching);
-                remote.label.transform.position = remote.root.position + Vector3.up * (peer.crouching ? 1.52f : 2.05f);
+                // Render a short buffered timeline instead of speeding up/slowing down at each HTTP packet.
+                remote.Sample(ServerNow - 180, out var position, out float heading, out var velocity);
+                remote.root.position = position;
+                remote.root.rotation = Quaternion.Euler(0, heading, 0);
+                remote.motion.SetMotion(velocity.magnitude, peer.crouching, remote.root.InverseTransformDirection(velocity));
+                remote.motion.SetActivity(peer.activity, peer.pose, peer.action,
+                    Mathf.Max(0, (float)((ServerNow - peer.actionAt) / 1000.0)));
+                remote.label.transform.position = remote.root.position + Vector3.up * (peer.pose == "sit" ? 1.45f : peer.crouching ? 1.52f : 2.05f);
                 if (player.ViewCamera)
                 {
                     remote.label.transform.rotation = player.ViewCamera.transform.rotation;
@@ -142,7 +157,8 @@ namespace CraDev.World
                 remote.label.gameObject.SetActive((peer.Position-player.transform.position).sqrMagnitude < 625);
                 string caption = peer.nickname + (voice && voice.IsSpeaking(peer.publicId) ? "  •" : "");
                 if (remote.label.text != caption) remote.label.text = caption;
-                remote.label.color = voice && voice.IsSpeaking(peer.publicId) ? new Color(.42f,1,.69f) : Color.white;
+                Color captionColor = voice && voice.IsSpeaking(peer.publicId) ? new Color(.42f,1,.69f) : Color.white;
+                if (remote.label.color != captionColor) remote.label.color = captionColor;
             }
             foreach (int id in remove) { Destroy(remotes[id].root.gameObject); remotes.Remove(id); }
         }
@@ -166,6 +182,7 @@ namespace CraDev.World
             label.fontSize = 48; label.characterSize = .009f; label.richText = false;
             if (font) { label.font = font; label.GetComponent<MeshRenderer>().sharedMaterial = font.material; }
             remotes[peer.publicId] = new Remote { root = host, label = label, motion = motion, avatarId = peer.avatarId, outfit = peer.outfit };
+            remotes[peer.publicId].Push(peer, serverTime);
         }
 
         public IEnumerator Leave()
@@ -182,11 +199,45 @@ namespace CraDev.World
         {
             foreach (var remote in remotes.Values) if (remote.root) Destroy(remote.root.gameObject);
             remotes.Clear(); peers.Clear();
+            Self = null; if (player) player.ClearActivityPose();
         }
         void OnDestroy() { ClearPeers(); if (remoteRoot) Destroy(remoteRoot.gameObject); }
         sealed class Remote
         {
             public Transform root; public TextMesh label; public WorldAvatarMotion motion; public string avatarId, outfit;
+            readonly List<SamplePoint> samples = new List<SamplePoint>(10);
+            string activity; int revision;
+            public void Push(WorldPeer peer, long time)
+            {
+                if (activity != peer.activity || revision != peer.movementRevision ||
+                    (samples.Count > 0 && (peer.Position - samples[samples.Count-1].position).sqrMagnitude > 16)) samples.Clear();
+                activity = peer.activity; revision = peer.movementRevision;
+                if (samples.Count > 0 && samples[samples.Count-1].time >= time) return;
+                samples.Add(new SamplePoint { position = peer.Position, yaw = peer.yaw, time = time });
+                if (samples.Count > 10) samples.RemoveAt(0);
+            }
+            public void Sample(double time, out Vector3 position, out float heading, out Vector3 velocity)
+            {
+                velocity = Vector3.zero;
+                var newest = samples[samples.Count-1]; position = newest.position; heading = newest.yaw;
+                if (!string.IsNullOrEmpty(activity) || samples.Count < 2) return;
+                for (int i=1; i<samples.Count; i++) {
+                    var a = samples[i-1]; var b = samples[i];
+                    if (time > b.time && i < samples.Count-1) continue;
+                    float span = Mathf.Max(1, b.time-a.time);
+                    float t = Mathf.Clamp((float)(time-a.time)/span, 0, 1);
+                    position = Vector3.Lerp(a.position,b.position,t); heading = Mathf.LerpAngle(a.yaw,b.yaw,t);
+                    velocity = (b.position-a.position)/(span*.001f); velocity.y=0;
+                    if (time>b.time) {
+                        // Brief jitter tolerance only; never keep walking through geometry on a lost connection.
+                        float extra = Mathf.Clamp((float)(time-b.time)*.001f,0,.1f);
+                        position += Vector3.ClampMagnitude(velocity,6.5f)*extra;
+                        if(time-b.time>150)velocity=Vector3.zero;
+                    }
+                    return;
+                }
+            }
+            struct SamplePoint { public Vector3 position; public float yaw; public long time; }
         }
     }
 }

@@ -332,12 +332,38 @@ namespace CraDev
                 state.black.nickname != null && state.black.nickname.StartsWith("CityTestGuest", StringComparison.Ordinal) && state.status == "playing";
             Check(seated, "white GUI seat and the real black test-client seat start the same server game");
             if (!seated) yield break;
+            var player = Object.FindFirstObjectByType<WorldPlayerController>();
+            deadline = Time.realtimeSinceStartup + 5f;
+            while (Time.realtimeSinceStartup < deadline && network.Self?.pose != "sit") yield return null;
+            Check(network.Self != null && network.Self.activity == "chess" && network.Self.activitySlot == 0 &&
+                network.Self.activityRole == "white" && network.Self.pose == "sit" && player.ActivityLocked,
+                "the server seats the white player and the controller receives the locked sitting pose");
+            Check(network.Self != null && Mathf.Abs(network.Self.x + 14f) < .05f && Mathf.Abs(network.Self.z - 57.78f) < .05f,
+                "white sits at the real south chair rather than inside the table");
+            chess.Close();
+            Vector3 seatedPosition = player.transform.position;
+            player.Simulate(Vector2.up, Vector2.zero, true, false, true, .05f);
+            Check(!chess.IsOpen && !player.Paused && player.ActivityLocked && (player.transform.position - seatedPosition).sqrMagnitude < .001f,
+                "closing the chess view allows looking around but cannot walk or jump out of the chair");
+            yield return new WaitForSecondsRealtime(.3f);
+            yield return Capture("city-chess-seated.png");
+            chess.OpenTable(0);
+            Check(chess.IsOpen && player.Paused, "seated player can reopen the same table without changing the scene");
             chess.SelectSquare(WorldChess.SquareIndex("e2"));
-            chess.SelectSquare(WorldChess.SquareIndex("e4"));
+            var board = chess.transform.Find("ChessOverlay/ChessWindow/ChessBoardFrame");
+            var source = board.Find("Square52") as RectTransform; // e2 from white's view
+            var target = board.Find("Square36") as RectTransform; // e4
+            Check(target && target.GetComponentInChildren<ChessLegalMarker>().Mode == 1,
+                "selecting e2 shows a legal-move dot on e4");
+            var canvas = chess.GetComponentInParent<Canvas>();
+            var eventCamera = canvas && canvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.worldCamera : null;
+            Vector2 startPoint = RectTransformUtility.WorldToScreenPoint(eventCamera, source.TransformPoint(source.rect.center));
+            Vector2 endPoint = RectTransformUtility.WorldToScreenPoint(eventCamera, target.TransformPoint(target.rect.center));
+            chess.BeginPieceDrag(52, startPoint, eventCamera); chess.DragPiece(endPoint, eventCamera); chess.EndPieceDrag(endPoint, eventCamera);
             deadline = Time.realtimeSinceStartup + 12f;
             while (Time.realtimeSinceStartup < deadline && !BoardHas(chess.CurrentState, "e4", "P", "e2")) yield return null;
             bool whiteMoved = BoardHas(chess.CurrentState, "e4", "P", "e2");
-            Check(whiteMoved, "GUI e2-e4 is acknowledged by the authoritative server board");
+            Check(whiteMoved, "dragging GUI e2-e4 is acknowledged by the authoritative server board");
             if (!whiteMoved) yield break;
             deadline = Time.realtimeSinceStartup + 12f;
             while (Time.realtimeSinceStartup < deadline && !BoardHas(chess.CurrentState, "e5", "p", "e7")) yield return null;
@@ -345,6 +371,18 @@ namespace CraDev
             Check(blackMoved, "the second real client replies e7-e5 and the GUI receives it");
             Check(blackMoved && chess.CurrentState.turn == "white" && chess.CurrentState.status == "playing",
                 "the shared game returns the turn to white after both legal moves");
+            Check(chess.CurrentState.history != null && chess.CurrentState.history.Length == 2 &&
+                chess.CurrentState.history[0].san == "e4" && chess.CurrentState.history[1].san == "e5",
+                "the server and chess UI retain the SAN move history for both players");
+            Check(chess.transform.Find("ChessOverlay/ChessWindow/ChessMoveHistory") &&
+                chess.transform.Find("ChessOverlay/ChessWindow/ChessDraw").gameObject.activeInHierarchy &&
+                chess.transform.Find("ChessOverlay/ChessWindow/ChessResign").gameObject.activeInHierarchy,
+                "move-history, mutual-draw and confirmed-resignation controls exist in a live game");
+            var flip = chess.transform.Find("ChessOverlay/ChessWindow/ChessFlip")?.GetComponent<Button>();
+            flip.onClick.Invoke();
+            Check(board.Find("File0").GetComponent<Text>().text == "h" && board.Find("Rank0").GetComponent<Text>().text == "1",
+                "flipping the board changes file/rank orientation together");
+            flip.onClick.Invoke();
             yield return Capture("city-chess-playing.png");
             // Release only this test seat via the same confirmation path used by the player.
             var leave = chess.transform.Find("ChessOverlay/ChessWindow/ChessLeave")?.GetComponent<Button>();
@@ -356,6 +394,10 @@ namespace CraDev
                 while (Time.realtimeSinceStartup < deadline && chess.CurrentState?.white?.publicId == PlayerProfile.PublicId) yield return null;
                 Check(chess.CurrentState != null && (chess.CurrentState.white == null || chess.CurrentState.white.publicId != PlayerProfile.PublicId),
                     "test seat is released through the confirmed GUI leave action");
+                deadline = Time.realtimeSinceStartup + 5f;
+                while (Time.realtimeSinceStartup < deadline && player.ActivityLocked) yield return null;
+                Check(!player.ActivityLocked && network.Self != null && string.IsNullOrEmpty(network.Self.activity),
+                    "confirmed leave releases the authoritative chair and restores standing movement");
             }
         }
 

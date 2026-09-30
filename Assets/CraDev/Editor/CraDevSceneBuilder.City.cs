@@ -50,13 +50,14 @@ namespace CraDev.EditorTools
             CityRoadMarkings();
             CityStreetFurniture();
             CityChessPavilion();
+            BuildPenaltyStadium();
             CityMonitor(new Vector3(-18, 0, 40), 0);
             CityMonitor(new Vector3(18, 0, 40), 0);
             CityMonitor(new Vector3(-65, 0, -20), 180);
             CityMonitor(new Vector3(65, 0, -20), 180);
 
             CityDistrictBoundary();
-            Debug.Log("[CraDev] City: 300x300m, 8 roads, 16 junctions, vacant plots, open chess pavilion and 10 tables.");
+            Debug.Log("[CraDev] City: 300x300m, 8 roads, 16 junctions, vacant plots, solid chess club with 10 tables and a two-player penalty stadium.");
         }
 
         static GameObject CityBox(string name, Vector3 position, Vector3 size, Material material, bool collider = false, bool bevel = false, Transform parent = null)
@@ -124,7 +125,7 @@ namespace CraDev.EditorTools
             foreach (float side in new[] { minZ + .12f, maxZ - .12f })
                 CityBox("Kerb", new Vector3(x, .075f, side), new Vector3(width - .5f, .15f, .24f), cityStone, true);
             // Open plots are intentionally not buildings: just flat landscaped land and survey markers.
-            if (column == 2 && row == 3) return;
+            if ((column == 2 || column == 3) && row == 3) return;
             foreach (float px in new[] { minX + 5, maxX - 5 })
             foreach (float pz in new[] { minZ + 5, maxZ - 5 })
             {
@@ -306,12 +307,8 @@ namespace CraDev.EditorTools
             walnut.SetFloat("_Smoothness", .75f);
             var floor = WorldPhotoMaterial("ChessHonedFloor", "CityFloor", 1.5f, new Color(.93f, .95f, .96f), .3f);
             floor.SetFloat("_Smoothness", .9f);
-            var glass = WorldMaterial("ChessArchitecturalGlass", new Color(.55f, .73f, .76f, .13f));
-            glass.SetFloat("_Mode", 3); glass.SetInt("_SrcBlend", (int)BlendMode.One);
-            glass.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha); glass.SetInt("_ZWrite", 0);
-            glass.DisableKeyword("_ALPHATEST_ON"); glass.DisableKeyword("_ALPHABLEND_ON"); glass.EnableKeyword("_ALPHAPREMULTIPLY_ON");
-            glass.renderQueue = 3000; glass.SetFloat("_Glossiness", .9f); glass.SetFloat("_Metallic", .2f);
-            EditorUtility.SetDirty(glass);
+            var plaster = WorldPhotoMaterial("ChessWarmPlaster", "Concrete", 2.6f, new Color(.91f, .89f, .81f), .13f);
+            plaster.SetFloat("_Smoothness", .17f);
 
             CityBox("ChessForecourt", new Vector3(0, .015f, 58.5f), new Vector3(47, .01f, 45), pale, false, false, pavilion);
             CityBox("PavilionFloor", new Vector3(0, .03f, 64), new Vector3(44, .006f, 28), floor, false, false, pavilion);
@@ -322,12 +319,12 @@ namespace CraDev.EditorTools
             foreach (float side in new[] { -12.4f, 12.4f })
                 CityBox("FrontStonePlinth", new Vector3(side, .3f, 50.2f), new Vector3(18.8f, .6f, .4f), pale, true, true, pavilion);
             foreach (float x in new[] { -21.8f, 21.8f })
-                CityGlassPanel(new Vector3(x, 2.75f, 64), new Vector3(.06f, 4.3f, 27.4f), glass, pavilion);
-            CityGlassPanel(new Vector3(0, 2.75f, 77.8f), new Vector3(43.2f, 4.3f, .06f), glass, pavilion);
+                CityBox("ChessSolidSideWall", new Vector3(x, 2.75f, 64), new Vector3(.4f, 4.3f, 27.4f), plaster, true, false, pavilion);
+            CityBox("ChessSolidNorthWall", new Vector3(0, 2.75f, 77.8f), new Vector3(43.2f, 4.3f, .4f), plaster, true, false, pavilion);
             foreach (float side in new[] { -12.4f, 12.4f })
-                CityGlassPanel(new Vector3(side, 2.75f, 50.2f), new Vector3(18.8f, 4.3f, .06f), glass, pavilion);
+                CityBox("ChessSolidFrontWall", new Vector3(side, 2.75f, 50.2f), new Vector3(18.8f, 4.3f, .4f), plaster, true, false, pavilion);
 
-            // Fine mullions, deep stone reveals and an overhanging roof give the pavilion real scale.
+            // Bronze pilasters, deep stone reveals and a sheltered entry frame the solid masonry club.
             foreach (float x in new[] { -21.8f, -14f, -7f, 7f, 14f, 21.8f })
             {
                 foreach (float z in new[] { 50.15f, 77.85f })
@@ -343,7 +340,7 @@ namespace CraDev.EditorTools
             CityBox("EntryCanopy", new Vector3(0, 4.7f, 48.3f), new Vector3(10, .22f, 4.2f), cityMetal, false, true, pavilion);
             CityText("PavilionName", "SHAXMAT KLUBI", new Vector3(0, 5.35f, 48.66f), .52f, new Color(.29f, .23f, .17f), pavilion);
             CityText("PavilionInvitation", "10 TA DOSKA  ·  BIRGA O‘YNAYMIZ", new Vector3(0, 4.64f, 46.17f), .18f, new Color(.88f, .8f, .61f), pavilion);
-            CityText("InteriorWelcome", "SHAXMATCHILAR MAYDONCHASI", new Vector3(0, 3.9f, 77.64f), .48f, new Color(.95f, .89f, .73f), pavilion);
+            CityText("InteriorWelcome", "SHAXMAT AFSONALARI", new Vector3(0, 4.5f, 77.47f), .3f, new Color(.23f, .2f, .16f), pavilion);
 
             for (float x = -21; x <= 21; x += 1.2f)
                 CityBox("AcousticCeilingSlat", new Vector3(x, 4.82f, 64), new Vector3(.09f, .22f, 26.8f), walnut, false, true, pavilion);
@@ -358,18 +355,13 @@ namespace CraDev.EditorTools
             foreach (float x in new[] { -14f, 0f, 14f })
             foreach (float z in new[] { 59f, 70f })
             {
-                var light = NewLight("ChessTableLight", pavilion, LightType.Point, new Color(1f, .9f, .72f), 1.5f, Quaternion.identity);
+                var light = NewLight("ChessTableLight", pavilion, LightType.Point, new Color(1f, .94f, .84f), 2.2f, Quaternion.identity);
                 light.transform.position = new Vector3(x, 3.6f, z); light.range = 11; light.shadows = LightShadows.None;
                 light.renderMode = LightRenderMode.Auto;
             }
             foreach (float x in new[] { -20.4f, 20.4f })
                 foreach (float z in new[] { 52f, 75.5f }) CityPlanter(new Vector3(x, 0, z), pavilion);
-        }
-
-        static void CityGlassPanel(Vector3 p, Vector3 size, Material glass, Transform parent)
-        {
-            var pane = CityBox("ClearArchitecturalGlass", p, size, glass, true, false, parent);
-            pane.GetComponent<Renderer>().shadowCastingMode = ShadowCastingMode.Off;
+            BuildChessGallery(pavilion, walnut, plaster);
         }
 
         static void CityChessStation(int number, Vector3 p, Material wood, Transform parent)

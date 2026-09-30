@@ -147,7 +147,13 @@ namespace CraDev.EditorTools
                 target = target,
                 options = run ? BuildOptions.AutoRunPlayer : BuildOptions.None,
             };
-            return BuildPipeline.BuildPlayer(options);
+            var report = BuildPipeline.BuildPlayer(options);
+            if (report.summary.result == BuildResult.Succeeded) {
+                string credits = Path.GetFullPath("ASSET-CREDITS.txt");
+                if (!File.Exists(credits)) throw new FileNotFoundException("Asset attribution is required for distribution", credits);
+                File.Copy(credits, Path.Combine(Path.GetDirectoryName(Path.GetFullPath(path)), "ASSET-CREDITS.txt"), true);
+            }
+            return report;
         }
 
         /// <summary>

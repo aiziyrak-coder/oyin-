@@ -50,6 +50,7 @@ namespace CraDev.World
         WorldNetwork network;
         WorldVoice voice;
         WorldChess chess;
+        WorldPenalty penalty;
         float saveAt;
         int menuChangedFrame = -1;
         string stateKey;
@@ -61,6 +62,7 @@ namespace CraDev.World
         void Start()
         {
             network = GetComponent<WorldNetwork>(); voice = GetComponent<WorldVoice>(); chess = GetComponent<WorldChess>();
+            penalty = GetComponent<WorldPenalty>();
             if (!player) player = FindFirstObjectByType<WorldPlayerController>();
             if (!font) font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             WorldPreferences.Load();
@@ -84,7 +86,7 @@ namespace CraDev.World
                 voiceState.text = voice.Notice ?? Loc.F("city.voice",Loc.T(voice.MicOn ? "city.on" : "city.off"),
                     Loc.T(voice.SpeakerOn ? "city.on" : "city.off"),Loc.T(VoicePreferences.PushToTalk ? "city.ptt" : "city.open_mic"));
             if (!player || !movementState) return;
-            string next = !player.IsGrounded ? "world.hud.airborne" :
+            string next = player.ActivityPose == "sit" ? "city.seated" : !player.IsGrounded ? "world.hud.airborne" :
                 player.IsCrouching ? "world.hud.crouching" :
                 player.IsSprinting && player.Speed > .15f ? "world.hud.running" :
                 player.Speed > .15f ? "world.hud.walking" : "world.hud.standing";
@@ -102,6 +104,7 @@ namespace CraDev.World
         public bool ToggleMenuFromInput()
         {
             if (leaving || Time.frameCount == menuChangedFrame) return false;
+            if (penalty && penalty.IsOpen) { penalty.Close(); menuChangedFrame = Time.frameCount; return true; }
             if (chess && chess.IsOpen) { chess.Close(); menuChangedFrame = Time.frameCount; return true; }
             SetSettings(!settingsOpen);
             return true;
@@ -110,6 +113,7 @@ namespace CraDev.World
         public void SetSettings(bool open)
         {
             if (leaving) return;
+            if (open && penalty && penalty.IsOpen) penalty.Close();
             if (open && chess && chess.IsOpen) chess.Close();
             if (player && player.Paused != open) player.SetPaused(open);
             ApplySettingsVisibility(open);

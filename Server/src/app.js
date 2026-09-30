@@ -6,6 +6,7 @@ import { walletRoutes } from './wallet.js';
 import { chatRoutes } from './chat.js';
 import { createWorld } from './world.js';
 import { createChess } from './chess.js';
+import { createPenalty } from './penalty.js';
 import { upcomingEvents } from './events.js';
 import { AVATARS, GENDERS, isValidAvatar, MAX_LENGTH, nicknameKey, validateNickname } from './nickname.js';
 import { isValidOutfit } from './outfit.js';
@@ -92,6 +93,8 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
   limits.worldVoice = rateLimits.worldVoice ?? 1200;
   limits.chessRead = rateLimits.chessRead ?? 600;
   limits.chessWrite = rateLimits.chessWrite ?? 120;
+  limits.penaltyRead = rateLimits.penaltyRead ?? 600;
+  limits.penaltyWrite = rateLimits.penaltyWrite ?? 120;
 
   // "METOD /yo'l" -> { limit: rateLimits kaliti, bucket?: cheklovchi kaliti (standart: limit), auth?,
   //                    perPlayer?: cheklov IP emas, o'yinchi bo'yicha (auth kerak), run }
@@ -159,6 +162,15 @@ export function createApp(db, { rateLimits = {}, windowMs = 60_000, now = () => 
         if (!post) return run(ctx);
         const body = await readJson(ctx.req);
         // Validate sessions/seats at execution time, never at the arrival time of an unfinished body.
+        return run({ ...ctx, now: now() }, body);
+      } });
+  }
+  for (const [key, run] of Object.entries(createPenalty(world))) {
+    const post = key.startsWith('POST ');
+    routes.set(key, { limit: post ? 'penaltyWrite' : 'penaltyRead', auth: true, perPlayer: true,
+      run: async ctx => {
+        if (!post) return run(ctx);
+        const body = await readJson(ctx.req);
         return run({ ...ctx, now: now() }, body);
       } });
   }

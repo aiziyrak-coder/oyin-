@@ -43,7 +43,8 @@ namespace CraDev
         {
             bool worldSmoke=System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevWorldSmoke")>=0;
             bool citySmoke=System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevCitySmoke")>=0;
-            bool enterWorld=citySmoke||worldSmoke||System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevEnterWorld")>=0;
+            bool penaltySmoke=System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevPenaltySmoke")>=0;
+            bool enterWorld=penaltySmoke||citySmoke||worldSmoke||System.Array.IndexOf(System.Environment.GetCommandLineArgs(),"-cradevEnterWorld")>=0;
             if(enterWorld)
             {
                 float enterDeadline=Time.realtimeSinceStartup+90;
@@ -62,6 +63,22 @@ namespace CraDev
                 yield break;
             }
             string page = Argument(System.Environment.GetCommandLineArgs(), "-cradevPage");
+            int sportsFailures=0;
+            if(citySmoke||penaltySmoke) {
+                sportsFailures+=DevLocomotionSmoke.Run(FindFirstObjectByType<World.WorldPlayerController>());
+                sportsFailures+=DevSportsEnvironmentSmoke.Run();
+            }
+            if(penaltySmoke) {
+                yield return DevPenaltySmoke.Run();
+                yield return Shot(path);
+                var sportsHud=FindFirstObjectByType<World.WorldHud>();sportsHud.ReturnToLobby();
+                float until=Time.realtimeSinceStartup+30;
+                while(SceneManager.GetActiveScene().name!="MainMenu"&&Time.realtimeSinceStartup<until)yield return null;
+                bool returned=SceneManager.GetActiveScene().name=="MainMenu";
+                Debug.Log("[PenaltyTest] "+(returned?"PASS":"FAIL")+": return to lobby");
+                if(quit)Application.Quit(DevPenaltySmoke.Failures+sportsFailures>0||!returned?1:0);
+                yield break;
+            }
             if(citySmoke)
             {
                 yield return DevCitySmoke.Run();
@@ -74,7 +91,7 @@ namespace CraDev
                 while(SceneManager.GetActiveScene().name!="MainMenu"&&Time.realtimeSinceStartup<until)yield return null;
                 bool returned=SceneManager.GetActiveScene().name=="MainMenu";
                 Debug.Log("[CityTest] "+(returned?"PASS":"FAIL")+": return to lobby");
-                if(quit)Application.Quit(DevCitySmoke.Failures>0||!returned?1:0);
+                if(quit)Application.Quit(DevCitySmoke.Failures+sportsFailures>0||!returned?1:0);
                 yield break;
             }
             if(worldSmoke)

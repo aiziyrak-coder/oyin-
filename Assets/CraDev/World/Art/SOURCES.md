@@ -1,5 +1,22 @@
 # NewWorld: real dunyo materiallari
 
+## Shaxmat galereyasi — 2026-09-30
+
+`ChessGallery/` ichidagi to'rtta haqiqiy foto Wikimedia Commons rasmiy `imageinfo` API va asl `upload.wikimedia.org` manbalaridan o'zgartirmasdan yuklandi. API qaytargan **SHA-1 va bayt hajmi to'rttalasida ham mos**. Original piksel fayllarida retush, AI yuz yoki upscale yo'q. Unity importi uzun tomonni ko'pi bilan 2048 px qilib mipmap/compression qo'llaydi; ramka asl aspect ratio'ni saqlaydi. Abdusattorov manbasining EXIF orientation=6 belgisi uchun zarur bo'lsa mesh UV clockwise aylantiriladi, original JPG baytlari o'zgarmaydi.
+
+Mualliflar o'yinni yoki platformani qo'llab-quvvatlaydi degan ma'no yo'q; bu nomli tarixiy/sport galereyasi. Muallif va litsenziya devordagi lavhalarda ham ko'rsatiladi. Tarqatiladigan o'yinga loyiha ildizidagi **ASSET-CREDITS.txt** nusxasi kiritilishi shart (ayniqsa CC BY 4.0 Carlsen fotosi uchun).
+
+| Fayl | Tasvir / muallif | Huquq | Bayt | SHA-256 |
+| --- | --- | --- | ---: | --- |
+| `ChessGallery/Carlsen.jpg` | [Magnus Carlsen in 2025](https://commons.wikimedia.org/wiki/File:Magnus_Carlsen_in_2025.jpg), Miroslav.vajdic, Commons crop: SpyroeBM | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | 995450 | `B5FCA4F6600619EE803E63803C6969D967FE334BC31770A8AA95B06F65D8CC3C` |
+| `ChessGallery/Polgar.jpg` | [HoogovensChess1998JuditPolgar](https://commons.wikimedia.org/wiki/File:HoogovensChess1998JuditPolgar.jpg), Noord-Hollands Archief / Fotoburo de Boer | [CC0](https://creativecommons.org/publicdomain/zero/1.0/), archive transferred copyright and dedicated this collection | 1518379 | `3BD99C18D10BD4EBF4ED3431DDE8B15E1D093596F2EA91A88DFC0F1F39E63BB9` |
+| `ChessGallery/Capablanca.jpg` | [Jose Raul Capablanca 1921](https://commons.wikimedia.org/wiki/File:Jos%C3%A9_Ra%C3%BAl_Capablanca_1921.jpg), Agence Rol / BnF Gallica, ID btv1b53045803j | Public domain, Commons PD-anon-expired, published 1921 | 1953805 | `529C8EDBB89A9B040E42062A383968F06C505FBFD9722C1530D065007037A59F` |
+| `ChessGallery/Abdusattorov.jpg` | [2024 FIDE World Blitz portrait](https://commons.wikimedia.org/wiki/File:Nodirbek_Abdusattorov_during_2024_FIDE_World_Blitz_Championship_4_(cropped).jpg), Ofb | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) | 905343 | `588F645ED46328A981EAD4C5CDD5FB1D82171C8EA5B6115D35AD36A8D0E20028` |
+
+Originals: [Carlsen](https://upload.wikimedia.org/wikipedia/commons/1/1a/Magnus_Carlsen_in_2025.jpg), [Polgar](https://upload.wikimedia.org/wikipedia/commons/1/17/HoogovensChess1998JuditPolgar.jpg), [Capablanca](https://upload.wikimedia.org/wikipedia/commons/0/0f/Jos%C3%A9_Ra%C3%BAl_Capablanca_1921.jpg), [Abdusattorov](https://upload.wikimedia.org/wikipedia/commons/3/3d/Nodirbek_Abdusattorov_during_2024_FIDE_World_Blitz_Championship_4_%28cropped%29.jpg). Jami **5 372 977 bayt**. Foto manbasida mavjud homiy logotiplari hujjatli foto tarkibidir; NewWorld hamkorligi yoki reklama deb ko'rsatilmaydi.
+
+Stadion arxitekturasi, kuboklar, tribunalar, darvoza/to'r va maydon chiziqlari loyiha kodi bilan yaratiladi. Chim uchun oldingi CC0 Grass Ground mikrorelyefi va o'zimiz yozgan world-space mowing pattern shader ishlatiladi; alohida tijoriy yoki yopiq asset qo'shilmagan.
+
 Manba: **Poly Haven** — fotografik PBR materiallar va haqiqiy HDR osmon. Bu fayllar generativ AI bilan yaratilmagan. Ular rasmiy manbadan o'zgartirmasdan yuklangan; faqat loyiha ichidagi fayl nomi soddalashtirilgan.
 
 Yuklangan sana: 2026-09-28. Barcha 13 faylning MD5 qiymati Poly Haven `/files/{id}` API javobi bilan solishtirildi va mos keldi. Jami: 56 722 406 bayt (54.09 MiB).

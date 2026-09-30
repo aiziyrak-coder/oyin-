@@ -22,11 +22,15 @@ namespace CraDev.Online
     }
     [Serializable] public sealed class ChessSeat { public int publicId; public string nickname; }
     [Serializable] public sealed class ChessMove { public string from, to, promotion; }
+    [Serializable] public sealed class ChessHistoryMove
+    { public int ply, number; public string color, san, from, to, piece, captured, promotion; }
     [Serializable] public sealed class ChessSnapshot
     {
         public int tableId, version;
-        public string fen, turn, status, winner, lastFrom, lastTo, error;
+        public string fen, turn, status, winner, lastFrom, lastTo, error, checkSquare, timeControl, drawOffer;
         public string[] board;
+        public string[] whiteCaptures, blackCaptures;
+        public ChessHistoryMove[] history;
         public ChessSeat white, black;
         public ChessMove[] legalMoves;
         public int[] resetVotes;

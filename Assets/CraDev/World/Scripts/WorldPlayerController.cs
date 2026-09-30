@@ -53,10 +53,14 @@ namespace CraDev.World
         bool skipNextLook;
         bool paused;
         bool initialized;
+        string activityPose;
+        float eyeHeight = StandingHeight - .14f;
 
         public Camera ViewCamera => viewCamera;
         public CharacterController Capsule => capsule != null ? capsule : GetComponent<CharacterController>();
         public bool Paused => paused;
+        public bool ActivityLocked => !string.IsNullOrEmpty(activityPose);
+        public string ActivityPose => activityPose ?? "stand";
         public bool IsGrounded { get; private set; }
         public bool IsCrouching { get; private set; }
         public bool IsSprinting { get; private set; }
@@ -114,6 +118,7 @@ namespace CraDev.World
         public void SetPaused(bool value)
         {
             bool changed = paused != value;
+            if (!changed) return;
             paused = value;
             planarVelocity = Vector3.zero;
             Speed = 0f;
@@ -171,14 +176,36 @@ namespace CraDev.World
             crouchLatched = previousCrouchInput = false;
             IsGrounded = IsCrouching = IsSprinting = false;
             Speed = 0f;
-            spawnPosition = position;
-            spawnYaw = this.yaw;
             UpdateCamera(0f);
         }
 
+        public void CorrectPosition(Vector3 position)
+        {
+            if (!Finite(position.x) || !Finite(position.y) || !Finite(position.z)) return;
+            Initialize();
+            bool enabled = capsule.enabled; capsule.enabled = false;
+            transform.position = position; capsule.enabled = enabled;
+            // Server reconciliation must not reset mouse pitch, jump buffer or the spawn point.
+            planarVelocity = Vector3.zero;
+        }
+
+        public void ApplyActivityPose(Vector3 position, float heading, string pose)
+        {
+            Initialize();
+            bool changed = activityPose != pose || (transform.position - position).sqrMagnitude > .01f;
+            if (changed) {
+                float oldPitch = pitch; Teleport(position, heading); pitch = oldPitch;
+            }
+            activityPose = pose;
+            planarVelocity = Vector3.zero; verticalVelocity = 0; Speed = 0;
+            IsGrounded = true; IsSprinting = IsCrouching = false;
+        }
+
+        public void ClearActivityPose() { activityPose = null; }
+
         void Update()
         {
-            if (TestMode || paused) return;
+            if (TestMode || paused) { if (ActivityLocked) UpdateCamera(Time.unscaledDeltaTime); return; }
             if (!Application.isFocused || Cursor.lockState != CursorLockMode.Locked)
             {
                 SetPaused(true);
@@ -208,6 +235,9 @@ namespace CraDev.World
                 (WorldPreferences.InvertY ? -1f : 1f), -85f, 85f);
             transform.rotation = Quaternion.Euler(0f, yaw, 0f);
 
+            // Closing a board keeps the reserved chair: look around freely, but do not walk through it.
+            if (ActivityLocked) { Speed = 0; UpdateCamera(dt); return; }
+
             bool toggleMode = WorldPreferences.ToggleCrouch;
             if (toggleMode != toggleCrouchMode)
             {
@@ -224,7 +254,10 @@ namespace CraDev.World
             // Uzun kadrda devordan o'tish va sakrash natijasining FPSga bog'liqligini kamaytiradi.
             int steps = Mathf.Max(1, Mathf.CeilToInt(dt / (1f / 90f)));
             float step = dt / steps;
+            Vector3 frameStart = transform.position;
             for (int i = 0; i < steps; i++) MoveStep(move, sprint, wantsCrouch, step);
+            Vector3 frameMove = transform.position - frameStart;
+            Speed = new Vector2(frameMove.x, frameMove.z).magnitude / dt;
             UpdateCamera(dt);
             if (transform.position.y < -40f) Teleport(spawnPosition, spawnYaw);
         }
@@ -339,6 +372,15 @@ namespace CraDev.World
 
         bool OwnCollider(Collider other) => other == capsule || other.transform.IsChildOf(transform);
 
+        void OnControllerColliderHit(ControllerColliderHit hit)
+        {
+            // Remove velocity into a wall immediately; keep its tangential component for clean sliding.
+            if (hit.normal.y > .3f || hit.normal.y < -.3f) return;
+            Vector3 normal = hit.normal; normal.y = 0; normal.Normalize();
+            float into = Vector3.Dot(planarVelocity, normal);
+            if (into < 0) planarVelocity -= normal * into;
+        }
+
         void UpdateCamera(float dt)
         {
             if (viewCamera == null) return;
@@ -351,7 +393,9 @@ namespace CraDev.World
                 targetBob = Mathf.Sin(bobPhase * 2f) * (IsCrouching ? .009f : .018f);
             }
             bobOffset = Mathf.Lerp(bobOffset, targetBob, blend);
-            viewCamera.transform.localPosition = new Vector3(0f, capsule.height - .14f + bobOffset + stepCameraOffset, 0f);
+            float targetEye = activityPose == "sit" ? 1.12f : activityPose == "keeper" ? 1.5f : capsule.height - .14f;
+            eyeHeight = Mathf.Lerp(eyeHeight, targetEye, blend);
+            viewCamera.transform.localPosition = new Vector3(0f, eyeHeight + bobOffset + stepCameraOffset, 0f);
             viewCamera.transform.localRotation = Quaternion.Euler(pitch, 0f, 0f);
             viewCamera.fieldOfView = Mathf.Lerp(viewCamera.fieldOfView, Mathf.Clamp(WorldPreferences.FieldOfView,
                 WorldPreferences.MinFieldOfView, WorldPreferences.MaxFieldOfView), blend);

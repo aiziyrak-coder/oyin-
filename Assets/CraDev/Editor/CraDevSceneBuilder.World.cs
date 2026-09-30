@@ -57,6 +57,7 @@ namespace CraDev.EditorTools
             root.gameObject.AddComponent<WorldVoice>();
             var chess = root.gameObject.AddComponent<WorldChess>();
             Set(chess,"font",kit.Medium);Set(chess,"boldFont",kit.SemiBold);Set(chess,"rounded",kit.RoundFill);
+            root.gameObject.AddComponent<WorldPenalty>().Configure(kit.Medium,kit.SemiBold,kit.RoundFill);
             Save(scene,WorldScene);
             var scenes=EditorBuildSettings.scenes.Where(s=>s.path!=WorldScene).ToList();scenes.Add(new EditorBuildSettingsScene(WorldScene,true));EditorBuildSettings.scenes=scenes.ToArray();
             AssetDatabase.SaveAssets();Debug.Log("[CraDev] WorldSandbox yaratildi.");

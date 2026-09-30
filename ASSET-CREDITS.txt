@@ -1,0 +1,45 @@
+NEWWORLD — THIRD-PARTY VISUAL ASSETS
+
+The people depicted below do not endorse NewWorld. The chess gallery is an
+informational tribute to the history and players of chess. Source photographs
+were downloaded unchanged. Unity may resize and compress them for display.
+Full aspect ratios are preserved in the gallery, without AI-generated faces.
+
+Magnus Carlsen in 2025
+Photographer: Miroslav.vajdic. Existing Commons crop: SpyroeBM.
+License: Creative Commons Attribution 4.0 International (CC BY 4.0).
+License: https://creativecommons.org/licenses/by/4.0/
+Source: https://commons.wikimedia.org/wiki/File:Magnus_Carlsen_in_2025.jpg
+Original: https://commons.wikimedia.org/wiki/File:Magnus_Carlsen_at_Rapid_%24_Blitz_2025.jpg
+
+Judit Polgar — Hoogovens Chess Tournament, 17 January 1998
+Credit: Noord-Hollands Archief / Fotoburo de Boer.
+License: CC0 1.0 Universal Public Domain Dedication.
+License: https://creativecommons.org/publicdomain/zero/1.0/
+Source: https://commons.wikimedia.org/wiki/File:HoogovensChess1998JuditPolgar.jpg
+Archive: https://hdl.handle.net/21.12102/a17d9a6f-d4af-cfff-84da-19917979bd71
+
+Jose Raul Capablanca — 1921
+Credit: Agence Rol / Bibliotheque nationale de France, Gallica.
+Public domain: Commons PD-anon-expired (published 1921).
+Source: https://commons.wikimedia.org/wiki/File:Jos%C3%A9_Ra%C3%BAl_Capablanca_1921.jpg
+Archive identifier: btv1b53045803j.
+
+Nodirbek Abdusattorov — 2024 FIDE World Blitz Championship
+Photographer: Ofb. Existing cropped version hosted by Wikimedia Commons.
+License: CC0 1.0 Universal Public Domain Dedication.
+License: https://creativecommons.org/publicdomain/zero/1.0/
+Source: https://commons.wikimedia.org/wiki/File:Nodirbek_Abdusattorov_during_2024_FIDE_World_Blitz_Championship_4_(cropped).jpg
+
+PBR SURFACES AND HDR SKY
+Poly Haven assets used under CC0 1.0, https://polyhaven.com/license
+Grass Ground — Charlotte Baglioni.
+Concrete Floor Worn 02 — Dimitrios Savva.
+Rock 01, Asphalt 02, Marble 01 — Rob Tuytel.
+Black Walnut Veneer 02 — Jenelle van Heerden.
+Kloofendal 48d Partly Cloudy (Pure Sky) — Greg Zaal / Jarod Guest.
+Detailed original download URLs and integrity hashes are recorded in the
+project at Assets/CraDev/World/Art/SOURCES.md.
+
+NewWorld stadium architecture, furniture, trophy meshes, pitch markings and
+procedural turf mowing pattern are original project geometry and code.

@@ -8,13 +8,14 @@ import { fileURLToPath } from 'node:url';
 import { setTimeout as sleep } from 'node:timers/promises';
 
 export function parseOptions(args) {
-  let allowed = false, rawUrl = '', seconds = 120, chess = false;
+  let allowed = false, rawUrl = '', seconds = 120, chess = false, penalty = false;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--allow-test') allowed = true;
     else if (args[i] === '--chess') chess = true;
+    else if (args[i] === '--penalty') penalty = true;
     else if (args[i] === '--base-url') rawUrl = args[++i] ?? '';
     else if (args[i] === '--seconds') seconds = Number(args[++i]);
-    else throw new Error('Unknown option. Use --allow-test --base-url http://127.0.0.1:8088 [--seconds 120] [--chess].');
+    else throw new Error('Unknown option. Use --allow-test --base-url http://127.0.0.1:8088 [--seconds 120] [--chess|--penalty].');
   }
   if (!allowed) throw new Error('Refusing to run without explicit --allow-test. Use an isolated cloned database.');
   if (!rawUrl) throw new Error('An explicit --base-url pointing to a loopback test server is required.');
@@ -26,13 +27,32 @@ export function parseOptions(args) {
   // The normal local player database listens on 8080; avoid it even if the operator supplies the wrong port.
   if (!url.port || url.port === '8080') throw new Error('Use a separate test port (for example 8088), not the normal server.');
   if (!Number.isInteger(seconds) || seconds < 5 || seconds > 120) throw new Error('--seconds must be an integer from 5 to 120.');
-  return { baseUrl: url.origin, seconds, chess };
+  if (chess && penalty) throw new Error('Choose one test activity at a time: --chess or --penalty.');
+  return { baseUrl: url.origin, seconds, chess, penalty };
 }
 
 export function chooseChessReply(table, publicId) {
   if (table.black?.publicId !== publicId || table.turn !== 'black' || !['playing', 'check'].includes(table.status)) return null;
   const moves = table.legalMoves ?? [];
   return moves.find(move => move.from === 'e7' && move.to === 'e5') ?? moves[0] ?? null;
+}
+
+// Deliberately predictable two-turn partner for DevPenaltySmoke, not a competitive AI.
+// It never chooses from an opponent's private aim or claimed client score.
+export function choosePenaltyAction(arena, publicId) {
+  if (arena?.player2?.publicId !== publicId || arena.phase !== 'aiming') return null;
+  if (arena.turn === 0 && arena.keeperId === publicId && !arena.keeperReady)
+    return { action: 'dive', direction: 0 };
+  if (arena.turn === 1 && arena.shooterId === publicId && !arena.shooterReady)
+    return { action: 'shoot', aimX: 0, aimY: .4, power: .72 };
+  return null;
+}
+
+export function penaltyFollowTarget(target, arena) {
+  // followStep adds (+2,+1). This virtual target lands at the public entry kiosk,
+  // not at the already-teleported shooter's spot 23.5 metres inside the arena.
+  return target?.activity === 'penalty' || (arena?.player1 && !arena.player2)
+    ? { x: 62, z: 42 } : target;
 }
 
 export function followStep(self, target, elapsedSeconds) {
@@ -47,7 +67,7 @@ export function followStep(self, target, elapsedSeconds) {
 }
 
 async function main() {
-  const { baseUrl, seconds, chess } = parseOptions(process.argv.slice(2));
+  const { baseUrl, seconds, chess, penalty } = parseOptions(process.argv.slice(2));
   const deadline = Date.now() + seconds * 1000;
   let stopped = false, token = '', sessionId = '', following = 0;
   const stop = () => { stopped = true; };
@@ -80,15 +100,17 @@ async function main() {
       throw new Error('Test world join failed (HTTP ' + joined.status + ').');
     sessionId = joined.data.sessionId;
     let snapshot = joined.data, previous = performance.now(), nextLog = 0, nextChess = 0, chessReplied = false;
+    let nextPenalty = 0, arena = null;
     console.log('Test guest ' + created.data.nickname + ' #' + created.data.publicId + ' joined the isolated world; microphone and speaker OFF.');
     // Reserve three seconds for orderly leave. No reconnect loop can create additional identities/sessions.
     while (!stopped && Date.now() < deadline - 3000) {
       const tick = performance.now();
       const target = snapshot.players?.find(peer => peer.publicId === following) ?? snapshot.players?.[0];
       following = target?.publicId ?? 0;
-      const step = followStep(snapshot.self, target, (tick - previous) / 1000); previous = tick;
+      const destination = snapshot.self.activity ? null : penalty ? penaltyFollowTarget(target, arena) : target;
+      const step = followStep(snapshot.self, destination, (tick - previous) / 1000); previous = tick;
       const result = await api('/api/world/state', { sessionId, ...step, y: .15,
-        crouching: false, micOn: false, speakerOn: false });
+        crouching: false, micOn: false, speakerOn: false, movementRevision: snapshot.self.movementRevision ?? 0 });
       if (!result.ok || !result.data.self) throw new Error('Test world update failed (HTTP ' + result.status + ').');
       snapshot = result.data;
       if (chess && !chessReplied && tick >= nextChess && Date.now() < deadline - 6500 &&
@@ -110,6 +132,27 @@ async function main() {
               chessReplied = true;
               console.log('Test chess black reply: ' + move.from + '-' + move.to + '. No further bot moves.');
             }
+          }
+        }
+      }
+      if (penalty && tick >= nextPenalty && Date.now() < deadline - 6500) {
+        nextPenalty = tick + 500;
+        const read = await api('/api/penalty/state?sessionId=' + encodeURIComponent(sessionId));
+        if (read.ok) {
+          arena = read.data;
+          if (arena.player1 && !arena.player2 && Math.hypot(snapshot.self.x - 64, snapshot.self.z - 43) <= 8) {
+            const entered = await api('/api/penalty/join', { sessionId });
+            if (entered.ok) { arena = entered.data; console.log('Test guest joined penalty player 2.'); }
+          }
+          if (arena.player2?.publicId === created.data.publicId && arena.phase === 'abandoned') {
+            const left = await api('/api/penalty/leave', { sessionId });
+            if (left.ok) { arena = left.data; console.log('Test guest released abandoned penalty match.'); }
+          }
+          const choice = choosePenaltyAction(arena, created.data.publicId);
+          if (choice) {
+            const { action, ...fields } = choice;
+            const committed = await api('/api/penalty/' + action, { sessionId, version: arena.version, turn: arena.turn, ...fields });
+            if (committed.ok) { arena = committed.data; console.log('Test penalty turn ' + arena.turn + ': committed ' + action + '.'); }
           }
         }
       }
