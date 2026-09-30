@@ -1,5 +1,13 @@
 # NewWorld
 
+## Eng yangi — Share-Test tuzatildi (2026-09-30)
+
+- [x] Do'st ZIPi uchun tasdiqlangan vaqtinchalik Cloudflare HTTPS; DNS tayyorligi kutiladi, xatolar yoziladi.
+- [x] NoWait serverni yopmaydi; qayta bosish joriy ZIP/manzilni saqlaydi; alohida Stop-Share-Test tugmasi.
+- [x] Mezbon/do'st bir serverga ulanadi; PS5/PS7 fingerprint bir xil. ZIP launcher eski muhit sozlamasidan ustun.
+- [x] 136 paket testi; real ZIPdan internet olamiga kirish 59/59 + lobbyga qaytish. Paket va foydalanish ma'lumoti `HANDOFF.md` boshida.
+- [ ] Haqiqiy boshqa kompyuter va mikrofonlar bilan sinov, doimiy server keyin.
+
 ## Eng yangi — umumiy shahar va shaxmat (2026-09-30)
 
 - [x] Foydalanuvchi yangi so'rov bilan olamga o'tishni tasdiqladi; oldingi holat `af2c2d3`da saqlandi.

@@ -321,10 +321,14 @@ function Get-ServerFiles {
 
 # Server kodining barmoq izi (Server/src va package.json mazmuni): o'zgarsa, launcher yoqqan server qayta yoqiladi
 function Get-ServerFingerprint {
-    $lines = foreach ($file in (@(Get-ServerFiles) | Sort-Object FullName)) {
-        $relative = $file.FullName.Substring($ServerDir.Length)
-        "$relative=$((Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash)"
+    # Windows PowerShell 5.1 and PowerShell 7 sort punctuation differently by culture.
+    # Canonical ordinal paths make both launchers recognize the SAME running server.
+    $entries = [System.Collections.Generic.SortedDictionary[string,string]]::new([StringComparer]::Ordinal)
+    foreach ($file in @(Get-ServerFiles)) {
+        $relative = $file.FullName.Substring($ServerDir.Length).Replace('\','/').ToLowerInvariant()
+        $entries[$relative] = (Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash.ToLowerInvariant()
     }
+    $lines = foreach ($entry in $entries.GetEnumerator()) { "$($entry.Key)=$($entry.Value)" }
     $bytes = [System.Text.Encoding]::UTF8.GetBytes((@($lines) -join "`n"))
     $sha = [System.Security.Cryptography.SHA256]::Create()
     try { return (($sha.ComputeHash($bytes) | ForEach-Object { $_.ToString('x2') }) -join '') }

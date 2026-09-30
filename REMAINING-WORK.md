@@ -2,6 +2,14 @@
 
 2026-09-30. Bu ro'yxat bajarilganlik da'vosi emas. Foydalanuvchi barcha ishlarni davom ettirishga ruxsat bergan; mayda dizayn savollari bilan to'xtatmang. Tashqi hisob, to'lov yoki biometrik xizmatni soxtalashtirmang.
 
+## Eng yangi: Share-Test orqali haqiqiy internet ZIP tekshiruvi
+
+- [x] Cloudflare uchun foydalanuvchi ruxsati olindi; public HTTPS /health va paket o'yinidan ulanish tekshirildi. Yangi domen DNS tayyorligi uchun 120 soniyalik qayta urinish, tushunarli xato/transkript.
+- [x] NoWait/oyna yopilganda server saqlanadi; `Stop-Share-Test.cmd` faqat o'zi egalik qiladigan jarayonni yopadi. Launcher serveri bo'lsa, bir xil olam ishlatiladi va Stop uni o'chirmaydi.
+- [x] PS5/PS7 fingerprint farqi va PS5 build-stamp JSON metama'lumoti xatosi tuzatildi. Qayta bosishda URL/tunnel PID/ZIP vaqti o'zgarmasligi tekshirildi.
+- [x] 136/136 paket sinovi; real ZIP 186 fayl/entry, zarur Unity fayllari, server.txt va launcher bor; DB/.env/PDB/log/DoNotShip yo'q. ZIPdan ochilgan o'yin `Logs/share-public-client.log`da 59/59 + lobbyga qaytish PASS.
+- [ ] Do'stning boshqa jismoniy kompyuterida internet va ikki mikrofon sinovi hali kerak. Doimiy VPS/installer/avtoyangilash bandlari bajarilmagan. Oldingi "ommaviy tunnel sinovi yo'q" jumlalari pastdagi tarixiy auditga tegishli.
+
 ## Eng yangi: shahar infratuzilmasi va umumiy shaxmat olami
 
 Foydalanuvchining yangi so'rovi bilan olamga o'tildi; quyidagi lobby-audit bo'limi tarixiy. Hali ochiq hisob/to'lov/hardware ishlarini tayyor deb belgilamang.

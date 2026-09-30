@@ -1,5 +1,15 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld)
 
+## ENG YANGI — do'stga yuboriladigan Share-Test ZIP (2026-09-30)
+
+- Foydalanuvchi Cloudflare orqali o'yin API serverini vaqtincha ochishga aniq ruxsat berdi. `Share-Test.cmd` endi tayyor tunnel/serverni jarayon tugaganda o'chirmaydi; `-NoWait` ham ishlaydi. To'xtatish uchun yangi `Stop-Share-Test.cmd`. Oyna yopilishi mumkin, kompyuter/internet va server ishlashi kerak.
+- Mavjud tasdiqlangan launcher serveri qayta ishlatiladi: mezbon va do'st bir xil xotiradagi olam/partiyaga ulanadi. `common.ps1` fingerprint oldin PS5 va PS7 da turlicha chiqardi; ordinal kanonik yo'llar bilan bir xil qilindi. Begona jarayon to'xtatilmaydi; to'xtatishda PID + boshlanish vaqti tekshiriladi.
+- Eski xato qayta takrorlandi: Cloudflare ulangan bo'lsa ham yangi domen DNS'da hali topilmay, qisqa HTTPS tekshiruv ZIPni yaratmasdan to'xtatgan. Endi 120 soniyagacha tayyorlik kutiladi, haqiqiy xato va har bir bosqich `Logs/share-session-*.log`ga yoziladi. HTTPS tekshiruvi o'chirilmagan. Cloudflare vaqtinchalik sinov vositasi, doimiy VPS o'rniga emas.
+- `tools/share-package.ps1`: faqat Unity runtime allowlist, shaxsiy/debug fayllari chiqariladi, junction/reparse taqiqlanadi. `Start-NewWorld.cmd` aniq `-server` bilan eski `CRADEV_SERVER` muhit sozlamasidan ustun keladi. ZIP to'liq ochilishi kerak. Eski nusxalar ustidan yozilmaydi; tayyor arxiv `.partial.zip`dan nashr qilinadi.
+- Faol ulashishni qayta bosish URL va tayyor ZIPni saqlaydi. PS5 `Get-Content` metama'lumoti JSONga obyekt bo'lib tushib, ZIP har safar qayta yaratilishi ham real sinovda topildi va tuzatildi. Holat `Logs/share-state.json`, manba fayllari yoki Git ichida emas.
+- Windows PS5.1 paket sinovlari 136/136; own-server Stop va borrowed-server Stop alohida o'tdi. PS5/PS7 fingerprint mos. Ochiq HTTPS orqali ZIPdan ochilgan Unity o'yini: `Logs/share-public-client.log`, 59/59 shahar testi va lobbyga qaytish PASS; `server.txt` manbasi tasdiqlandi. Bu boshqa jismoniy kompyuterdagi mikrofon sinovi emas.
+- Yuborish nusxasi: `Builds/NewWorld-test-20260930-121524-cab4b0.zip`, 346474816 bayt (~330.4 MiB). Joriy manzil va jarayonlar `Logs/share-state.json`da. Holat yopilsa yoki kompyuter qayta yoqilsa, eski ZIP ishlamaydi; yangisini Share-Test bilan yarating. Loyiha/baza/tokenlar ZIPga kiritilmagan. GitHubga push qilinmagan.
+
 ## ENG YANGI — umumiy shahar va shaxmat (2026-09-30)
 
 Foydalanuvchi endi olamga o'tishni aniq so'radi. Quyidagi eski "olamga o'tilmadi" jumlalari tarixiy; lobbydagi tashqi xizmat/hardware bandlari esa ochiqligicha qoladi. O'zgarishdan oldingi mahalliy saqlash nuqtasi `af2c2d3`; GitHubga push qilinmagan.
