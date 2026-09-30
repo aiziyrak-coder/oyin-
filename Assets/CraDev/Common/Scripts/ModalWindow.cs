@@ -41,7 +41,7 @@ namespace CraDev
             EventSystem.current?.SetSelectedGameObject(null);
         }
 
-        public void Close()
+        public virtual void Close()
         {
             visible = false;
             group.blocksRaycasts = false;

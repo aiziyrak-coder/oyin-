@@ -145,7 +145,9 @@ export function createGroupStore(sql, cutoff) {
   const ownerRole = sql.prepare('UPDATE group_members SET role=?, expires_at=NULL WHERE group_id=? AND player_id=?');
   const shared = sql.prepare(`
     SELECT 1 FROM group_members a JOIN group_members b ON b.group_id = a.group_id
-    WHERE a.player_id = ? AND b.player_id = ? LIMIT 1`);
+    WHERE a.player_id = ? AND b.player_id = ?
+      AND (a.expires_at IS NULL OR a.expires_at > ?)
+      AND (b.expires_at IS NULL OR b.expires_at > ?) LIMIT 1`);
 
   function freeCode() {
     for (let attempt = 0; attempt < 100; attempt++) {
@@ -207,7 +209,7 @@ export function createGroupStore(sql, cutoff) {
       } catch(error) {sql.exec('ROLLBACK');throw error;}
     },
     /** Ikki o'yinchi kamida bitta umumiy guruhda (lobbyga taklif uchun). */
-    shareGroup(a, b) { return shared.get(a, b) !== undefined; },
+    shareGroup(a, b, now) { const instant=now.toISOString();return shared.get(a, b, instant, instant) !== undefined; },
   };
 }
 

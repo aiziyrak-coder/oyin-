@@ -236,6 +236,22 @@ describe('guruhlar', () => {
   });
 });
 
+test('expired subscription cannot invite or accept without visiting any group endpoint', async () => {
+  const api=await startApi();
+  try {
+    const owner=await api.register('ExpiryOwner'),guest=await api.register('ExpiryGuest');
+    const {body:g}=await api.post('create',owner,{name:'Expiring membership',kind:'paid',price:1,currency:'CDCoin',period:'week'});
+    api.db.wallet.creditVerified(guest.id,'expiry:test:receipt',1,new Date(api.clock.ms));
+    await api.post('join',guest,{code:g.code,expectedPrice:1,paymentKey:'expiry-join-00001'});
+    api.clock.ms+=7*DAY-1000;
+    assert.equal((await api.call('POST','/api/party/invite',owner,{nickname:guest.nickname})).status,200);
+    const invite=(await api.call('POST','/api/party/heartbeat',guest,{pingMs:5})).body.invitations[0];
+    api.clock.ms+=1000;
+    assert.equal((await api.call('POST','/api/party/accept',guest,{invitationId:invite.id})).status,403);
+    assert.equal((await api.call('POST','/api/party/invite',owner,{nickname:guest.nickname})).status,403);
+  } finally {await api.close();}
+});
+
 test('guruh yaratish cheklovi (daqiqasiga) va ping', async () => {
   const api = await startApi({ create: 100, groupCreate: 2, ping: 3 });
   try {

@@ -22,7 +22,7 @@ namespace CraDev.Online
         public static string Parse(string url)
         {
             if(string.IsNullOrEmpty(url)||url.Length>128)return null;
-            var match=Regex.Match(url,@"^newworld://group/([ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6})/?$",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
+            var match=Regex.Match(url,@"\Anewworld://group/([ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6})/?\z",RegexOptions.IgnoreCase|RegexOptions.CultureInvariant);
             return match.Success?match.Groups[1].Value.ToUpperInvariant():null;
         }
         void Receive(string url){var code=Parse(url);if(code!=null)pending=code;}
@@ -33,10 +33,10 @@ namespace CraDev.Online
                 if(pending!=null)
                 {
                     var lobby=FindFirstObjectByType<MainMenuScreen>();
-                    if(lobby!=null&&lobby.FriendsPanel!=null&&!ModalWindow.AnyOpen)
+                    if(lobby!=null&&lobby.FriendsPanel!=null&&!ModalWindow.AnyOpen&&!lobby.SettingsOpen&&!lobby.AvatarStudioOpen)
                     {
                         var groups=lobby.FriendsPanel.GetComponent<LobbyGroupsPanel>();
-                        if(groups!=null){string code=pending;pending=null;yield return null;groups.OpenLink(code);}
+                        if(groups!=null){string code=pending;pending=null;groups.OpenLink(code);}
                     }
                 }
                 yield return new WaitForSecondsRealtime(.5f);

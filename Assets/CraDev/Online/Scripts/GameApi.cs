@@ -275,7 +275,7 @@ namespace CraDev.Online
 
     [Serializable] public class PartyRequest { public string nickname, invitationId; public int pingMs = -1; public bool micOn, speakerOn; }
     [Serializable] public class PartyMember { public string nickname, avatarId, gender, outfit; public int seat, pingMs; public bool online, micOn, speakerOn; }
-    [Serializable] public class VoiceChunk { public int seq, rate; public string nickname, data; }
+    [Serializable] public class VoiceChunk { public int seq, rate; public string nickname, data, roomId; }
     [Serializable] public class VoiceCursor { public int cursor; public string error; }
     [Serializable] public class VoiceBatch { public int cursor; public VoiceChunk[] chunks; }
     [Serializable] public class PartyInvitation { public string id, nickname; }

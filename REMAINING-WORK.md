@@ -2,6 +2,30 @@
 
 2026-09-30. Bu ro'yxat bajarilganlik da'vosi emas. Foydalanuvchi barcha ishlarni davom ettirishga ruxsat bergan; mayda dizayn savollari bilan to'xtatmang. Tashqi hisob, to'lov yoki biometrik xizmatni soxtalashtirmang.
 
+## Eng yangi: olamdan oldingi lobby auditi
+
+Saqlash nuqtasi `4488ecd`, push yo'q. Olam funksiyalariga o'tilmadi.
+
+Tuzatilgan aniq xatolar:
+
+- Chat tez yopib-ochilganda eski javoblar yangi oynaga tushishi: yopishda so'rov avlodi darhol bekor qilinadi.
+- Chat qoralamasi kontakt almashganda yoki oyna yopilganda yo'qolishi: har suhbatga alohida xotiradagi qoralama. Dastur yopilganda saqlanmaydi; diskka shaxsiy matn yozilmaydi. Noaniq yuborish javobida takror yuborish kaliti saqlanadi.
+- Eski tarixning polling sabab qayta sakrashi: eski tarixda jonli yangilanish to'xtaydi, so'nggi xabarlarga qaytish tugmasi bor. Dastlab ochilganda eng yangi xabarlar ko'rinadi. Bo'sh xabar yuborilmaydi.
+- Chat huquqi bekor bo'lsa ekrandagi tarix tozalanadi va yuborish yopiladi. Dinamik sarlavhani tarjima komponenti ustidan yozmaydi.
+- Guruh formasi pending yuklashdan qayta chizilishi, oldingi xato forma ustida qolishi, saqlash paytida matn o'zgarishi va eski operatsiya javobining boshqa guruhni almashtirishi tuzatildi.
+- Kechikkan ovoz boshqa lobbyga yuborilishi: har bo'lak yozilgan roomId bilan bog'lanadi, server noto'g'ri/eski roomId ni rad etadi. Lobby o'zgarganda ovoz buferlari/oqimlari tozalanadi. Mute qilganda kutayotgan bo'laklar tashlanadi.
+- Faqat speakerOn=false yuborilganda server micOn=true bo'lib qolishi tuzatildi.
+- Obunasi tugagan guruhdoshning taklif yuborishi/qabul qilishi: guruh sahifasi ochilmasa ham muddat har ruxsat tekshiruvida hisoblanadi.
+- Guruh havolasi sozlama yoki avatar studiyasi ustidan ochilmaydi; parser oxirgi yangi qator kabi ortiqcha belgilarni ham rad etadi.
+
+Dalillar: server 85/85; Unity 1280x720 da 124/124 (`Logs/lobby-audit-final-player.log`), build `Logs/lobby-audit-final-build.log` Succeeded. Guruh/chat holat testlari haqiqiy foydalanuvchilarga xabar, guruh yoki to'lov yaratmagan. Kamera 5 soniyalik kutishdan keyin tushunarli xatoga o'tishi tekshirildi, ammo haqiqiy skaner ishladi degani emas. Windows Camera/Image qurilmalari ro'yxati bo'sh, joriy foydalanuvchining webcam ruxsati Allow; bu drayver/hardware muammosini to'liq tashxislash o'rnini bosmaydi.
+
+Share-Test mahalliy ZIP sinovi o'tdi: `Builds/NewWorld-test-20260930-110652-ef147a.zip`, 355876690 bayt; exe/UnityPlayer/server.txt bor, .db/.env/.pdb/.log yo'q. Test 8090 serveri yopildi, 8080 asosiy server ishladi. Bu ZIP lokal 127.0.0.1 manzilli SINOV NUSXASI: do'stlarga tarqatmang; eng oxirgi mayda tuzatishlardan oldin yig'ilgan. Ommaviy tunnel tekshirilmagan.
+
+Muhim: ovoz protokoli endi roomId talab qiladi; eski mijozlar serverga ovoz yubora olmaydi. Tarqatishda server va barcha o'yinchilarning buildlari birga yangilansin.
+
+Hali "hech qanday kamchilik yo'q" deb bo'lmaydi: ikki qurilma/internet sinovi, haqiqiy kamera/yuz natijasi, AEC, email/parol va akkaunt tiklash, yuzni bo'lishish, 4K, Click/Payme, VPS va installer/yangilash quyidagi ro'yxatda ochiq turibdi. Ular tayyor deb belgilansin uchun real dalil kerak.
+
 ## Shu ishda qo'shilgan
 
 - Do'st va guruh yozishmasi: serverda ruxsat tekshiruvi, takroriy yuborishdan himoya, oldingi xabarlar; lobby ichidagi bitta modal oyna. Haqiqiy foydalanuvchilarga sinov xabari yuborilmagan.

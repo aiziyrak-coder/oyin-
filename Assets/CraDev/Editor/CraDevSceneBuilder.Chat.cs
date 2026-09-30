@@ -15,8 +15,9 @@ namespace CraDev.EditorTools
             panel.rectTransform.anchorMin=panel.rectTransform.anchorMax=panel.rectTransform.pivot=new Vector2(.5f,.5f);panel.rectTransform.anchoredPosition=Vector2.zero;
             Set(window,"panel",panel.rectTransform);V2Text(panel.transform,"chat.title",28,22,700,50,32);
             Set(window,"closeButton",V2Button(panel.transform,"×",null,974,22,58,50,localized:false));
-            Set(window,"heading",V2Text(panel.transform,"chat.choose",310,84,550,40,26));
+            Set(window,"heading",V2Text(panel.transform,"",310,84,700,40,26,false));
             Set(window,"olderButton",V2Button(panel.transform,"chat.older",null,310,134,300,42));
+            Set(window,"latestButton",V2Button(panel.transform,"chat.latest",null,632,134,400,42));
             ScrollRect Pane(string name,float x,float w,out RectTransform rows)
             {
                 var image=V2Panel(panel.transform,name,x,190,w,440,new Color32(21,23,22,255));image.raycastTarget=true;

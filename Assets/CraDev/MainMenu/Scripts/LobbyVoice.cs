@@ -31,7 +31,7 @@ namespace CraDev.MainMenu
 
         bool micOn, speakerOn, micMissing;
         AudioClip micClip;
-        string activeDevice;
+        string activeDevice, captureRoom, observedRoom;
         int micRate, readPos, frameSize;
         float[] frame, previous;
         bool previousValid;
@@ -77,7 +77,7 @@ namespace CraDev.MainMenu
             Changed();
         }
 
-        /// <summary>Karnay: o'chsa mikrofon ham o'chadi; yoqilsa mikrofon avtomatik yoqiladi.</summary>
+        /// <summary>Karnayni yoqish mikrofonni avtomatik yoqmaydi.</summary>
         public void SetSpeaker(bool on)
         {
             speakerOn = on;
@@ -95,8 +95,8 @@ namespace CraDev.MainMenu
 
         void Changed()
         {
+            if(!micOn||!speakerOn){StopMic();pending.Clear();outbox.Clear();}
             PlayerPrefs.SetInt(SpeakerPref, speakerOn ? 1 : 0);
-            // Mikrofon tanlovi karnay o'chganda ham eslab qolinmaydi: karnay yoqilsa u baribir yoqiladi
             PlayerPrefs.SetInt(MicPref, micOn ? 1 : 0);
             PlayerPrefs.Save();
             RefreshButtons();
@@ -118,9 +118,15 @@ namespace CraDev.MainMenu
 
         void Update()
         {
+            string room=party?.State?.roomId;
+            if(room!=observedRoom)
+            {
+                StopMic();pending.Clear();outbox.Clear();observedRoom=room;cursor=-1;cursorRoom=null;
+                foreach(var stream in streams.Values)stream.Dispose();streams.Clear();
+            }
             if (HotkeyPressed()) ToggleMic();
             if(micClip!=null&&activeDevice!=VoicePreferences.Device)StopMic();
-            bool capture = micOn && speakerOn && Together && (!VoicePreferences.PushToTalk || TalkHeld());
+            bool capture = micOn && speakerOn && Together && !string.IsNullOrEmpty(room) && (!VoicePreferences.PushToTalk || TalkHeld());
             if (capture && micClip == null) StartMic();
             else if (!capture && micClip != null) StopMic();
             if (micClip != null) ReadMic();
@@ -176,6 +182,7 @@ namespace CraDev.MainMenu
                 micMissing = true; micOn = false; lobby.Toast(Loc.T("voice.no_mic")); Changed(); return;
             }
             string device = activeDevice = VoicePreferences.Device;
+            captureRoom=party.State.roomId;
             Microphone.GetDeviceCaps(device, out int min, out int max);
             micRate = PreferredRate;
             // 0/0 - qurilma istalgan chastotani qabul qiladi
@@ -231,7 +238,7 @@ namespace CraDev.MainMenu
             var bytes = new byte[pending.Count];
             for (int i = 0; i < bytes.Length; i++) bytes[i] = MuLaw.Encode(pending[i]);
             pending.Clear();
-            outbox.Enqueue(new VoiceChunk { seq = ++seq, rate = micRate, data = Convert.ToBase64String(bytes) });
+            outbox.Enqueue(new VoiceChunk { seq = ++seq, rate = micRate, data = Convert.ToBase64String(bytes), roomId=captureRoom });
             // Tarmoq sekin bo'lsa eski bo'laklar tashlanadi (kechikish o'smasin)
             while (outbox.Count > 6) outbox.Dequeue();
         }
@@ -242,6 +249,7 @@ namespace CraDev.MainMenu
             {
                 if (outbox.Count == 0 || string.IsNullOrEmpty(PlayerProfile.Token)) { yield return null; continue; }
                 var chunk = outbox.Dequeue();
+                if(!micOn||!speakerOn||!Together||chunk.roomId!=party.State.roomId)continue;
                 ApiResult<VoiceCursor> result = default;
                 yield return lobby.Api.VoiceSend(PlayerProfile.Token, chunk, r => result = r);
                 if (result.NetworkError) { outbox.Clear(); yield return new WaitForSecondsRealtime(.5f); }

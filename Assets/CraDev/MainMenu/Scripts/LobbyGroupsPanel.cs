@@ -14,7 +14,7 @@ namespace CraDev.MainMenu
     /// Do'stlar paneli (LobbyFriendsPanel) bilan bitta ro'yxat maydonini (rows) va qidiruv maydonini bo'lishadi:
     /// "groups" rejimida qidiruv maydoni guruh nomi yoki kodini qidiradi. Ko'rinishlar: ro'yxat (mening guruhlarim,
     /// yuborgan so'rovlarim yoki qidiruv natijalari), guruh sahifasi (a'zolar, so'rovlar, amallar), yangi guruh formasi.
-    /// Pullik guruhda to'lov tizimi yo'q: "Obuna bo'lish" so'rov yuboradi, egasi to'lovni o'zi tekshirib tasdiqlaydi.
+    /// Pullik a'zolik CDCoin orqali tasdiqlangan narxda atomik to'lanadi.
     /// </summary>
     public class LobbyGroupsPanel : MonoBehaviour
     {
@@ -91,8 +91,8 @@ namespace CraDev.MainMenu
             if (!on) { revision++; return; }
             query = text ?? "";
             // Oxirgi ma'lum ro'yxat darhol ko'rinadi (do'stlar qatorlari qolib ketmaydi), keyin yangilanadi
-            if (mineLoaded || view == "create") Draw();
-            if (view != "create") Load();
+            if (mineLoaded || view == "create" || view == "edit") Draw();
+            if (view != "create" && view != "edit" && view != "transfer") Load();
         }
 
         /// <summary>Qidiruv maydoni o'zgardi: ro'yxat ko'rinishiga qaytib qidiradi (bo'sh - mening guruhlarim).</summary>
@@ -114,6 +114,7 @@ namespace CraDev.MainMenu
         public bool Back()
         {
             if (!Active || view == "list") return false;
+            revision++;loading=false;
             if(view=="edit"||view=="transfer"){view="detail";Draw();return true;}
             view = "list"; detail = null; openCode = null;
             Load();
@@ -133,12 +134,14 @@ namespace CraDev.MainMenu
         void OpenCreate()
         {
             if (!Active) return;
+            revision++;loading=false;failure=null;
             view = "create";
             Draw();
         }
         void OpenEdit()
         {
             if(detail==null||detail.role!="owner")return;
+            revision++;loading=false;failure=null;
             formName=detail.name;formDescription=detail.description;formKind=detail.kind;
             formPrice=detail.currency=="CDCoin"?detail.price.ToString():"";formCurrency="CDCoin";formPeriod=detail.period;
             view="edit";Draw();
@@ -438,7 +441,7 @@ namespace CraDev.MainMenu
             foreach (var value in values)
             {
                 string v = value;
-                TextButton(rows, x, y, cw, 42, label(v), v == selected ? LobbyPalette.Accent : new Color32(52, 52, 56, 255), () => pick(v));
+                TextButton(rows, x, y, cw, 42, label(v), v == selected ? LobbyPalette.Accent : new Color32(52, 52, 56, 255), () => pick(v)).interactable=!busy;
                 x += cw + 6;
             }
             return y + 50;
@@ -448,6 +451,22 @@ namespace CraDev.MainMenu
         {
             Label(rows, Loc.T(key), 2, y, rows.rect.width, 24, 16).color = Soft;
             return y + 26;
+        }
+
+        internal void VerifyForDevelopment(Action<bool,string> check)
+        {
+            if(Array.IndexOf(Environment.GetCommandLineArgs(),"-cradevSingleLobbySmoke")<0)return;
+            string savedName=formName,savedDescription=formDescription;
+            host.Choose("groups");failure=()=>"AUDIT error";int old=revision;OpenCreate();
+            check(revision>old&&!loading&&failure==null,"opening group form invalidates old loading/error state");
+            var field=rows.GetComponentsInChildren<InputField>().FirstOrDefault();
+            if(field!=null)field.text="AUDIT unsaved group";
+            Refresh();Redraw();
+            check(field!=null&&field.gameObject.activeInHierarchy&&field.text=="AUDIT unsaved group","group draft survives refresh and party redraw");
+            busy=true;Draw();
+            check(rows.GetComponentsInChildren<InputField>().All(f=>!f.interactable),"in-flight group save locks draft fields");
+            busy=false;formName=savedName;formDescription=savedDescription;view="list";revision++;
+            host.Choose("friends");
         }
 
         // ------------------------------------------------------------------ Amallar
@@ -465,11 +484,12 @@ namespace CraDev.MainMenu
                 { lobby.Toast(Loc.T("groups.error.invalid_price")); return; }
                 body.price = price;
             }
-            busy = true; Draw();
+            int operation=++revision;loading=false;busy = true; Draw();
             Action<ApiResult<GroupInfo>> done = result =>
             {
                 if (this == null) return;
                 busy = false;
+                if(operation!=revision){if(result.Ok)StartCoroutine(LoadMineOnly());return;}
                 if (!result.Ok) { lobby.Toast(ErrorText(result.NetworkError, result.Status, result.Data?.error)); Draw(); return; }
                 formName = formDescription = formPrice = ""; formKind = "free";
                 lobby.Toast(Loc.F(editing?"groups.saved":"groups.created", CodePrefix + result.Data.code));
@@ -499,13 +519,14 @@ namespace CraDev.MainMenu
         void JoinConfirmed(bool paid)
         {
             if (busy || detail == null) return;
-            busy = true; Draw();
+            int operation=++revision;loading=false;busy = true; Draw();
             string kind = detail.kind;
             if (paid && (paymentKey == null || paymentCode != detail.code)) { paymentKey = Guid.NewGuid().ToString("N"); paymentCode = detail.code; }
             Action<ApiResult<GroupJoinResponse>> done = result =>
             {
                 if (this == null) return;
                 busy = false;
+                if(operation!=revision){if(result.Ok){lobby.GetComponent<LobbyWallet>()?.Refresh();StartCoroutine(LoadMineOnly());}return;}
                 if (!result.Ok) { lobby.Toast(ErrorText(result.NetworkError, result.Status, result.Data?.error)); Draw(); return; }
                 paymentKey = null;
                 lobby.GetComponent<LobbyWallet>()?.Refresh();
@@ -521,12 +542,13 @@ namespace CraDev.MainMenu
         void Act(string action, string nickname, string role)
         {
             if (busy || detail == null) return;
-            busy = true; Draw();
+            int operation=++revision;loading=false;busy = true; Draw();
             string name = detail.name;
             lobby.StartCoroutine(lobby.Api.GroupAction(PlayerProfile.Token, action, detail.code, nickname, role, result =>
             {
                 if (this == null) return;
                 busy = false;
+                if(operation!=revision){if(result.Ok)StartCoroutine(LoadMineOnly());return;}
                 if (!result.Ok) { lobby.Toast(ErrorText(result.NetworkError, result.Status, result.Data?.error)); Draw(); return; }
                 string done = "groups.done." + action + (action == "role" ? "_" + role : "");
                 lobby.Toast(Loc.F(done, nickname ?? name));
@@ -699,6 +721,7 @@ namespace CraDev.MainMenu
             field.textComponent = text; field.placeholder = placeholder; field.targetGraphic = fill;
             field.lineType = multiline ? InputField.LineType.MultiLineNewline : InputField.LineType.SingleLine;
             field.characterLimit = limit;
+            field.interactable=!busy;
             field.customCaretColor = true; field.caretColor = Color.white; field.caretWidth = 2;
             field.selectionColor = new Color(.45f, .62f, 1f, .45f);
             field.text = value ?? "";

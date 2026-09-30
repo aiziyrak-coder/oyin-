@@ -163,6 +163,7 @@ namespace CraDev
                 lobby.Show("settings");lobby.ChooseSection("0");yield return Shot(System.IO.Path.Combine(folder,"settings.png"));
                 lobby.ChooseSection("4");yield return Shot(System.IO.Path.Combine(folder,"notifications.png"));
                 lobby.ChooseSection("1");yield return Shot(System.IO.Path.Combine(folder,"settings-display.png"));
+                lobby.ChooseSection("2");yield return Shot(System.IO.Path.Combine(folder,"settings-audio.png"));
                 lobby.ChooseSection("3");yield return Shot(System.IO.Path.Combine(folder,"settings-controls.png"));
                 lobby.SetSettings(false);
                 lobby.FriendsPanel.Choose("find");yield return Shot(System.IO.Path.Combine(folder,"friends-search.png"));

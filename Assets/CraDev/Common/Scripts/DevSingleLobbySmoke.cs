@@ -50,9 +50,10 @@ namespace CraDev
                 Check(viewer.CurrentOption==other,"party heartbeat keeps the draft avatar");
             }
             if(savedFace!=null){Click("StudioRemoveFace");yield return null;Check(viewer.Face==null&&studio.Dirty,"face removal previewed");}
-            Click("StudioScan");yield return new WaitForSecondsRealtime(.5f);
+            Click("StudioScan");yield return new WaitForSecondsRealtime(5.6f);
             Check(studio.ScanOpen,"live scanner opens inside the studio");
             var camera=studio.Scanner.CameraState;
+            Check(camera!=FaceScanner.CameraState.Starting,"camera either produces frames or reaches a clear error state");
             if(camera==FaceScanner.CameraState.NoDevice||camera==FaceScanner.CameraState.Failed)Check(studio.Scanner.FailureShown,"camera problem explained with retry");
             lobby.Back();yield return null;
             Check(!studio.ScanOpen&&lobby.AvatarStudioOpen,"Esc closes the scanner first");
@@ -133,6 +134,7 @@ namespace CraDev
                 Check(ModalWindow.AnyOpen==hasEvent,"event card opens real event details");
                 if(ModalWindow.AnyOpen)lobby.Dialog.Close();
             }
+            friends.GetComponent<LobbyGroupsPanel>()?.VerifyForDevelopment(Check);
             Click("LobbySettings");yield return null;
             Check(lobby.SettingsOpen&&lobby.Current.Id=="home"&&lobby.Stage.Current==0,"settings overlay keeps lobby and avatar");
             Check(!lobby.Current.Group.blocksRaycasts,"modal blocks underlying lobby");
@@ -171,6 +173,7 @@ namespace CraDev
             {
                 var field=chat.GetComponentInChildren<InputField>();
                 Check(field!=null&&field.characterLimit==1000&&!field.textComponent.supportRichText,"chat input bounded and markup disabled");
+                chat.VerifyForDevelopment(Check);
                 chat.Close();yield return null;
             }
             Check(!ModalWindow.AnyOpen&&lobby.Current.Id=="home","closing chat returns to the same lobby");

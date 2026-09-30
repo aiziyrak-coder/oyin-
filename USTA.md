@@ -1,5 +1,14 @@
 # NewWorld Lobby
 
+## Eng yangi — lobby konflikt auditi (2026-09-30)
+
+- [x] Chat tez yopib-ochish, qoralama, tarix, bo'sh yuborish va huquq bekor bo'lishi tuzatildi.
+- [x] Guruh formasi/kech javoblar va tugagan obunaning lobby taklif huquqi tuzatildi.
+- [x] Ovoz roomId bilan bog'landi; lobby almashganda buferlar tozalanadi; qisman speaker-mute serverda ham mic'ni o'chiradi.
+- [x] Server 85/85; Unity 1280x720 da 124/124; kamera xatosi tushunarli UI ga o'tishi tasdiqlandi.
+- [x] LocalOnly ZIP va fallback port sinovi; bu ommaviy tarqatish yoki internet testi emas.
+- [ ] Hamma pre-world imkoniyatlar hali bitmagan: aniq ochiq bandlar va dalillar `REMAINING-WORK.md` boshida. Olamga o'tilmadi.
+
 ## CDCoin va ijtimoiy lobby (2026-09-30)
 
 - [x] Qaror: guruh tushumi egaga to'liq, komissiya yo'q; 1 CDCoin = 100 so'm.

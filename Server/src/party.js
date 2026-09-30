@@ -8,7 +8,7 @@ const VOICE_KEEP_MS = 3000, VOICE_MAX_CHUNKS = 150, VOICE_MAX_BYTES = 12000;
 // Lobby vaqtinchalik: profil va do'stlik bazasiga yozmaydi.
 export function createParties(db) {
   // Lobbyga faqat do'st yoki umumiy guruhdagi a'zo chaqiriladi (xato kodi eski mijozlar uchun 'friends_only')
-  const related = (a, b) => db.friendship(a, b) === 'friends' || (db.groups?.shareGroup(a, b) ?? false);
+  const related = (a, b, now) => db.friendship(a, b) === 'friends' || (db.groups?.shareGroup(a, b, now) ?? false);
   const rooms = new Map(), membership = new Map(), invites = new Map();
   function leave(id) {
     const room = rooms.get(membership.get(id));
@@ -50,6 +50,8 @@ export function createParties(db) {
     if (!body || typeof body !== 'object') return [400, { error: 'bad_json' }];
     const room = rooms.get(membership.get(player.id));
     if (!room || room.members.size < 2) return [409, { error: 'no_party' }];
+    // Never route a delayed recording to a different lobby after a membership change.
+    if (body.roomId !== room.id) return [409, { error: 'voice_room_changed' }];
     const member = room.members.get(player.id);
     if (!member.speaker) return [409, { error: 'speaker_off' }];
     if (!Number.isInteger(body.rate) || body.rate < 8000 || body.rate > 48000) return [400, { error: 'invalid_rate' }];
@@ -98,11 +100,12 @@ export function createParties(db) {
       // Mikrofon karnaysiz ishlamaydi (mijoz qoidasi serverda ham saqlanadi)
       if (typeof body.speakerOn === 'boolean') member.speaker = body.speakerOn;
       if (typeof body.micOn === 'boolean') member.mic = body.micOn && member.speaker;
+      if (!member.speaker) member.mic = false;
     } else if (kind === 'invite') {
       const room = own(id, time);
       if (room.host !== id) return fail(403, 'host_only');
       const target = typeof body.nickname === 'string' && db.findPlayerByNicknameKey(nicknameKey(body.nickname.trim()));
-      if (!target || !related(id, target.id)) return fail(403, 'friends_only');
+      if (!target || !related(id, target.id, now)) return fail(403, 'friends_only');
       if (room.members.has(target.id)) return fail(409, 'already_joined');
       const pending = [...invites.values()].filter(i => i.room === room.id);
       if (pending.some(i => i.target === target.id)) return [200, snapshot(id, time)];
@@ -116,7 +119,7 @@ export function createParties(db) {
       if (kind === 'accept') {
         const room = rooms.get(invite.room);
         if (!room || room.members.size >= 5) return fail(409, 'party_full');
-        if (!related(invite.host, id)) return fail(403, 'friends_only');
+        if (!related(invite.host, id, now)) return fail(403, 'friends_only');
         const previous = rooms.get(membership.get(id));
         if (previous && previous.members.size > 1) return fail(409, 'leave_first');
         leave(id);

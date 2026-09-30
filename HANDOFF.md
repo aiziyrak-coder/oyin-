@@ -1,5 +1,9 @@
 # Ishni boshqa AI yordamchida davom ettirish (NewWorld lobby)
 
+## ENG YANGI — olamdan oldingi konflikt auditi
+
+`REMAINING-WORK.md` boshidagi audit bo'limi eng dolzarb. Saqlash nuqtasi `4488ecd`, push yo'q. Chat qoralamasi/lifecycle/history, guruh formasi/kech javoblar, ovozning roomId bo'yicha izolyatsiyasi, qisman mute va tugagan obuna bilan lobby taklifi tuzatildi. Server 85/85; Unity 1280x720 da 124/124, `Logs/lobby-audit-final-player.log`; build `Logs/lobby-audit-final-build.log` Succeeded. Kamera xatosi UI bilan boshqariladi, lekin video qurilma ochilmagan. Ovoz serveri roomId talab qiladi: eski ZIP mijozlarini ham yangilang. LocalOnly ZIP tekshirildi, ommaviy tunnel emas. Olamga o'tilmadi, tashqi xizmat/hardware talab qiladigan bandlar ochiq.
+
 ## ENG YANGI — yozishma, guruh boshqaruvi va sinovlar (2026-09-30)
 
 To'liq dolzarb navbat: `REMAINING-WORK.md`. Quyidagi tarixiy bo'limlarda chat yo'q, mikrofon faqat standart yoki karnay mikrofonni yoqadi degan gaplar endi eskirgan.
